@@ -12,6 +12,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -43,9 +46,7 @@ import com.google.common.eventbus.Subscribe;
  */
 public class StickyEventBus extends EventBus {
 
-    // Be aware that enabling logging will log every posted message twice because of internals of EventBus. This also indicates that the
-    // event will be wrapped in a DeadEvent object whenever no body is subscribed on the event type.
-    private static final boolean LOGGING_ENABLED = true;
+    private static final Logger LOG = LogManager.getLogger(StickyEventBus.class);
 
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.METHOD)
@@ -68,9 +69,7 @@ public class StickyEventBus extends EventBus {
     @Override
     public void register(final Object object) {
         if (object != null) {
-            if (StickyEventBus.LOGGING_ENABLED) {
-//                Logger.d("Registering %s", object);
-            }
+        	LOG.trace("Registering {}", object);
             super.register(object);
 
             synchronized (stateMutex) {
@@ -86,9 +85,7 @@ public class StickyEventBus extends EventBus {
 
     @Override
     public void post(final Object event) {
-        if (StickyEventBus.LOGGING_ENABLED) {
-//            Logger.d("Post: %s", event);
-        }
+        LOG.trace("Post: {}", event);
         super.post(event);
     }
 
@@ -104,12 +101,8 @@ public class StickyEventBus extends EventBus {
         try {
             Object result = method.invoke(object, new Object[0]);
             post(result);
-        } catch (IllegalArgumentException e) {
-//            Logger.w(e, "Could not provide current state event from newly registered object to other registered objects");
-        } catch (IllegalAccessException e) {
-//            Logger.w(e, "Could not provide current state event from newly registered object to other registered objects");
-        } catch (InvocationTargetException e) {
-//            Logger.w(e, "Could not provide current state event from newly registered object to other registered objects");
+        } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
+        	LOG.warn("Could not provide current state event from newly registered object to other registered objects, ignoring", e);
         }
     }
 
@@ -121,12 +114,8 @@ public class StickyEventBus extends EventBus {
                 try {
                     Object result = pair.second.invoke(pair.first, new Object[0]);
                     post(result);
-                } catch (IllegalArgumentException e) {
-//                    Logger.w(e, "Could not provide current state event to new registered object");
-                } catch (IllegalAccessException e) {
-//                    Logger.w(e, "Could not provide current state event to new registered object");
-                } catch (InvocationTargetException e) {
-//                    Logger.w(e, "Could not provide current state event to new registered object");
+                } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
+                    LOG.warn("Could not provide current state event to new registered object, ignoring", e);
                 }
             }
         }
@@ -143,12 +132,10 @@ public class StickyEventBus extends EventBus {
                 if (eventType != Void.class) {
                     Pair<Object, Method> put = currentStateMethods.put(eventType, new Pair<Object, Method>(object, method));
                     if (put != null) {
-//                        Logger.w("Only one currentStateProvider for " + eventType.getClass().getSimpleName() + " can be registered.");
+                        LOG.warn("Only one currentStateProvider for {} can be registered.", eventType.getClass().getSimpleName());
                     }
                     newMappings.add(eventType);
-                    if (StickyEventBus.LOGGING_ENABLED) {
-//                        Logger.d("Found that %s provides %s", object.getClass().getSimpleName(), eventType);
-                    }
+                    LOG.debug("Found that {} provides {}", object.getClass().getSimpleName(), eventType);
                 }
             }
         }
@@ -178,9 +165,7 @@ public class StickyEventBus extends EventBus {
     public void unregister(final Object object) {
         if (object != null) {
             synchronized (stateMutex) {
-                if (StickyEventBus.LOGGING_ENABLED) {
-//                    Logger.d("Unregistering %s", object);
-                }
+                LOG.trace("Unregistering {}", object);
                 registeredObjects.remove(object);
 
                 for (Class<?> value : getProvidedDataTypesForObject(object)) {
