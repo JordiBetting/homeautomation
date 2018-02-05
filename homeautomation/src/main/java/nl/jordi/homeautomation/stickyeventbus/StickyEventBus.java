@@ -25,7 +25,7 @@ import com.google.common.eventbus.Subscribe;
 /**
  * EventBus with direct reply on register for sticky events.
  * 
- * Extension of Guavas {@link EventBus}. For usage, see: <a href="https://code.google.com/p/guava-libraries/wiki/EventBusExplained">Guava
+ * Extension of Guavas {@link EventBus}. For usage, see: <a href="https://github.com/google/guava/wiki/EventBusExplained">Guava
  * Explained: EventBus</a>
  * For each event type, one provider can provide the current 'state' event using the {@link ProvideCurrentStateEvent} annotation.
  * 
