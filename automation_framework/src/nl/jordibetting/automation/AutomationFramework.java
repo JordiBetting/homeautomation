@@ -1,5 +1,7 @@
 package nl.jordibetting.automation;
 
+import com.google.common.base.Preconditions;
+
 import nl.jordibetting.automation.controlloop.Controlloop;
 import nl.jordibetting.automation.domoticz.Domoticz;
 import nl.jordibetting.automation.event.Events;
@@ -8,30 +10,51 @@ import nl.jordibetting.automation.state.State;
 
 public class AutomationFramework {
 
+	private AutomationFrameworkState frameworkState = AutomationFrameworkState.INITIALIZING;
+
 	private final State state;
 	private final Domoticz domoticz;
 	private final Events events;
 	private final Controlloop controlLoop;
-	
-	public AutomationFramework(State state, Domoticz domoticz, Events events, Controlloop controlloop) {
+
+	public AutomationFramework(final State state, final Domoticz domoticz, final Events events, final Controlloop controlloop) {
 		this.state = state;
 		this.domoticz = domoticz;
 		this.events = events;
-		this.controlLoop = controlloop;
-		
+		controlLoop = controlloop;
+
 	}
 
 	public static AutomationFramework create() {
-		State state = new State();
-		Domoticz domoticz = new Domoticz();
-		Events events = new SynchronousEvents();
-		Controlloop controlloop = new Controlloop(events);
-		
+		final State state = new State();
+		final Domoticz domoticz = new Domoticz();
+		final Events events = new SynchronousEvents();
+		final Controlloop controlloop = new Controlloop(events);
+
 		return new AutomationFramework(state, domoticz, events, controlloop);
 	}
 
-	public void addRoom(Room room) {
-//		eventHandler.register(room);
+	public void addRoom(final Room room) {
+		ensureState(AutomationFrameworkState.INITIALIZING);
+		events.subscribe(room);
 	}
-	
+
+	public void start() {
+		ensureState(AutomationFrameworkState.INITIALIZING);
+		frameworkState = AutomationFrameworkState.RUNNING;
+	}
+
+	public void stop() {
+		ensureState(AutomationFrameworkState.RUNNING);
+		frameworkState = AutomationFrameworkState.STOPPED;
+	}
+
+	private void ensureState(final AutomationFrameworkState expectedState) {
+		Preconditions.checkState(frameworkState == expectedState);
+	}
+
+	public AutomationFrameworkState getState() {
+		return frameworkState;
+	}
+
 }
