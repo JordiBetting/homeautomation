@@ -3,12 +3,11 @@ pipeline {
 		label 'java' 
 	}
 	
-	tools {
-		gradle 'gradle4.10.2'
-	}
-	
 	stages {
 		stage("build") {
+			tools {
+				gradle 'gradle4.10.2'
+			}
 			steps {
 				sh 'echo Building with gradle'
 				sh 'gradle -b automation_framework/build.gradle test check build'
