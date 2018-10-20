@@ -15,27 +15,29 @@ pipeline {
 			}
 		}
 		stage("post-build") {
-			parallel {
-				stage("Test results") {
-					steps {
-						sh 'touch automation_framework/build/test-results/test/*.xml'
-						junit allowEmptyResults: true, testResults: '**/build/test-results/test/*.xml'
+			steps {
+				parallel {
+					stage("Test results") {
+						steps {
+							sh 'touch automation_framework/build/test-results/test/*.xml'
+							junit allowEmptyResults: true, testResults: '**/build/test-results/test/*.xml'
+						}
+					}
+					stage("Findbugs") {
+						steps {
+							findbugs canComputeNew: false, defaultEncoding: '', excludePattern: '', healthy: '', includePattern: '', pattern: '**/build/reports/findbugs/*.xml', unHealthy: ''
+						}
+					}
+					stage("Coverage") {
+						steps {
+							jacoco()
+						}
 					}
 				}
-				stage("Findbugs") {
+				stage("cleanup") {
 					steps {
-						findbugs canComputeNew: false, defaultEncoding: '', excludePattern: '', healthy: '', includePattern: '', pattern: '**/build/reports/findbugs/*.xml', unHealthy: ''
+						cleanWs()	
 					}
-				}
-				stage("Coverage") {
-					steps {
-						jacoco()
-					}
-				}
-			}
-			stage("cleanup") {
-				steps {
-					cleanWs()	
 				}
 			}
 		}
