@@ -22,7 +22,6 @@ public class AutomationFramework {
 		this.domoticz = domoticz;
 		this.events = events;
 		controlLoop = controlloop;
-
 	}
 
 	public static AutomationFramework create() {
