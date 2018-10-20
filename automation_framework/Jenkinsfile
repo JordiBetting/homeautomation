@@ -13,29 +13,25 @@ pipeline {
 				sh 'gradle -b automation_framework/build.gradle test check build'
 			}
 		}
-		stage("Analyze results") {
+		stage("Post-build") {
 			parallel {
-				stage("Unit tests") {
+				stage("test") {
+					steps {
+						sh "echo hi"
+					}
+				}
+				stage("Process results") {
 					steps {
 						sh 'touch automation_framework/build/test-results/test/*.xml'
 						junit allowEmptyResults: true, testResults: '**/build/test-results/test/*.xml'
-					}
-				}
-				stage("Find bugs") {
-					steps {
 						findbugs canComputeNew: false, defaultEncoding: '', excludePattern: '', healthy: '', includePattern: '', pattern: '**/build/reports/findbugs/*.xml', unHealthy: ''
+						jacoco sourceExclusionPattern: '*/test/**'
+						archiveArtifacts artifacts: '**/*.jar', excludes: '**/jacocoagent.jar', onlyIfSuccessful: true
+						cleanWs()
 					}
 				}
-				stage("Code coverage") {
-					jacoco sourceExclusionPattern: '*/test/**'
-				}
 			}
-		}
-		stage("Workspace archive+cleanup") {
-			steps {
-				archiveArtifacts artifacts: '**/*.jar', excludes: '**/jacocoagent.jar', onlyIfSuccessful: true
-				cleanWs()
-			}
+			
 		}
 	}
 }
