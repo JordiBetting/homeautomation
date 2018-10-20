@@ -1,5 +1,12 @@
 pipeline {
-	agent { label 'java' }
+	agent { 
+		label 'java' 
+	}
+	
+	tools {
+		gradle 'gradle4.10.2'
+	}
+	
 	stages {
 		stage("build") {
 			steps {
