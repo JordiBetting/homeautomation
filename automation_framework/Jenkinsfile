@@ -18,7 +18,7 @@ pipeline {
 				stage("test") {
 					steps {
 						sh "echo hi"
-					}
+					|
 				}
 				stage("Process results") {
 					steps {
