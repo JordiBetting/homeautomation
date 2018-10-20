@@ -3,12 +3,11 @@ pipeline {
 		label 'java' 
 	}
 	
-	tools {
-		gradle 'gradle4.10.2'
-	}
-	
 	stages {
 		stage("build") {
+			tools {
+				gradle 'gradle4.10.2'
+			}
 			steps {
 				sh 'echo Building with gradle'
 				sh 'gradle -b automation_framework/build.gradle test check build'
@@ -21,7 +20,7 @@ pipeline {
 				findbugs canComputeNew: false, defaultEncoding: '', excludePattern: '', healthy: '', includePattern: '', pattern: '**/build/reports/findbugs/*.xml', unHealthy: ''
 				jacoco sourceExclusionPattern: '*/test/**'
 				archiveArtifacts artifacts: '**/*.jar', excludes: '**/jacocoagent.jar', onlyIfSuccessful: true
-				cleanWs()
+				cleanWs() 
 			}
 		}
 	}
