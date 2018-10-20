@@ -22,14 +22,20 @@ pipeline {
 				}
 			}
 			stage("Findbugs") {
-				findbugs canComputeNew: false, defaultEncoding: '', excludePattern: '', healthy: '', includePattern: '', pattern: '**/build/reports/findbugs/*.xml', unHealthy: ''
+				steps {
+					findbugs canComputeNew: false, defaultEncoding: '', excludePattern: '', healthy: '', includePattern: '', pattern: '**/build/reports/findbugs/*.xml', unHealthy: ''
+				}
 			}
 			stage("Coverage") {
-				jacoco()
+				steps {
+					jacoco()
+				}
 			}
 		}
 		stage("cleanup") {
-			cleanWs()	
+			steps {
+				cleanWs()	
+			}
 		}
 	}
 }
