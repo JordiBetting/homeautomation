@@ -9,7 +9,9 @@ pipeline {
 		}
 		stage("Post-build") {
 			steps {
+				sh 'touch automation_framework/build/test-results/test/*.xml'
 				junit allowEmptyResults: true, testResults: '**/build/test-results/test/*.xml'
+				cleanWs()
 			}
 		}
 	}
