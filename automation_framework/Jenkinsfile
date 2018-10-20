@@ -27,9 +27,7 @@ pipeline {
 					}
 				}
 				stage("Code coverage") {
-					steps {
-						jacoco sourceExclusionPattern: '*/test/**'
-					}
+					jacoco sourceExclusionPattern: '*/test/**'
 				}
 			}
 		}
