@@ -10,12 +10,6 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 
-import nl.gingerbeard.automation.event.EventResult;
-import nl.gingerbeard.automation.event.EventResultList;
-import nl.gingerbeard.automation.event.Events;
-import nl.gingerbeard.automation.event.Subscribe;
-import nl.gingerbeard.automation.event.SynchronousEvents;
-
 public class SynchronousEventsTest {
 
 	private static class TestSubscriber {
@@ -106,7 +100,7 @@ public class SynchronousEventsTest {
 	}
 
 	@Test
-	public void SuperClassNotDeliveredToChild() {
+	public void superClassNotDeliveredToChild() {
 		final Events events = new SynchronousEvents();
 		final MyEventSubscriber subscriber = new MyEventSubscriber();
 		events.subscribe(subscriber);
@@ -120,7 +114,7 @@ public class SynchronousEventsTest {
 	}
 
 	@Test
-	public void DerivedClassAlsoDeliveredtoSuperClass() {
+	public void derivedClassAlsoDeliveredtoSuperClass() {
 		final Events events = new SynchronousEvents();
 		final MyEventSubscriber subscriber = new MyEventSubscriber();
 		events.subscribe(subscriber);
@@ -134,7 +128,7 @@ public class SynchronousEventsTest {
 	}
 
 	@Test
-	public void MultipleSubscribed() {
+	public void multipleSubscribed() {
 		final Events events = new SynchronousEvents();
 		final MultipleSubscribe subscriber = new MultipleSubscribe();
 		events.subscribe(subscriber);
@@ -173,7 +167,7 @@ public class SynchronousEventsTest {
 		assertEquals(1, subscriber.count);
 	}
 
-	private class TooManyParametersSubscriber {
+	private static class TooManyParametersSubscriber {
 		@Subscribe
 		public void twoParameters(final Object one, final Object two) {
 
@@ -206,7 +200,7 @@ public class SynchronousEventsTest {
 		}
 	}
 
-	private class NoParametersSubscriber {
+	private static class NoParametersSubscriber {
 		@Subscribe
 		public void noParameters() {
 
@@ -275,7 +269,7 @@ public class SynchronousEventsTest {
 	private static class NullSubscriber {
 		@Subscribe
 		public void throwException(final String a) {
-			throw null;
+			throw new RuntimeException();
 		}
 	}
 
