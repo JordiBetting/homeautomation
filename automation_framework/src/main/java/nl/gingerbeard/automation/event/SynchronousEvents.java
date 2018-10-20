@@ -20,10 +20,14 @@ public class SynchronousEvents implements Events {
 		Preconditions.checkArgument(subscriber != null);
 		if (!subscribers.contains(subscriber)) {
 			subscribers.add(subscriber);
-			for (final Method method : ReflectionUtil.getMethodsAnnotatedWith(subscriber.getClass(), Subscribe.class, 1)) {
-				final Class<?> interestedIn = method.getParameterTypes()[0];
-				callback.put(interestedIn, new Subscriber(subscriber, method));
-			}
+			registerSubscriberInterests(subscriber);
+		}
+	}
+
+	private void registerSubscriberInterests(final Object subscriber) {
+		for (final Method method : ReflectionUtil.getMethodsAnnotatedWith(subscriber.getClass(), Subscribe.class, 1)) {
+			final Class<?> interestedIn = method.getParameterTypes()[0];
+			callback.put(interestedIn, new Subscriber(subscriber, method));
 		}
 	}
 
@@ -36,12 +40,16 @@ public class SynchronousEvents implements Events {
 		final Class<?> eventType = event.getClass();
 		for (final Class<?> callbackEventType : callback.keySet()) {
 			if (callbackEventType.isAssignableFrom(eventType)) {
-				for (final Subscriber subscriber : callback.get(callbackEventType)) {
-					results.add(subscriber.call(event));
-				}
+				triggerSubscribers(event, results, callbackEventType);
 			}
 		}
 		return results;
+	}
+
+	private void triggerSubscribers(final Object event, final EventResult results, final Class<?> callbackEventType) {
+		for (final Subscriber subscriber : callback.get(callbackEventType)) {
+			results.add(subscriber.call(event));
+		}
 	}
 
 }

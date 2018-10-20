@@ -1,13 +1,9 @@
 package nl.gingerbeard.automation;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
-import org.junit.Test;
-
-import nl.gingerbeard.automation.AutomationFramework;
-import nl.gingerbeard.automation.AutomationFrameworkState;
-import nl.gingerbeard.automation.Room;
+import org.junit.jupiter.api.Test;
 
 public class AutomationFrameworkLifecycleTest {
 
@@ -15,7 +11,7 @@ public class AutomationFrameworkLifecycleTest {
 	public void state_initial() {
 		final AutomationFramework framework = AutomationFramework.create();
 
-		assertEquals(AutomationFrameworkState.INITIALIZING, framework.getState());
+		assertEquals(AutomationFrameworkState.INITIALIZING, framework.getFrameworkState());
 	}
 
 	@Test
@@ -24,7 +20,7 @@ public class AutomationFrameworkLifecycleTest {
 
 		framework.start();
 
-		assertEquals(AutomationFrameworkState.RUNNING, framework.getState());
+		assertEquals(AutomationFrameworkState.RUNNING, framework.getFrameworkState());
 	}
 
 	@Test
@@ -47,7 +43,7 @@ public class AutomationFrameworkLifecycleTest {
 
 		framework.stop();
 
-		assertEquals(AutomationFrameworkState.STOPPED, framework.getState());
+		assertEquals(AutomationFrameworkState.STOPPED, framework.getFrameworkState());
 	}
 
 	@Test
