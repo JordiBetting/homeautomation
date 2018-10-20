@@ -14,7 +14,6 @@ pipeline {
 				sh 'gradle -b automation_framework/build.gradle test check build'
 			}
 		}
-		
 		stage("post-build") {
 			parallel {
 				stage("Test results") {
