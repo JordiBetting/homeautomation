@@ -4,7 +4,7 @@ pipeline {
 		stage("build") {
 			steps {
 				sh 'echo Building with gradle'
-				sh 'gradle -b automation_framework/build.gradle test check build'
+				sh '/opt/gradle/latest/bin/gradle -b automation_framework/build.gradle test check build'
 			}
 		}
 	}
