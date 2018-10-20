@@ -7,5 +7,8 @@ pipeline {
 				sh '/opt/gradle/latest/bin/gradle -b automation_framework/build.gradle test check build'
 			}
 		}
+		stage("Post-build") {
+			junit allowEmptyResults: true, testResults: '**/build/test-results/test/*.xml'
+		}
 	}
 }
