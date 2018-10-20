@@ -8,7 +8,9 @@ pipeline {
 			}
 		}
 		stage("Post-build") {
-			junit allowEmptyResults: true, testResults: '**/build/test-results/test/*.xml'
+			steps {
+				junit allowEmptyResults: true, testResults: '**/build/test-results/test/*.xml'
+			}
 		}
 	}
 }
