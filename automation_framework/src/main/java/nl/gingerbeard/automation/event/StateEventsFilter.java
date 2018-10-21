@@ -1,6 +1,8 @@
 package nl.gingerbeard.automation.event;
 
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.function.Predicate;
 
 import com.google.common.collect.Maps;
 
@@ -17,6 +19,11 @@ public class StateEventsFilter implements Events {
 	private static final EventStateDefaults defaults = new EventStateDefaults();
 
 	private final Map<Object, EventState> subscribers = Maps.newHashMap();
+	private final State currentState;
+
+	public StateEventsFilter(final State currentState) {
+		this.currentState = currentState;
+	}
 
 	@Override
 	public void subscribe(final Object subscriber) {
@@ -42,6 +49,11 @@ public class StateEventsFilter implements Events {
 
 	@Override
 	public EventResult trigger(final Device event) {
+		// subscribers.entrySet().stream().filter(doFilter()).forEach(action);
+		return null;
+	}
+
+	private Predicate<? super Entry<Object, EventState>> doFilter() {
 		// TODO Auto-generated method stub
 		return null;
 	}
