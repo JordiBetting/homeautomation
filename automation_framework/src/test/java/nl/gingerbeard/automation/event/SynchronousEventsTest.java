@@ -10,15 +10,18 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 
+import nl.gingerbeard.automation.devices.Device;
+import nl.gingerbeard.automation.state.State;
+
 public class SynchronousEventsTest {
 
 	private static class TestSubscriber {
 
-		public Optional<String> event = Optional.empty();
+		public Optional<Device> event = Optional.empty();
 		public int count = 0;
 
 		@Subscribe
-		public void test(final String param) {
+		public void test(final Device param) {
 			event = Optional.ofNullable(param);
 			count++;
 		}
@@ -40,7 +43,7 @@ public class SynchronousEventsTest {
 		}
 	}
 
-	private static class MyEvent {
+	private static class MyEvent extends Device {
 
 	}
 
@@ -52,12 +55,12 @@ public class SynchronousEventsTest {
 		public int counter = 0;
 
 		@Subscribe
-		public void first(final String a) {
+		public void first(final Device a) {
 			counter++;
 		}
 
 		@Subscribe
-		public void second(final String e) {
+		public void second(final Device e) {
 			counter++;
 		}
 	}
@@ -69,10 +72,11 @@ public class SynchronousEventsTest {
 		events.subscribe(subscriber);
 
 		assertFalse(subscriber.event.isPresent());
-		events.trigger("Hello");
+		events.trigger(new NamedDevice("Hello"));
 
 		assertTrue(subscriber.event.isPresent());
-		assertEquals("Hello", subscriber.event.get());
+		assertTrue(subscriber.event.get() instanceof NamedDevice);
+		assertEquals("Hello", ((NamedDevice) subscriber.event.get()).getName());
 	}
 
 	@Test
@@ -82,7 +86,7 @@ public class SynchronousEventsTest {
 		events.subscribe(subscriber);
 
 		assertEquals(0, subscriber.count);
-		events.trigger("Hi");
+		events.trigger(new NamedDevice("Hi"));
 
 		assertEquals(1, subscriber.count);
 	}
@@ -94,7 +98,7 @@ public class SynchronousEventsTest {
 		events.subscribe(subscriber);
 
 		assertEquals(0, subscriber.count);
-		events.trigger(new Exception());
+		events.trigger(new State());
 
 		assertEquals(0, subscriber.count);
 	}
@@ -133,7 +137,7 @@ public class SynchronousEventsTest {
 		final MultipleSubscribe subscriber = new MultipleSubscribe();
 		events.subscribe(subscriber);
 
-		events.trigger("Howdy");
+		events.trigger(new NamedDevice("Howdy"));
 
 		assertEquals(2, subscriber.counter);
 	}
@@ -142,7 +146,7 @@ public class SynchronousEventsTest {
 	public void nullCallbackThrowsException() {
 		final Events events = new SynchronousEvents();
 		try {
-			events.trigger(null);
+			events.trigger((Device) null);
 			fail("expected exception");
 		} catch (final IllegalArgumentException e) {
 			// expected
@@ -152,7 +156,7 @@ public class SynchronousEventsTest {
 	@Test
 	public void callbackNoSubscribersNoException() {
 		final Events events = new SynchronousEvents();
-		events.trigger("test");
+		events.trigger(new NamedDevice("test"));
 	}
 
 	@Test
@@ -162,7 +166,7 @@ public class SynchronousEventsTest {
 		events.subscribe(subscriber);
 		events.subscribe(subscriber);
 
-		events.trigger("test");
+		events.trigger(new NamedDevice("test"));
 
 		assertEquals(1, subscriber.count);
 	}
@@ -221,7 +225,7 @@ public class SynchronousEventsTest {
 	@Test
 	public void testReturnTypeNoSubscribersEmptyList() {
 		final Events events = new SynchronousEvents();
-		final EventResult returned = events.trigger("test");
+		final EventResult returned = events.trigger(new NamedDevice("test"));
 
 		assertNotNull(returned);
 		assertEquals(0, returned.size());
@@ -230,7 +234,7 @@ public class SynchronousEventsTest {
 	private static class ReturningSubscriber {
 
 		@Subscribe
-		public EventResult test(final String hi) {
+		public EventResult test(final Device hi) {
 			return EventResultList.of("Good morning");
 		}
 	}
@@ -241,7 +245,7 @@ public class SynchronousEventsTest {
 		final ReturningSubscriber subscriber = new ReturningSubscriber();
 		events.subscribe(subscriber);
 
-		final EventResult returned = events.trigger("test");
+		final EventResult returned = events.trigger(new NamedDevice("test"));
 
 		assertEquals(1, returned.size());
 		assertTrue(returned.get(0).isPresent());
@@ -261,7 +265,7 @@ public class SynchronousEventsTest {
 		final ThrowingSubscriber subscriber = new ThrowingSubscriber();
 		events.subscribe(subscriber);
 
-		final EventResult trigger = events.trigger("");
+		final EventResult trigger = events.trigger(new NamedDevice(""));
 
 		assertEquals(0, trigger.getAll().size());
 	}
@@ -279,7 +283,7 @@ public class SynchronousEventsTest {
 		final NullSubscriber subscriber = new NullSubscriber();
 		events.subscribe(subscriber);
 
-		final EventResult trigger = events.trigger("");
+		final EventResult trigger = events.trigger(new NamedDevice(""));
 
 		assertEquals(0, trigger.getAll().size());
 	}
@@ -297,7 +301,7 @@ public class SynchronousEventsTest {
 		final WrongReturnTypeSubscriber subscriber = new WrongReturnTypeSubscriber();
 		events.subscribe(subscriber);
 
-		final EventResult trigger = events.trigger("");
+		final EventResult trigger = events.trigger(new NamedDevice(""));
 
 		assertEquals(0, trigger.getAll().size());
 	}

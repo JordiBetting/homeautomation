@@ -8,6 +8,8 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 
+import nl.gingerbeard.automation.devices.Device;
+import nl.gingerbeard.automation.state.State;
 import nl.gingerbeard.automation.util.ReflectionUtil;
 
 public class SynchronousEvents implements Events {
@@ -31,8 +33,7 @@ public class SynchronousEvents implements Events {
 		}
 	}
 
-	@Override
-	public EventResult trigger(final Object event) {
+	private EventResult trigger(final Object event) {
 		Preconditions.checkArgument(event != null);
 
 		final EventResult results = new EventResultList();
@@ -50,6 +51,16 @@ public class SynchronousEvents implements Events {
 		for (final Subscriber subscriber : callback.get(callbackEventType)) {
 			results.add(subscriber.call(event));
 		}
+	}
+
+	@Override
+	public EventResult trigger(final Device event) {
+		return trigger((Object) event);
+	}
+
+	@Override
+	public EventResult trigger(final State event) {
+		return trigger((Object) event);
 	}
 
 }

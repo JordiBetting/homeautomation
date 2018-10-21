@@ -3,6 +3,7 @@ package nl.gingerbeard.automation;
 import com.google.common.base.Preconditions;
 
 import nl.gingerbeard.automation.controlloop.Controlloop;
+import nl.gingerbeard.automation.devices.Device;
 import nl.gingerbeard.automation.domoticz.Domoticz;
 import nl.gingerbeard.automation.event.Events;
 import nl.gingerbeard.automation.event.SynchronousEvents;
@@ -57,9 +58,9 @@ public class AutomationFramework {
 		return frameworkState;
 	}
 
-	public void deviceChanged(final String string) {
+	public void deviceChanged(final Device changedDevice) {
 		Preconditions.checkState(frameworkState == AutomationFrameworkState.RUNNING);
-		events.trigger(string);
+		events.trigger(changedDevice);
 	}
 
 	public State getState() {

@@ -11,6 +11,7 @@ import nl.gingerbeard.automation.devices.Device;
 import nl.gingerbeard.automation.event.EventResult;
 import nl.gingerbeard.automation.event.EventResultEmpty;
 import nl.gingerbeard.automation.event.Events;
+import nl.gingerbeard.automation.state.State;
 
 public class ControlloopTest {
 
@@ -23,13 +24,18 @@ public class ControlloopTest {
 		}
 
 		@Override
-		public EventResult trigger(final Object event) {
+		public EventResult trigger(final Device event) {
 			getReceivedEvents().add(event);
 			return EventResultEmpty.create();
 		}
 
 		public List<Object> getReceivedEvents() {
 			return receivedEvents;
+		}
+
+		@Override
+		public EventResult trigger(final State event) {
+			return null;
 		}
 
 	}
