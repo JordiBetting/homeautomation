@@ -3,6 +3,7 @@ package nl.gingerbeard.automation;
 import com.google.common.base.Preconditions;
 
 import nl.gingerbeard.automation.controlloop.Controlloop;
+import nl.gingerbeard.automation.devices.Device;
 import nl.gingerbeard.automation.domoticz.Domoticz;
 import nl.gingerbeard.automation.event.Events;
 import nl.gingerbeard.automation.event.SynchronousEvents;
@@ -17,18 +18,17 @@ public class AutomationFramework {
 	private final Events events;
 	private final Controlloop controlLoop;
 
-	public AutomationFramework(final State state, final Domoticz domoticz, final Events events, final Controlloop controlloop) {
+	private AutomationFramework(final State state, final Domoticz domoticz, final Events events, final Controlloop controlloop) {
 		this.state = state;
 		this.domoticz = domoticz;
 		this.events = events;
 		controlLoop = controlloop;
-
 	}
 
 	public static AutomationFramework create() {
 		final State state = new State();
 		final Domoticz domoticz = new Domoticz();
-		final Events events = new SynchronousEvents();
+		final Events events = new SynchronousEvents(state);
 		final Controlloop controlloop = new Controlloop(events);
 
 		return new AutomationFramework(state, domoticz, events, controlloop);
@@ -36,6 +36,7 @@ public class AutomationFramework {
 
 	public void addRoom(final Room room) {
 		ensureState(AutomationFrameworkState.INITIALIZING);
+
 		events.subscribe(room);
 	}
 
@@ -53,8 +54,17 @@ public class AutomationFramework {
 		Preconditions.checkState(frameworkState == expectedState);
 	}
 
-	public AutomationFrameworkState getState() {
+	public AutomationFrameworkState getFrameworkState() {
 		return frameworkState;
+	}
+
+	public void deviceChanged(final Device changedDevice) {
+		Preconditions.checkState(frameworkState == AutomationFrameworkState.RUNNING);
+		events.trigger(changedDevice);
+	}
+
+	public State getState() {
+		return state;
 	}
 
 }

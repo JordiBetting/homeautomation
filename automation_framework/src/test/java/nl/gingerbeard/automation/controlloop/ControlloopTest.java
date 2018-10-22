@@ -1,13 +1,12 @@
 package nl.gingerbeard.automation.controlloop;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import nl.gingerbeard.automation.controlloop.Controlloop;
 import nl.gingerbeard.automation.devices.Device;
 import nl.gingerbeard.automation.event.EventResult;
 import nl.gingerbeard.automation.event.EventResultEmpty;
@@ -48,4 +47,5 @@ public class ControlloopTest {
 		assertEquals(1, events.getReceivedEvents().size());
 		assertEquals(myDevice, events.getReceivedEvents().get(0));
 	}
+
 }

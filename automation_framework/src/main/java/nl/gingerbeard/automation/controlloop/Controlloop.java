@@ -16,10 +16,8 @@ public class Controlloop {
 		events.trigger(changedDevice);
 	}
 
-	public void stateChanged() {
-
-	}
-
-	// public void
+	// public void stateChanged() {
+	//
+	// }
 
 }

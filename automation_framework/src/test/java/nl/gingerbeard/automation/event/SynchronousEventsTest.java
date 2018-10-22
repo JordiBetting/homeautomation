@@ -1,14 +1,17 @@
 package nl.gingerbeard.automation.event;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
+
+import nl.gingerbeard.automation.devices.Device;
+import nl.gingerbeard.automation.state.State;
 
 public class SynchronousEventsTest {
 
@@ -40,7 +43,7 @@ public class SynchronousEventsTest {
 		}
 	}
 
-	private static class MyEvent {
+	private static class MyEvent extends Device {
 
 	}
 
@@ -57,14 +60,14 @@ public class SynchronousEventsTest {
 		}
 
 		@Subscribe
-		public void second(final String e) {
+		public void second(final Object e) {
 			counter++;
 		}
 	}
 
 	@Test
 	public void receiveCallback() {
-		final Events events = new SynchronousEvents();
+		final Events events = new SynchronousEvents(new State());
 		final TestSubscriber subscriber = new TestSubscriber();
 		events.subscribe(subscriber);
 
@@ -77,7 +80,7 @@ public class SynchronousEventsTest {
 
 	@Test
 	public void feedbackReceivedOnce() {
-		final Events events = new SynchronousEvents();
+		final Events events = new SynchronousEvents(new State());
 		final TestSubscriber subscriber = new TestSubscriber();
 		events.subscribe(subscriber);
 
@@ -89,19 +92,19 @@ public class SynchronousEventsTest {
 
 	@Test
 	public void otherTypeNotReceived() {
-		final Events events = new SynchronousEvents();
+		final Events events = new SynchronousEvents(new State());
 		final TestSubscriber subscriber = new TestSubscriber();
 		events.subscribe(subscriber);
 
 		assertEquals(0, subscriber.count);
-		events.trigger(new Exception());
+		events.trigger(new State());
 
 		assertEquals(0, subscriber.count);
 	}
 
 	@Test
 	public void superClassNotDeliveredToChild() {
-		final Events events = new SynchronousEvents();
+		final Events events = new SynchronousEvents(new State());
 		final MyEventSubscriber subscriber = new MyEventSubscriber();
 		events.subscribe(subscriber);
 
@@ -115,7 +118,7 @@ public class SynchronousEventsTest {
 
 	@Test
 	public void derivedClassAlsoDeliveredtoSuperClass() {
-		final Events events = new SynchronousEvents();
+		final Events events = new SynchronousEvents(new State());
 		final MyEventSubscriber subscriber = new MyEventSubscriber();
 		events.subscribe(subscriber);
 
@@ -129,7 +132,7 @@ public class SynchronousEventsTest {
 
 	@Test
 	public void multipleSubscribed() {
-		final Events events = new SynchronousEvents();
+		final Events events = new SynchronousEvents(new State());
 		final MultipleSubscribe subscriber = new MultipleSubscribe();
 		events.subscribe(subscriber);
 
@@ -140,9 +143,9 @@ public class SynchronousEventsTest {
 
 	@Test
 	public void nullCallbackThrowsException() {
-		final Events events = new SynchronousEvents();
+		final Events events = new SynchronousEvents(new State());
 		try {
-			events.trigger(null);
+			events.trigger((Device) null);
 			fail("expected exception");
 		} catch (final IllegalArgumentException e) {
 			// expected
@@ -151,13 +154,13 @@ public class SynchronousEventsTest {
 
 	@Test
 	public void callbackNoSubscribersNoException() {
-		final Events events = new SynchronousEvents();
+		final Events events = new SynchronousEvents(new State());
 		events.trigger("test");
 	}
 
 	@Test
 	public void registerSubscriberTwoReceivesSingle() {
-		final Events events = new SynchronousEvents();
+		final Events events = new SynchronousEvents(new State());
 		final TestSubscriber subscriber = new TestSubscriber();
 		events.subscribe(subscriber);
 		events.subscribe(subscriber);
@@ -176,7 +179,7 @@ public class SynchronousEventsTest {
 
 	@Test
 	public void registerTooManyParametersIgnored() {
-		final Events events = new SynchronousEvents();
+		final Events events = new SynchronousEvents(new State());
 		final TooManyParametersSubscriber subscriber = new TooManyParametersSubscriber();
 
 		try {
@@ -189,7 +192,7 @@ public class SynchronousEventsTest {
 
 	@Test
 	public void registerNoParametersThrowsException() {
-		final Events events = new SynchronousEvents();
+		final Events events = new SynchronousEvents(new State());
 		final NoParametersSubscriber subscriber = new NoParametersSubscriber();
 
 		try {
@@ -209,7 +212,7 @@ public class SynchronousEventsTest {
 
 	@Test
 	public void registerNullThrowsException() {
-		final Events events = new SynchronousEvents();
+		final Events events = new SynchronousEvents(new State());
 		try {
 			events.subscribe(null);
 			fail("Expected exception");
@@ -220,7 +223,7 @@ public class SynchronousEventsTest {
 
 	@Test
 	public void testReturnTypeNoSubscribersEmptyList() {
-		final Events events = new SynchronousEvents();
+		final Events events = new SynchronousEvents(new State());
 		final EventResult returned = events.trigger("test");
 
 		assertNotNull(returned);
@@ -230,14 +233,14 @@ public class SynchronousEventsTest {
 	private static class ReturningSubscriber {
 
 		@Subscribe
-		public EventResult test(final String hi) {
+		public EventResult test(final String parameter) {
 			return EventResultList.of("Good morning");
 		}
 	}
 
 	@Test
 	public void testReturnTypeReturnsValue() {
-		final Events events = new SynchronousEvents();
+		final Events events = new SynchronousEvents(new State());
 		final ReturningSubscriber subscriber = new ReturningSubscriber();
 		events.subscribe(subscriber);
 
@@ -257,7 +260,7 @@ public class SynchronousEventsTest {
 
 	@Test
 	public void testThrowExeption_noresult() {
-		final Events events = new SynchronousEvents();
+		final Events events = new SynchronousEvents(new State());
 		final ThrowingSubscriber subscriber = new ThrowingSubscriber();
 		events.subscribe(subscriber);
 
@@ -268,14 +271,14 @@ public class SynchronousEventsTest {
 
 	private static class NullSubscriber {
 		@Subscribe
-		public void throwException(final String a) {
-			throw new RuntimeException();
+		public EventResult throwException(final String a) {
+			return null;
 		}
 	}
 
 	@Test
 	public void test_returnNull_noresult() {
-		final Events events = new SynchronousEvents();
+		final Events events = new SynchronousEvents(new State());
 		final NullSubscriber subscriber = new NullSubscriber();
 		events.subscribe(subscriber);
 
@@ -293,7 +296,7 @@ public class SynchronousEventsTest {
 
 	@Test
 	public void return_wrongReturnType_ignored() {
-		final Events events = new SynchronousEvents();
+		final Events events = new SynchronousEvents(new State());
 		final WrongReturnTypeSubscriber subscriber = new WrongReturnTypeSubscriber();
 		events.subscribe(subscriber);
 

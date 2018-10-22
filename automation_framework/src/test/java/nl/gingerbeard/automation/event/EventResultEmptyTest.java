@@ -1,15 +1,11 @@
 package nl.gingerbeard.automation.event;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.Optional;
 
-import org.junit.Test;
-
-import nl.gingerbeard.automation.event.EventResult;
-import nl.gingerbeard.automation.event.EventResultEmpty;
-import nl.gingerbeard.automation.event.EventResultList;
+import org.junit.jupiter.api.Test;
 
 public class EventResultEmptyTest {
 
