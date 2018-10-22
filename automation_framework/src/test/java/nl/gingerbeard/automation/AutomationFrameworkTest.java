@@ -8,6 +8,7 @@ import nl.gingerbeard.automation.devices.Device;
 import nl.gingerbeard.automation.event.EventState;
 import nl.gingerbeard.automation.event.Subscribe;
 import nl.gingerbeard.automation.state.AlarmState;
+import nl.gingerbeard.automation.state.HomeAway;
 import nl.gingerbeard.automation.state.TimeOfDay;
 
 public class AutomationFrameworkTest {
@@ -25,39 +26,6 @@ public class AutomationFrameworkTest {
 
 	@EventState(timeOfDay = TimeOfDay.ALLDAY)
 	public static class AllDaySubscriber extends Room {
-
-		int counter = 0;
-
-		@Subscribe
-		public void receive(final Object event) {
-			counter++;
-		}
-	}
-
-	@EventState(alarmState = AlarmState.ARM_HOME)
-	public static class AlarmSubscriber extends Room {
-
-		int counter = 0;
-
-		@Subscribe
-		public void receive(final Object event) {
-			counter++;
-		}
-	}
-
-	@EventState(alarmState = AlarmState.ALWAYS)
-	public static class AllAlarmSubscriber extends Room {
-
-		int counter = 0;
-
-		@Subscribe
-		public void receive(final Object event) {
-			counter++;
-		}
-	}
-
-	@EventState(alarmState = AlarmState.ARMED)
-	public static class ArmAlarmSubscriber extends Room {
 
 		int counter = 0;
 
@@ -108,6 +76,39 @@ public class AutomationFrameworkTest {
 		assertEquals(1, subscriber.counter);
 	}
 
+	@EventState(alarmState = AlarmState.ARM_HOME)
+	public static class AlarmSubscriber extends Room {
+
+		int counter = 0;
+
+		@Subscribe
+		public void receive(final Object event) {
+			counter++;
+		}
+	}
+
+	@EventState(alarmState = AlarmState.ALWAYS)
+	public static class AllAlarmSubscriber extends Room {
+
+		int counter = 0;
+
+		@Subscribe
+		public void receive(final Object event) {
+			counter++;
+		}
+	}
+
+	@EventState(alarmState = AlarmState.ARMED)
+	public static class ArmAlarmSubscriber extends Room {
+
+		int counter = 0;
+
+		@Subscribe
+		public void receive(final Object event) {
+			counter++;
+		}
+	}
+
 	@Test
 	public void alarm_correctState_eventReceived() {
 		final AutomationFramework framework = AutomationFramework.create();
@@ -139,12 +140,12 @@ public class AutomationFrameworkTest {
 		final AutomationFramework framework = AutomationFramework.create();
 		framework.getState().setAlarmState(AlarmState.ARM_AWAY);
 
-		final AlarmSubscriber subscriber = new AlarmSubscriber();
+		final AllAlarmSubscriber subscriber = new AllAlarmSubscriber();
 		framework.addRoom(subscriber);
 		framework.start();
 		framework.deviceChanged(new Device());
 
-		assertEquals(0, subscriber.counter);
+		assertEquals(1, subscriber.counter);
 	}
 
 	@Test
@@ -153,6 +154,67 @@ public class AutomationFrameworkTest {
 		framework.getState().setAlarmState(AlarmState.ARM_AWAY);
 
 		final ArmAlarmSubscriber subscriber = new ArmAlarmSubscriber();
+		framework.addRoom(subscriber);
+		framework.start();
+		framework.deviceChanged(new Device());
+
+		assertEquals(1, subscriber.counter);
+	}
+
+	@EventState(homeAway = HomeAway.HOME)
+	public static class HomeSubscriber extends Room {
+
+		int counter;
+
+		@Subscribe
+		public void receive(final Object event) {
+			counter++;
+		}
+	}
+
+	@EventState(homeAway = HomeAway.ALWAYS)
+	public static class AlwaysHomeAwaySubscriber extends Room {
+
+		int counter;
+
+		@Subscribe
+		public void receive(final Object event) {
+			counter++;
+		}
+	}
+
+	@Test
+	public void homeSubscriber_home_received() {
+		final AutomationFramework framework = AutomationFramework.create();
+		framework.getState().setHomeAway(HomeAway.HOME);
+
+		final HomeSubscriber subscriber = new HomeSubscriber();
+		framework.addRoom(subscriber);
+		framework.start();
+		framework.deviceChanged(new Device());
+
+		assertEquals(1, subscriber.counter);
+	}
+
+	@Test
+	public void homeSubscriber_away_nothingReceived() {
+		final AutomationFramework framework = AutomationFramework.create();
+		framework.getState().setHomeAway(HomeAway.AWAY);
+
+		final HomeSubscriber subscriber = new HomeSubscriber();
+		framework.addRoom(subscriber);
+		framework.start();
+		framework.deviceChanged(new Device());
+
+		assertEquals(0, subscriber.counter);
+	}
+
+	@Test
+	public void homeAwayAlwaysSubscriber_away_received() {
+		final AutomationFramework framework = AutomationFramework.create();
+		framework.getState().setHomeAway(HomeAway.ALWAYS);
+
+		final AlwaysHomeAwaySubscriber subscriber = new AlwaysHomeAwaySubscriber();
 		framework.addRoom(subscriber);
 		framework.start();
 		framework.deviceChanged(new Device());

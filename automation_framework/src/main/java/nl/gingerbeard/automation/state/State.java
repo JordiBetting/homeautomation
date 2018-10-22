@@ -6,9 +6,10 @@ import nl.gingerbeard.automation.event.EventState;
 
 public class State {
 
-	// TODO: Initialize state somehow
+	// TODO: Initialize state via domoticz
+	// state in domoticz is always leading
 	public AlarmState alarm = AlarmState.DISARMED;
-	public Object home;
+	public HomeAway home = HomeAway.HOME;
 	private TimeOfDay timeOfDay = TimeOfDay.DAYTIME;
 
 	public void setTimeOfDay(final TimeOfDay newTimeOfDay) {
@@ -21,11 +22,14 @@ public class State {
 	}
 
 	public boolean meets(final EventState eventState) {
-		// TODO: home
-		return timeOfDay.meets(eventState.timeOfDay()) && alarm.meets(eventState.alarmState());
+		return timeOfDay.meets(eventState.timeOfDay()) && alarm.meets(eventState.alarmState()) && home.meets(eventState.homeAway());
 	}
 
 	public void setAlarmState(final AlarmState alarmState) {
 		alarm = alarmState;
+	}
+
+	public void setHomeAway(final HomeAway homeAway) {
+		home = homeAway;
 	}
 }
