@@ -1,10 +1,7 @@
 package nl.gingerbeard.automation.event;
 
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Predicate;
-
-import com.google.common.collect.Maps;
 
 import nl.gingerbeard.automation.devices.Device;
 import nl.gingerbeard.automation.state.State;
@@ -18,7 +15,12 @@ public class StateEventsFilter implements Events {
 
 	private static final EventStateDefaults defaults = new EventStateDefaults();
 
-	private final Map<Object, EventState> subscribers = Maps.newHashMap();
+	// private final Map<Object, EventState> subscribers = Maps.newHashMap();
+
+	private final Events timeOfDay_daySubscribers = new SynchronousEvents();
+	private final Events timeOfDay_nightSubscribers = new SynchronousEvents();
+	private final Events timeOfDay_alwaysSubscribers = new SynchronousEvents();
+
 	private final State currentState;
 
 	public StateEventsFilter(final State currentState) {
