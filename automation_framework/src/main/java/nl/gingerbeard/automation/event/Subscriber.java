@@ -6,10 +6,12 @@ import java.lang.reflect.Method;
 class Subscriber {
 	private final Object instance;
 	private final Method method;
+	private final EventState eventState;
 
-	Subscriber(final Object instance, final Method method) {
+	Subscriber(final Object instance, final Method method, final EventState eventState) {
 		this.instance = instance;
 		this.method = method;
+		this.eventState = eventState;
 	}
 
 	EventResult call(final Object event) {
@@ -23,5 +25,9 @@ class Subscriber {
 			// e.printStackTrace(); TODO
 		}
 		return EventResultEmpty.create();
+	}
+
+	public EventState getEventState() {
+		return eventState;
 	}
 }

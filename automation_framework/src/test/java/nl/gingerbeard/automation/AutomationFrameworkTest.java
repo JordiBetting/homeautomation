@@ -25,7 +25,7 @@ public class AutomationFrameworkTest {
 	@Test
 	public void testStateSubscribe() {
 		final AutomationFramework framework = AutomationFramework.create();
-		framework.getState().setTimeOfDay(TimeOfDay.NIGHTTIME);
+		framework.getState().setTimeOfDay(TimeOfDay.DAYTIME);
 		final StateSubscriber subscriber = new StateSubscriber();
 
 		framework.addRoom(subscriber);

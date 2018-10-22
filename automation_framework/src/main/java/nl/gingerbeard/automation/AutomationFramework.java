@@ -28,7 +28,7 @@ public class AutomationFramework {
 	public static AutomationFramework create() {
 		final State state = new State();
 		final Domoticz domoticz = new Domoticz();
-		final Events events = new SynchronousEvents();
+		final Events events = new SynchronousEvents(state);
 		final Controlloop controlloop = new Controlloop(events);
 
 		return new AutomationFramework(state, domoticz, events, controlloop);

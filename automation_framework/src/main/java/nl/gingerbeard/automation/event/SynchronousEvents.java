@@ -8,14 +8,24 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 
-import nl.gingerbeard.automation.devices.Device;
 import nl.gingerbeard.automation.state.State;
 import nl.gingerbeard.automation.util.ReflectionUtil;
 
 public class SynchronousEvents implements Events {
+	private static final EventStateDefaults defaults = new EventStateDefaults();
 
 	private final ListMultimap<Class<?>, Subscriber> callback = ArrayListMultimap.create();
 	private final List<Object> subscribers = new ArrayList<>();
+	private final State state;
+
+	@EventState
+	private static class EventStateDefaults {
+
+	}
+
+	public SynchronousEvents(final State state) {
+		this.state = state;
+	}
 
 	@Override
 	public void subscribe(final Object subscriber) {
@@ -28,12 +38,30 @@ public class SynchronousEvents implements Events {
 
 	private void registerSubscriberInterests(final Object subscriber) {
 		for (final Method method : ReflectionUtil.getMethodsAnnotatedWith(subscriber.getClass(), Subscribe.class, 1)) {
-			final Class<?> interestedIn = method.getParameterTypes()[0];
-			callback.put(interestedIn, new Subscriber(subscriber, method));
+			final Class<?> eventInterest = method.getParameterTypes()[0];
+			final EventState subscriberInterests = getSubscriberInterests(subscriber);
+			callback.put(eventInterest, new Subscriber(subscriber, method, subscriberInterests));
 		}
 	}
 
-	private EventResult trigger(final Object event) {
+	private EventState getSubscriberInterests(final Object subscriber) {
+		final Class<?> annotatedObject = getStateAnnotation(subscriber);
+		final EventState interests = annotatedObject.getAnnotation(EventState.class);
+		return interests;
+	}
+
+	private Class<?> getStateAnnotation(final Object subscriber) {
+		Class<?> annotatedObject;
+		if (subscriber.getClass().isAnnotationPresent(EventState.class)) {
+			annotatedObject = subscriber.getClass();
+		} else {
+			annotatedObject = defaults.getClass();
+		}
+		return annotatedObject;
+	}
+
+	@Override
+	public EventResult trigger(final Object event) {
 		Preconditions.checkArgument(event != null);
 
 		final EventResult results = new EventResultList();
@@ -49,18 +77,10 @@ public class SynchronousEvents implements Events {
 
 	private void triggerSubscribers(final Object event, final EventResult results, final Class<?> callbackEventType) {
 		for (final Subscriber subscriber : callback.get(callbackEventType)) {
-			results.add(subscriber.call(event));
+			if (state.meets(subscriber.getEventState())) {
+				results.add(subscriber.call(event));
+			}
 		}
-	}
-
-	@Override
-	public EventResult trigger(final Device event) {
-		return trigger((Object) event);
-	}
-
-	@Override
-	public EventResult trigger(final State event) {
-		return trigger((Object) event);
 	}
 
 }
