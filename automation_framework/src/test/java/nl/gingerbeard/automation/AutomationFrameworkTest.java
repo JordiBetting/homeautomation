@@ -4,8 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 
+import nl.gingerbeard.automation.devices.Device;
 import nl.gingerbeard.automation.event.EventState;
-import nl.gingerbeard.automation.event.NamedDevice;
 import nl.gingerbeard.automation.event.Subscribe;
 import nl.gingerbeard.automation.state.TimeOfDay;
 
@@ -31,7 +31,7 @@ public class AutomationFrameworkTest {
 		framework.addRoom(subscriber);
 		framework.start();
 
-		framework.deviceChanged(new NamedDevice("test"));
+		framework.deviceChanged(new Device());
 
 		assertEquals(1, subscriber.counter);
 	}
@@ -44,7 +44,7 @@ public class AutomationFrameworkTest {
 		final StateSubscriber subscriber = new StateSubscriber();
 		framework.addRoom(subscriber);
 		framework.start();
-		framework.deviceChanged(new NamedDevice("test"));
+		framework.deviceChanged(new Device());
 
 		assertEquals(0, subscriber.counter);
 	}
