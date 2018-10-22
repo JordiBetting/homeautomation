@@ -4,4 +4,9 @@ package nl.gingerbeard.automation.state;
 public enum TimeOfDay {
 	ALLDAY, DAYTIME, NIGHTTIME
 	// /json.htm?type=command&param=getSunRiseSet
+	;
+
+	public boolean meets(final TimeOfDay other) {
+		return equals(other) || other == TimeOfDay.ALLDAY;
+	}
 }

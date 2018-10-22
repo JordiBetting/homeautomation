@@ -7,12 +7,57 @@ import org.junit.jupiter.api.Test;
 import nl.gingerbeard.automation.devices.Device;
 import nl.gingerbeard.automation.event.EventState;
 import nl.gingerbeard.automation.event.Subscribe;
+import nl.gingerbeard.automation.state.AlarmState;
 import nl.gingerbeard.automation.state.TimeOfDay;
 
 public class AutomationFrameworkTest {
 
 	@EventState(timeOfDay = TimeOfDay.DAYTIME)
-	public static class StateSubscriber extends Room {
+	public static class TimeOfDaySubscriber extends Room {
+
+		int counter = 0;
+
+		@Subscribe
+		public void receive(final Object event) {
+			counter++;
+		}
+	}
+
+	@EventState(timeOfDay = TimeOfDay.ALLDAY)
+	public static class AllDaySubscriber extends Room {
+
+		int counter = 0;
+
+		@Subscribe
+		public void receive(final Object event) {
+			counter++;
+		}
+	}
+
+	@EventState(alarmState = AlarmState.ARM_HOME)
+	public static class AlarmSubscriber extends Room {
+
+		int counter = 0;
+
+		@Subscribe
+		public void receive(final Object event) {
+			counter++;
+		}
+	}
+
+	@EventState(alarmState = AlarmState.ALWAYS)
+	public static class AllAlarmSubscriber extends Room {
+
+		int counter = 0;
+
+		@Subscribe
+		public void receive(final Object event) {
+			counter++;
+		}
+	}
+
+	@EventState(alarmState = AlarmState.ARMED)
+	public static class ArmAlarmSubscriber extends Room {
 
 		int counter = 0;
 
@@ -23,10 +68,10 @@ public class AutomationFrameworkTest {
 	}
 
 	@Test
-	public void testStateSubscribe() {
+	public void timeOfDay_correctState_eventReceived() {
 		final AutomationFramework framework = AutomationFramework.create();
 		framework.getState().setTimeOfDay(TimeOfDay.DAYTIME);
-		final StateSubscriber subscriber = new StateSubscriber();
+		final TimeOfDaySubscriber subscriber = new TimeOfDaySubscriber();
 
 		framework.addRoom(subscriber);
 		framework.start();
@@ -37,15 +82,81 @@ public class AutomationFrameworkTest {
 	}
 
 	@Test
-	public void otherState_subscribe_nothingReceived() {
+	public void timeOfDay_OtherState_nothingReceived() {
 		final AutomationFramework framework = AutomationFramework.create();
 		framework.getState().setTimeOfDay(TimeOfDay.NIGHTTIME);
 
-		final StateSubscriber subscriber = new StateSubscriber();
+		final TimeOfDaySubscriber subscriber = new TimeOfDaySubscriber();
 		framework.addRoom(subscriber);
 		framework.start();
 		framework.deviceChanged(new Device());
 
 		assertEquals(0, subscriber.counter);
+	}
+
+	@Test
+	public void timeOfDay_allday_received() {
+		final AutomationFramework framework = AutomationFramework.create();
+		framework.getState().setTimeOfDay(TimeOfDay.DAYTIME);
+		final TimeOfDaySubscriber subscriber = new TimeOfDaySubscriber();
+
+		framework.addRoom(subscriber);
+		framework.start();
+
+		framework.deviceChanged(new Device());
+
+		assertEquals(1, subscriber.counter);
+	}
+
+	@Test
+	public void alarm_correctState_eventReceived() {
+		final AutomationFramework framework = AutomationFramework.create();
+		framework.getState().setAlarmState(AlarmState.ARM_HOME);
+
+		final AlarmSubscriber subscriber = new AlarmSubscriber();
+		framework.addRoom(subscriber);
+		framework.start();
+		framework.deviceChanged(new Device());
+
+		assertEquals(1, subscriber.counter);
+	}
+
+	@Test
+	public void alarm_otherState_nothingReceived() {
+		final AutomationFramework framework = AutomationFramework.create();
+		framework.getState().setAlarmState(AlarmState.DISARMED);
+
+		final AlarmSubscriber subscriber = new AlarmSubscriber();
+		framework.addRoom(subscriber);
+		framework.start();
+		framework.deviceChanged(new Device());
+
+		assertEquals(0, subscriber.counter);
+	}
+
+	@Test
+	public void alarm_all_received() {
+		final AutomationFramework framework = AutomationFramework.create();
+		framework.getState().setAlarmState(AlarmState.ARM_AWAY);
+
+		final AlarmSubscriber subscriber = new AlarmSubscriber();
+		framework.addRoom(subscriber);
+		framework.start();
+		framework.deviceChanged(new Device());
+
+		assertEquals(0, subscriber.counter);
+	}
+
+	@Test
+	public void alarm_armed_received() {
+		final AutomationFramework framework = AutomationFramework.create();
+		framework.getState().setAlarmState(AlarmState.ARM_AWAY);
+
+		final ArmAlarmSubscriber subscriber = new ArmAlarmSubscriber();
+		framework.addRoom(subscriber);
+		framework.start();
+		framework.deviceChanged(new Device());
+
+		assertEquals(1, subscriber.counter);
 	}
 }

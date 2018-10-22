@@ -6,7 +6,8 @@ import nl.gingerbeard.automation.event.EventState;
 
 public class State {
 
-	public Object alarm;
+	// TODO: Initialize state somehow
+	public AlarmState alarm = AlarmState.DISARMED;
 	public Object home;
 	private TimeOfDay timeOfDay = TimeOfDay.DAYTIME;
 
@@ -20,7 +21,11 @@ public class State {
 	}
 
 	public boolean meets(final EventState eventState) {
-		// TODO: alarm + home
-		return timeOfDay.equals(eventState.timeOfDay()) || eventState.timeOfDay() == TimeOfDay.ALLDAY;
+		// TODO: home
+		return timeOfDay.meets(eventState.timeOfDay()) && alarm.meets(eventState.alarmState());
+	}
+
+	public void setAlarmState(final AlarmState alarmState) {
+		alarm = alarmState;
 	}
 }
