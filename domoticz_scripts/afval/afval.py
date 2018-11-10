@@ -26,8 +26,8 @@ ophaaldagen = data['data']['ophaaldagen']['data']
 type='none'
 
 now = datetime.datetime.now()
-datetoday="%d-%d-%d" % (now.year, now.month, now.day)
-#datetoday='2018-11-14'
+datetoday=now.strftime("%Y-%m-%d")
+#datetoday='2018-11-07'
 
 for ophaaldag in ophaaldagen:
         if ophaaldag['date'] == datetoday:
