@@ -12,7 +12,7 @@ public class Controlloop {
 	}
 
 	// domoticz event: add change [trigger=device], commandArray['OpenURL']='www.yourdomain.com/api/movecamtopreset.cgi' with device ID of changed device
-	public void triggerDeviceChanged(final Device changedDevice) {
+	public void triggerDeviceChanged(final Device<?> changedDevice) {
 		events.trigger(changedDevice);
 	}
 

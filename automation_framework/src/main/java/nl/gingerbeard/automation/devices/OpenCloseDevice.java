@@ -2,7 +2,15 @@ package nl.gingerbeard.automation.devices;
 
 import java.util.Optional;
 
-public abstract class OpenCloseDevice extends Device {
+import nl.gingerbeard.automation.devices.OpenCloseDevice.OpenCloseState;
+
+public abstract class OpenCloseDevice extends Device<OpenCloseState> {
+
+	public static enum OpenCloseState {
+		OPEN, //
+		CLOSE, //
+		;
+	}
 
 	public OpenCloseDevice(final int idx, final Optional<Integer> batteryDomoticzId) {
 		super(idx, batteryDomoticzId);
