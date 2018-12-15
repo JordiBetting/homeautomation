@@ -1,5 +1,6 @@
 package nl.gingerbeard.automation.devices;
 
+import java.util.Locale;
 import java.util.Optional;
 
 import nl.gingerbeard.automation.devices.OnOffDevice.OnOff;
@@ -19,7 +20,7 @@ public abstract class OnOffDevice extends Device<OnOff> {
 	@Override
 	public boolean updateState(final String newStateString) {
 		try {
-			final OnOff newState = OnOff.valueOf(newStateString.toUpperCase());
+			final OnOff newState = OnOff.valueOf(newStateString.toUpperCase(Locale.ENGLISH));
 			setState(newState);
 			return true;
 		} catch (final IllegalArgumentException e) {
