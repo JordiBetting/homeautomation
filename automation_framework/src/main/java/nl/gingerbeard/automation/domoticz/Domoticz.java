@@ -24,9 +24,10 @@ public class Domoticz implements EventReceived {
 		final int idx = device.getIdx();
 		if (!devices.containsKey(idx)) {
 			devices.put(idx, device);
-			if (device.getBatteryDomoticzId().isPresent()) {
-				devices.put(device.getBatteryDomoticzId().get(), device);
-			}
+			// TODO: How to deal with battery of devices. How to even link it to the original device?
+			// if (device.getBatteryDomoticzId().isPresent()) {
+			// devices.put(device.getBatteryDomoticzId().get(), device);
+			// }
 			return true;
 		} else {
 			return false;
