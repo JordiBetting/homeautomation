@@ -47,7 +47,7 @@ public class DomoticzEventReceiver extends NanoHTTPD {
 				if (m.matches()) {
 					response = Optional.of(newFixedLengthResponse(Status.OK, NanoHTTPD.MIME_PLAINTEXT, "OKIDOKI"));
 					if (listener.isPresent()) {
-						final boolean result = listener.get().deviceChanged(Integer.valueOf(m.group(1)), m.group(2));
+						final boolean result = listener.get().deviceChanged(Integer.parseInt(m.group(1)), m.group(2));
 						if (result == false) {
 							response = Optional.of(newFixedLengthResponse(Status.NOT_FOUND, NanoHTTPD.MIME_PLAINTEXT, "Could not process request."));
 						}
