@@ -34,7 +34,7 @@ public class DomoticzEventReceiver extends NanoHTTPD implements IDomoticzEventRe
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see nl.gingerbeard.automation.domoticz.IDomoticzEventReceiver#setEventListener(nl.gingerbeard.automation.domoticz.DomoticzEventReceiver.EventReceived)
 	 */
 	@Override
@@ -44,7 +44,7 @@ public class DomoticzEventReceiver extends NanoHTTPD implements IDomoticzEventRe
 
 	@Override
 	public Response serve(final IHTTPSession session) {
-		Optional<Response> response = Optional.empty();
+		Optional<Response> response;
 		if (session.getMethod() == Method.GET) {
 			response = processGetRequest(session);
 		} else {
