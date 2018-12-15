@@ -40,26 +40,66 @@ public class DomoticzEventReceiver extends NanoHTTPD {
 	public Response serve(final IHTTPSession session) {
 		Optional<Response> response = Optional.empty();
 		if (session.getMethod() == Method.GET) {
-			try {
-				final String uri = session.getUri();
-
-				final Matcher m = URIPATTERN.matcher(uri);
-				if (m.matches()) {
-					response = Optional.of(newFixedLengthResponse(Status.OK, NanoHTTPD.MIME_PLAINTEXT, "OKIDOKI"));
-					if (listener.isPresent()) {
-						final boolean result = listener.get().deviceChanged(Integer.parseInt(m.group(1)), m.group(2));
-						if (result == false) {
-							response = Optional.of(newFixedLengthResponse(Status.NOT_FOUND, NanoHTTPD.MIME_PLAINTEXT, "Could not process request."));
-						}
-					}
-				}
-			} catch (final Throwable t) {
-				response = Optional.of(newFixedLengthResponse(Status.INTERNAL_ERROR, NanoHTTPD.MIME_PLAINTEXT, "Internal server error: " + t.getMessage()));
-			}
+			response = processGetRequest(session);
 		} else {
 			response = Optional.of(newFixedLengthResponse(Status.METHOD_NOT_ALLOWED, NanoHTTPD.MIME_PLAINTEXT, "Only GET is supported"));
 		}
 		return response.orElse(super.serve(session));
+	}
+
+	private Optional<Response> processGetRequest(final IHTTPSession session) {
+		Optional<Response> response;
+		try {
+			response = processGetRequest(session.getUri());
+		} catch (final Throwable t) {
+			response = Optional.of(newFixedLengthResponse(Status.INTERNAL_ERROR, NanoHTTPD.MIME_PLAINTEXT, "Internal server error: " + t.getMessage()));
+		}
+		return response;
+	}
+
+	private static class ResponseParameters {
+		public final int idx;
+		public final String state;
+
+		public ResponseParameters(final int idx, final String state) {
+			this.idx = idx;
+			this.state = state;
+		}
+
+	}
+
+	private Optional<Response> processGetRequest(final String uri) {
+		Optional<Response> response = Optional.empty();
+
+		final Optional<ResponseParameters> responseParams = parseParameters(uri);
+		if (responseParams.isPresent()) {
+			final Optional<Response> defaultResponse = Optional.of(newFixedLengthResponse(Status.OK, NanoHTTPD.MIME_PLAINTEXT, "OKIDOKI"));
+			final Optional<Response> listenerResponse = triggerListener(responseParams.get());
+			response = listenerResponse.isPresent() ? listenerResponse : defaultResponse;
+		}
+		return response;
+	}
+
+	private Optional<Response> triggerListener(final ResponseParameters responseParams) {
+		Optional<Response> response = Optional.empty();
+
+		if (listener.isPresent()) {
+			final boolean result = listener.get().deviceChanged(responseParams.idx, responseParams.state);
+			if (result == false) {
+				response = Optional.of(newFixedLengthResponse(Status.NOT_FOUND, NanoHTTPD.MIME_PLAINTEXT, "Could not process request."));
+			}
+		}
+		return response;
+	}
+
+	private Optional<ResponseParameters> parseParameters(final String uri) {
+		final Matcher m = URIPATTERN.matcher(uri);
+		final boolean matches = m.matches();
+		Optional<ResponseParameters> responseParams = Optional.empty();
+		if (matches) {
+			responseParams = Optional.of(new ResponseParameters(Integer.parseInt(m.group(1)), m.group(2)));
+		}
+		return responseParams;
 	}
 
 }
