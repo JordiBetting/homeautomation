@@ -3,19 +3,21 @@ package nl.gingerbeard.automation;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import java.io.IOException;
+
 import org.junit.jupiter.api.Test;
 
 public class AutomationFrameworkLifecycleTest {
 
 	@Test
-	public void state_initial() {
+	public void state_initial() throws IOException {
 		final AutomationFramework framework = AutomationFramework.create();
 
 		assertEquals(AutomationFrameworkState.INITIALIZING, framework.getFrameworkState());
 	}
 
 	@Test
-	public void state_start_running() {
+	public void state_start_running() throws IOException {
 		final AutomationFramework framework = AutomationFramework.create();
 
 		framework.start();
@@ -24,7 +26,7 @@ public class AutomationFrameworkLifecycleTest {
 	}
 
 	@Test
-	public void state_startTwice_throwsException() {
+	public void state_startTwice_throwsException() throws IOException {
 		final AutomationFramework framework = AutomationFramework.create();
 
 		framework.start();
@@ -37,7 +39,7 @@ public class AutomationFrameworkLifecycleTest {
 	}
 
 	@Test
-	public void state_stop_stopped() {
+	public void state_stop_stopped() throws IOException {
 		final AutomationFramework framework = AutomationFramework.create();
 		framework.start();
 
@@ -47,7 +49,7 @@ public class AutomationFrameworkLifecycleTest {
 	}
 
 	@Test
-	public void state_stopTwice_throwsException() {
+	public void state_stopTwice_throwsException() throws IOException {
 		final AutomationFramework framework = AutomationFramework.create();
 		framework.start();
 
@@ -61,13 +63,13 @@ public class AutomationFrameworkLifecycleTest {
 	}
 
 	@Test
-	public void intializing_addroom_noException() {
+	public void intializing_addroom_noException() throws IOException {
 		final AutomationFramework framework = AutomationFramework.create();
 		framework.addRoom(new Room());
 	}
 
 	@Test
-	public void running_addroom_exception() {
+	public void running_addroom_exception() throws IOException {
 		final AutomationFramework framework = AutomationFramework.create();
 		framework.start();
 
@@ -80,7 +82,7 @@ public class AutomationFrameworkLifecycleTest {
 	}
 
 	@Test
-	public void stopped_addroom_exception() {
+	public void stopped_addroom_exception() throws IOException {
 		final AutomationFramework framework = AutomationFramework.create();
 		framework.start();
 		framework.stop();

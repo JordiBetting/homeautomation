@@ -43,7 +43,16 @@ public class SynchronousEventsTest {
 		}
 	}
 
-	private static class MyEvent extends Device {
+	private static class MyEvent extends Device<Void> {
+
+		public MyEvent() {
+			super(0, Optional.empty());
+		}
+
+		@Override
+		public boolean updateState(final String newState) {
+			return false;
+		}
 
 	}
 
@@ -145,7 +154,7 @@ public class SynchronousEventsTest {
 	public void nullCallbackThrowsException() {
 		final Events events = new SynchronousEvents(new State());
 		try {
-			events.trigger((Device) null);
+			events.trigger((Device<?>) null);
 			fail("expected exception");
 		} catch (final IllegalArgumentException e) {
 			// expected

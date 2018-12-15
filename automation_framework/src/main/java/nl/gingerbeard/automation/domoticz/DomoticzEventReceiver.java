@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
 import fi.iki.elonen.NanoHTTPD;
 import fi.iki.elonen.NanoHTTPD.Response.Status;
 
-public class DomoticzEventReceiver extends NanoHTTPD {
+public class DomoticzEventReceiver extends NanoHTTPD implements IDomoticzEventReceiver {
 
 	public static interface EventReceived {
 		/**
@@ -27,11 +27,17 @@ public class DomoticzEventReceiver extends NanoHTTPD {
 	private static final Pattern URIPATTERN = Pattern.compile("/([0-9]+)/([a-zA-Z]+)/?");
 	private Optional<EventReceived> listener = Optional.empty();
 
-	DomoticzEventReceiver(final int port) throws IOException {
+	public DomoticzEventReceiver(final int port) throws IOException {
 		super(port);
 		start(NanoHTTPD.SOCKET_READ_TIMEOUT, true);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see nl.gingerbeard.automation.domoticz.IDomoticzEventReceiver#setEventListener(nl.gingerbeard.automation.domoticz.DomoticzEventReceiver.EventReceived)
+	 */
+	@Override
 	public void setEventListener(final EventReceived listener) {
 		this.listener = Optional.ofNullable(listener);
 	}

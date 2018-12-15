@@ -2,9 +2,11 @@ package nl.gingerbeard.automation;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.io.IOException;
+
 import org.junit.jupiter.api.Test;
 
-import nl.gingerbeard.automation.devices.Device;
+import nl.gingerbeard.automation.devices.TestDevice;
 import nl.gingerbeard.automation.event.EventState;
 import nl.gingerbeard.automation.event.Subscribe;
 import nl.gingerbeard.automation.state.AlarmState;
@@ -36,7 +38,7 @@ public class AutomationFrameworkTest {
 	}
 
 	@Test
-	public void timeOfDay_correctState_eventReceived() {
+	public void timeOfDay_correctState_eventReceived() throws IOException {
 		final AutomationFramework framework = AutomationFramework.create();
 		framework.getState().setTimeOfDay(TimeOfDay.DAYTIME);
 		final TimeOfDaySubscriber subscriber = new TimeOfDaySubscriber();
@@ -44,26 +46,26 @@ public class AutomationFrameworkTest {
 		framework.addRoom(subscriber);
 		framework.start();
 
-		framework.deviceChanged(new Device());
+		framework.deviceChanged(new TestDevice());
 
 		assertEquals(1, subscriber.counter);
 	}
 
 	@Test
-	public void timeOfDay_OtherState_nothingReceived() {
+	public void timeOfDay_OtherState_nothingReceived() throws IOException {
 		final AutomationFramework framework = AutomationFramework.create();
 		framework.getState().setTimeOfDay(TimeOfDay.NIGHTTIME);
 
 		final TimeOfDaySubscriber subscriber = new TimeOfDaySubscriber();
 		framework.addRoom(subscriber);
 		framework.start();
-		framework.deviceChanged(new Device());
+		framework.deviceChanged(new TestDevice());
 
 		assertEquals(0, subscriber.counter);
 	}
 
 	@Test
-	public void timeOfDay_allday_received() {
+	public void timeOfDay_allday_received() throws IOException {
 		final AutomationFramework framework = AutomationFramework.create();
 		framework.getState().setTimeOfDay(TimeOfDay.DAYTIME);
 		final TimeOfDaySubscriber subscriber = new TimeOfDaySubscriber();
@@ -71,7 +73,7 @@ public class AutomationFrameworkTest {
 		framework.addRoom(subscriber);
 		framework.start();
 
-		framework.deviceChanged(new Device());
+		framework.deviceChanged(new TestDevice());
 
 		assertEquals(1, subscriber.counter);
 	}
@@ -110,53 +112,53 @@ public class AutomationFrameworkTest {
 	}
 
 	@Test
-	public void alarm_correctState_eventReceived() {
+	public void alarm_correctState_eventReceived() throws IOException {
 		final AutomationFramework framework = AutomationFramework.create();
 		framework.getState().setAlarmState(AlarmState.ARM_HOME);
 
 		final AlarmSubscriber subscriber = new AlarmSubscriber();
 		framework.addRoom(subscriber);
 		framework.start();
-		framework.deviceChanged(new Device());
+		framework.deviceChanged(new TestDevice());
 
 		assertEquals(1, subscriber.counter);
 	}
 
 	@Test
-	public void alarm_otherState_nothingReceived() {
+	public void alarm_otherState_nothingReceived() throws IOException {
 		final AutomationFramework framework = AutomationFramework.create();
 		framework.getState().setAlarmState(AlarmState.DISARMED);
 
 		final AlarmSubscriber subscriber = new AlarmSubscriber();
 		framework.addRoom(subscriber);
 		framework.start();
-		framework.deviceChanged(new Device());
+		framework.deviceChanged(new TestDevice());
 
 		assertEquals(0, subscriber.counter);
 	}
 
 	@Test
-	public void alarm_all_received() {
+	public void alarm_all_received() throws IOException {
 		final AutomationFramework framework = AutomationFramework.create();
 		framework.getState().setAlarmState(AlarmState.ARM_AWAY);
 
 		final AllAlarmSubscriber subscriber = new AllAlarmSubscriber();
 		framework.addRoom(subscriber);
 		framework.start();
-		framework.deviceChanged(new Device());
+		framework.deviceChanged(new TestDevice());
 
 		assertEquals(1, subscriber.counter);
 	}
 
 	@Test
-	public void alarm_armed_received() {
+	public void alarm_armed_received() throws IOException {
 		final AutomationFramework framework = AutomationFramework.create();
 		framework.getState().setAlarmState(AlarmState.ARM_AWAY);
 
 		final ArmAlarmSubscriber subscriber = new ArmAlarmSubscriber();
 		framework.addRoom(subscriber);
 		framework.start();
-		framework.deviceChanged(new Device());
+		framework.deviceChanged(new TestDevice());
 
 		assertEquals(1, subscriber.counter);
 	}
@@ -184,40 +186,40 @@ public class AutomationFrameworkTest {
 	}
 
 	@Test
-	public void homeSubscriber_home_received() {
+	public void homeSubscriber_home_received() throws IOException {
 		final AutomationFramework framework = AutomationFramework.create();
 		framework.getState().setHomeAway(HomeAway.HOME);
 
 		final HomeSubscriber subscriber = new HomeSubscriber();
 		framework.addRoom(subscriber);
 		framework.start();
-		framework.deviceChanged(new Device());
+		framework.deviceChanged(new TestDevice());
 
 		assertEquals(1, subscriber.counter);
 	}
 
 	@Test
-	public void homeSubscriber_away_nothingReceived() {
+	public void homeSubscriber_away_nothingReceived() throws IOException {
 		final AutomationFramework framework = AutomationFramework.create();
 		framework.getState().setHomeAway(HomeAway.AWAY);
 
 		final HomeSubscriber subscriber = new HomeSubscriber();
 		framework.addRoom(subscriber);
 		framework.start();
-		framework.deviceChanged(new Device());
+		framework.deviceChanged(new TestDevice());
 
 		assertEquals(0, subscriber.counter);
 	}
 
 	@Test
-	public void homeAwayAlwaysSubscriber_away_received() {
+	public void homeAwayAlwaysSubscriber_away_received() throws IOException {
 		final AutomationFramework framework = AutomationFramework.create();
 		framework.getState().setHomeAway(HomeAway.ALWAYS);
 
 		final AlwaysHomeAwaySubscriber subscriber = new AlwaysHomeAwaySubscriber();
 		framework.addRoom(subscriber);
 		framework.start();
-		framework.deviceChanged(new Device());
+		framework.deviceChanged(new TestDevice());
 
 		assertEquals(1, subscriber.counter);
 	}

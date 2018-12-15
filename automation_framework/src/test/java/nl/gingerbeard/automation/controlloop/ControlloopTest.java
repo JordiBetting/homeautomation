@@ -7,7 +7,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-import nl.gingerbeard.automation.devices.Device;
+import nl.gingerbeard.automation.devices.TestDevice;
 import nl.gingerbeard.automation.event.EventResult;
 import nl.gingerbeard.automation.event.EventResultEmpty;
 import nl.gingerbeard.automation.event.Events;
@@ -38,7 +38,7 @@ public class ControlloopTest {
 	public void testStateChanged() {
 		final EventsStore events = new EventsStore();
 		final Controlloop control = new Controlloop(events);
-		final Device myDevice = new Device();
+		final TestDevice myDevice = new TestDevice();
 
 		assertEquals(0, events.getReceivedEvents().size());
 

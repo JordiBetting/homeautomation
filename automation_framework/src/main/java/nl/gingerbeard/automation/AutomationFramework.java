@@ -1,10 +1,14 @@
 package nl.gingerbeard.automation;
 
+import java.io.IOException;
+
 import com.google.common.base.Preconditions;
 
 import nl.gingerbeard.automation.controlloop.Controlloop;
 import nl.gingerbeard.automation.devices.Device;
 import nl.gingerbeard.automation.domoticz.Domoticz;
+import nl.gingerbeard.automation.domoticz.DomoticzEventReceiver;
+import nl.gingerbeard.automation.domoticz.IDomoticzEventReceiver;
 import nl.gingerbeard.automation.event.Events;
 import nl.gingerbeard.automation.event.SynchronousEvents;
 import nl.gingerbeard.automation.state.State;
@@ -25,9 +29,14 @@ public class AutomationFramework {
 		controlLoop = controlloop;
 	}
 
-	public static AutomationFramework create() {
+	public static AutomationFramework create() throws IOException {
+		return create(0);
+	}
+
+	public static AutomationFramework create(final int port) throws IOException {
 		final State state = new State();
-		final Domoticz domoticz = new Domoticz();
+		final IDomoticzEventReceiver eventReceiver = new DomoticzEventReceiver(port);
+		final Domoticz domoticz = new Domoticz(eventReceiver);
 		final Events events = new SynchronousEvents(state);
 		final Controlloop controlloop = new Controlloop(events);
 
@@ -58,7 +67,7 @@ public class AutomationFramework {
 		return frameworkState;
 	}
 
-	public void deviceChanged(final Device changedDevice) {
+	public void deviceChanged(final Device<?> changedDevice) {
 		Preconditions.checkState(frameworkState == AutomationFrameworkState.RUNNING);
 		events.trigger(changedDevice);
 	}

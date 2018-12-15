@@ -2,10 +2,10 @@ package nl.gingerbeard.automation.devices;
 
 import java.util.Optional;
 
-public class LightSensor extends Device {
+public class TestDevice extends Device<Void> {
 
-	public LightSensor(final int idx, final Optional<Integer> batteryDomoticzId) {
-		super(idx, batteryDomoticzId);
+	public TestDevice() {
+		super(0, Optional.empty());
 	}
 
 	@Override
