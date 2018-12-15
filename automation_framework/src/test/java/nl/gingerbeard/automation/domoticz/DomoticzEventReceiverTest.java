@@ -45,9 +45,10 @@ public class DomoticzEventReceiverTest {
 		private Optional<String> newState = Optional.empty();
 
 		@Override
-		public void deviceChanged(final int id, final String newState) {
+		public boolean deviceChanged(final int id, final String newState) {
 			this.id = Optional.of(id);
 			this.newState = Optional.ofNullable(newState);
+			return true;
 		}
 
 		public Optional<Integer> getId() {
@@ -134,11 +135,47 @@ public class DomoticzEventReceiverTest {
 		assertEquals(405, con.getResponseCode());
 	}
 
+	private static class ThrowingEventListener implements EventReceived {
+
+		@Override
+		public boolean deviceChanged(final int idx, final String newState) {
+			throw new UnsupportedOperationException();
+		}
+
+	}
+
 	@Test
-	public void defaultPort_8080() throws IOException {
-		receiver = new DomoticzEventReceiver();
+	public void listener_throwsException_internalServerError() throws IOException {
+		receiver = new DomoticzEventReceiver(0);
+		receiver.setEventListener(new ThrowingEventListener());
 		final int port = receiver.getListeningPort();
 
-		assertEquals(8080, port);
+		final URL url = new URL("http://localhost:" + port + "/1234/hello/");
+		final HttpURLConnection con = (HttpURLConnection) url.openConnection();
+		con.setRequestMethod("GET");
+
+		assertEquals(500, con.getResponseCode());
+	}
+
+	private static class ReturningFalseEventListener implements EventReceived {
+
+		@Override
+		public boolean deviceChanged(final int idx, final String newState) {
+			return false;
+		}
+
+	}
+
+	@Test
+	public void listenerReturnsFalse_errorCode404() throws IOException {
+		receiver = new DomoticzEventReceiver(0);
+		receiver.setEventListener(new ReturningFalseEventListener());
+		final int port = receiver.getListeningPort();
+
+		final URL url = new URL("http://localhost:" + port + "/1234/hello/");
+		final HttpURLConnection con = (HttpURLConnection) url.openConnection();
+		con.setRequestMethod("GET");
+
+		assertEquals(404, con.getResponseCode());
 	}
 }

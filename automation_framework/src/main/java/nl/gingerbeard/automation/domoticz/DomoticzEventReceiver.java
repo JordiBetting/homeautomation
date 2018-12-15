@@ -11,16 +11,21 @@ import fi.iki.elonen.NanoHTTPD.Response.Status;
 public class DomoticzEventReceiver extends NanoHTTPD {
 
 	public static interface EventReceived {
-		public void deviceChanged(int id, String newState);
+		/**
+		 * Indicate that a device state has changed in domoticz. Exceptions result in internal server error (500).
+		 *
+		 * @param idx
+		 *            Identification in domoticz
+		 * @param newState
+		 *            State string
+		 * @return True in case the device update was processed succesfully. False otherwise.
+		 */
+		public boolean deviceChanged(int idx, String newState);
 	}
 
 	// matches /id/action/ e.g. /123/close or /123/close/
 	private static final Pattern URIPATTERN = Pattern.compile("/([0-9]+)/([a-zA-Z]+)/?");
 	private Optional<EventReceived> listener = Optional.empty();
-
-	public DomoticzEventReceiver() throws IOException {
-		this(8080);
-	}
 
 	DomoticzEventReceiver(final int port) throws IOException {
 		super(port);
@@ -33,22 +38,28 @@ public class DomoticzEventReceiver extends NanoHTTPD {
 
 	@Override
 	public Response serve(final IHTTPSession session) {
+		Optional<Response> response = Optional.empty();
 		if (session.getMethod() == Method.GET) {
-			final String uri = session.getUri();
+			try {
+				final String uri = session.getUri();
 
-			final Matcher m = URIPATTERN.matcher(uri);
-			if (m.matches()) {
-				// System.out.println("ID=" + m.group(1));
-				// System.out.println("think=" + m.group(2));
-				if (listener.isPresent()) {
-					listener.get().deviceChanged(Integer.valueOf(m.group(1)), m.group(2));
+				final Matcher m = URIPATTERN.matcher(uri);
+				if (m.matches()) {
+					response = Optional.of(newFixedLengthResponse(Status.OK, NanoHTTPD.MIME_PLAINTEXT, "OKIDOKI"));
+					if (listener.isPresent()) {
+						final boolean result = listener.get().deviceChanged(Integer.valueOf(m.group(1)), m.group(2));
+						if (result == false) {
+							response = Optional.of(newFixedLengthResponse(Status.NOT_FOUND, NanoHTTPD.MIME_PLAINTEXT, "Could not process request."));
+						}
+					}
 				}
-				return newFixedLengthResponse(Status.OK, NanoHTTPD.MIME_PLAINTEXT, "OKIDOKI");
+			} catch (final Throwable t) {
+				response = Optional.of(newFixedLengthResponse(Status.INTERNAL_ERROR, NanoHTTPD.MIME_PLAINTEXT, "Internal server error: " + t.getMessage()));
 			}
 		} else {
-			return newFixedLengthResponse(Status.METHOD_NOT_ALLOWED, NanoHTTPD.MIME_PLAINTEXT, "OKIDOKI");
+			response = Optional.of(newFixedLengthResponse(Status.METHOD_NOT_ALLOWED, NanoHTTPD.MIME_PLAINTEXT, "Only GET is supported"));
 		}
-		return super.serve(session);
+		return response.orElse(super.serve(session));
 	}
 
 }
