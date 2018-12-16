@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import nl.gingerbeard.automation.controlloop.Controlloop;
 import nl.gingerbeard.automation.devices.Device;
 import nl.gingerbeard.automation.domoticz.DomoticzEventReceiver.EventReceived;
 
@@ -15,8 +16,10 @@ public class Domoticz implements EventReceived {
 	// no auth as it is localhost, allowed from domticz authmanager
 
 	private final Map<Integer, Device<?>> devices = new HashMap<>();
+	private final Controlloop controlloop;
 
-	public Domoticz(final IDomoticzEventReceiver receiver) {
+	public Domoticz(final IDomoticzEventReceiver receiver, final Controlloop controlloop) {
+		this.controlloop = controlloop;
 		receiver.setEventListener(this);
 	}
 
@@ -38,7 +41,11 @@ public class Domoticz implements EventReceived {
 	public boolean deviceChanged(final int idx, final String newState) {
 		final Optional<Device<?>> device = Optional.ofNullable(devices.get(idx));
 		if (device.isPresent()) {
-			return device.get().updateState(newState);
+			final boolean result = device.get().updateState(newState);
+			if (result) {
+				controlloop.triggerDeviceChanged(device.get());
+			}
+			return result;
 		}
 		return false;
 	}

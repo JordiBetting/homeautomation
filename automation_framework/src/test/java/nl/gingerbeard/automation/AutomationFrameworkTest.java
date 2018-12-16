@@ -223,4 +223,5 @@ public class AutomationFrameworkTest {
 
 		assertEquals(1, subscriber.counter);
 	}
+
 }

@@ -22,11 +22,11 @@ public class AutomationFramework {
 	private final Events events;
 	private final Controlloop controlLoop;
 
-	private AutomationFramework(final State state, final Domoticz domoticz, final Events events, final Controlloop controlloop) {
+	AutomationFramework(final State state, final Domoticz domoticz, final Events events, final Controlloop controlLoop) {
 		this.state = state;
 		this.domoticz = domoticz;
 		this.events = events;
-		controlLoop = controlloop;
+		this.controlLoop = controlLoop;
 	}
 
 	public static AutomationFramework create() throws IOException {
@@ -36,9 +36,9 @@ public class AutomationFramework {
 	public static AutomationFramework create(final int port) throws IOException {
 		final State state = new State();
 		final IDomoticzEventReceiver eventReceiver = new DomoticzEventReceiver(port);
-		final Domoticz domoticz = new Domoticz(eventReceiver);
 		final Events events = new SynchronousEvents(state);
 		final Controlloop controlloop = new Controlloop(events);
+		final Domoticz domoticz = new Domoticz(eventReceiver, controlloop);
 
 		return new AutomationFramework(state, domoticz, events, controlloop);
 	}
