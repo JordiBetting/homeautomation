@@ -287,4 +287,21 @@ public class ContainerTest {
 			assertEquals("Service does not implement specified class", e.getMessage());
 		}
 	}
+
+	public static class ComponentWithOptionalString {
+		@Requires
+		public Optional<String> optionalString;
+	}
+
+	@Test
+	public void optionalRequires_filledWithDependency() {
+		final Container container = new Container();
+		container.register(ComponentWithOptionalString.class, ProvidingComponent.class);
+		container.start();
+
+		final Optional<ComponentWithOptionalString> component = container.getComponent(ComponentWithOptionalString.class);
+
+		assertTrue(component.isPresent());
+		assertTrue(component.get().optionalString.isPresent());
+	}
 }
