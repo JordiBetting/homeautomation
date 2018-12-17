@@ -15,6 +15,7 @@ import com.google.common.collect.Iterables;
 
 import nl.gingerbeard.automation.service.annotation.Activate;
 import nl.gingerbeard.automation.service.annotation.Component;
+import nl.gingerbeard.automation.service.annotation.Deactivate;
 import nl.gingerbeard.automation.service.annotation.Provides;
 import nl.gingerbeard.automation.service.annotation.Requires;
 import nl.gingerbeard.automation.service.exception.ComponentException;
@@ -198,5 +199,92 @@ public class ContainerTest {
 		// arbitrary order, so use XOR
 		assertTrue(firstString.equals("Hello") ^ secondString.equals("Hello"));
 		assertTrue(firstString.equals("Hello2") ^ secondString.equals("Hello2"));
+	}
+
+	public static class Leaf {
+		@Provides
+		public String provide;
+
+		@Requires
+		public StringBuilder builder;
+
+		@Activate
+		public void init() {
+			provide = "hooray";
+			builder.append("L");
+		}
+
+		@Deactivate
+		public void deinit() {
+			builder.append("l");
+		}
+	}
+
+	public static class Trunk {
+		@Requires
+		public String fromLeaf;
+
+		@Provides
+		public Integer middle;
+
+		@Requires
+		public StringBuilder builder;
+
+		@Activate
+		public void init() {
+			middle = 42;
+			builder.append("M");
+		}
+
+		@Deactivate
+		public void deactivate() {
+			builder.append("m");
+		}
+	}
+
+	public static class Root {
+		@Requires
+		public Integer fromMiddle;
+
+		@Requires
+		public StringBuilder builder;
+
+		@Activate
+		public void init() {
+			builder.append("R");
+		}
+
+		@Deactivate
+		public void deactivate() {
+			builder.append("r");
+		}
+	}
+
+	@Test
+	public void activateDeactivate_orderOfDependencies() {
+		final StringBuilder result = new StringBuilder();
+
+		final Container container = new Container();
+		container.register(Trunk.class);
+		container.register(Root.class);
+		container.register(Leaf.class);
+		container.register(StringBuilder.class, result, 1);
+
+		container.start();
+
+		container.shutDown();
+
+		assertEquals("LMRrml", result.toString());
+	}
+
+	@Test
+	public void registerExternalService_invalidType_throwsException() {
+		final Container container = new Container();
+		try {
+			container.register(Integer.class, "NotAnInteger", 1);
+			fail("Expected exception");
+		} catch (final IllegalArgumentException e) {
+			assertEquals("Service does not implement specified class", e.getMessage());
+		}
 	}
 }
