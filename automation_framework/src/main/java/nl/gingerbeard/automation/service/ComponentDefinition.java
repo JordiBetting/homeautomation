@@ -1,0 +1,267 @@
+package nl.gingerbeard.automation.service;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Optional;
+
+import com.google.common.base.Objects;
+import com.google.common.collect.Lists;
+
+import nl.gingerbeard.automation.service.annotation.Activate;
+import nl.gingerbeard.automation.service.annotation.Deactivate;
+import nl.gingerbeard.automation.service.annotation.Provides;
+import nl.gingerbeard.automation.service.annotation.Requires;
+import nl.gingerbeard.automation.service.exception.ComponentException;
+
+public class ComponentDefinition {
+	private static enum State {
+		NEW, //
+		RESOLVED, //
+		ACTIVE, //
+		;
+	}
+
+	private State state = State.NEW;
+	private final Class<?> componentClass;
+	private final Object componentInstance;
+	private final int componentPriority;
+
+	ComponentDefinition(final int componentPriority, final Class<?> clazz) {
+		componentClass = clazz;
+		componentInstance = createInstance(clazz);
+		this.componentPriority = componentPriority;
+	}
+
+	private Object createInstance(final Class<?> clazz) {
+		try {
+			return clazz.newInstance(); // TODO: Deprecation
+		} catch (final IllegalAccessException e) {
+			throw new ComponentException("No default constructor found for class " + clazz.getName(), e);
+		} catch (final InstantiationException e) {
+			throw new ComponentException("No default constructor found for class " + clazz.getName(), e);
+		}
+	}
+
+	Object getComponent() {
+		return componentInstance;
+	}
+
+	void resolve(final ServiceRegistry serviceRegistry) {
+		if (isResolved()) {
+			return;
+		}
+		if (!isAllFieldsResolved(serviceRegistry)) {
+			return;
+		}
+		registerProducedServices(serviceRegistry);
+		state = State.RESOLVED;
+	}
+
+	private boolean isAllFieldsResolved(final ServiceRegistry serviceRegistry) {
+		for (final Field field : componentClass.getDeclaredFields()) {
+			if (isConsumedField(field) && !isConsumedFieldResolved(field, serviceRegistry)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	public List<String> getUnResolvedFieldNames(final ServiceRegistry serviceRegistry) {
+		final List<String> unresolvedFields = Lists.newArrayList();
+		for (final Field field : componentClass.getDeclaredFields()) {
+			if (isConsumedField(field) && !isConsumedFieldResolved(field, serviceRegistry)) {
+				unresolvedFields.add(field.getName());
+			}
+		}
+		return unresolvedFields;
+	}
+
+	private boolean isConsumedFieldResolved(final Field field, final ServiceRegistry serviceRegistry) {
+		final Class<?> serviceClass = field.getType();
+		if (isCollection(serviceClass)) {
+			return true;
+		}
+		if (isOptional(serviceClass)) {
+			return true;
+		}
+		return serviceRegistry.hasService(this, serviceClass);
+	}
+
+	private boolean isCollection(final Class<?> serviceClass) {
+		return serviceClass == Many.class;
+	}
+
+	private boolean isOptional(final Class<?> serviceClass) {
+		return serviceClass == Optional.class;
+	}
+
+	private Class<?> getGenericTypeParameter(final Field field) {
+		return (Class) ((java.lang.reflect.ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
+	}
+
+	private void registerProducedServices(final ServiceRegistry registry) {
+		for (final Field field : componentClass.getDeclaredFields()) {
+			if (isProducedService(field)) {
+				registry.registerService(this, new ServiceInstance(getComponentPriority(), field));
+			}
+		}
+	}
+
+	private boolean isProducedService(final Field field) {
+		return field.isAnnotationPresent(Provides.class);
+	}
+
+	boolean isResolved() {
+		return state != State.NEW;
+	}
+
+	boolean isActive() {
+		return state == State.ACTIVE;
+	}
+
+	void activate(final ServiceRegistry registry) {
+		if (isResolved()) {
+			try {
+				linkConsumedServices(registry);
+				invokeAnnotatedMethods(Activate.class);
+				activateProducedServices(registry);
+				state = State.ACTIVE;
+			} catch (final ServiceRegistry.InactiveServiceException e) {
+			}
+		}
+	}
+
+	private void linkConsumedServices(final ServiceRegistry registry) {
+		for (final Field field : componentClass.getDeclaredFields()) {
+			if (isConsumedField(field)) {
+				linkConsumedField(field, registry);
+			}
+		}
+	}
+
+	private boolean isConsumedField(final Field field) {
+		return field.isAnnotationPresent(Requires.class);
+	}
+
+	private void linkConsumedField(final Field field, final ServiceRegistry registry) {
+		final Class<?> serviceClass = field.getType();
+		if (isCollection(serviceClass)) {
+			final Collection<?> services = registry.getServices(getGenericTypeParameter(field), this);
+			setServiceToField(field, new ManyServices(services));
+		} else if (isOptional(serviceClass)) {
+			final Class<?> genericTypeParameter = getGenericTypeParameter(field);
+			final Optional<Object> service = registry.getService(genericTypeParameter, this);
+			setServiceToField(field, service);
+		} else {
+			setServiceToField(field, registry.getService(serviceClass, this));
+		}
+	}
+
+	private void setServiceToField(final Field field, final Object service) {
+		setServiceToField(field, Optional.ofNullable(service));
+	}
+
+	private void setServiceToField(final Field field, final Optional<Object> service) {
+		try {
+			field.set(componentInstance, service.orElse(null));
+		} catch (final IllegalAccessException e) {
+			throw new ComponentException("Service " + field.getName() + " of " + this + " cannot be set", e);
+		} catch (final IllegalArgumentException e) {
+			throw new ComponentException("Service " + field.getName() + " of " + this + " cannot be set", e);
+		}
+	}
+
+	private void activateProducedServices(final ServiceRegistry registry) {
+		for (final Field field : componentClass.getDeclaredFields()) {
+			if (isProducedService(field)) {
+				final Object service = getServiceFromField(field);
+				registry.activateService(this, field.getName(), service);
+			}
+		}
+	}
+
+	public void deactivate() {
+		if (isActive()) {
+			invokeAnnotatedMethods(Deactivate.class);
+		}
+		state = State.RESOLVED;
+	}
+
+	private void invokeAnnotatedMethods(final Class<? extends Annotation> annotation) {
+		for (final Method method : componentClass.getDeclaredMethods()) {
+			if (method.isAnnotationPresent(annotation)) {
+				invokeMethod(method);
+			}
+		}
+	}
+
+	private void invokeMethod(final Method method) {
+		try {
+			method.invoke(componentInstance, new Object[0]);
+		} catch (final IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+			throw new ComponentException("Method " + method.getName() + " of " + this + " failed", e);
+		}
+	}
+
+	private Object getServiceFromField(final Field field) {
+		try {
+			final Object result = field.get(componentInstance);
+			if (result == null) {
+				throw new ComponentException("Service " + field.getName() + " of " + this + " is null");
+			}
+			return result;
+		} catch (final IllegalArgumentException | IllegalAccessException e) {
+			throw new ComponentException("Service " + field.getName() + " of " + this + " cannot be read", e);
+		}
+	}
+
+	@Override
+	public final int hashCode() {
+		return Objects.hashCode(new Object[] { componentClass, Integer.valueOf(componentPriority) });
+	}
+
+	@Override
+	public final boolean equals(final Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (!(obj instanceof ComponentDefinition)) {
+			return false;
+		}
+		final ComponentDefinition other = (ComponentDefinition) obj;
+		return Objects.equal(componentClass, other.componentClass) && Objects.equal(Integer.valueOf(componentPriority), Integer.valueOf(other.componentPriority));
+	}
+
+	@Override
+	public String toString() {
+		if (componentClass == null) {
+			return "?";
+		}
+		return componentClass.getName();
+	}
+
+	public int getComponentPriority() {
+		return componentPriority;
+	}
+
+	private static final class ManyServices<T> implements Many<T> {
+		private final Iterable<T> elements;
+
+		public ManyServices(final Iterable<T> elements) {
+			this.elements = elements;
+		}
+
+		@Override
+		public Iterator<T> iterator() {
+			return this.elements.iterator();
+		}
+	}
+}
