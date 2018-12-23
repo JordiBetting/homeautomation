@@ -292,6 +292,18 @@ public class ContainerTest {
 	public static class ComponentWithOptionalString {
 		@Requires
 		public Optional<String> optionalString = Optional.empty(); // TODO: Determine if container shall do this.
+
+		public static ComponentWithOptionalString instance;
+
+		@Activate
+		public void check() {
+			instance = this;
+		}
+	}
+
+	@After
+	public void cleanOptional() {
+		ComponentWithOptionalString.instance = null;
 	}
 
 	@Test
@@ -312,9 +324,8 @@ public class ContainerTest {
 		container.register(ComponentWithOptionalString.class);
 		container.start();
 
-		final Optional<ComponentWithOptionalString> component = container.getComponent(ComponentWithOptionalString.class);
-		assertTrue(component.isPresent());
-		assertFalse(component.get().optionalString.isPresent());
+		final Optional<String> component = ComponentWithOptionalString.instance.optionalString;
+		assertFalse(component.isPresent());
 	}
 
 	public static class ComponentProvidingNull {
@@ -408,4 +419,58 @@ public class ContainerTest {
 			assertEquals("Service provides of nl.gingerbeard.automation.service.ContainerTest$PrivateRequires cannot be set", e.getMessage());
 		}
 	}
+
+	public static class NoDefConstructorComponent {
+		public NoDefConstructorComponent(final Object haha) {
+
+		}
+	}
+
+	@Test
+	public void noDefaultConstructor_throwsException() {
+		final Container container = new Container();
+		try {
+			container.register(NoDefConstructorComponent.class);
+			fail("Expected exception");
+		} catch (final ComponentException e) {
+			assertEquals("No default constructor found for class nl.gingerbeard.automation.service.ContainerTest$NoDefConstructorComponent", e.getMessage());
+		}
+	}
+
+	public static class PrivateConstructorComponent {
+		private PrivateConstructorComponent() {
+
+		}
+	}
+
+	@Test
+	public void privateConstructor_throwsException() {
+		final Container container = new Container();
+		try {
+			container.register(PrivateConstructorComponent.class);
+			fail("Expected exception");
+		} catch (final ComponentException e) {
+			assertEquals("No default constructor found for class nl.gingerbeard.automation.service.ContainerTest$PrivateConstructorComponent", e.getMessage());
+		}
+	}
+
+	public static class PrivateActivateComponent {
+		@Activate
+		private void blaat() {
+
+		}
+	}
+
+	@Test
+	public void privateActivateMethod_throwsException() {
+		final Container container = new Container();
+		container.register(PrivateActivateComponent.class);
+		try {
+			container.start();
+			fail("Expected exception");
+		} catch (final ComponentException e) {
+			assertEquals("Method blaat of nl.gingerbeard.automation.service.ContainerTest$PrivateActivateComponent failed", e.getMessage());
+		}
+	}
+
 }

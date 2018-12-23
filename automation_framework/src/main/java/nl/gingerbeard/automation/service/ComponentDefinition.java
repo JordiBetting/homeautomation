@@ -87,6 +87,13 @@ public class ComponentDefinition {
 			return true;
 		}
 		if (isOptional(serviceClass)) {
+			try {
+				if (field.get(componentInstance) == null) {
+					field.set(componentInstance, Optional.empty());
+				}
+			} catch (IllegalArgumentException | IllegalAccessException e) {
+				return false;
+			}
 			return true;
 		}
 		return serviceRegistry.hasService(this, serviceClass);
@@ -228,25 +235,7 @@ public class ComponentDefinition {
 	}
 
 	@Override
-	public final boolean equals(final Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (obj == null) {
-			return false;
-		}
-		if (!(obj instanceof ComponentDefinition)) {
-			return false;
-		}
-		final ComponentDefinition other = (ComponentDefinition) obj;
-		return Objects.equal(componentClass, other.componentClass) && Objects.equal(Integer.valueOf(componentPriority), Integer.valueOf(other.componentPriority));
-	}
-
-	@Override
 	public String toString() {
-		if (componentClass == null) {
-			return "?";
-		}
 		return componentClass.getName();
 	}
 
