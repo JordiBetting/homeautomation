@@ -168,10 +168,12 @@ public class ComponentDefinition {
 
 	private void setServiceToField(final Field field, final Optional<Object> service) {
 		try {
-			field.set(componentInstance, service.orElse(null));
+			if (service.isPresent() && field.getType() == Optional.class) {
+				field.set(componentInstance, service);
+			} else {
+				field.set(componentInstance, service.orElse(null));
+			}
 		} catch (final IllegalAccessException e) {
-			throw new ComponentException("Service " + field.getName() + " of " + this + " cannot be set", e);
-		} catch (final IllegalArgumentException e) {
 			throw new ComponentException("Service " + field.getName() + " of " + this + " cannot be set", e);
 		}
 	}

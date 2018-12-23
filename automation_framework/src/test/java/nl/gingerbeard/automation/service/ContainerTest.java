@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 import java.util.Collection;
 import java.util.Optional;
 
+import org.junit.After;
 import org.junit.jupiter.api.Test;
 
 import com.google.common.collect.Iterables;
@@ -290,7 +291,7 @@ public class ContainerTest {
 
 	public static class ComponentWithOptionalString {
 		@Requires
-		public Optional<String> optionalString;
+		public Optional<String> optionalString = Optional.empty(); // TODO: Determine if container shall do this.
 	}
 
 	@Test
@@ -303,5 +304,108 @@ public class ContainerTest {
 
 		assertTrue(component.isPresent());
 		assertTrue(component.get().optionalString.isPresent());
+	}
+
+	@Test
+	public void optionalRequires_notFilled_NoException() {
+		final Container container = new Container();
+		container.register(ComponentWithOptionalString.class);
+		container.start();
+
+		final Optional<ComponentWithOptionalString> component = container.getComponent(ComponentWithOptionalString.class);
+		assertTrue(component.isPresent());
+		assertFalse(component.get().optionalString.isPresent());
+	}
+
+	public static class ComponentProvidingNull {
+		@Provides
+		public String test = null;
+	}
+
+	@Test
+	public void produces_null_throwNPE() {
+		final Container container = new Container();
+		container.register(ComponentProvidingNull.class);
+
+		try {
+			container.start();
+			fail("Expected exception");
+		} catch (final ComponentException e) {
+			assertEquals("Service test of nl.gingerbeard.automation.service.ContainerTest$ComponentProvidingNull is null", e.getMessage());
+		}
+	}
+
+	public static class ManyRequires {
+		@Requires
+		public Many<String> strings;
+
+		public static ManyRequires instance;
+
+		@Activate
+		public void register() {
+			instance = this;
+		}
+	}
+
+	@After
+	public void cleanManyRequires() {
+		ManyRequires.instance = null;
+	}
+
+	@Test
+	public void requiresMany_works() {
+		final Container container = new Container();
+		container.register(ManyRequires.class, ProvidingComponent.class, ProvidingComponent2.class);
+
+		container.start();
+
+		final Many<String> many = ManyRequires.instance.strings;
+
+		assertEquals(2, Iterables.size(many));
+		final String firstString = Iterables.get(many, 0);
+		final String secondString = Iterables.get(many, 1);
+
+		assertTrue(firstString.startsWith("Hello"));
+		assertTrue(secondString.startsWith("Hello"));
+		assertNotEquals(firstString, secondString);
+
+		// arbitrary order, so use XOR
+		assertTrue(firstString.equals("Hello") ^ secondString.equals("Hello"));
+		assertTrue(firstString.equals("Hello2") ^ secondString.equals("Hello2"));
+	}
+
+	public static class PrivateProvides {
+		@Provides
+		private final Object provides = new Object();
+	}
+
+	@Test
+	public void privateProvides_throwsException() {
+		final Container container = new Container();
+		container.register(PrivateProvides.class);
+
+		try {
+			container.start();
+		} catch (final ComponentException e) {
+			assertEquals("Service provides of nl.gingerbeard.automation.service.ContainerTest$PrivateProvides cannot be read", e.getMessage());
+		}
+	}
+
+	public static class PrivateRequires {
+		@Requires
+		private Object provides;
+	}
+
+	@Test
+	public void privateRequires_throwsException() {
+		final Container container = new Container();
+		container.register(PrivateRequires.class);
+		container.register(Object.class, new Object(), 1);
+
+		try {
+			container.start();
+		} catch (final ComponentException e) {
+			assertEquals("Service provides of nl.gingerbeard.automation.service.ContainerTest$PrivateRequires cannot be set", e.getMessage());
+		}
 	}
 }

@@ -112,9 +112,6 @@ public class ServiceRegistry {
 	public void activateService(final ComponentDefinition component, final String fieldName, final Object service) {
 		final List<ServiceInstance> services = componentServices.get(component);
 		final ServiceInstance instance = findServiceInstance(services, fieldName);
-		if (instance == null) {
-			throw new IllegalArgumentException("Producing field " + fieldName + " in " + component + " does not exist");
-		}
 		instance.setService(service);
 	}
 

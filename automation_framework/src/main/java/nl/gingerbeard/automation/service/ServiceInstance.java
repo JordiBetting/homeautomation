@@ -44,13 +44,6 @@ public class ServiceInstance {
 		return this.clazz == clazz;
 	}
 
-	public boolean isMatching(final Class<?> clazz, final int priority) {
-		if (this.clazz != clazz) {
-			return false;
-		}
-		return producePriority > priority;
-	}
-
 	public int getComponentPriority() {
 		return componentPriority;
 	}
