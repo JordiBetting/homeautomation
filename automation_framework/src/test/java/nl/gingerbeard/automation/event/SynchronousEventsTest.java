@@ -46,7 +46,7 @@ public class SynchronousEventsTest {
 	private static class MyEvent extends Device<Void> {
 
 		public MyEvent() {
-			super(0, Optional.empty());
+			super(0);
 		}
 
 		@Override

@@ -7,9 +7,14 @@ public abstract class Device<T> {
 	private final Optional<Integer> batteryDomoticzId;
 	private T state;
 
-	public Device(final int idx, final Optional<Integer> batteryDomoticzId) {
+	public Device(final int idx, final int batteryDomoticzId) {
 		this.idx = idx;
-		this.batteryDomoticzId = batteryDomoticzId;
+		this.batteryDomoticzId = Optional.of(batteryDomoticzId);
+	}
+
+	public Device(final int idx) {
+		this.idx = idx;
+		this.batteryDomoticzId = Optional.empty();
 	}
 
 	public int getIdx() {

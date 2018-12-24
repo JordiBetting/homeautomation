@@ -1,7 +1,5 @@
 package nl.gingerbeard.automation.devices;
 
-import java.util.Optional;
-
 import nl.gingerbeard.automation.devices.OpenCloseDevice.OpenCloseState;
 
 public abstract class OpenCloseDevice extends Device<OpenCloseState> {
@@ -12,7 +10,7 @@ public abstract class OpenCloseDevice extends Device<OpenCloseState> {
 		;
 	}
 
-	public OpenCloseDevice(final int idx, final Optional<Integer> batteryDomoticzId) {
+	public OpenCloseDevice(final int idx, final int batteryDomoticzId) {
 		super(idx, batteryDomoticzId);
 	}
 

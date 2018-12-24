@@ -1,10 +1,8 @@
 package nl.gingerbeard.automation.devices;
 
-import java.util.Optional;
-
 public class MovementSensor extends OnOffDevice {
 
-	public MovementSensor(final int idx, final Optional<Integer> batteryDomoticzId) {
+	public MovementSensor(final int idx, final int batteryDomoticzId) {
 		super(idx, batteryDomoticzId);
 	}
 

@@ -246,4 +246,10 @@ public class AutomationFrameworkTest {
 		assertEquals(1, subscriber.counter);
 	}
 
+	@Test
+	public void createAndStop_noException() {
+		createIntegration();
+		container.shutDown();
+		container = null;
+	}
 }

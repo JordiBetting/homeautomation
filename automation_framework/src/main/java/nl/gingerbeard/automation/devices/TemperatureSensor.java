@@ -1,7 +1,5 @@
 package nl.gingerbeard.automation.devices;
 
-import java.util.Optional;
-
 import nl.gingerbeard.automation.devices.TemperatureSensor.TemperatureValue;
 
 public class TemperatureSensor extends Device<TemperatureValue> {
@@ -10,7 +8,7 @@ public class TemperatureSensor extends Device<TemperatureValue> {
 		public double temperatureCelsius;
 	}
 
-	public TemperatureSensor(final int idx, final Optional<Integer> batteryDomoticzId) {
+	public TemperatureSensor(final int idx, final int batteryDomoticzId) {
 		super(idx, batteryDomoticzId);
 	}
 

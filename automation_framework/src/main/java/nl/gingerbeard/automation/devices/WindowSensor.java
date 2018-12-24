@@ -1,10 +1,8 @@
 package nl.gingerbeard.automation.devices;
 
-import java.util.Optional;
-
 public class WindowSensor extends OpenCloseDevice {
 
-	public WindowSensor(final int idx, final Optional<Integer> batteryDomoticzId) {
+	public WindowSensor(final int idx, final int batteryDomoticzId) {
 		super(idx, batteryDomoticzId);
 	}
 

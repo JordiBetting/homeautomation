@@ -1,7 +1,6 @@
 package nl.gingerbeard.automation.devices;
 
 import java.util.Locale;
-import java.util.Optional;
 
 import nl.gingerbeard.automation.devices.OnOffDevice.OnOff;
 
@@ -13,8 +12,12 @@ public abstract class OnOffDevice extends Device<OnOff> {
 		;
 	}
 
-	public OnOffDevice(final int idx, final Optional<Integer> batteryDomoticzId) {
+	public OnOffDevice(final int idx, final int batteryDomoticzId) {
 		super(idx, batteryDomoticzId);
+	}
+
+	public OnOffDevice(final int idx) {
+		super(idx);
 	}
 
 	@Override

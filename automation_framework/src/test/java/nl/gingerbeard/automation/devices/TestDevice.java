@@ -1,11 +1,9 @@
 package nl.gingerbeard.automation.devices;
 
-import java.util.Optional;
-
 public class TestDevice extends Device<Void> {
 
 	public TestDevice() {
-		super(0, Optional.empty());
+		super(0);
 	}
 
 	@Override

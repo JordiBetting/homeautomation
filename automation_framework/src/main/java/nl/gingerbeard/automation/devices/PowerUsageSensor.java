@@ -1,7 +1,5 @@
 package nl.gingerbeard.automation.devices;
 
-import java.util.Optional;
-
 import nl.gingerbeard.automation.devices.PowerUsageSensor.PowerUsage;
 
 public class PowerUsageSensor extends Device<PowerUsage> {
@@ -10,7 +8,7 @@ public class PowerUsageSensor extends Device<PowerUsage> {
 
 	}
 
-	public PowerUsageSensor(final int idx, final Optional<Integer> batteryDomoticzId) {
+	public PowerUsageSensor(final int idx, final int batteryDomoticzId) {
 		super(idx, batteryDomoticzId);
 	}
 

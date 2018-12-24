@@ -1,10 +1,8 @@
 package nl.gingerbeard.automation.devices;
 
-import java.util.Optional;
-
 public class DoorSensor extends OpenCloseDevice {
 
-	public DoorSensor(final int idx, final Optional<Integer> batteryDomoticzId) {
+	public DoorSensor(final int idx, final int batteryDomoticzId) {
 		super(idx, batteryDomoticzId);
 	}
 

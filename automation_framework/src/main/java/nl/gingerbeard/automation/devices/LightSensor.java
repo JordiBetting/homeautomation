@@ -1,7 +1,5 @@
 package nl.gingerbeard.automation.devices;
 
-import java.util.Optional;
-
 import nl.gingerbeard.automation.devices.LightSensor.LightMeasurement;
 
 public class LightSensor extends Device<LightMeasurement> {
@@ -10,7 +8,7 @@ public class LightSensor extends Device<LightMeasurement> {
 		public double lux;
 	}
 
-	public LightSensor(final int idx, final Optional<Integer> batteryDomoticzId) {
+	public LightSensor(final int idx, final int batteryDomoticzId) {
 		super(idx, batteryDomoticzId);
 	}
 

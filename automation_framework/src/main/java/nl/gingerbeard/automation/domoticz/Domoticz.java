@@ -30,6 +30,7 @@ public class Domoticz implements EventReceived, IDomoticz {
 
 	public Domoticz() {
 		super();
+		listener = Optional.empty();
 	}
 
 	// for testing

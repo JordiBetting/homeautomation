@@ -1,10 +1,8 @@
 package nl.gingerbeard.automation.devices;
 
-import java.util.Optional;
-
 public class Shutters extends OpenCloseDevice {
 
-	public Shutters(final int idx, final Optional<Integer> batteryDomoticzId) {
+	public Shutters(final int idx, final int batteryDomoticzId) {
 		super(idx, batteryDomoticzId);
 	}
 

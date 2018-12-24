@@ -4,10 +4,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 
+import nl.gingerbeard.automation.devices.Device;
 import nl.gingerbeard.automation.devices.OnOffDevice;
 import nl.gingerbeard.automation.devices.OnOffDevice.OnOff;
 import nl.gingerbeard.automation.devices.Switch;
@@ -19,7 +22,7 @@ public class DomoticzTest {
 		final Domoticz domoticz = new Domoticz((e) -> {
 		});
 
-		final OnOffDevice device = new Switch(1, Optional.empty());
+		final OnOffDevice device = new Switch(1);
 		device.updateState(OnOff.OFF.name());
 		domoticz.addDevice(device);
 
@@ -41,7 +44,7 @@ public class DomoticzTest {
 		final Domoticz domoticz = new Domoticz((e) -> {
 		});
 
-		final Switch switch1 = new Switch(1, Optional.empty());
+		final Switch switch1 = new Switch(1);
 		boolean result = domoticz.addDevice(switch1);
 		assertTrue(result);
 		result = domoticz.addDevice(switch1);
@@ -53,11 +56,58 @@ public class DomoticzTest {
 		final Domoticz domoticz = new Domoticz((e) -> {
 		});
 
-		final Switch switch1 = new Switch(1, Optional.empty());
-		final Switch switch2 = new Switch(1, Optional.empty());
+		final Switch switch1 = new Switch(1);
+		final Switch switch2 = new Switch(1);
 		boolean result = domoticz.addDevice(switch1);
 		assertTrue(result);
 		result = domoticz.addDevice(switch2);
 		assertFalse(result);
+	}
+
+	@Test
+	public void noListener_deviceChanged_noException() {
+		final Domoticz domoticz = new Domoticz();
+		assertFalse(domoticz.listener.isPresent());
+		domoticz.addDevice(new Switch(1));
+
+		final boolean result = domoticz.deviceChanged(1, "on");
+
+		assertTrue(result);
+	}
+
+	@Test
+	public void update_invalidNewState_returnsFalse() {
+		final Domoticz domoticz = new Domoticz();
+		assertFalse(domoticz.listener.isPresent());
+		domoticz.addDevice(new Switch(1));
+		final boolean result = domoticz.deviceChanged(1, "does not exist");
+
+		assertFalse(result);
+
+	}
+
+	private static class TestListener implements IDomoticzDeviceStatusChanged {
+
+		private final List<Device<?>> receivedDeviceUpdates = new ArrayList<>();
+
+		@Override
+		public void statusChanged(final Device<?> device) {
+			receivedDeviceUpdates.add(device);
+
+		}
+
+	}
+
+	@Test
+	public void update_listenerCalled() {
+		final Domoticz domoticz = new Domoticz();
+		final TestListener listener = new TestListener();
+		domoticz.listener = Optional.of(listener);
+		domoticz.addDevice(new Switch(1));
+
+		final boolean result = domoticz.deviceChanged(1, "on");
+
+		assertTrue(result);
+		assertEquals(1, listener.receivedDeviceUpdates.size());
 	}
 }

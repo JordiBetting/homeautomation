@@ -1,10 +1,8 @@
 package nl.gingerbeard.automation.devices;
 
-import java.util.Optional;
-
 public class SmokeCo2Alarm extends OnOffDevice {
 
-	public SmokeCo2Alarm(final int idx, final Optional<Integer> batteryDomoticzId) {
+	public SmokeCo2Alarm(final int idx, final int batteryDomoticzId) {
 		super(idx, batteryDomoticzId);
 	}
 
