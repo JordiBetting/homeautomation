@@ -9,7 +9,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
-import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
 
 import nl.gingerbeard.automation.service.annotation.Activate;
@@ -237,11 +236,6 @@ public class ComponentDefinition {
 		} catch (final IllegalArgumentException | IllegalAccessException e) {
 			throw new ComponentException("Service " + field.getName() + " of " + this + " cannot be read", e);
 		}
-	}
-
-	@Override
-	public final int hashCode() {
-		return Objects.hashCode(new Object[] { componentClass, Integer.valueOf(componentPriority) });
 	}
 
 	@Override
