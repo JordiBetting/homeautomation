@@ -83,4 +83,9 @@ public class SynchronousEvents implements Events {
 		}
 	}
 
+	public void clear() {
+		callback.clear();
+		subscribers.clear();
+	}
+
 }

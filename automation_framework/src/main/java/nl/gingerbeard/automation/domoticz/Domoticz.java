@@ -7,6 +7,7 @@ import java.util.Optional;
 import nl.gingerbeard.automation.devices.Device;
 import nl.gingerbeard.automation.domoticz.DomoticzEventReceiver.EventReceived;
 import nl.gingerbeard.automation.service.annotation.Activate;
+import nl.gingerbeard.automation.service.annotation.Deactivate;
 import nl.gingerbeard.automation.service.annotation.Provides;
 import nl.gingerbeard.automation.service.annotation.Requires;
 
@@ -26,6 +27,12 @@ public class Domoticz implements EventReceived, IDomoticz {
 	public void registerReceiver() {
 		domoticzInstance = this;
 		domoticzReceiver.setEventListener(this);
+	}
+
+	@Deactivate
+	public void unregisterReceiver() {
+		domoticzInstance = null;
+		domoticzReceiver.setEventListener(null);
 	}
 
 	public Domoticz() {

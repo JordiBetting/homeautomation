@@ -8,6 +8,7 @@ import nl.gingerbeard.automation.event.Events;
 import nl.gingerbeard.automation.event.EventsCompoent;
 import nl.gingerbeard.automation.service.Container;
 import nl.gingerbeard.automation.service.annotation.Activate;
+import nl.gingerbeard.automation.service.annotation.Deactivate;
 import nl.gingerbeard.automation.service.annotation.Provides;
 import nl.gingerbeard.automation.service.annotation.Requires;
 import nl.gingerbeard.automation.state.StateComponent;
@@ -23,6 +24,11 @@ public class AutomationFramework {
 	@Activate
 	public void createFramework() {
 		framework = this;
+	}
+
+	@Deactivate
+	public void removeFramework() {
+		framework = null;
 	}
 
 	public void addRoom(final Room room) {
