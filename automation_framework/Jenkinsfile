@@ -24,7 +24,7 @@ pipeline {
 				sh 'touch automation_framework/build/test-results/test/*.xml'
 				junit allowEmptyResults: true, testResults: '**/build/test-results/test/*.xml'
 				findbugs canComputeNew: false, defaultEncoding: '', excludePattern: '', healthy: '', includePattern: '', pattern: '**/build/reports/findbugs/*.xml', unHealthy: ''
-				jacoco sourceExclusionPattern: '*/test/**'
+				jacoco classDirectories = fileTree(dir: "${project.buildDir}/classes/main")
 				sh 'sloccount --duplicates --wide --details ./ > sloccount.sc'
 				sloccountPublish encoding: '', pattern: ''
 				archiveArtifacts artifacts: '**/*.jar', excludes: '**/jacocoagent.jar', onlyIfSuccessful: true
