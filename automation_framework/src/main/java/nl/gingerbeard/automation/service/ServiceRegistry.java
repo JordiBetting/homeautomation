@@ -80,13 +80,9 @@ public class ServiceRegistry {
 		return services;
 	}
 
+	@SuppressWarnings("unchecked")
 	private <T> T getService(final ServiceInstance instance) {
-		@SuppressWarnings("unchecked")
-		final T service = (T) instance.getService();
-		if (service == null) {
-			throw new InactiveServiceException(instance);
-		}
-		return service;
+		return (T) instance.getService();
 	}
 
 	private Collection<ServiceInstance> filterServices(final ComponentDefinition currentComponent, final Class<?> serviceClass) {

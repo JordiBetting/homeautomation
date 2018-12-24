@@ -7,7 +7,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Logger;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
@@ -96,17 +95,6 @@ public class Container {
 				activationSequence.add(def);
 			}
 		}
-	}
-
-	public Set<Class<?>> getActiveComponents() {
-		validateContainerStarted();
-		final ImmutableSet.Builder<Class<?>> builder = ImmutableSet.builder();
-		for (final ComponentDefinition definition : components) {
-			if (definition.isActive()) {
-				builder.add(definition.getComponent().getClass());
-			}
-		}
-		return builder.build();
 	}
 
 	private void validateContainerStarted() {

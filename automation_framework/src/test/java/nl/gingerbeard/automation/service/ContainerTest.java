@@ -471,4 +471,12 @@ public class ContainerTest {
 		}
 	}
 
+	@Test
+	public void shutdownBeforeStart_noException() {
+		container = new Container();
+		container.register(Leaf.class);
+
+		shutdownContainer();
+	}
+
 }
