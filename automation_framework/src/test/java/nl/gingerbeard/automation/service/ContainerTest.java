@@ -15,7 +15,6 @@ import org.junit.jupiter.api.Test;
 import com.google.common.collect.Iterables;
 
 import nl.gingerbeard.automation.service.annotation.Activate;
-import nl.gingerbeard.automation.service.annotation.Component;
 import nl.gingerbeard.automation.service.annotation.Deactivate;
 import nl.gingerbeard.automation.service.annotation.Provides;
 import nl.gingerbeard.automation.service.annotation.Requires;
@@ -34,7 +33,6 @@ public class ContainerTest {
 		}
 	}
 
-	@Component
 	static class ProvideRequiresComponent {
 
 		@Provides
@@ -44,7 +42,6 @@ public class ContainerTest {
 		public Integer myRequires;
 	}
 
-	@Component
 	static class ProvidingComponent {
 
 		@Provides
@@ -56,7 +53,6 @@ public class ContainerTest {
 		}
 	}
 
-	@Component
 	static class ProvidingComponent2 {
 
 		@Provides
@@ -68,7 +64,6 @@ public class ContainerTest {
 		}
 	}
 
-	@Component
 	static class RequiringComponent {
 		@Requires
 		public String myStringRequire;
