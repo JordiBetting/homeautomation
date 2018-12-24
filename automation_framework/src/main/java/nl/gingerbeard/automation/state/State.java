@@ -2,9 +2,9 @@ package nl.gingerbeard.automation.state;
 
 import com.google.common.base.Preconditions;
 
-import nl.gingerbeard.automation.event.EventState;
+import nl.gingerbeard.automation.event.annotations.EventState;
 
-public class State {
+public final class State {
 
 	// TODO: Initialize state via domoticz
 	// state in domoticz is always leading

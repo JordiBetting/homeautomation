@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
 import fi.iki.elonen.NanoHTTPD;
 import fi.iki.elonen.NanoHTTPD.Response.Status;
 
-public class DomoticzEventReceiver extends NanoHTTPD implements IDomoticzEventReceiver {
+final class DomoticzEventReceiver extends NanoHTTPD implements IDomoticzEventReceiver {
 
 	public static interface EventReceived {
 		/**

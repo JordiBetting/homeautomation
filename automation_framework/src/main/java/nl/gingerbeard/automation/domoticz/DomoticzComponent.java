@@ -7,7 +7,7 @@ import nl.gingerbeard.automation.service.annotation.Deactivate;
 import nl.gingerbeard.automation.service.annotation.Provides;
 import nl.gingerbeard.automation.service.annotation.Requires;
 
-public class DomoticzComponent {
+public final class DomoticzComponent {
 	@Requires
 	public Optional<IDomoticzDeviceStatusChanged> listener;
 

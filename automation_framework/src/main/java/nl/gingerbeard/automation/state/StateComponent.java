@@ -4,7 +4,7 @@ import nl.gingerbeard.automation.service.annotation.Activate;
 import nl.gingerbeard.automation.service.annotation.Deactivate;
 import nl.gingerbeard.automation.service.annotation.Provides;
 
-public class StateComponent {
+public final class StateComponent {
 	@Provides
 	public State state;
 

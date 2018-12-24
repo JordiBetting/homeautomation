@@ -1,6 +1,6 @@
 package nl.gingerbeard.automation.event;
 
-public interface Events {
+public interface IEvents {
 
 	void subscribe(Object subscriber);
 

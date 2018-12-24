@@ -1,6 +1,6 @@
 package nl.gingerbeard.automation.domoticz;
 
-public class DomoticzEventReceiverConfiguration {
+public final class DomoticzEventReceiverConfiguration {
 
 	private final int port;
 

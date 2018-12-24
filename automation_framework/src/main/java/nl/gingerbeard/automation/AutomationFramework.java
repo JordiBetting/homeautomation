@@ -2,14 +2,14 @@ package nl.gingerbeard.automation;
 
 import nl.gingerbeard.automation.devices.Device;
 import nl.gingerbeard.automation.domoticz.IDomoticz;
-import nl.gingerbeard.automation.event.Events;
+import nl.gingerbeard.automation.event.IEvents;
 
 public class AutomationFramework implements AutomationFrameworkInterface {
 
-	private final Events events;
+	private final IEvents events;
 	private final IDomoticz domoticzEvents;
 
-	public AutomationFramework(final Events events, final IDomoticz domoticzEvents) {
+	public AutomationFramework(final IEvents events, final IDomoticz domoticzEvents) {
 		this.events = events;
 		this.domoticzEvents = domoticzEvents;
 	}

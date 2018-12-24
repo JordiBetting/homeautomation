@@ -8,7 +8,7 @@ import nl.gingerbeard.automation.devices.Device;
 import nl.gingerbeard.automation.domoticz.DomoticzEventReceiver.EventReceived;
 
 // high - level access
-public class Domoticz implements EventReceived, IDomoticz {
+final class Domoticz implements EventReceived, IDomoticz {
 
 	private final Optional<IDomoticzDeviceStatusChanged> listener;
 

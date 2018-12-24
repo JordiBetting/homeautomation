@@ -10,11 +10,11 @@ import org.junit.jupiter.api.Test;
 import nl.gingerbeard.automation.devices.TestDevice;
 import nl.gingerbeard.automation.event.EventResult;
 import nl.gingerbeard.automation.event.EventResultEmpty;
-import nl.gingerbeard.automation.event.Events;
+import nl.gingerbeard.automation.event.IEvents;
 
 public class ControlloopTest {
 
-	private static class EventsStore implements Events {
+	private static class EventsStore implements IEvents {
 
 		private final List<Object> receivedEvents = new ArrayList<>();
 

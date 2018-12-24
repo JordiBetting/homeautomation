@@ -5,7 +5,7 @@ import java.util.Optional;
 
 import com.google.common.collect.Lists;
 
-public class EventResultEmpty implements EventResult {
+public final class EventResultEmpty implements EventResult {
 
 	EventResultEmpty() {
 	}

@@ -13,7 +13,7 @@ import com.google.common.collect.Sets;
 import nl.gingerbeard.automation.service.exception.ComponentException;
 import nl.gingerbeard.automation.service.exception.UnresolvedDependencyException;
 
-public class Container {
+public final class Container {
 	private static final Logger LOG = Logger.getLogger(Container.class.getName());
 	private static final ComponentDefinition CONTEXT_COMPONENT = new ComponentDefinition(42, Container.class);
 

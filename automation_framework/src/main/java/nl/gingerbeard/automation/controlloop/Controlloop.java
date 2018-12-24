@@ -2,12 +2,12 @@ package nl.gingerbeard.automation.controlloop;
 
 import nl.gingerbeard.automation.devices.Device;
 import nl.gingerbeard.automation.domoticz.IDomoticzDeviceStatusChanged;
-import nl.gingerbeard.automation.event.Events;
+import nl.gingerbeard.automation.event.IEvents;
 
-public class Controlloop implements IDomoticzDeviceStatusChanged {
-	private final Events events;
+class Controlloop implements IDomoticzDeviceStatusChanged {
+	private final IEvents events;
 
-	public Controlloop(final Events events) {
+	public Controlloop(final IEvents events) {
 		this.events = events;
 	}
 

@@ -1,4 +1,4 @@
-package nl.gingerbeard.automation.event;
+package nl.gingerbeard.automation.event.annotations;
 
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;

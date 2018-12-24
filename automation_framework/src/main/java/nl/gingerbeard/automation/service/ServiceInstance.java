@@ -2,7 +2,7 @@ package nl.gingerbeard.automation.service;
 
 import java.lang.reflect.Field;
 
-public class ServiceInstance {
+final class ServiceInstance {
 	private final String name;
 	private final Class<?> clazz;
 	private final int producePriority;
