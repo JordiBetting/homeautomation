@@ -19,6 +19,7 @@ public final class DomoticzUpdateTransmitter implements IDomoticzUpdateTransmitt
 	@Override
 	public void transmitDeviceUpdate(final Device<?> device) throws IOException {
 		final URL url = new URL(configuration.getBaseURL(), createDeviceSpecificUrlPart(device));
+		System.out.println(url.toString());
 		executeRequest(url);
 	}
 
@@ -27,13 +28,14 @@ public final class DomoticzUpdateTransmitter implements IDomoticzUpdateTransmitt
 		con.setRequestMethod("GET");
 		final int responseCode = con.getResponseCode();
 		if (responseCode != HttpURLConnection.HTTP_OK) {
-			throw new IOException(con.getResponseMessage()); // TODO: add response body;
+			// TODO: additionally parse returning JSON. Domoticz returns 200 with error in case of failures.
+			throw new IOException(url.toString() + " " + con.getResponseMessage()); // TODO: add response body;
 		}
 	}
 
 	private String createDeviceSpecificUrlPart(final Device<?> device) {
 		final StringBuilder stringBuilder = new StringBuilder();
-		stringBuilder.append("json.html?type=command&param=");
+		stringBuilder.append("json.htm?type=command&param=");
 		stringBuilder.append(device.getDomoticzParam());
 		stringBuilder.append("&idx=");
 		stringBuilder.append(device.getIdx());
