@@ -26,6 +26,7 @@ public class DomoticzUpdateTransmitterTest {
 
 		static final String JSON_OK = "{ \"status\" : \"OK\" }";
 		static final String JSON_ERROR = "{ \"status\" : \"error\" }";
+		static final String JSON_MALFORMED = "{ \"status\" ";
 		private Status status = Status.OK;
 		private final List<String> requests = new ArrayList<>();
 		private String text = JSON_OK;
@@ -140,5 +141,21 @@ public class DomoticzUpdateTransmitterTest {
 		} catch (final IOException e) {
 			assertEquals("Failed setting value in domotics: {\"status\":\"error\"}", e.getMessage());
 		}
+	}
+
+	@Test
+	public void malformedJSON_throwsException() {
+		final IDomoticzUpdateTransmitter transmitter = new DomoticzUpdateTransmitter(domoticzConfig);
+		final Switch device = new Switch(1);
+		device.updateState("on");
+		webserver.setResponse(Status.OK, TestWebServer.JSON_MALFORMED);
+
+		try {
+			transmitter.transmitDeviceUpdate(device);
+			fail("Expected exception");
+		} catch (final IOException e) {
+			assertEquals("Unable to parse JSON from domoticz", e.getMessage());
+		}
+
 	}
 }
