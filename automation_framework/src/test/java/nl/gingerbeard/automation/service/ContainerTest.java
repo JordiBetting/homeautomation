@@ -42,7 +42,7 @@ public class ContainerTest {
 		public Integer myRequires;
 	}
 
-	static class ProvidingComponent {
+	public static class ProvidingComponent {
 
 		@Provides
 		public String provided;
@@ -53,7 +53,7 @@ public class ContainerTest {
 		}
 	}
 
-	static class ProvidingComponent2 {
+	public static class ProvidingComponent2 {
 
 		@Provides
 		public String provided2;
@@ -64,7 +64,7 @@ public class ContainerTest {
 		}
 	}
 
-	static class RequiringComponent {
+	public static class RequiringComponent {
 		@Requires
 		public String myStringRequire;
 
@@ -426,7 +426,9 @@ public class ContainerTest {
 			container.register(NoDefConstructorComponent.class);
 			fail("Expected exception");
 		} catch (final ComponentException e) {
-			assertEquals("No default constructor found for class nl.gingerbeard.automation.service.ContainerTest$NoDefConstructorComponent", e.getMessage());
+			assertEquals(
+					"No default constructor found for class nl.gingerbeard.automation.service.ContainerTest$NoDefConstructorComponent. Ensure that constructor and class are public, static (in case of nested class) and contain no parameters.",
+					e.getMessage());
 		}
 	}
 
@@ -443,7 +445,9 @@ public class ContainerTest {
 			container.register(PrivateConstructorComponent.class);
 			fail("Expected exception");
 		} catch (final ComponentException e) {
-			assertEquals("No default constructor found for class nl.gingerbeard.automation.service.ContainerTest$PrivateConstructorComponent", e.getMessage());
+			assertEquals(
+					"No default constructor found for class nl.gingerbeard.automation.service.ContainerTest$PrivateConstructorComponent. Ensure that constructor and class are public, static (in case of nested class) and contain no parameters.",
+					e.getMessage());
 		}
 	}
 

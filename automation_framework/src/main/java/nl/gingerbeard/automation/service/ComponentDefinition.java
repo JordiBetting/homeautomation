@@ -38,11 +38,10 @@ public class ComponentDefinition {
 
 	private Object createInstance(final Class<?> clazz) {
 		try {
-			return clazz.newInstance(); // TODO: Deprecation
-		} catch (final IllegalAccessException e) {
-			throw new ComponentException("No default constructor found for class " + clazz.getName(), e);
-		} catch (final InstantiationException e) {
-			throw new ComponentException("No default constructor found for class " + clazz.getName(), e);
+			return clazz.getConstructor().newInstance();
+		} catch (IllegalAccessException | InstantiationException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+			throw new ComponentException(
+					"No default constructor found for class " + clazz.getName() + ". Ensure that constructor and class are public, static (in case of nested class) and contain no parameters.", e);
 		}
 	}
 
