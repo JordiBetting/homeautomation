@@ -89,7 +89,6 @@ public class DomoticzTest {
 			receivedDeviceUpdates.add(device);
 
 		}
-
 	}
 
 	@Test

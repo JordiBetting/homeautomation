@@ -1,16 +1,24 @@
 package nl.gingerbeard.automation;
 
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
+import java.net.URL;
 import java.util.Optional;
 
 import org.junit.After;
 import org.junit.jupiter.api.Test;
 
+import nl.gingerbeard.automation.devices.OnOffDevice.OnOff;
+import nl.gingerbeard.automation.devices.Switch;
 import nl.gingerbeard.automation.devices.TestDevice;
 import nl.gingerbeard.automation.domoticz.DomoticzEventReceiverConfiguration;
+import nl.gingerbeard.automation.domoticz.IDomoticzEventReceiver;
 import nl.gingerbeard.automation.event.EventState;
 import nl.gingerbeard.automation.event.Subscribe;
 import nl.gingerbeard.automation.service.Container;
@@ -251,5 +259,46 @@ public class AutomationFrameworkTest {
 		createIntegration();
 		container.shutDown();
 		container = null;
+	}
+
+	public static class TestRoom extends Room {
+
+		public final Switch testSwitch = new Switch(1);
+
+		public TestRoom() {
+			super();
+			addDevice(testSwitch);
+		}
+
+	}
+
+	@Test
+	public void integration_updateEventWebserverReceived_deviceUpdated() throws IOException {
+		final TestRoom testRoom = new TestRoom();
+		final AutomationFramework framework = createIntegration();
+		framework.addRoom(testRoom);
+
+		updateDevice(1, "on");
+		assertEquals(OnOff.ON, testRoom.testSwitch.getState());
+
+		updateDevice(1, "off");
+		assertEquals(OnOff.OFF, testRoom.testSwitch.getState());
+	}
+
+	private void updateDevice(final int idx, final String newValue) throws MalformedURLException, IOException, ProtocolException {
+		final URL url = new URL("http://localhost:" + getListeningPort() + "/" + idx + "/" + newValue + "/");
+		final HttpURLConnection con = (HttpURLConnection) url.openConnection();
+		con.setRequestMethod("GET");
+
+		assertEquals(200, con.getResponseCode());
+	}
+
+	private int getListeningPort() {
+		final Optional<IDomoticzEventReceiver> eventReceiverOptional = container.getService(IDomoticzEventReceiver.class);
+		assertTrue(eventReceiverOptional.isPresent());
+		final IDomoticzEventReceiver eventReceiver = eventReceiverOptional.get();
+		final int port = eventReceiver.getListeningPort();
+		assertNotEquals(0, port);
+		return port;
 	}
 }

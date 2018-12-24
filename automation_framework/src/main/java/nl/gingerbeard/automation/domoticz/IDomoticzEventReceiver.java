@@ -6,4 +6,6 @@ public interface IDomoticzEventReceiver {
 
 	void setEventListener(EventReceived listener);
 
+	int getListeningPort();
+
 }
