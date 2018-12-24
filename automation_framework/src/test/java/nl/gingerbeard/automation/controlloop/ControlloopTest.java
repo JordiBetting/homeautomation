@@ -36,13 +36,14 @@ public class ControlloopTest {
 
 	@Test
 	public void testStateChanged() {
+		final Controlloop control = new Controlloop();
 		final EventsStore events = new EventsStore();
-		final Controlloop control = new Controlloop(events);
+		control.events = events;
 		final TestDevice myDevice = new TestDevice();
 
 		assertEquals(0, events.getReceivedEvents().size());
 
-		control.triggerDeviceChanged(myDevice);
+		control.statusChanged(myDevice);
 
 		assertEquals(1, events.getReceivedEvents().size());
 		assertEquals(myDevice, events.getReceivedEvents().get(0));

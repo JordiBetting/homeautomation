@@ -4,25 +4,47 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import nl.gingerbeard.automation.controlloop.Controlloop;
 import nl.gingerbeard.automation.devices.Device;
 import nl.gingerbeard.automation.domoticz.DomoticzEventReceiver.EventReceived;
+import nl.gingerbeard.automation.service.annotation.Activate;
+import nl.gingerbeard.automation.service.annotation.Provides;
+import nl.gingerbeard.automation.service.annotation.Requires;
 
 // high - level access
-public class Domoticz implements EventReceived {
+public class Domoticz implements EventReceived, IDomoticz {
+
+	@Requires
+	public Optional<IDomoticzDeviceStatusChanged> listener;
+
+	@Requires
+	public IDomoticzEventReceiver domoticzReceiver;
+
+	@Provides
+	public IDomoticz domoticzInstance;
+
+	@Activate
+	public void registerReceiver() {
+		domoticzInstance = this;
+		domoticzReceiver.setEventListener(this);
+	}
+
+	public Domoticz() {
+		super();
+	}
+
+	// for testing
+	Domoticz(final IDomoticzEventReceiver domoticzReceiver) {
+		this.domoticzReceiver = domoticzReceiver;
+		listener = Optional.empty();
+	}
 
 	// move to subclass for separtaion
 	// public Object domoticzUrl;
-	// no auth as it is localhost, allowed from domticz authmanager
+	// no auth as it is localhost, allowed from domoticz authmanager
 
 	private final Map<Integer, Device<?>> devices = new HashMap<>();
-	private final Controlloop controlloop;
 
-	public Domoticz(final IDomoticzEventReceiver receiver, final Controlloop controlloop) {
-		this.controlloop = controlloop;
-		receiver.setEventListener(this);
-	}
-
+	@Override
 	public boolean addDevice(final Device<?> device) {
 		final int idx = device.getIdx();
 		if (!devices.containsKey(idx)) {
@@ -41,9 +63,10 @@ public class Domoticz implements EventReceived {
 	public boolean deviceChanged(final int idx, final String newState) {
 		final Optional<Device<?>> device = Optional.ofNullable(devices.get(idx));
 		if (device.isPresent()) {
-			final boolean result = device.get().updateState(newState);
-			if (result) {
-				controlloop.triggerDeviceChanged(device.get());
+			final Device<?> changedDevice = device.get();
+			final boolean result = changedDevice.updateState(newState);
+			if (result && listener.isPresent()) {
+				listener.get().statusChanged(changedDevice);
 			}
 			return result;
 		}
