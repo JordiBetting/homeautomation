@@ -24,21 +24,25 @@ public class DomoticzUpdateTransmitterTest {
 
 	private static class TestWebServer extends NanoHTTPD {
 
+		static final String JSON_OK = "{ \"status\" : \"OK\" }";
+		static final String JSON_ERROR = "{ \"status\" : \"error\" }";
 		private Status status = Status.OK;
 		private final List<String> requests = new ArrayList<>();
+		private String text = JSON_OK;
 
 		public TestWebServer() {
 			super(0);
 		}
 
-		public void setResponse(final Status status) {
+		public void setResponse(final Status status, final String text) {
 			this.status = status;
+			this.text = text;
 		}
 
 		@Override
 		public Response serve(final IHTTPSession session) {
 			getRequests().add(session.getMethod() + " " + session.getUri() + "?" + session.getQueryParameterString());
-			return super.newFixedLengthResponse(status, MIME_PLAINTEXT, "");
+			return super.newFixedLengthResponse(status, MIME_PLAINTEXT, text);
 		}
 
 		public List<String> getRequests() {
@@ -113,13 +117,28 @@ public class DomoticzUpdateTransmitterTest {
 		final IDomoticzUpdateTransmitter transmitter = new DomoticzUpdateTransmitter(domoticzConfig);
 		final Switch device = new Switch(1);
 		device.updateState("on");
-		webserver.setResponse(Status.NOT_FOUND);
+		webserver.setResponse(Status.NOT_FOUND, TestWebServer.JSON_ERROR);
 
 		try {
 			transmitter.transmitDeviceUpdate(device);
 			fail("Expected exception");
 		} catch (final IOException e) {
 			assertEquals("http://localhost:" + webserver.getListeningPort() + "/json.htm?type=command&param=switchlight&idx=1&switchcmd=on Not Found", e.getMessage());
+		}
+	}
+
+	@Test
+	public void domoticzError_exceptionThrown() {
+		final IDomoticzUpdateTransmitter transmitter = new DomoticzUpdateTransmitter(domoticzConfig);
+		final Switch device = new Switch(1);
+		device.updateState("on");
+		webserver.setResponse(Status.OK, TestWebServer.JSON_ERROR); // Domoticz does this apparently :-(
+
+		try {
+			transmitter.transmitDeviceUpdate(device);
+			fail("Expected exception");
+		} catch (final IOException e) {
+			assertEquals("Failed setting value in domotics: {\"status\":\"error\"}", e.getMessage());
 		}
 	}
 }

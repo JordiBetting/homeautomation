@@ -1,5 +1,8 @@
 package nl.gingerbeard.automation.domoticz;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
+
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -30,6 +33,34 @@ public class IntegrationTest {
 
 		device.updateState("10");
 		transmitter.transmitDeviceUpdate(device);
+	}
+
+	private static class ErrorDimmeableLight extends DimmeableLight {
+
+		public ErrorDimmeableLight(final int idx) {
+			super(idx);
+		}
+
+		@Override
+		public String getDomoticzSwitchCmd() {
+			return "ThatWasUnexpected";
+		}
+
+	}
+
+	@Test
+	public void domoticz_returnError() throws IOException {
+		final IDomoticzUpdateTransmitter transmitter = new DomoticzUpdateTransmitter(domoticzConfig);
+		final ErrorDimmeableLight device = new ErrorDimmeableLight(274);
+
+		device.updateState("10");
+
+		try {
+			transmitter.transmitDeviceUpdate(device);
+			fail("Expected exception");
+		} catch (final IOException e) {
+			assertEquals("Failed setting value in domotics: {\"message\":\"Error sending switch command, check device\\/hardware !\",\"title\":\"SwitchLight\",\"status\":\"ERROR\"}", e.getMessage());
+		}
 	}
 
 }
