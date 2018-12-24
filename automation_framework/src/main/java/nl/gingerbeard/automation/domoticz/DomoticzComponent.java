@@ -2,6 +2,8 @@ package nl.gingerbeard.automation.domoticz;
 
 import java.util.Optional;
 
+import nl.gingerbeard.automation.domoticz.receiver.IDomoticzEventReceiver;
+import nl.gingerbeard.automation.domoticz.transmitter.IDomoticzUpdateTransmitter;
 import nl.gingerbeard.automation.service.annotation.Activate;
 import nl.gingerbeard.automation.service.annotation.Deactivate;
 import nl.gingerbeard.automation.service.annotation.Provides;
@@ -13,6 +15,9 @@ public final class DomoticzComponent {
 
 	@Requires
 	public IDomoticzEventReceiver domoticzReceiver;
+
+	@Requires
+	public IDomoticzUpdateTransmitter domoticzTransmitter;
 
 	@Provides
 	public IDomoticz domoticz;

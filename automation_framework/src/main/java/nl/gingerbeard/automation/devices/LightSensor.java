@@ -17,4 +17,14 @@ public class LightSensor extends Device<LightMeasurement> {
 		return false;
 	}
 
+	@Override
+	public String getDomoticzParam() {
+		throw new UnsupportedOperationException("Can't set light sensor value");
+	}
+
+	@Override
+	public String getDomoticzSwitchCmd() {
+		throw new UnsupportedOperationException("Can't set light sensor value");
+	}
+
 }

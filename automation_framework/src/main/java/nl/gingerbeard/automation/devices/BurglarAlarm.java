@@ -13,4 +13,14 @@ public class BurglarAlarm extends Device<AlarmState> {
 		return false; // TODO
 	}
 
+	@Override
+	public String getDomoticzParam() {
+		throw new UnsupportedOperationException("not implemented yet"); // TODO
+	}
+
+	@Override
+	public String getDomoticzSwitchCmd() {
+		throw new UnsupportedOperationException("not implemented yet"); // TODO
+	}
+
 }

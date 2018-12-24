@@ -11,4 +11,14 @@ public class TestDevice extends Device<Void> {
 		return false;
 	}
 
+	@Override
+	public String getDomoticzParam() {
+		return null;
+	}
+
+	@Override
+	public String getDomoticzSwitchCmd() {
+		return null;
+	}
+
 }

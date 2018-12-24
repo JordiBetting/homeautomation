@@ -31,4 +31,14 @@ public abstract class OnOffDevice extends Device<OnOff> {
 		}
 	}
 
+	@Override
+	public String getDomoticzSwitchCmd() {
+		return getState().name().toLowerCase(Locale.US);
+	}
+
+	@Override
+	public String getDomoticzParam() {
+		return "switchlight";
+	}
+
 }

@@ -1,4 +1,4 @@
-package nl.gingerbeard.automation.domoticz;
+package nl.gingerbeard.automation.domoticz.receiver;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
 import fi.iki.elonen.NanoHTTPD;
 import fi.iki.elonen.NanoHTTPD.Response.Status;
 
-final class DomoticzEventReceiver extends NanoHTTPD implements IDomoticzEventReceiver {
+public final class DomoticzEventReceiver extends NanoHTTPD implements IDomoticzEventReceiver {
 
 	public static interface EventReceived {
 		/**

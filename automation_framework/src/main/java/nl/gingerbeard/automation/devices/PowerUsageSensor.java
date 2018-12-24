@@ -17,4 +17,13 @@ public class PowerUsageSensor extends Device<PowerUsage> {
 		return false;
 	}
 
+	@Override
+	public String getDomoticzParam() {
+		throw new UnsupportedOperationException("Can't set sensor value");
+	}
+
+	@Override
+	public String getDomoticzSwitchCmd() {
+		throw new UnsupportedOperationException("Can't set sensor value");
+	}
 }

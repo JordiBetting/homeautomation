@@ -3,7 +3,8 @@ package nl.gingerbeard.automation;
 import nl.gingerbeard.automation.controlloop.ControlloopComponent;
 import nl.gingerbeard.automation.devices.Device;
 import nl.gingerbeard.automation.domoticz.DomoticzComponent;
-import nl.gingerbeard.automation.domoticz.DomoticzEventReceiverComponent;
+import nl.gingerbeard.automation.domoticz.receiver.DomoticzEventReceiverComponent;
+import nl.gingerbeard.automation.domoticz.transmitter.DomoticzUpdateTransmitterComponent;
 import nl.gingerbeard.automation.event.EventsCompoent;
 import nl.gingerbeard.automation.service.Container;
 import nl.gingerbeard.automation.state.StateComponent;
@@ -20,6 +21,7 @@ public interface AutomationFrameworkInterface {
 		container.register(EventsCompoent.class);
 		container.register(DomoticzComponent.class);
 		container.register(DomoticzEventReceiverComponent.class);
+		container.register(DomoticzUpdateTransmitterComponent.class);
 		container.register(ControlloopComponent.class);
 		container.register(AutomationFrameworkComponent.class);
 		return container;

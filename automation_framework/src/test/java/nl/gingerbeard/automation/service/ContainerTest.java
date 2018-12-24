@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 import java.util.Collection;
 import java.util.Optional;
 
-import org.junit.After;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import com.google.common.collect.Iterables;
@@ -25,7 +25,7 @@ public class ContainerTest {
 
 	private Container container;
 
-	@After
+	@AfterEach
 	public void shutdownContainer() {
 		if (container != null) {
 			container.shutDown();

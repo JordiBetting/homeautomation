@@ -55,6 +55,16 @@ public class SynchronousEventsTest {
 			return false;
 		}
 
+		@Override
+		public String getDomoticzParam() {
+			return null;
+		}
+
+		@Override
+		public String getDomoticzSwitchCmd() {
+			return null;
+		}
+
 	}
 
 	private static class DerivedMyEvent extends MyEvent {

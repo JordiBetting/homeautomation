@@ -1,7 +1,8 @@
-package nl.gingerbeard.automation.domoticz;
+package nl.gingerbeard.automation.domoticz.receiver;
 
 import java.io.IOException;
 
+import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
 import nl.gingerbeard.automation.service.annotation.Activate;
 import nl.gingerbeard.automation.service.annotation.Deactivate;
 import nl.gingerbeard.automation.service.annotation.Provides;
@@ -13,13 +14,13 @@ public final class DomoticzEventReceiverComponent {
 	public IDomoticzEventReceiver receiver;
 
 	@Requires
-	public DomoticzEventReceiverConfiguration config;
+	public DomoticzConfiguration config;
 
 	private DomoticzEventReceiver instance;
 
 	@Activate
 	public void createReceiver() throws IOException {
-		receiver = instance = new DomoticzEventReceiver(config.getPort());
+		receiver = instance = new DomoticzEventReceiver(config.getListenPort());
 	}
 
 	@Deactivate

@@ -34,4 +34,8 @@ public abstract class Device<T> {
 	protected void setState(final T newState) {
 		state = newState;
 	}
+
+	public abstract String getDomoticzParam();
+
+	public abstract String getDomoticzSwitchCmd();
 }

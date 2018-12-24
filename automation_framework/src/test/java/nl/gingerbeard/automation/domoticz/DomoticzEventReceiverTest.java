@@ -12,7 +12,8 @@ import java.util.Optional;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
-import nl.gingerbeard.automation.domoticz.DomoticzEventReceiver.EventReceived;
+import nl.gingerbeard.automation.domoticz.receiver.DomoticzEventReceiver;
+import nl.gingerbeard.automation.domoticz.receiver.DomoticzEventReceiver.EventReceived;
 
 public class DomoticzEventReceiverTest {
 

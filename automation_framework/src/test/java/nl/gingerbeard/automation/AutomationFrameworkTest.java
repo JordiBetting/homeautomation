@@ -11,14 +11,14 @@ import java.net.ProtocolException;
 import java.net.URL;
 import java.util.Optional;
 
-import org.junit.After;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import nl.gingerbeard.automation.devices.OnOffDevice.OnOff;
 import nl.gingerbeard.automation.devices.Switch;
 import nl.gingerbeard.automation.devices.TestDevice;
-import nl.gingerbeard.automation.domoticz.DomoticzEventReceiverConfiguration;
-import nl.gingerbeard.automation.domoticz.IDomoticzEventReceiver;
+import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
+import nl.gingerbeard.automation.domoticz.receiver.IDomoticzEventReceiver;
 import nl.gingerbeard.automation.event.annotations.EventState;
 import nl.gingerbeard.automation.event.annotations.Subscribe;
 import nl.gingerbeard.automation.service.Container;
@@ -53,7 +53,7 @@ public class AutomationFrameworkTest {
 
 	private Container container;
 
-	@After
+	@AfterEach
 	public void removeContainer() {
 		if (container != null) {
 			container.shutDown();
@@ -63,13 +63,21 @@ public class AutomationFrameworkTest {
 
 	private AutomationFramework createIntegration() {
 		container = AutomationFrameworkInterface.createFrameworkContainer();
-		container.register(DomoticzEventReceiverConfiguration.class, new DomoticzEventReceiverConfiguration(0), 1);
+		container.register(DomoticzConfiguration.class, new DomoticzConfiguration(0, createMockUrl()), 1);
 		container.start();
 
 		final Optional<AutomationFramework> framework = container.getService(AutomationFramework.class);
 		assertTrue(framework.isPresent());
 
 		return framework.get();
+	}
+
+	private URL createMockUrl() {
+		try {
+			return new URL("http://localhost/mock");
+		} catch (final MalformedURLException e) {
+			throw new RuntimeException("Expected URL mock to be valid", e);
+		}
 	}
 
 	private State getState() {
