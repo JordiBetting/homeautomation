@@ -6,7 +6,7 @@ import nl.gingerbeard.automation.service.annotation.Deactivate;
 import nl.gingerbeard.automation.service.annotation.Provides;
 import nl.gingerbeard.automation.service.annotation.Requires;
 
-public class DomoticzUpdateTransmitterComponent {
+public final class DomoticzUpdateTransmitterComponent {
 
 	@Provides
 	public IDomoticzUpdateTransmitter transmitter;

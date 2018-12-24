@@ -12,8 +12,8 @@ import org.junit.jupiter.api.Test;
 
 import nl.gingerbeard.automation.devices.Device;
 import nl.gingerbeard.automation.devices.OnOffDevice;
-import nl.gingerbeard.automation.devices.OnOffDevice.OnOff;
 import nl.gingerbeard.automation.devices.Switch;
+import nl.gingerbeard.automation.state.OnOffState;
 
 public class DomoticzTest {
 
@@ -22,12 +22,12 @@ public class DomoticzTest {
 		final Domoticz domoticz = new Domoticz();
 
 		final OnOffDevice device = new Switch(1);
-		device.updateState(OnOff.OFF.name());
+		device.updateState(OnOffState.OFF.name());
 		domoticz.addDevice(device);
 
-		assertEquals(OnOff.OFF, device.getState());
+		assertEquals(OnOffState.OFF, device.getState());
 		domoticz.deviceChanged(1, "on");
-		assertEquals(OnOff.ON, device.getState());
+		assertEquals(OnOffState.ON, device.getState());
 	}
 
 	@Test

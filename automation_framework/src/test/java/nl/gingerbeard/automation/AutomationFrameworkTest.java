@@ -14,7 +14,6 @@ import java.util.Optional;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
-import nl.gingerbeard.automation.devices.OnOffDevice.OnOff;
 import nl.gingerbeard.automation.devices.Switch;
 import nl.gingerbeard.automation.devices.TestDevice;
 import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
@@ -24,6 +23,7 @@ import nl.gingerbeard.automation.event.annotations.Subscribe;
 import nl.gingerbeard.automation.service.Container;
 import nl.gingerbeard.automation.state.AlarmState;
 import nl.gingerbeard.automation.state.HomeAway;
+import nl.gingerbeard.automation.state.OnOffState;
 import nl.gingerbeard.automation.state.State;
 import nl.gingerbeard.automation.state.TimeOfDay;
 
@@ -287,10 +287,10 @@ public class AutomationFrameworkTest {
 		framework.addRoom(testRoom);
 
 		updateDevice(1, "on");
-		assertEquals(OnOff.ON, testRoom.testSwitch.getState());
+		assertEquals(OnOffState.ON, testRoom.testSwitch.getState());
 
 		updateDevice(1, "off");
-		assertEquals(OnOff.OFF, testRoom.testSwitch.getState());
+		assertEquals(OnOffState.OFF, testRoom.testSwitch.getState());
 	}
 
 	private void updateDevice(final int idx, final String newValue) throws MalformedURLException, IOException, ProtocolException {
