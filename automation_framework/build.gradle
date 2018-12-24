@@ -15,10 +15,6 @@ dependencies {
 	compile group: 'com.google.guava', name: 'guava', version: '23.5-jre'
 }
 
-jacocoTestReport {
-	classDirectories = fileTree(dir: "${project.buildDir}/classes/main")
-}
-
 test {
     useJUnitPlatform()
 }
