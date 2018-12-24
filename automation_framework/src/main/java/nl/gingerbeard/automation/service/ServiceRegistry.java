@@ -81,6 +81,7 @@ public class ServiceRegistry {
 	}
 
 	private <T> T getService(final ServiceInstance instance) {
+		@SuppressWarnings("unchecked")
 		final T service = (T) instance.getService();
 		if (service == null) {
 			throw new InactiveServiceException(instance);
@@ -125,6 +126,8 @@ public class ServiceRegistry {
 	}
 
 	public static class InactiveServiceException extends RuntimeException {
+		private static final long serialVersionUID = 1687329623070583267L;
+
 		public InactiveServiceException(final ServiceInstance service) {
 			super();
 		}

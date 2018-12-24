@@ -141,6 +141,7 @@ public class Container {
 		registry.registerService(CONTEXT_COMPONENT, serviceInstance);
 	}
 
+	@SuppressWarnings("unchecked")
 	public <T> Optional<T> getService(final Class<T> clazz) {
 		validateContainerStarted();
 		return (Optional<T>) registry.getService(clazz);

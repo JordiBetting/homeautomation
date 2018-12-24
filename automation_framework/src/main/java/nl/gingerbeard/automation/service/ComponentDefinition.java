@@ -64,7 +64,7 @@ public class ComponentDefinition {
 
 	private boolean isAllFieldsResolved(final ServiceRegistry serviceRegistry) {
 		for (final Field field : componentClass.getDeclaredFields()) {
-			if (isConsumedField(field) && !isConsumedFieldResolved(field, serviceRegistry)) {
+			if (isRequiresField(field) && !isRequiresResolved(field, serviceRegistry)) {
 				return false;
 			}
 		}
@@ -74,14 +74,14 @@ public class ComponentDefinition {
 	public List<String> getUnResolvedFieldNames(final ServiceRegistry serviceRegistry) {
 		final List<String> unresolvedFields = Lists.newArrayList();
 		for (final Field field : componentClass.getDeclaredFields()) {
-			if (isConsumedField(field) && !isConsumedFieldResolved(field, serviceRegistry)) {
+			if (isRequiresField(field) && !isRequiresResolved(field, serviceRegistry)) {
 				unresolvedFields.add(field.getName());
 			}
 		}
 		return unresolvedFields;
 	}
 
-	private boolean isConsumedFieldResolved(final Field field, final ServiceRegistry serviceRegistry) {
+	private boolean isRequiresResolved(final Field field, final ServiceRegistry serviceRegistry) {
 		final Class<?> serviceClass = field.getType();
 		if (isCollection(serviceClass)) {
 			return true;
@@ -108,7 +108,7 @@ public class ComponentDefinition {
 	}
 
 	private Class<?> getGenericTypeParameter(final Field field) {
-		return (Class) ((java.lang.reflect.ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
+		return (Class<?>) ((java.lang.reflect.ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
 	}
 
 	private void registerProducedServices(final ServiceRegistry registry) {
@@ -134,7 +134,7 @@ public class ComponentDefinition {
 	void activate(final ServiceRegistry registry) {
 		if (isResolved()) {
 			try {
-				linkConsumedServices(registry);
+				linkRequiredServices(registry);
 				invokeAnnotatedMethods(Activate.class);
 				activateProducedServices(registry);
 				state = State.ACTIVE;
@@ -143,33 +143,35 @@ public class ComponentDefinition {
 		}
 	}
 
-	private void linkConsumedServices(final ServiceRegistry registry) {
+	private void linkRequiredServices(final ServiceRegistry registry) {
 		for (final Field field : componentClass.getDeclaredFields()) {
-			if (isConsumedField(field)) {
-				linkConsumedField(field, registry);
+			if (isRequiresField(field)) {
+				linkRequiredField(field, registry);
 			}
 		}
 	}
 
-	private boolean isConsumedField(final Field field) {
+	private boolean isRequiresField(final Field field) {
 		return field.isAnnotationPresent(Requires.class);
 	}
 
-	private void linkConsumedField(final Field field, final ServiceRegistry registry) {
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private void linkRequiredField(final Field field, final ServiceRegistry registry) {
 		final Class<?> serviceClass = field.getType();
 		if (isCollection(serviceClass)) {
 			final Collection<?> services = registry.getServices(getGenericTypeParameter(field), this);
-			setServiceToField(field, new ManyServices(services));
+			injectService(field, new ManyServices(services));
+
 		} else if (isOptional(serviceClass)) {
 			final Class<?> genericTypeParameter = getGenericTypeParameter(field);
 			final Optional<Object> service = registry.getService(genericTypeParameter, this);
-			setServiceToOptionalField(field, service);
+			injectOptionalService(field, service);
 		} else {
-			setServiceToField(field, registry.getService(serviceClass, this));
+			injectService(field, registry.getService(serviceClass, this));
 		}
 	}
 
-	private void setServiceToOptionalField(final Field field, final Optional<Object> service) {
+	private void injectOptionalService(final Field field, final Optional<Object> service) {
 		try {
 			field.set(componentInstance, service);
 		} catch (final IllegalAccessException e) {
@@ -177,11 +179,11 @@ public class ComponentDefinition {
 		}
 	}
 
-	private void setServiceToField(final Field field, final Object service) {
-		setServiceToField(field, Optional.ofNullable(service));
+	private void injectService(final Field field, final Object service) {
+		injectService(field, Optional.ofNullable(service));
 	}
 
-	private void setServiceToField(final Field field, final Optional<Object> service) {
+	private void injectService(final Field field, final Optional<Object> service) {
 		try {
 			if (service.isPresent() && field.getType() == Optional.class) {
 				field.set(componentInstance, service);
