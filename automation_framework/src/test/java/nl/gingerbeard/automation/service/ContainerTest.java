@@ -479,4 +479,42 @@ public class ContainerTest {
 		shutdownContainer();
 	}
 
+	public static class ProvidesPrio10Component {
+		@Provides(priority = 10)
+		public String provide = "10";
+
+	}
+
+	public static class ProvidesPrio11Component {
+		@Provides(priority = 11)
+		public String provide = "11";
+	}
+
+	@Test
+	public void providePriority_highestProvided() {
+		container = new Container();
+		container.register(ProvidesPrio10Component.class, ProvidesPrio11Component.class, RequiringComponent.class);
+		container.start();
+
+		final Optional<RequiringComponent> component = container.getComponent(RequiringComponent.class);
+
+		assertTrue(component.isPresent());
+		assertEquals("11", component.get().myStringRequire);
+	}
+
+	@Test
+	public void providePriority_manyReceivesAll() {
+		container = new Container();
+		container.register(ProvidesPrio10Component.class, ProvidesPrio11Component.class, ManyRequires.class);
+		container.start();
+
+		final Optional<ManyRequires> component = container.getComponent(ManyRequires.class);
+
+		assertTrue(component.isPresent());
+		final Many<String> many = component.get().strings;
+		assertEquals(2, Iterables.size(many));
+		assertTrue(Iterables.contains(many, "11"));
+		assertTrue(Iterables.contains(many, "10"));
+	}
+
 }
