@@ -350,17 +350,13 @@ public class ContainerTest {
 		@Requires
 		public Many<String> strings;
 
-		public static ManyRequires instance;
+		@Provides
+		public ManyRequires instance;
 
 		@Activate
-		public void register() {
+		public void initInstance() {
 			instance = this;
 		}
-	}
-
-	@After
-	public void cleanManyRequires() {
-		ManyRequires.instance = null;
 	}
 
 	@Test
@@ -370,7 +366,9 @@ public class ContainerTest {
 
 		container.start();
 
-		final Many<String> many = ManyRequires.instance.strings;
+		final Optional<ManyRequires> manyRequires = container.getService(ManyRequires.class);
+		assertTrue(manyRequires.isPresent());
+		final Many<String> many = manyRequires.get().strings;
 
 		assertEquals(2, Iterables.size(many));
 		final String firstString = Iterables.get(many, 0);
