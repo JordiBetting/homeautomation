@@ -454,7 +454,6 @@ public class ContainerTest {
 
 	public static class PrivateActivateComponent {
 		@Activate
-		@SuppressWarnings("UPM_UNCALLED_PRIVATE_METHOD")
 		private void blaat() {
 
 		}
