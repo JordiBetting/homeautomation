@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.Optional;
 
 import org.junit.After;
+import org.junit.Before;
 import org.junit.jupiter.api.Test;
 
 import com.google.common.collect.Iterables;
@@ -291,7 +292,8 @@ public class ContainerTest {
 
 	public static class ComponentWithOptionalString {
 		@Requires
-		public Optional<String> optionalString = Optional.empty(); // TODO: Determine if container shall do this.
+		public Optional<String> optionalString = Optional.empty();
+		// TODO: Determine if container shall set optional to empty.
 
 		public static ComponentWithOptionalString instance;
 
@@ -301,7 +303,7 @@ public class ContainerTest {
 		}
 	}
 
-	@After
+	@Before
 	public void cleanOptional() {
 		ComponentWithOptionalString.instance = null;
 	}

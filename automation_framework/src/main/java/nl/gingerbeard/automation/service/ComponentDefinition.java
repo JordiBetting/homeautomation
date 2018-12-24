@@ -163,9 +163,17 @@ public class ComponentDefinition {
 		} else if (isOptional(serviceClass)) {
 			final Class<?> genericTypeParameter = getGenericTypeParameter(field);
 			final Optional<Object> service = registry.getService(genericTypeParameter, this);
-			setServiceToField(field, service);
+			setServiceToOptionalField(field, service);
 		} else {
 			setServiceToField(field, registry.getService(serviceClass, this));
+		}
+	}
+
+	private void setServiceToOptionalField(final Field field, final Optional<Object> service) {
+		try {
+			field.set(componentInstance, service);
+		} catch (final IllegalAccessException e) {
+			throw new ComponentException("Service " + field.getName() + " of " + this + " cannot be set", e);
 		}
 	}
 
