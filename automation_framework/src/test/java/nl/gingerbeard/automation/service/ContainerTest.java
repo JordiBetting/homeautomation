@@ -68,10 +68,6 @@ public class ContainerTest {
 		@Requires
 		public String myStringRequire;
 
-		@Activate
-		public void init() {
-
-		}
 	}
 
 	@Test
@@ -294,6 +290,19 @@ public class ContainerTest {
 		}
 	}
 
+	@Test
+	public void registerExternalService_resolved() {
+		container = new Container();
+		container.register(RequiringComponent.class);
+		container.register(String.class, "hello", 1);
+		container.start();
+
+		final Optional<RequiringComponent> component = container.getComponent(RequiringComponent.class);
+
+		assertTrue(component.isPresent());
+		assertEquals("hello", component.get().myStringRequire);
+	}
+
 	public static class ComponentWithOptionalString {
 		@Requires
 		public Optional<String> optionalString = Optional.empty();
@@ -514,6 +523,20 @@ public class ContainerTest {
 		assertEquals(2, Iterables.size(many));
 		assertTrue(Iterables.contains(many, "11"));
 		assertTrue(Iterables.contains(many, "10"));
+	}
+
+	@Test
+	public void registerExternalServiceWithPriority_highestResolved() {
+		container = new Container();
+		container.register(RequiringComponent.class);
+		container.register(String.class, "10", 10);
+		container.register(String.class, "11", 11);
+		container.start();
+
+		final Optional<RequiringComponent> component = container.getComponent(RequiringComponent.class);
+
+		assertTrue(component.isPresent());
+		assertEquals("11", component.get().myStringRequire);
 	}
 
 }

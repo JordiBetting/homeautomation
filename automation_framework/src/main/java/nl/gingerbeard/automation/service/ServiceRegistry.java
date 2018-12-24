@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 
+import com.google.common.collect.Lists;
+
 public class ServiceRegistry {
 	private final Map<ComponentDefinition, List<ServiceInstance>> componentServices;
 
@@ -15,16 +17,13 @@ public class ServiceRegistry {
 	}
 
 	public void registerService(final ComponentDefinition component, final ServiceInstance service) {
-		if (component == null) {
-			throw new NullPointerException("key for component registration can not be null");
-		}
 		final List<ServiceInstance> services = getServices(component);
 		services.add(service);
 	}
 
 	private List<ServiceInstance> getServices(final ComponentDefinition component) {
 		if (!componentServices.containsKey(component)) {
-			componentServices.put(component, com.google.common.collect.Lists.newArrayList());
+			componentServices.put(component, Lists.newArrayList());
 		}
 		final List<ServiceInstance> services = componentServices.get(component);
 		return services;
