@@ -10,7 +10,6 @@ import java.util.Collection;
 import java.util.Optional;
 
 import org.junit.After;
-import org.junit.Before;
 import org.junit.jupiter.api.Test;
 
 import com.google.common.collect.Iterables;
@@ -24,6 +23,16 @@ import nl.gingerbeard.automation.service.exception.ComponentException;
 import nl.gingerbeard.automation.service.exception.UnresolvedDependencyException;
 
 public class ContainerTest {
+
+	private Container container;
+
+	@After
+	public void shutdownContainer() {
+		if (container != null) {
+			container.shutDown();
+			container = null;
+		}
+	}
 
 	@Component
 	static class ProvideRequiresComponent {
@@ -72,7 +81,7 @@ public class ContainerTest {
 
 	@Test
 	public void registerComponent_dependencyResolved() {
-		final Container container = new Container();
+		container = new Container();
 		container.register(ProvidingComponent.class);
 		container.register(RequiringComponent.class);
 
@@ -91,7 +100,7 @@ public class ContainerTest {
 
 	@Test
 	public void getComponent_doesNotExist_resultEmpty() {
-		final Container container = new Container();
+		container = new Container();
 		container.register(ProvidingComponent.class);
 
 		container.start();
@@ -102,7 +111,7 @@ public class ContainerTest {
 
 	@Test
 	public void unresolvedDependency_exceptionThrown() {
-		final Container container = new Container();
+		container = new Container();
 		container.register(RequiringComponent.class);
 
 		try {
@@ -140,7 +149,7 @@ public class ContainerTest {
 
 	@Test
 	public void circularDependency_exceptionThrown() {
-		final Container container = new Container();
+		container = new Container();
 		container.register(CircularA.class);
 		container.register(CircularB.class);
 		container.register(CircularC.class);
@@ -158,13 +167,13 @@ public class ContainerTest {
 
 	@Test
 	public void emptyContainer_start_noException() {
-		final Container container = new Container();
+		container = new Container();
 		container.start();
 	}
 
 	@Test
 	public void getService_notExisting_returnsOptionalEmpty() {
-		final Container container = new Container();
+		container = new Container();
 		container.start();
 		final Optional<String> result = container.getService(String.class);
 		assertEquals(Optional.empty(), result);
@@ -172,7 +181,7 @@ public class ContainerTest {
 
 	@Test
 	public void getService_withoutStart_throwsException() {
-		final Container container = new Container();
+		container = new Container();
 
 		try {
 			container.getService(String.class);
@@ -184,7 +193,7 @@ public class ContainerTest {
 
 	@Test
 	public void multipleProvides() {
-		final Container container = new Container();
+		container = new Container();
 		container.register(ProvidingComponent.class);
 		container.register(ProvidingComponent2.class);
 		container.start();
@@ -266,7 +275,7 @@ public class ContainerTest {
 	public void activateDeactivate_orderOfDependencies() {
 		final StringBuilder result = new StringBuilder();
 
-		final Container container = new Container();
+		container = new Container();
 		container.register(Trunk.class);
 		container.register(Root.class);
 		container.register(Leaf.class);
@@ -274,14 +283,14 @@ public class ContainerTest {
 
 		container.start();
 
-		container.shutDown();
+		shutdownContainer();
 
 		assertEquals("LMRrml", result.toString());
 	}
 
 	@Test
 	public void registerExternalService_invalidType_throwsException() {
-		final Container container = new Container();
+		container = new Container();
 		try {
 			container.register(Integer.class, "NotAnInteger", 1);
 			fail("Expected exception");
@@ -294,23 +303,11 @@ public class ContainerTest {
 		@Requires
 		public Optional<String> optionalString = Optional.empty();
 		// TODO: Determine if container shall set optional to empty.
-
-		public static ComponentWithOptionalString instance;
-
-		@Activate
-		public void check() {
-			instance = this;
-		}
-	}
-
-	@Before
-	public void cleanOptional() {
-		ComponentWithOptionalString.instance = null;
 	}
 
 	@Test
 	public void optionalRequires_filledWithDependency() {
-		final Container container = new Container();
+		container = new Container();
 		container.register(ComponentWithOptionalString.class, ProvidingComponent.class);
 		container.start();
 
@@ -322,12 +319,13 @@ public class ContainerTest {
 
 	@Test
 	public void optionalRequires_notFilled_NoException() {
-		final Container container = new Container();
+		container = new Container();
 		container.register(ComponentWithOptionalString.class);
 		container.start();
 
-		final Optional<String> component = ComponentWithOptionalString.instance.optionalString;
-		assertFalse(component.isPresent());
+		final Optional<ComponentWithOptionalString> component = container.getComponent(ComponentWithOptionalString.class);
+		assertTrue(component.isPresent());
+		assertFalse(component.get().optionalString.isPresent());
 	}
 
 	public static class ComponentProvidingNull {
@@ -337,7 +335,7 @@ public class ContainerTest {
 
 	@Test
 	public void produces_null_throwNPE() {
-		final Container container = new Container();
+		container = new Container();
 		container.register(ComponentProvidingNull.class);
 
 		try {
@@ -367,7 +365,7 @@ public class ContainerTest {
 
 	@Test
 	public void requiresMany_works() {
-		final Container container = new Container();
+		container = new Container();
 		container.register(ManyRequires.class, ProvidingComponent.class, ProvidingComponent2.class);
 
 		container.start();
@@ -394,7 +392,7 @@ public class ContainerTest {
 
 	@Test
 	public void privateProvides_throwsException() {
-		final Container container = new Container();
+		container = new Container();
 		container.register(PrivateProvides.class);
 
 		try {
@@ -411,7 +409,7 @@ public class ContainerTest {
 
 	@Test
 	public void privateRequires_throwsException() {
-		final Container container = new Container();
+		container = new Container();
 		container.register(PrivateRequires.class);
 		container.register(Object.class, new Object(), 1);
 
@@ -430,7 +428,7 @@ public class ContainerTest {
 
 	@Test
 	public void noDefaultConstructor_throwsException() {
-		final Container container = new Container();
+		container = new Container();
 		try {
 			container.register(NoDefConstructorComponent.class);
 			fail("Expected exception");
@@ -447,7 +445,7 @@ public class ContainerTest {
 
 	@Test
 	public void privateConstructor_throwsException() {
-		final Container container = new Container();
+		container = new Container();
 		try {
 			container.register(PrivateConstructorComponent.class);
 			fail("Expected exception");
@@ -465,7 +463,7 @@ public class ContainerTest {
 
 	@Test
 	public void privateActivateMethod_throwsException() {
-		final Container container = new Container();
+		container = new Container();
 		container.register(PrivateActivateComponent.class);
 		try {
 			container.start();
