@@ -3,7 +3,9 @@ package nl.gingerbeard.automation.event;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-class Subscriber {
+import nl.gingerbeard.automation.event.annotations.EventState;
+
+final class Subscriber {
 	private final Object instance;
 	private final Method method;
 	private final EventState eventState;

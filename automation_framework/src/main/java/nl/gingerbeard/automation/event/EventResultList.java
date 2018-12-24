@@ -7,7 +7,7 @@ import java.util.Optional;
 
 import com.google.common.collect.ImmutableList;
 
-public class EventResultList implements EventResult {
+public final class EventResultList implements EventResult {
 
 	private final List<String> results = new ArrayList<>();
 

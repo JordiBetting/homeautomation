@@ -17,7 +17,10 @@ import nl.gingerbeard.automation.service.annotation.Provides;
 import nl.gingerbeard.automation.service.annotation.Requires;
 import nl.gingerbeard.automation.service.exception.ComponentException;
 
-public class ComponentDefinition {
+//TODO: it is cleaner if this class' access modifier can be removed.
+// 		However, UnresolvedDependencyException depends on it and is in another package.
+// 		Fix this so that both are cleanly separated.
+public final class ComponentDefinition {
 	private static enum State {
 		NEW, //
 		RESOLVED, //

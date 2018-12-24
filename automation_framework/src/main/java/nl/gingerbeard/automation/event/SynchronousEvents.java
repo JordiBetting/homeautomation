@@ -8,10 +8,12 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 
+import nl.gingerbeard.automation.event.annotations.EventState;
+import nl.gingerbeard.automation.event.annotations.Subscribe;
 import nl.gingerbeard.automation.state.State;
 import nl.gingerbeard.automation.util.ReflectionUtil;
 
-public class SynchronousEvents implements Events {
+final class SynchronousEvents implements IEvents {
 	private static final EventStateDefaults defaults = new EventStateDefaults();
 
 	private final ListMultimap<Class<?>, Subscriber> callback = ArrayListMultimap.create();
@@ -81,6 +83,11 @@ public class SynchronousEvents implements Events {
 				results.add(subscriber.call(event));
 			}
 		}
+	}
+
+	public void clear() {
+		callback.clear();
+		subscribers.clear();
 	}
 
 }
