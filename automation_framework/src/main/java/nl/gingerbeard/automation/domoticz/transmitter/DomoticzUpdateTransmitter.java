@@ -10,6 +10,8 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import com.google.common.base.Charsets;
+
 import nl.gingerbeard.automation.devices.Device;
 import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
 
@@ -74,7 +76,7 @@ public final class DomoticzUpdateTransmitter implements IDomoticzUpdateTransmitt
 
 	private JSONObject getJsonContent(final HttpURLConnection con) throws IOException, ParseException {
 		final JSONParser parser = new JSONParser();
-		final InputStreamReader in = new InputStreamReader(con.getInputStream());
+		final InputStreamReader in = new InputStreamReader(con.getInputStream(), Charsets.UTF_8);
 		return (JSONObject) parser.parse(in);
 	}
 
