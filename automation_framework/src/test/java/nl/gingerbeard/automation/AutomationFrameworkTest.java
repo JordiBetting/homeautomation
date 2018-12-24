@@ -54,7 +54,7 @@ public class AutomationFrameworkTest {
 	}
 
 	private AutomationFramework createIntegration() {
-		container = AutomationFramework.createFrameworkContainer();
+		container = AutomationFrameworkInterface.createFrameworkContainer();
 		container.register(DomoticzEventReceiverConfiguration.class, new DomoticzEventReceiverConfiguration(0), 1);
 		container.start();
 

@@ -6,34 +6,11 @@ import java.util.Optional;
 
 import nl.gingerbeard.automation.devices.Device;
 import nl.gingerbeard.automation.domoticz.DomoticzEventReceiver.EventReceived;
-import nl.gingerbeard.automation.service.annotation.Activate;
-import nl.gingerbeard.automation.service.annotation.Deactivate;
-import nl.gingerbeard.automation.service.annotation.Provides;
-import nl.gingerbeard.automation.service.annotation.Requires;
 
 // high - level access
 public class Domoticz implements EventReceived, IDomoticz {
 
-	@Requires
-	public Optional<IDomoticzDeviceStatusChanged> listener;
-
-	@Requires
-	public IDomoticzEventReceiver domoticzReceiver;
-
-	@Provides
-	public IDomoticz domoticzInstance;
-
-	@Activate
-	public void registerReceiver() {
-		domoticzInstance = this;
-		domoticzReceiver.setEventListener(this);
-	}
-
-	@Deactivate
-	public void unregisterReceiver() {
-		domoticzInstance = null;
-		domoticzReceiver.setEventListener(null);
-	}
+	private final Optional<IDomoticzDeviceStatusChanged> listener;
 
 	public Domoticz() {
 		super();
@@ -41,9 +18,8 @@ public class Domoticz implements EventReceived, IDomoticz {
 	}
 
 	// for testing
-	Domoticz(final IDomoticzEventReceiver domoticzReceiver) {
-		this.domoticzReceiver = domoticzReceiver;
-		listener = Optional.empty();
+	Domoticz(final Optional<IDomoticzDeviceStatusChanged> listener) {
+		this.listener = listener;
 	}
 
 	// move to subclass for separtaion

@@ -19,8 +19,7 @@ public class DomoticzTest {
 
 	@Test
 	public void updateDevice_deviceUpdated() {
-		final Domoticz domoticz = new Domoticz((e) -> {
-		});
+		final Domoticz domoticz = new Domoticz();
 
 		final OnOffDevice device = new Switch(1);
 		device.updateState(OnOff.OFF.name());
@@ -33,16 +32,14 @@ public class DomoticzTest {
 
 	@Test
 	public void updateNotExistingDevice_noException() {
-		final Domoticz domoticz = new Domoticz((e) -> {
-		});
+		final Domoticz domoticz = new Domoticz();
 
 		domoticz.deviceChanged(1, "does not exist");
 	}
 
 	@Test
 	public void addDevice_twice_fails() {
-		final Domoticz domoticz = new Domoticz((e) -> {
-		});
+		final Domoticz domoticz = new Domoticz();
 
 		final Switch switch1 = new Switch(1);
 		boolean result = domoticz.addDevice(switch1);
@@ -53,8 +50,7 @@ public class DomoticzTest {
 
 	@Test
 	public void addDevices_sameidx_fails() {
-		final Domoticz domoticz = new Domoticz((e) -> {
-		});
+		final Domoticz domoticz = new Domoticz();
 
 		final Switch switch1 = new Switch(1);
 		final Switch switch2 = new Switch(1);
@@ -67,7 +63,6 @@ public class DomoticzTest {
 	@Test
 	public void noListener_deviceChanged_noException() {
 		final Domoticz domoticz = new Domoticz();
-		assertFalse(domoticz.listener.isPresent());
 		domoticz.addDevice(new Switch(1));
 
 		final boolean result = domoticz.deviceChanged(1, "on");
@@ -78,7 +73,6 @@ public class DomoticzTest {
 	@Test
 	public void update_invalidNewState_returnsFalse() {
 		final Domoticz domoticz = new Domoticz();
-		assertFalse(domoticz.listener.isPresent());
 		domoticz.addDevice(new Switch(1));
 		final boolean result = domoticz.deviceChanged(1, "does not exist");
 
@@ -100,9 +94,8 @@ public class DomoticzTest {
 
 	@Test
 	public void update_listenerCalled() {
-		final Domoticz domoticz = new Domoticz();
 		final TestListener listener = new TestListener();
-		domoticz.listener = Optional.of(listener);
+		final Domoticz domoticz = new Domoticz(Optional.of(listener));
 		domoticz.addDevice(new Switch(1));
 
 		final boolean result = domoticz.deviceChanged(1, "on");
