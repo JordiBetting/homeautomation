@@ -19,7 +19,7 @@ import nl.gingerbeard.automation.state.NextState;
 import nl.gingerbeard.automation.state.Percentage;
 
 @Disabled
-public class IntegrationTest {
+public class DomoticzHILIntegrationTest {
 
 	private static DomoticzConfiguration domoticzConfig;
 
