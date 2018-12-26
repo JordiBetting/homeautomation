@@ -21,10 +21,6 @@ test {
     useJUnitPlatform()
 }
 
-apply plugin: 'java'
-sourceCompatibility = 1.9
-targetCompatibility = 1.8
-
 findbugs {
 	ignoreFailures = true
 	effort = "max"
