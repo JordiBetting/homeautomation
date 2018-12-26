@@ -14,6 +14,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
+import nl.gingerbeard.automation.devices.Device;
 import nl.gingerbeard.automation.devices.Switch;
 import nl.gingerbeard.automation.devices.TestDevice;
 import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
@@ -272,10 +273,17 @@ public class AutomationFrameworkTest {
 	public static class TestRoom extends Room {
 
 		public final Switch testSwitch = new Switch(1);
+		public int updateEventCount;
 
 		public TestRoom() {
 			super();
 			addDevice(testSwitch);
+		}
+
+		@Subscribe
+		public void stateChanged(final Device<?> device) {
+			updateEventCount++;
+			assertEquals(testSwitch, device);
 		}
 
 	}
@@ -288,9 +296,11 @@ public class AutomationFrameworkTest {
 
 		updateDevice(1, "on");
 		assertEquals(OnOffState.ON, testRoom.testSwitch.getState());
+		assertEquals(1, testRoom.updateEventCount);
 
 		updateDevice(1, "off");
 		assertEquals(OnOffState.OFF, testRoom.testSwitch.getState());
+		assertEquals(2, testRoom.updateEventCount);
 	}
 
 	private void updateDevice(final int idx, final String newValue) throws MalformedURLException, IOException, ProtocolException {

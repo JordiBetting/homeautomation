@@ -2,6 +2,7 @@ package nl.gingerbeard.automation.devices;
 
 import java.util.Locale;
 
+import nl.gingerbeard.automation.state.NextState;
 import nl.gingerbeard.automation.state.OpenCloseState;
 
 public abstract class OpenCloseDevice extends Device<OpenCloseState> {
@@ -21,7 +22,7 @@ public abstract class OpenCloseDevice extends Device<OpenCloseState> {
 	}
 
 	@Override
-	public String getDomoticzSwitchCmd() {
-		return getState().name().toLowerCase(Locale.US);
+	public String getDomoticzSwitchCmd(final NextState<OpenCloseState> nextState) {
+		return nextState.get().name().toLowerCase(Locale.US);
 	}
 }

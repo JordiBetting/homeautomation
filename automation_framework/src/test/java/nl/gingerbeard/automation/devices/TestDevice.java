@@ -1,5 +1,7 @@
 package nl.gingerbeard.automation.devices;
 
+import nl.gingerbeard.automation.state.NextState;
+
 public class TestDevice extends Device<Void> {
 
 	public TestDevice() {
@@ -17,7 +19,7 @@ public class TestDevice extends Device<Void> {
 	}
 
 	@Override
-	public String getDomoticzSwitchCmd() {
+	public String getDomoticzSwitchCmd(final NextState<Void> nextState) {
 		return null;
 	}
 

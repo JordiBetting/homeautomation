@@ -19,6 +19,8 @@ import nl.gingerbeard.automation.devices.Switch;
 import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
 import nl.gingerbeard.automation.domoticz.transmitter.DomoticzUpdateTransmitter;
 import nl.gingerbeard.automation.domoticz.transmitter.IDomoticzUpdateTransmitter;
+import nl.gingerbeard.automation.state.NextState;
+import nl.gingerbeard.automation.state.OnOffState;
 
 public class DomoticzUpdateTransmitterTest {
 
@@ -56,9 +58,8 @@ public class DomoticzUpdateTransmitterTest {
 	public void transmitUpdate_urlCorrect() throws IOException {
 		final IDomoticzUpdateTransmitter transmitter = new DomoticzUpdateTransmitter(domoticzConfig);
 		final Switch device = new Switch(1);
-		device.updateState("on");
 
-		transmitter.transmitDeviceUpdate(device);
+		transmitter.transmitDeviceUpdate(new NextState<>(device, OnOffState.ON));
 
 		assertEquals(1, webserver.getRequests().size());
 		assertEquals("GET /json.htm?type=command&param=switchlight&idx=1&switchcmd=on", webserver.getRequests().get(0));
@@ -70,20 +71,14 @@ public class DomoticzUpdateTransmitterTest {
 		final Switch device = new Switch(1);
 
 		// on
-
-		device.updateState("on");
-		transmitter.transmitDeviceUpdate(device);
-
+		transmitter.transmitDeviceUpdate(new NextState<>(device, OnOffState.ON));
 		assertEquals(1, webserver.getRequests().size());
 		assertEquals("GET /json.htm?type=command&param=switchlight&idx=1&switchcmd=on", webserver.getRequests().get(0));
 
 		// off
-		device.updateState("off");
-		transmitter.transmitDeviceUpdate(device);
-
+		transmitter.transmitDeviceUpdate(new NextState<>(device, OnOffState.OFF));
 		assertEquals(2, webserver.getRequests().size());
 		assertEquals("GET /json.htm?type=command&param=switchlight&idx=1&switchcmd=off", webserver.getRequests().get(1));
-
 	}
 
 	private TestWebServer webserver;
@@ -117,11 +112,10 @@ public class DomoticzUpdateTransmitterTest {
 	public void errorResponse_throwsException() throws IOException {
 		final IDomoticzUpdateTransmitter transmitter = new DomoticzUpdateTransmitter(domoticzConfig);
 		final Switch device = new Switch(1);
-		device.updateState("on");
 		webserver.setResponse(Status.NOT_FOUND, TestWebServer.JSON_ERROR);
 
 		try {
-			transmitter.transmitDeviceUpdate(device);
+			transmitter.transmitDeviceUpdate(new NextState<>(device, OnOffState.ON));
 			fail("Expected exception");
 		} catch (final IOException e) {
 			assertEquals("http://localhost:" + webserver.getListeningPort() + "/json.htm?type=command&param=switchlight&idx=1&switchcmd=on Not Found", e.getMessage());
@@ -132,11 +126,10 @@ public class DomoticzUpdateTransmitterTest {
 	public void domoticzError_exceptionThrown() {
 		final IDomoticzUpdateTransmitter transmitter = new DomoticzUpdateTransmitter(domoticzConfig);
 		final Switch device = new Switch(1);
-		device.updateState("on");
 		webserver.setResponse(Status.OK, TestWebServer.JSON_ERROR); // Domoticz does this apparently :-(
 
 		try {
-			transmitter.transmitDeviceUpdate(device);
+			transmitter.transmitDeviceUpdate(new NextState<>(device, OnOffState.ON));
 			fail("Expected exception");
 		} catch (final IOException e) {
 			assertEquals("Failed setting value in domotics: {\"status\":\"error\"}", e.getMessage());
@@ -147,15 +140,15 @@ public class DomoticzUpdateTransmitterTest {
 	public void malformedJSON_throwsException() {
 		final IDomoticzUpdateTransmitter transmitter = new DomoticzUpdateTransmitter(domoticzConfig);
 		final Switch device = new Switch(1);
-		device.updateState("on");
 		webserver.setResponse(Status.OK, TestWebServer.JSON_MALFORMED);
 
 		try {
-			transmitter.transmitDeviceUpdate(device);
+			transmitter.transmitDeviceUpdate(new NextState<>(device, OnOffState.ON));
 			fail("Expected exception");
 		} catch (final IOException e) {
 			assertEquals("Unable to parse JSON from domoticz", e.getMessage());
 		}
 
 	}
+
 }

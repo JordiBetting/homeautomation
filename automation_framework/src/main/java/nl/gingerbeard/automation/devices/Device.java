@@ -2,6 +2,8 @@ package nl.gingerbeard.automation.devices;
 
 import java.util.Optional;
 
+import nl.gingerbeard.automation.state.NextState;
+
 public abstract class Device<T> {
 	private final int idx;
 	private final Optional<Integer> batteryDomoticzId;
@@ -37,5 +39,5 @@ public abstract class Device<T> {
 
 	public abstract String getDomoticzParam();
 
-	public abstract String getDomoticzSwitchCmd();
+	public abstract String getDomoticzSwitchCmd(NextState<T> nextState);
 }

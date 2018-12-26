@@ -1,6 +1,7 @@
 package nl.gingerbeard.automation.devices;
 
 import nl.gingerbeard.automation.state.AlarmState;
+import nl.gingerbeard.automation.state.NextState;
 
 public class BurglarAlarm extends Device<AlarmState> {
 
@@ -19,7 +20,7 @@ public class BurglarAlarm extends Device<AlarmState> {
 	}
 
 	@Override
-	public String getDomoticzSwitchCmd() {
+	public String getDomoticzSwitchCmd(final NextState<AlarmState> nextState) {
 		throw new UnsupportedOperationException("not implemented yet"); // TODO
 	}
 

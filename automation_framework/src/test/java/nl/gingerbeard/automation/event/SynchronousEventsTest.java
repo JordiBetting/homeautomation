@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 
 import nl.gingerbeard.automation.devices.Device;
 import nl.gingerbeard.automation.event.annotations.Subscribe;
+import nl.gingerbeard.automation.state.NextState;
 import nl.gingerbeard.automation.state.State;
 
 public class SynchronousEventsTest {
@@ -61,7 +62,8 @@ public class SynchronousEventsTest {
 		}
 
 		@Override
-		public String getDomoticzSwitchCmd() {
+		public String getDomoticzSwitchCmd(final NextState<Void> nextState) {
+			// TODO Auto-generated method stub
 			return null;
 		}
 
@@ -254,7 +256,7 @@ public class SynchronousEventsTest {
 
 		@Subscribe
 		public EventResult test(final String parameter) {
-			return EventResultList.of("Good morning");
+			return EventResult.of("Good morning");
 		}
 	}
 
@@ -309,19 +311,22 @@ public class SynchronousEventsTest {
 
 	private static class WrongReturnTypeSubscriber {
 		@Subscribe
-		public Object returnObject(final String in) {
-			return new Object();
+		public WrongReturnTypeSubscriber returnObject(final String in) {
+			return this;
 		}
 	}
 
 	@Test
-	public void return_wrongReturnType_ignored() {
+	public void return_otherType_wrapped() {
 		final IEvents events = new SynchronousEvents(new State());
 		final WrongReturnTypeSubscriber subscriber = new WrongReturnTypeSubscriber();
 		events.subscribe(subscriber);
 
 		final EventResult trigger = events.trigger("");
 
-		assertEquals(0, trigger.getAll().size());
+		assertEquals(1, trigger.getAll().size());
+		assertTrue(trigger.get(0).isPresent());
+		assertEquals(subscriber, trigger.get(0).get());
 	}
+
 }

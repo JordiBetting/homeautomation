@@ -1,6 +1,7 @@
 package nl.gingerbeard.automation.devices;
 
 import nl.gingerbeard.automation.devices.LightSensor.LightMeasurement;
+import nl.gingerbeard.automation.state.NextState;
 
 public class LightSensor extends Device<LightMeasurement> {
 
@@ -23,7 +24,7 @@ public class LightSensor extends Device<LightMeasurement> {
 	}
 
 	@Override
-	public String getDomoticzSwitchCmd() {
+	public String getDomoticzSwitchCmd(final NextState<LightMeasurement> nextState) {
 		throw new UnsupportedOperationException("Can't set light sensor value");
 	}
 

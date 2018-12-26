@@ -27,4 +27,7 @@ public class AutomationFramework implements AutomationFrameworkInterface {
 	public void deviceChanged(final Device<?> changedDevice) {
 		events.trigger(changedDevice);
 	}
+
+	// TODO: Add synchronization method to ensure devices are not updated while processing an update, etc. Consider grouping events that come in right after each other.
+
 }

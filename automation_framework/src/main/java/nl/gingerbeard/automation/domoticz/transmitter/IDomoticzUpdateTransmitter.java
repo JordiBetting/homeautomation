@@ -2,10 +2,10 @@ package nl.gingerbeard.automation.domoticz.transmitter;
 
 import java.io.IOException;
 
-import nl.gingerbeard.automation.devices.Device;
+import nl.gingerbeard.automation.state.NextState;
 
 public interface IDomoticzUpdateTransmitter {
 
-	void transmitDeviceUpdate(Device<?> device) throws IOException;
+	<T> void transmitDeviceUpdate(NextState<T> newState) throws IOException;
 
 }

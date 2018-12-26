@@ -19,14 +19,18 @@ final class Subscriber {
 	EventResult call(final Object event) {
 		try {
 			final Object returned = method.invoke(instance, event);
-			if (returned != null && EventResult.class.isAssignableFrom(returned.getClass())) {
-				return (EventResult) returned;
+			if (returned != null) {
+				if (EventResult.class.isAssignableFrom(returned.getClass())) {
+					return (EventResult) returned;
+				} else {
+					return EventResult.of(returned);
+				}
 			}
 		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
 			System.err.println("Received exception during invocation of subscriber. Ignoring " + e.getClass().getName() + ": " + e.getMessage());
 			// e.printStackTrace(); TODO
 		}
-		return EventResultEmpty.create();
+		return EventResult.empty();
 	}
 
 	public EventState getEventState() {

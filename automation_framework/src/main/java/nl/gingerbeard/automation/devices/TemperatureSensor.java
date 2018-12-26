@@ -1,6 +1,7 @@
 package nl.gingerbeard.automation.devices;
 
 import nl.gingerbeard.automation.devices.TemperatureSensor.TemperatureValue;
+import nl.gingerbeard.automation.state.NextState;
 
 public class TemperatureSensor extends Device<TemperatureValue> {
 
@@ -23,7 +24,7 @@ public class TemperatureSensor extends Device<TemperatureValue> {
 	}
 
 	@Override
-	public String getDomoticzSwitchCmd() {
+	public String getDomoticzSwitchCmd(final NextState<TemperatureValue> nextState) {
 		throw new UnsupportedOperationException("Can't set light sensor value");
 	}
 }
