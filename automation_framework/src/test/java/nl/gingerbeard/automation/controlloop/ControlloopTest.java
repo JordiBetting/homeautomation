@@ -10,6 +10,8 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
+import com.google.common.collect.Lists;
+
 import nl.gingerbeard.automation.devices.Switch;
 import nl.gingerbeard.automation.devices.TestDevice;
 import nl.gingerbeard.automation.domoticz.transmitter.IDomoticzUpdateTransmitter;
@@ -122,7 +124,7 @@ public class ControlloopTest {
 		final RecordingTransmitter transmitter = new RecordingTransmitter();
 		final CustomEvents events = new CustomEvents();
 		final Controlloop control = new Controlloop(events, transmitter);
-		events.setResult(EventResult.of(List.of(//
+		events.setResult(EventResult.of(Lists.newArrayList(//
 				new NextState<>(mockDevice1, OnOffState.ON), //
 				new NextState<>(mockDevice2, OnOffState.OFF)//
 		)));
@@ -172,7 +174,7 @@ public class ControlloopTest {
 		final ThrowExceptionOnFirstTransmit_Transmitter transmitter = new ThrowExceptionOnFirstTransmit_Transmitter();
 		final CustomEvents events = new CustomEvents();
 		final Controlloop control = new Controlloop(events, transmitter);
-		events.setResult(EventResult.of(List.of(//
+		events.setResult(EventResult.of(Lists.newArrayList(//
 				new NextState<>(mockDevice1, OnOffState.ON), //
 				new NextState<>(mockDevice2, OnOffState.OFF)//
 		)));
