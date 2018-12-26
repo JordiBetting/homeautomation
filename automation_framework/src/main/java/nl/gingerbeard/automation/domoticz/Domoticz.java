@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import nl.gingerbeard.automation.devices.Device;
-import nl.gingerbeard.automation.domoticz.DomoticzEventReceiver.EventReceived;
+import nl.gingerbeard.automation.domoticz.receiver.DomoticzEventReceiver.EventReceived;
 
 // high - level access
 final class Domoticz implements EventReceived, IDomoticz {

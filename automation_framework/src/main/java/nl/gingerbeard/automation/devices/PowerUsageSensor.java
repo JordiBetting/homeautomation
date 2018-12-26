@@ -1,6 +1,7 @@
 package nl.gingerbeard.automation.devices;
 
 import nl.gingerbeard.automation.devices.PowerUsageSensor.PowerUsage;
+import nl.gingerbeard.automation.state.NextState;
 
 public class PowerUsageSensor extends Device<PowerUsage> {
 
@@ -17,4 +18,13 @@ public class PowerUsageSensor extends Device<PowerUsage> {
 		return false;
 	}
 
+	@Override
+	public String getDomoticzParam() {
+		throw new UnsupportedOperationException("Can't set sensor value");
+	}
+
+	@Override
+	public String getDomoticzSwitchCmd(final NextState<PowerUsage> nextState) {
+		throw new UnsupportedOperationException("Can't set sensor value");
+	}
 }

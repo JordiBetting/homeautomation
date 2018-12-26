@@ -1,15 +1,15 @@
 package nl.gingerbeard.automation.service;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.Collection;
 import java.util.Optional;
 
-import org.junit.After;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import com.google.common.collect.Iterables;
@@ -25,7 +25,7 @@ public class ContainerTest {
 
 	private Container container;
 
-	@After
+	@AfterEach
 	public void shutdownContainer() {
 		if (container != null) {
 			container.shutDown();
@@ -280,14 +280,9 @@ public class ContainerTest {
 	}
 
 	@Test
-	public void registerExternalService_invalidType_throwsException() {
+	public void registerExternalService_superClass_noException() {
 		container = new Container();
-		try {
-			container.register(Integer.class, "NotAnInteger", 1);
-			fail("Expected exception");
-		} catch (final IllegalArgumentException e) {
-			assertEquals("Service does not implement specified class", e.getMessage());
-		}
+		container.register(Object.class, "NotAnInteger", 1);
 	}
 
 	@Test

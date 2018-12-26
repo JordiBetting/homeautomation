@@ -6,7 +6,7 @@ import nl.gingerbeard.automation.service.annotation.Provides;
 import nl.gingerbeard.automation.service.annotation.Requires;
 import nl.gingerbeard.automation.state.State;
 
-public final class EventsCompoent {
+public final class EventsComponent {
 
 	@Provides
 	public IEvents events;

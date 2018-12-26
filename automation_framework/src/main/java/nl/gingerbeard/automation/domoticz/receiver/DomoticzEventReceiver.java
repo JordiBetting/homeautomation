@@ -1,4 +1,4 @@
-package nl.gingerbeard.automation.domoticz;
+package nl.gingerbeard.automation.domoticz.receiver;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -7,8 +7,9 @@ import java.util.regex.Pattern;
 
 import fi.iki.elonen.NanoHTTPD;
 import fi.iki.elonen.NanoHTTPD.Response.Status;
+import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
 
-final class DomoticzEventReceiver extends NanoHTTPD implements IDomoticzEventReceiver {
+public final class DomoticzEventReceiver extends NanoHTTPD implements IDomoticzEventReceiver {
 
 	public static interface EventReceived {
 		/**
@@ -27,9 +28,10 @@ final class DomoticzEventReceiver extends NanoHTTPD implements IDomoticzEventRec
 	private static final Pattern URIPATTERN = Pattern.compile("/([0-9]+)/([a-zA-Z]+)/?");
 	private Optional<EventReceived> listener = Optional.empty();
 
-	public DomoticzEventReceiver(final int port) throws IOException {
-		super(port);
+	public DomoticzEventReceiver(final DomoticzConfiguration config) throws IOException {
+		super(config.getListenPort());
 		start(NanoHTTPD.SOCKET_READ_TIMEOUT, true);
+		config.updateListenPort(getListeningPort());
 	}
 
 	/*

@@ -1,8 +1,8 @@
 package nl.gingerbeard.automation;
 
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -11,19 +11,20 @@ import java.net.ProtocolException;
 import java.net.URL;
 import java.util.Optional;
 
-import org.junit.After;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
-import nl.gingerbeard.automation.devices.OnOffDevice.OnOff;
+import nl.gingerbeard.automation.devices.Device;
 import nl.gingerbeard.automation.devices.Switch;
 import nl.gingerbeard.automation.devices.TestDevice;
-import nl.gingerbeard.automation.domoticz.DomoticzEventReceiverConfiguration;
-import nl.gingerbeard.automation.domoticz.IDomoticzEventReceiver;
+import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
+import nl.gingerbeard.automation.domoticz.receiver.IDomoticzEventReceiver;
 import nl.gingerbeard.automation.event.annotations.EventState;
 import nl.gingerbeard.automation.event.annotations.Subscribe;
 import nl.gingerbeard.automation.service.Container;
 import nl.gingerbeard.automation.state.AlarmState;
 import nl.gingerbeard.automation.state.HomeAway;
+import nl.gingerbeard.automation.state.OnOffState;
 import nl.gingerbeard.automation.state.State;
 import nl.gingerbeard.automation.state.TimeOfDay;
 
@@ -53,7 +54,7 @@ public class AutomationFrameworkTest {
 
 	private Container container;
 
-	@After
+	@AfterEach
 	public void removeContainer() {
 		if (container != null) {
 			container.shutDown();
@@ -61,15 +62,23 @@ public class AutomationFrameworkTest {
 		}
 	}
 
-	private AutomationFramework createIntegration() {
-		container = AutomationFrameworkInterface.createFrameworkContainer();
-		container.register(DomoticzEventReceiverConfiguration.class, new DomoticzEventReceiverConfiguration(0), 1);
+	private IAutomationFrameworkInterface createIntegration() {
+		container = IAutomationFrameworkInterface.createFrameworkContainer();
+		container.register(DomoticzConfiguration.class, new DomoticzConfiguration(0, createMockUrl()), 1);
 		container.start();
 
-		final Optional<AutomationFramework> framework = container.getService(AutomationFramework.class);
+		final Optional<IAutomationFrameworkInterface> framework = container.getService(IAutomationFrameworkInterface.class);
 		assertTrue(framework.isPresent());
 
 		return framework.get();
+	}
+
+	private URL createMockUrl() {
+		try {
+			return new URL("http://localhost/mock");
+		} catch (final MalformedURLException e) {
+			throw new RuntimeException("Expected URL mock to be valid", e);
+		}
 	}
 
 	private State getState() {
@@ -80,7 +89,7 @@ public class AutomationFrameworkTest {
 
 	@Test
 	public void timeOfDay_correctState_eventReceived() throws IOException {
-		final AutomationFramework framework = createIntegration();
+		final IAutomationFrameworkInterface framework = createIntegration();
 		getState().setTimeOfDay(TimeOfDay.DAYTIME);
 		final TimeOfDaySubscriber subscriber = new TimeOfDaySubscriber();
 		framework.addRoom(subscriber);
@@ -92,7 +101,7 @@ public class AutomationFrameworkTest {
 
 	@Test
 	public void timeOfDay_OtherState_nothingReceived() throws IOException {
-		final AutomationFramework framework = createIntegration();
+		final IAutomationFrameworkInterface framework = createIntegration();
 		getState().setTimeOfDay(TimeOfDay.NIGHTTIME);
 
 		final TimeOfDaySubscriber subscriber = new TimeOfDaySubscriber();
@@ -104,7 +113,7 @@ public class AutomationFrameworkTest {
 
 	@Test
 	public void timeOfDay_allday_received() throws IOException {
-		final AutomationFramework framework = createIntegration();
+		final IAutomationFrameworkInterface framework = createIntegration();
 		getState().setTimeOfDay(TimeOfDay.DAYTIME);
 		final TimeOfDaySubscriber subscriber = new TimeOfDaySubscriber();
 
@@ -150,7 +159,7 @@ public class AutomationFrameworkTest {
 
 	@Test
 	public void alarm_correctState_eventReceived() throws IOException {
-		final AutomationFramework framework = createIntegration();
+		final IAutomationFrameworkInterface framework = createIntegration();
 		getState().setAlarmState(AlarmState.ARM_HOME);
 
 		final AlarmSubscriber subscriber = new AlarmSubscriber();
@@ -162,7 +171,7 @@ public class AutomationFrameworkTest {
 
 	@Test
 	public void alarm_otherState_nothingReceived() throws IOException {
-		final AutomationFramework framework = createIntegration();
+		final IAutomationFrameworkInterface framework = createIntegration();
 		getState().setAlarmState(AlarmState.DISARMED);
 
 		final AlarmSubscriber subscriber = new AlarmSubscriber();
@@ -174,7 +183,7 @@ public class AutomationFrameworkTest {
 
 	@Test
 	public void alarm_all_received() throws IOException {
-		final AutomationFramework framework = createIntegration();
+		final IAutomationFrameworkInterface framework = createIntegration();
 		getState().setAlarmState(AlarmState.ARM_AWAY);
 
 		final AllAlarmSubscriber subscriber = new AllAlarmSubscriber();
@@ -186,7 +195,7 @@ public class AutomationFrameworkTest {
 
 	@Test
 	public void alarm_armed_received() throws IOException {
-		final AutomationFramework framework = createIntegration();
+		final IAutomationFrameworkInterface framework = createIntegration();
 		getState().setAlarmState(AlarmState.ARM_AWAY);
 
 		final ArmAlarmSubscriber subscriber = new ArmAlarmSubscriber();
@@ -220,7 +229,7 @@ public class AutomationFrameworkTest {
 
 	@Test
 	public void homeSubscriber_home_received() throws IOException {
-		final AutomationFramework framework = createIntegration();
+		final IAutomationFrameworkInterface framework = createIntegration();
 		getState().setHomeAway(HomeAway.HOME);
 
 		final HomeSubscriber subscriber = new HomeSubscriber();
@@ -232,7 +241,7 @@ public class AutomationFrameworkTest {
 
 	@Test
 	public void homeSubscriber_away_nothingReceived() throws IOException {
-		final AutomationFramework framework = createIntegration();
+		final IAutomationFrameworkInterface framework = createIntegration();
 		getState().setHomeAway(HomeAway.AWAY);
 
 		final HomeSubscriber subscriber = new HomeSubscriber();
@@ -244,7 +253,7 @@ public class AutomationFrameworkTest {
 
 	@Test
 	public void homeAwayAlwaysSubscriber_away_received() throws IOException {
-		final AutomationFramework framework = createIntegration();
+		final IAutomationFrameworkInterface framework = createIntegration();
 		getState().setHomeAway(HomeAway.ALWAYS);
 
 		final AlwaysHomeAwaySubscriber subscriber = new AlwaysHomeAwaySubscriber();
@@ -264,10 +273,17 @@ public class AutomationFrameworkTest {
 	public static class TestRoom extends Room {
 
 		public final Switch testSwitch = new Switch(1);
+		public int updateEventCount;
 
 		public TestRoom() {
 			super();
 			addDevice(testSwitch);
+		}
+
+		@Subscribe
+		public void stateChanged(final Device<?> device) {
+			updateEventCount++;
+			assertEquals(testSwitch, device);
 		}
 
 	}
@@ -275,14 +291,16 @@ public class AutomationFrameworkTest {
 	@Test
 	public void integration_updateEventWebserverReceived_deviceUpdated() throws IOException {
 		final TestRoom testRoom = new TestRoom();
-		final AutomationFramework framework = createIntegration();
+		final IAutomationFrameworkInterface framework = createIntegration();
 		framework.addRoom(testRoom);
 
 		updateDevice(1, "on");
-		assertEquals(OnOff.ON, testRoom.testSwitch.getState());
+		assertEquals(OnOffState.ON, testRoom.testSwitch.getState());
+		assertEquals(1, testRoom.updateEventCount);
 
 		updateDevice(1, "off");
-		assertEquals(OnOff.OFF, testRoom.testSwitch.getState());
+		assertEquals(OnOffState.OFF, testRoom.testSwitch.getState());
+		assertEquals(2, testRoom.updateEventCount);
 	}
 
 	private void updateDevice(final int idx, final String newValue) throws MalformedURLException, IOException, ProtocolException {

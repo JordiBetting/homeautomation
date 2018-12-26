@@ -9,8 +9,18 @@ public interface EventResult {
 
 	int size();
 
-	Optional<String> get(int index);
+	Optional<Object> get(int index);
 
-	Collection<String> getAll();
+	Collection<Object> getAll();
+
+	public static EventResult of(final Object newValue) {
+		final EventResultList result = new EventResultList();
+		result.addResult(newValue);
+		return result;
+	}
+
+	public static EventResult empty() {
+		return EventResultEmpty.emptyResult;
+	}
 
 }

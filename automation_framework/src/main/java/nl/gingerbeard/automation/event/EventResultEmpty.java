@@ -7,13 +7,9 @@ import com.google.common.collect.Lists;
 
 public final class EventResultEmpty implements EventResult {
 
+	static final EventResult emptyResult = new EventResultEmpty();
+
 	EventResultEmpty() {
-	}
-
-	private static final EventResult emptyResult = new EventResultEmpty();
-
-	public static EventResult create() {
-		return emptyResult;
 	}
 
 	@Override
@@ -27,12 +23,12 @@ public final class EventResultEmpty implements EventResult {
 	}
 
 	@Override
-	public Optional<String> get(final int index) {
+	public Optional<Object> get(final int index) {
 		return Optional.empty();
 	}
 
 	@Override
-	public Collection<String> getAll() {
+	public Collection<Object> getAll() {
 		return Lists.newArrayList();
 	}
 

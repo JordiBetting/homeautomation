@@ -9,7 +9,10 @@ import com.google.common.collect.ImmutableList;
 
 public final class EventResultList implements EventResult {
 
-	private final List<String> results = new ArrayList<>();
+	private final List<Object> results = new ArrayList<>();
+
+	EventResultList() {
+	}
 
 	@Override
 	public void add(final EventResult call) {
@@ -22,7 +25,7 @@ public final class EventResultList implements EventResult {
 	}
 
 	@Override
-	public Optional<String> get(final int index) {
+	public Optional<Object> get(final int index) {
 		if (index < results.size() && index >= 0) {
 			return Optional.of(results.get(index));
 		} else {
@@ -30,15 +33,13 @@ public final class EventResultList implements EventResult {
 		}
 	}
 
-	public static EventResult of(final String string) {
-		final EventResultList result = new EventResultList();
-		result.results.add(string);
-		return result;
+	@Override
+	public Collection<Object> getAll() {
+		return ImmutableList.copyOf(results);
 	}
 
-	@Override
-	public Collection<String> getAll() {
-		return ImmutableList.copyOf(results);
+	public void addResult(final Object newValue) {
+		results.add(newValue);
 	}
 
 }
