@@ -62,12 +62,12 @@ public class AutomationFrameworkTest {
 		}
 	}
 
-	private AutomationFramework createIntegration() {
+	private IAutomationFrameworkInterface createIntegration() {
 		container = IAutomationFrameworkInterface.createFrameworkContainer();
 		container.register(DomoticzConfiguration.class, new DomoticzConfiguration(0, createMockUrl()), 1);
 		container.start();
 
-		final Optional<AutomationFramework> framework = container.getService(AutomationFramework.class);
+		final Optional<IAutomationFrameworkInterface> framework = container.getService(IAutomationFrameworkInterface.class);
 		assertTrue(framework.isPresent());
 
 		return framework.get();
@@ -89,7 +89,7 @@ public class AutomationFrameworkTest {
 
 	@Test
 	public void timeOfDay_correctState_eventReceived() throws IOException {
-		final AutomationFramework framework = createIntegration();
+		final IAutomationFrameworkInterface framework = createIntegration();
 		getState().setTimeOfDay(TimeOfDay.DAYTIME);
 		final TimeOfDaySubscriber subscriber = new TimeOfDaySubscriber();
 		framework.addRoom(subscriber);
@@ -101,7 +101,7 @@ public class AutomationFrameworkTest {
 
 	@Test
 	public void timeOfDay_OtherState_nothingReceived() throws IOException {
-		final AutomationFramework framework = createIntegration();
+		final IAutomationFrameworkInterface framework = createIntegration();
 		getState().setTimeOfDay(TimeOfDay.NIGHTTIME);
 
 		final TimeOfDaySubscriber subscriber = new TimeOfDaySubscriber();
@@ -113,7 +113,7 @@ public class AutomationFrameworkTest {
 
 	@Test
 	public void timeOfDay_allday_received() throws IOException {
-		final AutomationFramework framework = createIntegration();
+		final IAutomationFrameworkInterface framework = createIntegration();
 		getState().setTimeOfDay(TimeOfDay.DAYTIME);
 		final TimeOfDaySubscriber subscriber = new TimeOfDaySubscriber();
 
@@ -159,7 +159,7 @@ public class AutomationFrameworkTest {
 
 	@Test
 	public void alarm_correctState_eventReceived() throws IOException {
-		final AutomationFramework framework = createIntegration();
+		final IAutomationFrameworkInterface framework = createIntegration();
 		getState().setAlarmState(AlarmState.ARM_HOME);
 
 		final AlarmSubscriber subscriber = new AlarmSubscriber();
@@ -171,7 +171,7 @@ public class AutomationFrameworkTest {
 
 	@Test
 	public void alarm_otherState_nothingReceived() throws IOException {
-		final AutomationFramework framework = createIntegration();
+		final IAutomationFrameworkInterface framework = createIntegration();
 		getState().setAlarmState(AlarmState.DISARMED);
 
 		final AlarmSubscriber subscriber = new AlarmSubscriber();
@@ -183,7 +183,7 @@ public class AutomationFrameworkTest {
 
 	@Test
 	public void alarm_all_received() throws IOException {
-		final AutomationFramework framework = createIntegration();
+		final IAutomationFrameworkInterface framework = createIntegration();
 		getState().setAlarmState(AlarmState.ARM_AWAY);
 
 		final AllAlarmSubscriber subscriber = new AllAlarmSubscriber();
@@ -195,7 +195,7 @@ public class AutomationFrameworkTest {
 
 	@Test
 	public void alarm_armed_received() throws IOException {
-		final AutomationFramework framework = createIntegration();
+		final IAutomationFrameworkInterface framework = createIntegration();
 		getState().setAlarmState(AlarmState.ARM_AWAY);
 
 		final ArmAlarmSubscriber subscriber = new ArmAlarmSubscriber();
@@ -229,7 +229,7 @@ public class AutomationFrameworkTest {
 
 	@Test
 	public void homeSubscriber_home_received() throws IOException {
-		final AutomationFramework framework = createIntegration();
+		final IAutomationFrameworkInterface framework = createIntegration();
 		getState().setHomeAway(HomeAway.HOME);
 
 		final HomeSubscriber subscriber = new HomeSubscriber();
@@ -241,7 +241,7 @@ public class AutomationFrameworkTest {
 
 	@Test
 	public void homeSubscriber_away_nothingReceived() throws IOException {
-		final AutomationFramework framework = createIntegration();
+		final IAutomationFrameworkInterface framework = createIntegration();
 		getState().setHomeAway(HomeAway.AWAY);
 
 		final HomeSubscriber subscriber = new HomeSubscriber();
@@ -253,7 +253,7 @@ public class AutomationFrameworkTest {
 
 	@Test
 	public void homeAwayAlwaysSubscriber_away_received() throws IOException {
-		final AutomationFramework framework = createIntegration();
+		final IAutomationFrameworkInterface framework = createIntegration();
 		getState().setHomeAway(HomeAway.ALWAYS);
 
 		final AlwaysHomeAwaySubscriber subscriber = new AlwaysHomeAwaySubscriber();
@@ -291,7 +291,7 @@ public class AutomationFrameworkTest {
 	@Test
 	public void integration_updateEventWebserverReceived_deviceUpdated() throws IOException {
 		final TestRoom testRoom = new TestRoom();
-		final AutomationFramework framework = createIntegration();
+		final IAutomationFrameworkInterface framework = createIntegration();
 		framework.addRoom(testRoom);
 
 		updateDevice(1, "on");

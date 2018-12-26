@@ -16,7 +16,7 @@ public class AutomationFrameworkComponent {
 	public IDomoticz domoticz;
 
 	@Provides
-	public AutomationFramework framework;
+	public IAutomationFrameworkInterface framework;
 
 	@Activate
 	public void createFramework() {

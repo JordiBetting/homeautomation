@@ -42,7 +42,7 @@ public class IntegrationTest {
 		container.start();
 
 		port = config.getListenPort();
-		automation = container.getComponent(IAutomationFrameworkInterface.class).get();
+		automation = container.getService(IAutomationFrameworkInterface.class).get();
 	}
 
 	@AfterEach
