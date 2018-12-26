@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 
@@ -32,9 +31,10 @@ public class IntegrationTest {
 	// TODO: use local webserver, trigger transmitter, ensure room updates actuator based on sensor value.
 
 	@BeforeEach
-	public void start() throws MalformedURLException {
+	public void start() throws IOException {
 		webserver = new TestWebServer();
 		webserver.setResponse(Status.OK, TestWebServer.JSON_OK);
+		webserver.start();
 
 		config = new DomoticzConfiguration(0, new URL("http://localhost:" + webserver.getListeningPort()));
 		container = IAutomationFrameworkInterface.createFrameworkContainer();
@@ -72,15 +72,16 @@ public class IntegrationTest {
 		@Subscribe
 		public NextState<OnOffState> process(final Switch trigger) {
 			if (trigger.getIdx() == SENSOR.getIdx()) {
-				final OnOffState nextState = ACTUATOR.getState() == OnOffState.ON ? OnOffState.OFF : OnOffState.ON;
-				return new NextState<>(ACTUATOR, nextState);
+				return new NextState<>(ACTUATOR, OnOffState.ON);
+			} else if (trigger.getIdx() == ACTUATOR.getIdx()) {
+				return new NextState<>(ACTUATOR, OnOffState.OFF);
 			}
 			return null;
 		}
 	}
 
-	private void sendRequest() throws IOException {
-		final URL url = new URL("http://localhost:" + port + "/0/On");
+	private void sendRequest(final int idx, final String state) throws IOException {
+		final URL url = new URL("http://localhost:" + port + "/" + idx + "/" + state);
 		final HttpURLConnection con = (HttpURLConnection) url.openConnection();
 		con.setRequestMethod("GET");
 		assertEquals(200, con.getResponseCode());
@@ -90,12 +91,18 @@ public class IntegrationTest {
 	public void actuatorUpdatedBySensorUpdate() throws IOException {
 		automation.addRoom(new MyRoom());
 
-		sendRequest();
+		sendRequest(0, "on");
 
-		final List<String> requests = webserver.getRequests();
-
+		List<String> requests = webserver.getRequests();
 		assertEquals(1, requests.size());
-		assertEquals("GET theExpectedUpdate", requests.get(0));
+		assertEquals("GET /json.htm?type=command&param=switchlight&idx=1&switchcmd=on", requests.get(0));
+
+		// reply with device update 'in Domoticz'
+		sendRequest(1, "on");
+		requests = webserver.getRequests();
+		assertEquals(2, requests.size());
+		assertEquals("GET /json.htm?type=command&param=switchlight&idx=1&switchcmd=off", requests.get(1));
+
 	}
 
 }
