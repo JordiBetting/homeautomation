@@ -19,11 +19,11 @@ import nl.gingerbeard.automation.domoticz.receiver.DomoticzEventReceiver.EventRe
 
 public class DomoticzEventReceiverTest {
 
-	private static DomoticzConfiguration CONFIG;
-	private static DomoticzEventReceiver receiver;
+	private DomoticzConfiguration CONFIG;
+	private DomoticzEventReceiver receiver;
 
 	@BeforeEach
-	public static void initConfig() throws IOException {
+	public void initConfig() throws IOException {
 		CONFIG = new DomoticzConfiguration(0, new URL("http://localhost/"));
 		receiver = new DomoticzEventReceiver(CONFIG);
 	}

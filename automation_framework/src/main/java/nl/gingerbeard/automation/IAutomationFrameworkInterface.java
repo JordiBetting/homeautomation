@@ -9,9 +9,9 @@ import nl.gingerbeard.automation.event.EventsComponent;
 import nl.gingerbeard.automation.service.Container;
 import nl.gingerbeard.automation.state.StateComponent;
 
-public interface AutomationFrameworkInterface {
+public interface IAutomationFrameworkInterface {
 
-	void addRoom(Room room);
+	void addRoom(Room room); // TODO: consider adding Class rather then instance
 
 	void deviceChanged(Device<?> changedDevice);
 

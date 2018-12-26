@@ -63,7 +63,7 @@ public class AutomationFrameworkTest {
 	}
 
 	private AutomationFramework createIntegration() {
-		container = AutomationFrameworkInterface.createFrameworkContainer();
+		container = IAutomationFrameworkInterface.createFrameworkContainer();
 		container.register(DomoticzConfiguration.class, new DomoticzConfiguration(0, createMockUrl()), 1);
 		container.start();
 

@@ -4,7 +4,7 @@ import nl.gingerbeard.automation.devices.Device;
 import nl.gingerbeard.automation.domoticz.IDomoticz;
 import nl.gingerbeard.automation.event.IEvents;
 
-public class AutomationFramework implements AutomationFrameworkInterface {
+public class AutomationFramework implements IAutomationFrameworkInterface {
 
 	private final IEvents events;
 	private final IDomoticz domoticzEvents;
