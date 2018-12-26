@@ -116,7 +116,7 @@ public final class Container {
 		return activationSequence.remove(activationSequence.size() - 1);
 	}
 
-	public void register(final Class<?> clazz, final Object service, final int producePriority) {
+	public <T> void register(final Class<T> clazz, final T service, final int producePriority) {
 		register(clazz, service, producePriority, 42);
 	}
 
@@ -156,5 +156,9 @@ public final class Container {
 			}
 		}
 		return Optional.empty();
+	}
+
+	public <T> void register(final Class<T> class1, final T config) {
+		register(class1, config, 1);
 	}
 }

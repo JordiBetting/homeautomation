@@ -280,14 +280,9 @@ public class ContainerTest {
 	}
 
 	@Test
-	public void registerExternalService_invalidType_throwsException() {
+	public void registerExternalService_superClass_noException() {
 		container = new Container();
-		try {
-			container.register(Integer.class, "NotAnInteger", 1);
-			fail("Expected exception");
-		} catch (final IllegalArgumentException e) {
-			assertEquals("Service does not implement specified class", e.getMessage());
-		}
+		container.register(Object.class, "NotAnInteger", 1);
 	}
 
 	@Test

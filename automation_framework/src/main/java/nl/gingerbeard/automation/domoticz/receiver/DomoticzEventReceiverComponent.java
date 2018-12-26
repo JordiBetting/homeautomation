@@ -20,7 +20,7 @@ public final class DomoticzEventReceiverComponent {
 
 	@Activate
 	public void createReceiver() throws IOException {
-		receiver = instance = new DomoticzEventReceiver(config.getListenPort());
+		receiver = instance = new DomoticzEventReceiver(config);
 	}
 
 	@Deactivate

@@ -6,53 +6,21 @@ import static org.junit.jupiter.api.Assertions.fail;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import fi.iki.elonen.NanoHTTPD;
 import fi.iki.elonen.NanoHTTPD.Response.Status;
 import nl.gingerbeard.automation.devices.Switch;
 import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
+import nl.gingerbeard.automation.domoticz.helpers.TestWebServer;
 import nl.gingerbeard.automation.domoticz.transmitter.DomoticzUpdateTransmitter;
 import nl.gingerbeard.automation.domoticz.transmitter.IDomoticzUpdateTransmitter;
 import nl.gingerbeard.automation.state.NextState;
 import nl.gingerbeard.automation.state.OnOffState;
 
 public class DomoticzUpdateTransmitterTest {
-
-	private static class TestWebServer extends NanoHTTPD {
-
-		static final String JSON_OK = "{ \"status\" : \"OK\" }";
-		static final String JSON_ERROR = "{ \"status\" : \"error\" }";
-		static final String JSON_MALFORMED = "{ \"status\" ";
-		private Status status = Status.OK;
-		private final List<String> requests = new ArrayList<>();
-		private String text = JSON_OK;
-
-		public TestWebServer() {
-			super(0);
-		}
-
-		public void setResponse(final Status status, final String text) {
-			this.status = status;
-			this.text = text;
-		}
-
-		@Override
-		public Response serve(final IHTTPSession session) {
-			getRequests().add(session.getMethod() + " " + session.getUri() + "?" + session.getQueryParameterString());
-			return super.newFixedLengthResponse(status, MIME_PLAINTEXT, text);
-		}
-
-		public List<String> getRequests() {
-			return requests;
-		}
-
-	}
 
 	@Test
 	public void transmitUpdate_urlCorrect() throws IOException {
