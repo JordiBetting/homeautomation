@@ -24,17 +24,16 @@ pipeline {
 				sh 'touch automation_framework/build/test-results/test/*.xml'
 				junit allowEmptyResults: true, testResults: '**/build/test-results/test/*.xml'
 				findbugs canComputeNew: false, defaultEncoding: '', excludePattern: '', healthy: '', includePattern: '', pattern: '**/build/reports/findbugs/*.xml', unHealthy: ''
-				jacoco exclusionPattern: 'src/test*'
 				sh 'sloccount --duplicates --wide --details ./ > sloccount.sc'
 				sloccountPublish encoding: '', pattern: ''
 				archiveArtifacts artifacts: '**/*.jar', excludes: '**/jacocoagent.jar', onlyIfSuccessful: true
 				publishHTML (target: [
 					allowMissing: false,
-					alwaysLinkToLastBuild: false,
+					alwaysLinkToLastBuild: true,
 					keepAll: true,
 					reportDir: 'automation_framework/build/reports/jacoco/test/html/',
-					reportFiles: '**',
-					reportName: "coverage Report"
+					reportFiles: 'index.html',
+					reportName: "Coverage Report"
 					])
 			}
 			post {
