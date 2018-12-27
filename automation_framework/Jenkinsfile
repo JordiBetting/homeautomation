@@ -32,7 +32,7 @@ pipeline {
 					allowMissing: false,
 					alwaysLinkToLastBuild: false,
 					keepAll: true,
-					reportDir: 'build/reports/jacoco/test/html/',
+					reportDir: 'automation_framework/build/reports/jacoco/test/html/',
 					reportFiles: '**',
 					reportName: "coverage Report"
 					])
