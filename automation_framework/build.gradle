@@ -18,6 +18,20 @@ dependencies {
 }
 
 test {
+jacocoTestReport {
+    reports {
+        xml.enabled false
+        csv.enabled false
+    }
+
+    afterEvaluate {
+        classDirectories = files(classDirectories.files.collect {
+            fileTree(dir: it,
+                    exclude: ['**Test**'])
+        })
+    }
+}
+
     useJUnitPlatform()
 }
 

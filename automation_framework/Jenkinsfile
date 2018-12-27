@@ -10,7 +10,7 @@ pipeline {
 			}
 			steps {
 				sh 'echo Building with gradle'
-				sh 'gradle -b automation_framework/build.gradle test check build'
+				sh 'gradle -b automation_framework/build.gradle test check build jacocoTestReport'
 			}
 			post {
 				always {
@@ -28,6 +28,14 @@ pipeline {
 				sh 'sloccount --duplicates --wide --details ./ > sloccount.sc'
 				sloccountPublish encoding: '', pattern: ''
 				archiveArtifacts artifacts: '**/*.jar', excludes: '**/jacocoagent.jar', onlyIfSuccessful: true
+				publishHTML (target: [
+					allowMissing: false,
+					alwaysLinkToLastBuild: true,
+					keepAll: true,
+					reportDir: 'automation_framework/build/reports/jacoco/test/html/',
+					reportFiles: 'index.html',
+					reportName: "Coverage Report (Excl. tests)"
+					])
 			}
 			post {
 				always {
