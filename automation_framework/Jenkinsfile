@@ -32,9 +32,9 @@ pipeline {
 					allowMissing: false,
 					alwaysLinkToLastBuild: false,
 					keepAll: true,
-					reportDir: 'coverage',
-					reportFiles: 'build/reports/jacoco/test/html/**',
-					reportName: "RCov Report"
+					reportDir: 'build/reports/jacoco/test/html/',
+					reportFiles: '**',
+					reportName: "coverage Report"
 					])
 			}
 			post {
