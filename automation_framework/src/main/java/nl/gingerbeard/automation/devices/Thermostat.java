@@ -1,6 +1,5 @@
 package nl.gingerbeard.automation.devices;
 
-import nl.gingerbeard.automation.state.NextState;
 import nl.gingerbeard.automation.state.ThermostatState;
 
 public class Thermostat extends Device<ThermostatState> {
@@ -13,18 +12,6 @@ public class Thermostat extends Device<ThermostatState> {
 	public boolean updateState(final String newState) {
 		// TODO Auto-generated method stub
 		return false;
-	}
-
-	@Override
-	public String getDomoticzParam() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public String getDomoticzSwitchCmd(final NextState<ThermostatState> nextState) {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 }

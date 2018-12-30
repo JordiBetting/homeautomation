@@ -15,8 +15,8 @@ import nl.gingerbeard.automation.devices.DimmeableLight;
 import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
 import nl.gingerbeard.automation.domoticz.transmitter.DomoticzUpdateTransmitter;
 import nl.gingerbeard.automation.domoticz.transmitter.IDomoticzUpdateTransmitter;
+import nl.gingerbeard.automation.state.Level;
 import nl.gingerbeard.automation.state.NextState;
-import nl.gingerbeard.automation.state.Percentage;
 
 @Disabled
 public class DomoticzHILIntegrationTest {
@@ -33,18 +33,13 @@ public class DomoticzHILIntegrationTest {
 		final IDomoticzUpdateTransmitter transmitter = new DomoticzUpdateTransmitter(domoticzConfig);
 		final DimmeableLight device = new DimmeableLight(274);
 
-		transmitter.transmitDeviceUpdate(new NextState<>(device, new Percentage(10)));
+		transmitter.transmitDeviceUpdate(new NextState<>(device, new Level(10)));
 	}
 
 	private static class ErrorDimmeableLight extends DimmeableLight {
 
 		public ErrorDimmeableLight(final int idx) {
 			super(idx);
-		}
-
-		@Override
-		public String getDomoticzSwitchCmd(final NextState<Percentage> nextState) {
-			return "ThatWasUnexpected";
 		}
 
 	}
@@ -55,7 +50,7 @@ public class DomoticzHILIntegrationTest {
 		final ErrorDimmeableLight device = new ErrorDimmeableLight(274);
 
 		try {
-			transmitter.transmitDeviceUpdate(new NextState<>(device, new Percentage(10)));
+			transmitter.transmitDeviceUpdate(new NextState<>(device, new Level(10)));
 			fail("Expected exception");
 		} catch (final IOException e) {
 			assertEquals("Failed setting value in domotics: {\"message\":\"Error sending switch command, check device\\/hardware !\",\"title\":\"SwitchLight\",\"status\":\"ERROR\"}", e.getMessage());

@@ -1,9 +1,8 @@
 package nl.gingerbeard.automation.devices;
 
-import nl.gingerbeard.automation.state.NextState;
-import nl.gingerbeard.automation.state.Percentage;
+import nl.gingerbeard.automation.state.Level;
 
-public class DimmeableLight extends Device<Percentage> {
+public class DimmeableLight extends Device<Level> {
 	// TODO: consider 'PercentageDevice' as it may also count for shutters, etc. I don't know if control is the same. Check domoticz
 
 	public DimmeableLight(final int idx) {
@@ -13,21 +12,11 @@ public class DimmeableLight extends Device<Percentage> {
 	@Override
 	public boolean updateState(final String newState) {
 		try {
-			setState(new Percentage(Integer.parseInt(newState)));
+			setState(new Level(Integer.parseInt(newState)));
 			return true;
 		} catch (final NumberFormatException e) {
 			return false;
 			// TODO: log
 		}
-	}
-
-	@Override
-	public String getDomoticzSwitchCmd(final NextState<Percentage> nextState) {
-		return "Set%20Level&level=" + nextState.get().getPercentage();
-	}
-
-	@Override
-	public String getDomoticzParam() {
-		return "switchlight";
 	}
 }

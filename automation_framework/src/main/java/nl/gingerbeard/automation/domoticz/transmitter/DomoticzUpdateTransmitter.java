@@ -12,21 +12,22 @@ import org.json.simple.parser.ParseException;
 
 import com.google.common.base.Charsets;
 
-import nl.gingerbeard.automation.devices.Device;
 import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
 import nl.gingerbeard.automation.state.NextState;
 
 public final class DomoticzUpdateTransmitter implements IDomoticzUpdateTransmitter {
 
 	private final DomoticzConfiguration configuration;
+	private final DomoticzUrlCreator urlCreator;
 
 	public DomoticzUpdateTransmitter(final DomoticzConfiguration configuration) {
 		this.configuration = configuration;
+		urlCreator = new DomoticzUrlCreator(configuration);
 	}
 
 	@Override
 	public <T> void transmitDeviceUpdate(final NextState<T> nextState) throws IOException {
-		final URL url = new URL(configuration.getBaseURL(), createDeviceSpecificUrlPart(nextState));
+		final URL url = urlCreator.construct(nextState);
 		executeRequest(url);
 	}
 
@@ -79,19 +80,6 @@ public final class DomoticzUpdateTransmitter implements IDomoticzUpdateTransmitt
 		final JSONParser parser = new JSONParser();
 		final InputStreamReader in = new InputStreamReader(con.getInputStream(), Charsets.UTF_8);
 		return (JSONObject) parser.parse(in);
-	}
-
-	private <T> String createDeviceSpecificUrlPart(final NextState<T> nextState) {
-		final Device<T> device = nextState.getDevice();
-		final StringBuilder stringBuilder = new StringBuilder();
-		stringBuilder.append("json.htm?type=command&param=");
-		stringBuilder.append(device.getDomoticzParam());
-		stringBuilder.append("&idx=");
-		stringBuilder.append(device.getIdx());
-		stringBuilder.append("&switchcmd=");
-		stringBuilder.append(device.getDomoticzSwitchCmd(nextState));
-		final String deviceSpecificUrlPart = stringBuilder.toString();
-		return deviceSpecificUrlPart;
 	}
 
 }

@@ -12,15 +12,36 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import fi.iki.elonen.NanoHTTPD.Response.Status;
+import nl.gingerbeard.automation.devices.DimmeableLight;
 import nl.gingerbeard.automation.devices.Switch;
 import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
 import nl.gingerbeard.automation.domoticz.helpers.TestWebServer;
 import nl.gingerbeard.automation.domoticz.transmitter.DomoticzUpdateTransmitter;
 import nl.gingerbeard.automation.domoticz.transmitter.IDomoticzUpdateTransmitter;
+import nl.gingerbeard.automation.state.Level;
 import nl.gingerbeard.automation.state.NextState;
 import nl.gingerbeard.automation.state.OnOffState;
 
 public class DomoticzUpdateTransmitterTest {
+
+	private TestWebServer webserver;
+	private DomoticzConfiguration domoticzConfig;
+
+	@BeforeEach
+	public void createTestServer() throws Exception {
+		webserver = new TestWebServer();
+		webserver.start();
+		domoticzConfig = new DomoticzConfiguration(0, new URL("http://localhost:" + webserver.getListeningPort()));
+	}
+
+	@AfterEach
+	private void stopWebserver() {
+		if (webserver != null) {
+			webserver.stop();
+		}
+		webserver = null;
+		domoticzConfig = null;
+	}
 
 	@Test
 	public void transmitUpdate_urlCorrect() throws IOException {
@@ -49,27 +70,20 @@ public class DomoticzUpdateTransmitterTest {
 		assertEquals("GET /json.htm?type=command&param=switchlight&idx=1&switchcmd=off", webserver.getRequests().get(1));
 	}
 
-	private TestWebServer webserver;
-	private DomoticzConfiguration domoticzConfig;
+	@Test
+	public void transmitUpdateLevel_correct() throws IOException {
+		final IDomoticzUpdateTransmitter transmitter = new DomoticzUpdateTransmitter(domoticzConfig);
+		final DimmeableLight device = new DimmeableLight(1);
 
-	@BeforeEach
-	public void createTestServer() throws Exception {
-		webserver = new TestWebServer();
-		webserver.start();
-		domoticzConfig = new DomoticzConfiguration(0, new URL("http://localhost:" + webserver.getListeningPort()));
-	}
+		// on
+		transmitter.transmitDeviceUpdate(new NextState<>(device, new Level(42)));
+		assertEquals(1, webserver.getRequests().size());
+		assertEquals("GET /json.htm?type=command&param=switchlight&idx=1&switchcmd=Set%20Level&level=42", webserver.getRequests().get(0));
 
-	@AfterEach
-	private void stopWebserver() {
-		if (webserver != null) {
-			webserver.stop();
-		}
-		webserver = null;
-		domoticzConfig = null;
 	}
 
 	@Test
-	public void urlAppendTest() throws MalformedURLException {
+	public void learn_urlAppendTest() throws MalformedURLException {
 		final URL base = new URL("http://localhost:1234/base/");
 		final URL url = new URL(base, "test");
 
