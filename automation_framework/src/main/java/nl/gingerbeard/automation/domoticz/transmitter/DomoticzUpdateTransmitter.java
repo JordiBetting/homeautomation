@@ -13,21 +13,20 @@ import org.json.simple.parser.ParseException;
 import com.google.common.base.Charsets;
 
 import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
+import nl.gingerbeard.automation.domoticz.transmitter.urlcreator.DomoticzUrls;
 import nl.gingerbeard.automation.state.NextState;
 
 public final class DomoticzUpdateTransmitter implements IDomoticzUpdateTransmitter {
 
-	private final DomoticzConfiguration configuration;
-	private final DomoticzUrlCreator urlCreator;
+	private final DomoticzUrls urlCreator;
 
 	public DomoticzUpdateTransmitter(final DomoticzConfiguration configuration) {
-		this.configuration = configuration;
-		urlCreator = new DomoticzUrlCreator(configuration);
+		urlCreator = new DomoticzUrls(configuration);
 	}
 
 	@Override
 	public <T> void transmitDeviceUpdate(final NextState<T> nextState) throws IOException {
-		final URL url = urlCreator.construct(nextState);
+		final URL url = urlCreator.getUrl(nextState);
 		executeRequest(url);
 	}
 
