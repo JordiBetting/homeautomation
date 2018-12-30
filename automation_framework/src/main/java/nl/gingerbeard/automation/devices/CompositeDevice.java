@@ -5,9 +5,9 @@ import java.util.Set;
 
 public abstract class CompositeDevice<T> extends StateDevice<T> {
 
-	private final Set<Device<T>> devices;
+	private final Set<Device<?>> devices;
 
-	public CompositeDevice(final Set<Device<T>> devices) {
+	public CompositeDevice(final Set<Device<?>> devices) {
 		this.devices = devices;
 	}
 

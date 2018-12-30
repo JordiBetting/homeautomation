@@ -8,13 +8,22 @@ import nl.gingerbeard.automation.state.ThermostatState.ThermostatMode;
 
 public class Thermostat extends CompositeDevice<ThermostatState> {
 
-	public static class ThermostatSetpointDevice extends Device<Temperature> {
+	public abstract static class ThermostatSubdevice<T> extends Device<T> {
+		protected Thermostat parent;
 
-		private final Thermostat parent;
-
-		public ThermostatSetpointDevice(final int idx, final Thermostat parent) {
+		public ThermostatSubdevice(final int idx) {
 			super(idx);
+		}
+
+		public void setParent(final Thermostat parent) {
 			this.parent = parent;
+		}
+	}
+
+	public static class ThermostatSetpointDevice extends ThermostatSubdevice<Temperature> {
+
+		public ThermostatSetpointDevice(final int idx) {
+			super(idx);
 		}
 
 		@Override
@@ -23,15 +32,13 @@ public class Thermostat extends CompositeDevice<ThermostatState> {
 			// TODO
 			return false;
 		}
+
 	}
 
-	public static class ThermostatModeDevice extends Device<ThermostatMode> {
+	public static class ThermostatModeDevice extends ThermostatSubdevice<ThermostatMode> {
 
-		private final Thermostat parent;
-
-		public ThermostatModeDevice(final int idx, final Thermostat parent) {
+		public ThermostatModeDevice(final int idx) {
 			super(idx);
-			this.parent = parent;
 		}
 
 		@Override
@@ -43,7 +50,12 @@ public class Thermostat extends CompositeDevice<ThermostatState> {
 	}
 
 	public Thermostat(final int idxSetpoint, final int idxMode) {
-		super(Sets.newHashSet());
+		super(Sets.newHashSet(new ThermostatSetpointDevice(idxSetpoint), new ThermostatModeDevice(idxMode)));
+
+		for (final Device<?> device : getDevices()) {
+			final ThermostatSubdevice<?> sub = (ThermostatSubdevice<?>) device;
+			sub.setParent(this);
+		}
 	}
 
 	public void modeUpdated() {
