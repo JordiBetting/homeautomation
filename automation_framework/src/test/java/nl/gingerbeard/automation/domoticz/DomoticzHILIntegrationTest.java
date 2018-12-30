@@ -12,11 +12,14 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import nl.gingerbeard.automation.devices.DimmeableLight;
+import nl.gingerbeard.automation.devices.Heating;
 import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
 import nl.gingerbeard.automation.domoticz.transmitter.DomoticzUpdateTransmitter;
 import nl.gingerbeard.automation.domoticz.transmitter.IDomoticzUpdateTransmitter;
 import nl.gingerbeard.automation.state.Level;
 import nl.gingerbeard.automation.state.NextState;
+import nl.gingerbeard.automation.state.Temperature;
+import nl.gingerbeard.automation.state.Temperature.Unit;
 
 @Disabled
 public class DomoticzHILIntegrationTest {
@@ -34,6 +37,15 @@ public class DomoticzHILIntegrationTest {
 		final DimmeableLight device = new DimmeableLight(274);
 
 		transmitter.transmitDeviceUpdate(new NextState<>(device, new Level(10)));
+	}
+
+	@Test
+	public void setHeatingSetpointLivingRoom() throws IOException {
+		final IDomoticzUpdateTransmitter transmitter = new DomoticzUpdateTransmitter(domoticzConfig);
+		final Heating device = new Heating(471, 0);
+
+		transmitter.transmitDeviceUpdate(new NextState<>(device, new Temperature(22, Unit.CELSIUS)));
+
 	}
 
 	private static class ErrorDimmeableLight extends DimmeableLight {

@@ -13,6 +13,8 @@ import org.junit.jupiter.api.Test;
 
 import fi.iki.elonen.NanoHTTPD.Response.Status;
 import nl.gingerbeard.automation.devices.DimmeableLight;
+import nl.gingerbeard.automation.devices.Heating;
+import nl.gingerbeard.automation.devices.StringTestDevice;
 import nl.gingerbeard.automation.devices.Switch;
 import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
 import nl.gingerbeard.automation.domoticz.helpers.TestWebServer;
@@ -21,6 +23,8 @@ import nl.gingerbeard.automation.domoticz.transmitter.IDomoticzUpdateTransmitter
 import nl.gingerbeard.automation.state.Level;
 import nl.gingerbeard.automation.state.NextState;
 import nl.gingerbeard.automation.state.OnOffState;
+import nl.gingerbeard.automation.state.Temperature;
+import nl.gingerbeard.automation.state.Temperature.Unit;
 
 public class DomoticzUpdateTransmitterTest {
 
@@ -79,7 +83,31 @@ public class DomoticzUpdateTransmitterTest {
 		transmitter.transmitDeviceUpdate(new NextState<>(device, new Level(42)));
 		assertEquals(1, webserver.getRequests().size());
 		assertEquals("GET /json.htm?type=command&param=switchlight&idx=1&switchcmd=Set%20Level&level=42", webserver.getRequests().get(0));
+	}
 
+	@Test
+	public void transmitUnsupportedDevice_throwsException() {
+		final IDomoticzUpdateTransmitter transmitter = new DomoticzUpdateTransmitter(domoticzConfig);
+		final StringTestDevice device = new StringTestDevice();
+
+		try {
+			transmitter.transmitDeviceUpdate(new NextState<>(device, "someString"));
+			fail("Expected exception");
+		} catch (final IOException e) {
+			assertEquals("Cannot construct url from unsupported state: class java.lang.String", e.getMessage());
+		}
+
+	}
+
+	@Test
+	public void transmitTemperature_correct() throws IOException {
+		final IDomoticzUpdateTransmitter transmitter = new DomoticzUpdateTransmitter(domoticzConfig);
+		final Heating device = new Heating(1, 2);
+
+		// on
+		transmitter.transmitDeviceUpdate(new NextState<>(device, new Temperature(21, Unit.CELSIUS)));
+		assertEquals(1, webserver.getRequests().size());
+		assertEquals("GET /json.htm?type=setused&idx=1&setpoint=21.0&protected=false&used=true", webserver.getRequests().get(0));
 	}
 
 	@Test

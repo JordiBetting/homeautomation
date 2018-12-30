@@ -7,10 +7,13 @@ import java.util.Locale;
 import com.google.common.escape.Escaper;
 import com.google.common.net.UrlEscapers;
 
+import nl.gingerbeard.automation.devices.Device;
 import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
 import nl.gingerbeard.automation.state.Level;
 import nl.gingerbeard.automation.state.NextState;
 import nl.gingerbeard.automation.state.OnOffState;
+import nl.gingerbeard.automation.state.Temperature;
+import nl.gingerbeard.automation.state.Temperature.Unit;
 
 public final class DomoticzUrlCreator {
 
@@ -27,12 +30,16 @@ public final class DomoticzUrlCreator {
 		SWITCHCMD, //
 		PARAM, //
 		LEVEL, //
+		SETPOINT, //
+		PROTECTED, //
+		USED, //
 		;
 
 	}
 
-	private static enum Type implements QueryStringItem {
+	private static enum Type implements QueryStringItem { // TODO: Split enums to separate files.
 		COMMAND, //
+		SETUSED, //
 		;
 
 	}
@@ -73,24 +80,33 @@ public final class DomoticzUrlCreator {
 		}
 	}
 
-	// http://192.168.2.204:8080/json.htm?type=setused&idx=471&name=thermostat_livingroom_setpoint&setpoint=20&protected=false&used=true
-
 	@SuppressWarnings("unchecked")
 	public URL construct(final NextState<?> nextState) throws MalformedURLException {
 		if (isStateType(nextState, OnOffState.class)) {
 			return constructOnOffState((NextState<OnOffState>) nextState);
 		} else if (isStateType(nextState, Level.class)) {
 			return constructLevelState((NextState<Level>) nextState);
+		} else if (isStateType(nextState, Temperature.class)) {
+			return constructTemperatureState((NextState<Temperature>) nextState);
 		}
-		// TODO
-		return null;
+		throw new MalformedURLException("Cannot construct url from unsupported state: " + nextState.get().getClass());
+	}
+
+	private URL constructTemperatureState(final NextState<Temperature> nextState) throws MalformedURLException {
+		return URLBuilder.create(configuration) //
+				.add(Keys.TYPE, Type.SETUSED) //
+				.addIdx(nextState) //
+				.add(Keys.SETPOINT, nextState.get().get(Unit.CELSIUS)) // TODO: Use settings in domoticz to translate
+				.add(Keys.PROTECTED, "false")//
+				.add(Keys.USED, "true")//
+				.build();
 	}
 
 	private URL constructOnOffState(final NextState<OnOffState> nextState) throws MalformedURLException {
 		return URLBuilder.create(configuration) //
 				.add(Keys.TYPE, Type.COMMAND) //
 				.add(Keys.PARAM, Param.SWITCHLIGHT)//
-				.add(Keys.IDX, nextState.getDevice().getIdx()) // TODO consider IDX to be generic
+				.addIdx(nextState) // TODO consider IDX to be generic
 				.add(Keys.SWITCHCMD, getValue(nextState))//
 				.build();
 	}
@@ -99,7 +115,7 @@ public final class DomoticzUrlCreator {
 		return URLBuilder.create(configuration) //
 				.add(Keys.TYPE, Type.COMMAND) //
 				.add(Keys.PARAM, Param.SWITCHLIGHT) //
-				.add(Keys.IDX, nextState.getDevice().getIdx()) //
+				.addIdx(nextState) //
 				.add(Keys.SWITCHCMD, SwitchCMD.SET_LEVEL)//
 				.add(Keys.LEVEL, nextState.get().getLevel()) //
 				.build();
@@ -113,7 +129,7 @@ public final class DomoticzUrlCreator {
 		return nextState.get().getClass().isAssignableFrom(testState);
 	}
 
-	private static final class URLBuilder {
+	private static final class URLBuilder { // TODO: Split builder to separate file.
 
 		private final StringBuilder url;
 
@@ -123,8 +139,16 @@ public final class DomoticzUrlCreator {
 			url.append("/json.htm?");
 		}
 
+		public URLBuilder addIdx(final NextState<?> nextState) {
+			final Device<?> device = nextState.getDevice();
+			final int idx = device.getIdx();
+			return add(Keys.IDX, idx);
+		}
+
 		public URL build() throws MalformedURLException {
-			final String fullUrlString = url.substring(0, url.length() - 1); // trim off ? or &
+			final int lastCharIndex = url.length() - 1;
+			final String fullUrlString = url.substring(0, lastCharIndex); // trim off ? or &
+			System.out.println(fullUrlString);
 			return new URL(fullUrlString);
 		}
 
