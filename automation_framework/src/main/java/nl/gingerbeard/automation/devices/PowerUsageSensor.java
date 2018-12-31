@@ -5,11 +5,11 @@ import nl.gingerbeard.automation.devices.PowerUsageSensor.PowerUsage;
 public class PowerUsageSensor extends Device<PowerUsage> {
 
 	public static class PowerUsage {
-
+		// TODO: Move to state and implement
 	}
 
-	public PowerUsageSensor(final int idx, final int batteryDomoticzId) {
-		super(idx, batteryDomoticzId);
+	public PowerUsageSensor(final int idx) {
+		super(idx);
 	}
 
 	@Override

@@ -39,7 +39,7 @@ public class DomoticzUpdateTransmitterTest {
 	}
 
 	@AfterEach
-	private void stopWebserver() {
+	public void stopWebserver() {
 		if (webserver != null) {
 			webserver.stop();
 		}
@@ -102,7 +102,7 @@ public class DomoticzUpdateTransmitterTest {
 	@Test
 	public void transmitTemperature_correct() throws IOException {
 		final IDomoticzUpdateTransmitter transmitter = new DomoticzUpdateTransmitter(domoticzConfig);
-		final Heating device = new Heating(1, 2);
+		final Heating device = new Heating(1);
 
 		// on
 		transmitter.transmitDeviceUpdate(new NextState<>(device, new Temperature(21, Unit.CELSIUS)));

@@ -6,10 +6,6 @@ import nl.gingerbeard.automation.state.OnOffState;
 
 public abstract class OnOffDevice extends Device<OnOffState> {
 
-	public OnOffDevice(final int idx, final int batteryDomoticzId) {
-		super(idx, batteryDomoticzId);
-	}
-
 	public OnOffDevice(final int idx) {
 		super(idx);
 	}

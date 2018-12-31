@@ -4,8 +4,8 @@ import nl.gingerbeard.automation.state.Temperature;
 
 public class Heating extends Device<Temperature> {
 
-	public Heating(final int idx, final int batteryDomoticzId) {
-		super(idx, batteryDomoticzId);
+	public Heating(final int idx) {
+		super(idx);
 	}
 
 	@Override

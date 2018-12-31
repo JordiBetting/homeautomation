@@ -4,8 +4,8 @@ import nl.gingerbeard.automation.state.OpenCloseState;
 
 public abstract class OpenCloseDevice extends Device<OpenCloseState> {
 
-	public OpenCloseDevice(final int idx, final int batteryDomoticzId) {
-		super(idx, batteryDomoticzId);
+	public OpenCloseDevice(final int idx) {
+		super(idx);
 	}
 
 	@Override

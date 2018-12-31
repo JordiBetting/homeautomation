@@ -8,8 +8,8 @@ public class LightSensor extends Device<LightMeasurement> {
 		public double lux;
 	}
 
-	public LightSensor(final int idx, final int batteryDomoticzId) {
-		super(idx, batteryDomoticzId);
+	public LightSensor(final int idx) {
+		super(idx);
 	}
 
 	@Override

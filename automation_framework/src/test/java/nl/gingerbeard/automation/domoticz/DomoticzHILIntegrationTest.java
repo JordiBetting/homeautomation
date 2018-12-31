@@ -42,7 +42,7 @@ public class DomoticzHILIntegrationTest {
 	@Test
 	public void setHeatingSetpointLivingRoom() throws IOException {
 		final IDomoticzUpdateTransmitter transmitter = new DomoticzUpdateTransmitter(domoticzConfig);
-		final Heating device = new Heating(471, 0);
+		final Heating device = new Heating(471);
 
 		transmitter.transmitDeviceUpdate(new NextState<>(device, new Temperature(22, Unit.CELSIUS)));
 

@@ -8,8 +8,8 @@ public class TemperatureSensor extends Device<TemperatureValue> {
 		public double temperatureCelsius;
 	}
 
-	public TemperatureSensor(final int idx, final int batteryDomoticzId) {
-		super(idx, batteryDomoticzId);
+	public TemperatureSensor(final int idx) {
+		super(idx);
 	}
 
 	@Override
