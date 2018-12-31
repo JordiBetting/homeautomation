@@ -112,24 +112,27 @@ public class IntegrationTest {
 
 		private final Thermostat thermostat;
 		private static final Switch SENSOR = new Switch(1);
+		private final ThermostatState nextState;
 
-		public RoomWithThermostat() {
+		public RoomWithThermostat(final ThermostatState nextState) {
+			this.nextState = nextState;
 			thermostat = new Thermostat(2, 3);
 			addDevice(thermostat).and(SENSOR);
 		}
 
 		@Subscribe
 		public List<NextState<?>> process(final Switch trigger) {
-			final ThermostatState thermostatState = new ThermostatState();
-			thermostatState.setTemperature(Temperature.celcius(15));
-			return thermostat.createNextState(thermostatState);
+			return thermostat.createNextState(nextState);
 		}
 
 	}
 
 	@Test
-	public void compositeDeviceUpdatedBySensorUpdate() throws IOException {
-		automation.addRoom(new RoomWithThermostat());
+	public void thermostatSetpointUpdated_bySensorUpdate() throws IOException {
+		final ThermostatState thermostatState = new ThermostatState();
+		thermostatState.setTemperature(Temperature.celcius(15));
+
+		automation.addRoom(new RoomWithThermostat(thermostatState));
 
 		sendRequest(1, "on");
 
@@ -140,4 +143,32 @@ public class IntegrationTest {
 		assertEquals("GET /json.htm?type=setused&idx=2&setpoint=15.0&protected=false&used=true", requests.get(1));
 	}
 
+	@Test
+	public void thermostatModeOff_bySensorUpdate() throws IOException {
+		final ThermostatState thermostatState = new ThermostatState();
+		thermostatState.setOff();
+		automation.addRoom(new RoomWithThermostat(thermostatState));
+
+		sendRequest(1, "on");
+
+		final List<String> requests = webserver.getRequests();
+		assertEquals(1, requests.size());
+
+		assertEquals("GET /json.htm?type=setused&idx=3&tmode=0&protected=false&used=true", requests.get(0));
+	}
+
+	@Test
+	public void thermostatModeFull_bySensorUpdate() throws IOException {
+		final ThermostatState thermostatState = new ThermostatState();
+		thermostatState.setFullHeat();
+		;
+		automation.addRoom(new RoomWithThermostat(thermostatState));
+
+		sendRequest(1, "on");
+
+		final List<String> requests = webserver.getRequests();
+		assertEquals(1, requests.size());
+
+		assertEquals("GET /json.htm?type=setused&idx=3&tmode=3&protected=false&used=true", requests.get(0));
+	}
 }
