@@ -12,11 +12,15 @@ public final class ThermostatSetpointDevice extends Subdevice<Thermostat, Temper
 
 	@Override
 	public boolean updateState(final String newState) {
-		final double newValue = Double.parseDouble(newState);
-		// TODO: Use domoticz settings to understand what temperature unit is used.
-		setState(new Temperature(newValue, Unit.CELSIUS));
-		parent.ifPresent((parent) -> parent.setpointUpdated());
-		return true;
+		try {
+			final double newValue = Double.parseDouble(newState);
+			// TODO: Use domoticz settings to understand what temperature unit is used.
+			setState(new Temperature(newValue, Unit.CELSIUS));
+			parent.ifPresent((parent) -> parent.setpointUpdated());
+			return true;
+		} catch (final NumberFormatException e) {
+			return false;
+		}
 	}
 
 }

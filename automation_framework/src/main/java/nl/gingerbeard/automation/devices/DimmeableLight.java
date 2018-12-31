@@ -10,7 +10,12 @@ public class DimmeableLight extends Device<Level> {
 
 	@Override
 	public boolean updateState(final String newState) {
-		setState(new Level(Integer.parseInt(newState)));
+		try {
+			final Level newLevel = new Level(Integer.parseInt(newState));
+			setState(newLevel);
+		} catch (final NumberFormatException e) {
+			return false;
+		}
 		return true;
 	}
 }
