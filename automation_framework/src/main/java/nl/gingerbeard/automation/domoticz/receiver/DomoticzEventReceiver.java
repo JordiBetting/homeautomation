@@ -25,7 +25,7 @@ public final class DomoticzEventReceiver extends NanoHTTPD implements IDomoticzE
 	}
 
 	// matches /id/action/ e.g. /123/close or /123/close/
-	private static final Pattern URIPATTERN = Pattern.compile("/([0-9]+)/([a-zA-Z]+)/?");
+	private static final Pattern URIPATTERN = Pattern.compile("/([0-9]+)/([a-zA-Z_]+)/?");
 	private Optional<EventReceived> listener = Optional.empty();
 
 	public DomoticzEventReceiver(final DomoticzConfiguration config) throws IOException {
@@ -46,23 +46,21 @@ public final class DomoticzEventReceiver extends NanoHTTPD implements IDomoticzE
 
 	@Override
 	public Response serve(final IHTTPSession session) {
-		Optional<Response> response;
+		Response response;
 		if (session.getMethod() == Method.GET) {
 			response = processGetRequest(session);
 		} else {
-			response = Optional.of(newFixedLengthResponse(Status.METHOD_NOT_ALLOWED, NanoHTTPD.MIME_PLAINTEXT, "Only GET is supported"));
-		}
-		return response.orElse(super.serve(session));
-	}
-
-	private Optional<Response> processGetRequest(final IHTTPSession session) {
-		Optional<Response> response;
-		try {
-			response = processGetRequest(session.getUri());
-		} catch (final Throwable t) {
-			response = Optional.of(newFixedLengthResponse(Status.INTERNAL_ERROR, NanoHTTPD.MIME_PLAINTEXT, "Internal server error: " + t.getMessage()));
+			response = newFixedLengthResponse(Status.METHOD_NOT_ALLOWED, NanoHTTPD.MIME_PLAINTEXT, "Only GET is supported");
 		}
 		return response;
+	}
+
+	private Response processGetRequest(final IHTTPSession session) {
+		try {
+			return processGetRequest(session.getUri());
+		} catch (final Throwable t) {
+			return newFixedLengthResponse(Status.INTERNAL_ERROR, NanoHTTPD.MIME_PLAINTEXT, "Internal server error: " + t.getMessage());
+		}
 	}
 
 	private static class ResponseParameters {
@@ -76,14 +74,16 @@ public final class DomoticzEventReceiver extends NanoHTTPD implements IDomoticzE
 
 	}
 
-	private Optional<Response> processGetRequest(final String uri) {
-		Optional<Response> response = Optional.empty();
+	private Response processGetRequest(final String uri) {
+		Response response;
 
 		final Optional<ResponseParameters> responseParams = parseParameters(uri);
 		if (responseParams.isPresent()) {
-			final Optional<Response> defaultResponse = Optional.of(newFixedLengthResponse(Status.OK, NanoHTTPD.MIME_PLAINTEXT, "OKIDOKI"));
+			final Response defaultResponse = newFixedLengthResponse(Status.OK, NanoHTTPD.MIME_PLAINTEXT, "OKIDOKI");
 			final Optional<Response> listenerResponse = triggerListener(responseParams.get());
-			response = listenerResponse.isPresent() ? listenerResponse : defaultResponse;
+			response = listenerResponse.orElse(defaultResponse);
+		} else {
+			response = newFixedLengthResponse(Status.NOT_FOUND, NanoHTTPD.MIME_PLAINTEXT, "URL not in supported format");
 		}
 		return response;
 	}
@@ -92,9 +92,15 @@ public final class DomoticzEventReceiver extends NanoHTTPD implements IDomoticzE
 		Optional<Response> response = Optional.empty();
 
 		if (listener.isPresent()) {
-			final boolean result = listener.get().deviceChanged(responseParams.idx, responseParams.state);
-			if (result == false) {
-				response = Optional.of(newFixedLengthResponse(Status.NOT_FOUND, NanoHTTPD.MIME_PLAINTEXT, "Could not process request."));
+			try {
+				final boolean result = listener.get().deviceChanged(responseParams.idx, responseParams.state);
+				if (result == false) {
+					response = Optional.of(newFixedLengthResponse(Status.NOT_FOUND, NanoHTTPD.MIME_PLAINTEXT, "Could not process request."));
+				}
+			} catch (final Exception e) {
+				System.err.println(e.getMessage());
+				e.printStackTrace(System.err);
+				response = Optional.of(newFixedLengthResponse(Status.INTERNAL_ERROR, NanoHTTPD.MIME_PLAINTEXT, e.getMessage()));
 			}
 		}
 		return response;

@@ -10,8 +10,8 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 
-import nl.gingerbeard.automation.devices.Device;
 import nl.gingerbeard.automation.devices.OnOffDevice;
+import nl.gingerbeard.automation.devices.StateDevice;
 import nl.gingerbeard.automation.devices.Switch;
 import nl.gingerbeard.automation.state.OnOffState;
 
@@ -85,10 +85,10 @@ public class DomoticzTest {
 
 	private static class TestListener implements IDomoticzDeviceStatusChanged {
 
-		private final List<Device<?>> receivedDeviceUpdates = new ArrayList<>();
+		private final List<StateDevice<?>> receivedDeviceUpdates = new ArrayList<>();
 
 		@Override
-		public void statusChanged(final Device<?> device) {
+		public void statusChanged(final StateDevice<?> device) {
 			receivedDeviceUpdates.add(device);
 		}
 	}

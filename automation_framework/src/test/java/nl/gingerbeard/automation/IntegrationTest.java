@@ -22,6 +22,7 @@ import nl.gingerbeard.automation.state.NextState;
 import nl.gingerbeard.automation.state.OnOffState;
 import nl.gingerbeard.automation.state.Temperature;
 import nl.gingerbeard.automation.state.ThermostatState;
+import nl.gingerbeard.automation.state.ThermostatState.ThermostatMode;
 
 public class IntegrationTest {
 
@@ -110,19 +111,37 @@ public class IntegrationTest {
 
 	public static class RoomWithThermostat extends Room {
 
+		public static final int IDX_SENSOR = 1;
+		public static final int IDX_SETPOINT = 2;
+		public static final int IDX_MODE = 3;
+
 		private final Thermostat thermostat;
-		private static final Switch SENSOR = new Switch(1);
+		private static final Switch SENSOR = new Switch(IDX_SENSOR);
 		private final ThermostatState nextState;
+		private int thermostatChanges;
 
 		public RoomWithThermostat(final ThermostatState nextState) {
 			this.nextState = nextState;
-			thermostat = new Thermostat(2, 3);
+			thermostat = new Thermostat(IDX_SETPOINT, IDX_MODE);
 			addDevice(thermostat).and(SENSOR);
 		}
 
 		@Subscribe
 		public List<NextState<?>> process(final Switch trigger) {
 			return thermostat.createNextState(nextState);
+		}
+
+		@Subscribe
+		public void countThermostatChanges(final Thermostat device) {
+			thermostatChanges++;
+		}
+
+		public int getThermostatChangeCount() {
+			return thermostatChanges;
+		}
+
+		public Thermostat getThermostat() {
+			return thermostat;
 		}
 
 	}
@@ -134,13 +153,13 @@ public class IntegrationTest {
 
 		automation.addRoom(new RoomWithThermostat(thermostatState));
 
-		sendRequest(1, "on");
+		sendRequest(RoomWithThermostat.IDX_SENSOR, "on");
 
 		final List<String> requests = webserver.getRequests();
 		assertEquals(2, requests.size());
 
-		assertEquals("GET /json.htm?type=setused&idx=3&tmode=2&protected=false&used=true", requests.get(0));
-		assertEquals("GET /json.htm?type=setused&idx=2&setpoint=15.0&protected=false&used=true", requests.get(1));
+		assertEquals("GET /json.htm?type=setused&idx=" + RoomWithThermostat.IDX_MODE + "&tmode=2&protected=false&used=true", requests.get(0));
+		assertEquals("GET /json.htm?type=setused&idx=" + RoomWithThermostat.IDX_SETPOINT + "&setpoint=15.0&protected=false&used=true", requests.get(1));
 	}
 
 	@Test
@@ -149,26 +168,41 @@ public class IntegrationTest {
 		thermostatState.setOff();
 		automation.addRoom(new RoomWithThermostat(thermostatState));
 
-		sendRequest(1, "on");
+		sendRequest(RoomWithThermostat.IDX_SENSOR, "on");
 
 		final List<String> requests = webserver.getRequests();
 		assertEquals(1, requests.size());
 
-		assertEquals("GET /json.htm?type=setused&idx=3&tmode=0&protected=false&used=true", requests.get(0));
+		assertEquals("GET /json.htm?type=setused&idx=" + RoomWithThermostat.IDX_MODE + "&tmode=0&protected=false&used=true", requests.get(0));
 	}
 
 	@Test
 	public void thermostatModeFull_bySensorUpdate() throws IOException {
 		final ThermostatState thermostatState = new ThermostatState();
 		thermostatState.setFullHeat();
-		;
 		automation.addRoom(new RoomWithThermostat(thermostatState));
 
-		sendRequest(1, "on");
+		sendRequest(RoomWithThermostat.IDX_SENSOR, "on");
 
 		final List<String> requests = webserver.getRequests();
 		assertEquals(1, requests.size());
 
-		assertEquals("GET /json.htm?type=setused&idx=3&tmode=3&protected=false&used=true", requests.get(0));
+		assertEquals("GET /json.htm?type=setused&idx=" + RoomWithThermostat.IDX_MODE + "&tmode=3&protected=false&used=true", requests.get(0));
+	}
+
+	@Test
+	public void thermostatUpdateReceived_compositeTriggered() throws IOException {
+		final ThermostatState thermostatState = new ThermostatState();
+		thermostatState.setFullHeat();
+		final RoomWithThermostat room = new RoomWithThermostat(thermostatState);
+		automation.addRoom(room);
+
+		sendRequest(RoomWithThermostat.IDX_MODE, "off");
+
+		assertEquals(1, room.getThermostatChangeCount());
+		assertEquals(ThermostatMode.OFF, room.getThermostat().getState().getMode());
+
+		sendRequest(RoomWithThermostat.IDX_MODE, "full_heat");
+		assertEquals(ThermostatMode.FULL_HEAT, room.getThermostat().getState().getMode());
 	}
 }

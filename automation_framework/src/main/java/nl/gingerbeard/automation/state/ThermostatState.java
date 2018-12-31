@@ -13,6 +13,11 @@ public final class ThermostatState {
 	private ThermostatMode mode;
 	private Temperature setPoint;
 
+	public ThermostatState() {
+		mode = ThermostatMode.OFF;
+		setPoint = Temperature.celcius(20);
+	}
+
 	public void setFullHeat() {
 		mode = ThermostatMode.FULL_HEAT;
 	}
@@ -35,6 +40,10 @@ public final class ThermostatState {
 			return Optional.of(setPoint);
 		}
 		return Optional.empty();
+	}
+
+	public void setMode(final ThermostatMode newMode) {
+		mode = newMode;
 	}
 
 }
