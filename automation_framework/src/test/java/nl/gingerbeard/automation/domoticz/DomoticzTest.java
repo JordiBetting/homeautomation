@@ -40,23 +40,25 @@ public class DomoticzTest {
 	@Test
 	public void addDevice_twice_fails() {
 		final Domoticz domoticz = new Domoticz();
-
 		final Switch switch1 = new Switch(1);
 		boolean result = domoticz.addDevice(switch1);
 		assertTrue(result);
+
 		result = domoticz.addDevice(switch1);
+
 		assertFalse(result);
 	}
 
 	@Test
 	public void addDevices_sameidx_fails() {
 		final Domoticz domoticz = new Domoticz();
-
 		final Switch switch1 = new Switch(1);
 		final Switch switch2 = new Switch(1);
 		boolean result = domoticz.addDevice(switch1);
 		assertTrue(result);
+
 		result = domoticz.addDevice(switch2);
+
 		assertFalse(result);
 	}
 
@@ -74,6 +76,7 @@ public class DomoticzTest {
 	public void update_invalidNewState_returnsFalse() {
 		final Domoticz domoticz = new Domoticz();
 		domoticz.addDevice(new Switch(1));
+
 		final boolean result = domoticz.deviceChanged(1, "does not exist");
 
 		assertFalse(result);
@@ -87,7 +90,6 @@ public class DomoticzTest {
 		@Override
 		public void statusChanged(final Device<?> device) {
 			receivedDeviceUpdates.add(device);
-
 		}
 	}
 

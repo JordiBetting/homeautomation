@@ -20,11 +20,9 @@ final class URLBuilder {
 
 	public URLBuilder addIdx(final NextState<?> nextState) {
 		final StateDevice<?> device = nextState.getDevice();
-		if (device instanceof Device) {
-			final int idx = ((Device<?>) device).getIdx();
-			add(Keys.IDX, idx);
-		}
-		return this;
+		// throws cast exception when it is not a device, which means it is an implemnetation error in DomoticzUrls class. Therefore, accepted.
+		final int idx = ((Device<?>) device).getIdx();
+		return add(Keys.IDX, idx);
 	}
 
 	public URL build() throws MalformedURLException {

@@ -56,8 +56,6 @@ public final class DomoticzUrls {
 		case OFF:
 			tmode = 0;
 			break;
-		default:
-			throw new MalformedURLException("Cannot construct URL for thermostatMode: " + thermostatMode);
 		}
 		return tmode;
 	}
