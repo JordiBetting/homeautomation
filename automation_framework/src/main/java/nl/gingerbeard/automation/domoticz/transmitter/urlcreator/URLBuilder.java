@@ -4,6 +4,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import nl.gingerbeard.automation.devices.Device;
+import nl.gingerbeard.automation.devices.StateDevice;
 import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
 import nl.gingerbeard.automation.state.NextState;
 
@@ -18,9 +19,12 @@ final class URLBuilder {
 	}
 
 	public URLBuilder addIdx(final NextState<?> nextState) {
-		final Device<?> device = nextState.getDevice();
-		final int idx = device.getIdx();
-		return add(Keys.IDX, idx);
+		final StateDevice<?> device = nextState.getDevice();
+		if (device instanceof Device) {
+			final int idx = ((Device<?>) device).getIdx();
+			add(Keys.IDX, idx);
+		}
+		return this;
 	}
 
 	public URL build() throws MalformedURLException {

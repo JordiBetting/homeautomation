@@ -48,4 +48,25 @@ public class TemperatureTest {
 			assertEquals("Unit null unknown", e.getMessage());
 		}
 	}
+
+	@Test
+	public void builderCelcius_returnsValue() {
+		final Temperature temperature = Temperature.celcius(15);
+
+		assertEquals(15, temperature.get(Unit.CELSIUS));
+	}
+
+	@Test
+	public void builderFahrenheit_returnsValue() {
+		final Temperature temperature = Temperature.fahrenheit(15);
+
+		assertEquals(15, temperature.get(Unit.FAHRENHEIT));
+	}
+
+	@Test
+	public void builderKelvin_returnsValue() {
+		final Temperature temperature = Temperature.kelvin(15);
+
+		assertEquals(15, temperature.get(Unit.KELVIN));
+	}
 }

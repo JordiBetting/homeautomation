@@ -14,11 +14,20 @@ public class Room {
 
 	private final List<IDevice<?>> allDevices = new ArrayList<>();
 
-	protected void addDevice(final IDevice device) {
-		allDevices.add(device);
+	private final RoomBuilder builder = new RoomBuilder();
+
+	public class RoomBuilder {
+		public RoomBuilder and(final IDevice<?> device) {
+			allDevices.add(device);
+			return this;
+		}
 	}
 
-	public List<IDevice<?>> getDevices() {
+	protected final RoomBuilder addDevice(final IDevice<?> device) {
+		return builder.and(device);
+	}
+
+	public final List<IDevice<?>> getDevices() {
 		return Collections.unmodifiableList(allDevices);
 	}
 }

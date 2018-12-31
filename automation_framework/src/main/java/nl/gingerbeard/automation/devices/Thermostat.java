@@ -1,7 +1,12 @@
 package nl.gingerbeard.automation.devices;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
 import com.google.common.collect.Sets;
 
+import nl.gingerbeard.automation.state.NextState;
 import nl.gingerbeard.automation.state.Temperature;
 import nl.gingerbeard.automation.state.ThermostatState;
 import nl.gingerbeard.automation.state.ThermostatState.ThermostatMode;
@@ -9,14 +14,14 @@ import nl.gingerbeard.automation.state.ThermostatState.ThermostatMode;
 public class Thermostat extends CompositeDevice<ThermostatState> {
 
 	public abstract static class ThermostatSubdevice<T> extends Device<T> {
-		protected Thermostat parent;
+		protected Optional<Thermostat> parent = Optional.empty();
 
 		public ThermostatSubdevice(final int idx) {
 			super(idx);
 		}
 
 		public void setParent(final Thermostat parent) {
-			this.parent = parent;
+			this.parent = Optional.of(parent);
 		}
 	}
 
@@ -28,7 +33,7 @@ public class Thermostat extends CompositeDevice<ThermostatState> {
 
 		@Override
 		public boolean updateState(final String newState) {
-			parent.setpointUpdated();
+			parent.ifPresent((parent) -> parent.setpointUpdated());
 			// TODO
 			return false;
 		}
@@ -43,11 +48,15 @@ public class Thermostat extends CompositeDevice<ThermostatState> {
 
 		@Override
 		public boolean updateState(final String newState) {
-			parent.modeUpdated();
+			parent.ifPresent((parent) -> parent.modeUpdated());
+			// TODO
 			return false;
 		}
 
 	}
+
+	private ThermostatModeDevice modeDevice;
+	private ThermostatSetpointDevice setpointDevice;
 
 	public Thermostat(final int idxSetpoint, final int idxMode) {
 		super(Sets.newHashSet(new ThermostatSetpointDevice(idxSetpoint), new ThermostatModeDevice(idxMode)));
@@ -55,6 +64,11 @@ public class Thermostat extends CompositeDevice<ThermostatState> {
 		for (final Device<?> device : getDevices()) {
 			final ThermostatSubdevice<?> sub = (ThermostatSubdevice<?>) device;
 			sub.setParent(this);
+			if (device instanceof ThermostatModeDevice) {
+				modeDevice = (ThermostatModeDevice) device;
+			} else {
+				setpointDevice = (ThermostatSetpointDevice) device;
+			}
 		}
 	}
 
@@ -71,6 +85,16 @@ public class Thermostat extends CompositeDevice<ThermostatState> {
 	public boolean updateState(final String newState) {
 		// TODO Auto-generated method stub
 		return false;
+	}
+
+	public List<NextState<?>> createNextState(final ThermostatState thermostatState) {
+		final List<NextState<?>> nextStates = new ArrayList<>();
+
+		nextStates.add(new NextState<>(modeDevice, thermostatState.getMode()));
+		thermostatState.getSetPoint().ifPresent(//
+				(setpoint) -> nextStates.add(new NextState<>(setpointDevice, setpoint)));
+
+		return nextStates;
 	}
 
 }

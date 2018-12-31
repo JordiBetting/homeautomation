@@ -10,6 +10,7 @@ import nl.gingerbeard.automation.state.NextState;
 import nl.gingerbeard.automation.state.OnOffState;
 import nl.gingerbeard.automation.state.Temperature;
 import nl.gingerbeard.automation.state.Temperature.Unit;
+import nl.gingerbeard.automation.state.ThermostatState.ThermostatMode;
 
 public final class DomoticzUrls {
 
@@ -27,8 +28,38 @@ public final class DomoticzUrls {
 			return constructLevelState((NextState<Level>) nextState);
 		} else if (isStateType(nextState, Temperature.class)) {
 			return constructTemperatureState((NextState<Temperature>) nextState);
+		} else if (isStateType(nextState, ThermostatMode.class)) {
+			return constructThermostatMode((NextState<ThermostatMode>) nextState);
 		}
 		throw new MalformedURLException("Cannot construct url from unsupported state: " + nextState.get().getClass());
+	}
+
+	private URL constructThermostatMode(final NextState<ThermostatMode> nextState) throws MalformedURLException {
+		return URLBuilder.create(configuration) //
+				.add(Keys.TYPE, Type.SETUSED) //
+				.addIdx(nextState) //
+				.add(Keys.TMODE, getThermostatTMode(nextState.get())) //
+				.add(Keys.PROTECTED, "false")//
+				.add(Keys.USED, "true")//
+				.build();
+	}
+
+	private int getThermostatTMode(final ThermostatMode thermostatMode) throws MalformedURLException {
+		int tmode = 0;
+		switch (thermostatMode) {
+		case FULL_HEAT:
+			tmode = 3;
+			break;
+		case SETPOINT:
+			tmode = 2;
+			break;
+		case OFF:
+			tmode = 0;
+			break;
+		default:
+			throw new MalformedURLException("Cannot construct URL for thermostatMode: " + thermostatMode);
+		}
+		return tmode;
 	}
 
 	private URL constructTemperatureState(final NextState<Temperature> nextState) throws MalformedURLException {

@@ -9,6 +9,7 @@ enum Keys implements QueryStringItem {
 	SETPOINT, //
 	PROTECTED, //
 	USED, //
+	TMODE, //
 	;
 
 }
