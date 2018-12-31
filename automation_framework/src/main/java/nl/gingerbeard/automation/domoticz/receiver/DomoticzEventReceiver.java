@@ -25,7 +25,7 @@ public final class DomoticzEventReceiver extends NanoHTTPD implements IDomoticzE
 	}
 
 	// matches /id/action/ e.g. /123/close or /123/close/
-	private static final Pattern URIPATTERN = Pattern.compile("/([0-9]+)/([a-zA-Z_]+)/?");
+	private static final Pattern URIPATTERN = Pattern.compile("/([0-9]+)/([0-9a-zA-Z_]+)/?");
 	private Optional<EventReceived> listener = Optional.empty();
 
 	public DomoticzEventReceiver(final DomoticzConfiguration config) throws IOException {

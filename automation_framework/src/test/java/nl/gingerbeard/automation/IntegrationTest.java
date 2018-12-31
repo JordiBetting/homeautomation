@@ -1,6 +1,8 @@
 package nl.gingerbeard.automation;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -21,6 +23,7 @@ import nl.gingerbeard.automation.service.Container;
 import nl.gingerbeard.automation.state.NextState;
 import nl.gingerbeard.automation.state.OnOffState;
 import nl.gingerbeard.automation.state.Temperature;
+import nl.gingerbeard.automation.state.Temperature.Unit;
 import nl.gingerbeard.automation.state.ThermostatState;
 import nl.gingerbeard.automation.state.ThermostatState.ThermostatMode;
 
@@ -88,7 +91,7 @@ public class IntegrationTest {
 		final URL url = new URL("http://localhost:" + port + "/" + idx + "/" + state);
 		final HttpURLConnection con = (HttpURLConnection) url.openConnection();
 		con.setRequestMethod("GET");
-		assertEquals(200, con.getResponseCode());
+		assertEquals(200, con.getResponseCode(), "Status expected: 200 but was: " + con.getResponseCode() + ". Content: " + con.getContent());
 	}
 
 	@Test
@@ -198,11 +201,23 @@ public class IntegrationTest {
 		automation.addRoom(room);
 
 		sendRequest(RoomWithThermostat.IDX_MODE, "off");
-
 		assertEquals(1, room.getThermostatChangeCount());
 		assertEquals(ThermostatMode.OFF, room.getThermostat().getState().getMode());
+		assertFalse(room.getThermostat().getState().getSetPoint().isPresent());
 
 		sendRequest(RoomWithThermostat.IDX_MODE, "full_heat");
+		assertEquals(2, room.getThermostatChangeCount());
 		assertEquals(ThermostatMode.FULL_HEAT, room.getThermostat().getState().getMode());
+		assertFalse(room.getThermostat().getState().getSetPoint().isPresent());
+
+		sendRequest(RoomWithThermostat.IDX_MODE, "setpoint");
+		assertEquals(3, room.getThermostatChangeCount());
+		assertEquals(ThermostatMode.SETPOINT, room.getThermostat().getState().getMode());
+		assertTrue(room.getThermostat().getState().getSetPoint().isPresent());
+
+		sendRequest(RoomWithThermostat.IDX_SETPOINT, "14");
+		assertEquals(4, room.getThermostatChangeCount());
+		assertTrue(room.getThermostat().getState().getSetPoint().isPresent());
+		assertEquals(14, room.getThermostat().getState().getSetPoint().get().get(Unit.CELSIUS));
 	}
 }
