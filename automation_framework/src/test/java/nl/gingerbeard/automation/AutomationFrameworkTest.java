@@ -17,7 +17,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import nl.gingerbeard.automation.devices.Device;
-import nl.gingerbeard.automation.devices.IDevice;
 import nl.gingerbeard.automation.devices.Switch;
 import nl.gingerbeard.automation.devices.TestDevice;
 import nl.gingerbeard.automation.devices.Thermostat;
@@ -361,42 +360,6 @@ public class AutomationFrameworkTest {
 
 		assertEquals(1, setpoint.get().getIdx());
 		assertEquals(2, mode.get().getIdx());
-	}
-
-	private class RoomWithInvalidDevice extends Room {
-
-		public RoomWithInvalidDevice() {
-			addDevice(new IDevice<Void>() {
-
-				@Override
-				public boolean updateState(final String newState) {
-					return false;
-				}
-
-				@Override
-				public Void getState() {
-					return null;
-				}
-
-				@Override
-				public void setState(final Void newState) {
-				}
-			});
-			addDevice(new Switch(1));
-		}
-	}
-
-	@Test
-	public void roomWithValidAndInvalidDevice_invalidIgnored() {
-		final DomoticzTransmitRecorder recorder = new DomoticzTransmitRecorder();
-		final IAutomationFrameworkInterface framework = new AutomationFramework(new MockEvents(), recorder);
-
-		framework.addRoom(new RoomWithInvalidDevice());
-
-		final List<Device<?>> devices = recorder.getDevices();
-		assertEquals(1, devices.size());
-
-		assertEquals(Switch.class, devices.get(0).getClass());
 	}
 
 	private static class DomoticzTransmitRecorder implements IDomoticz {

@@ -40,12 +40,6 @@ public final class Thermostat extends CompositeDevice<ThermostatState> {
 		getState().setTemperature(setpointDevice.getState());
 	}
 
-	@Override
-	public boolean updateState(final String newState) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
 	public List<NextState<?>> createNextState(final ThermostatState thermostatState) {
 		final List<NextState<?>> nextStates = new ArrayList<>();
 

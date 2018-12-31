@@ -67,8 +67,4 @@ class Controlloop implements IDomoticzDeviceStatusChanged {
 		return Collection.class.isAssignableFrom(result.getClass());
 	}
 
-	// public void stateChanged() {
-	//
-	// }
-
 }

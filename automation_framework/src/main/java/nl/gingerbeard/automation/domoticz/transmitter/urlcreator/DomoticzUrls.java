@@ -45,19 +45,13 @@ public final class DomoticzUrls {
 	}
 
 	private int getThermostatTMode(final ThermostatMode thermostatMode) throws MalformedURLException {
-		int tmode = 0;
-		switch (thermostatMode) {
-		case FULL_HEAT:
-			tmode = 3;
-			break;
-		case SETPOINT:
-			tmode = 2;
-			break;
-		case OFF:
-			tmode = 0;
-			break;
+		if (thermostatMode == ThermostatMode.FULL_HEAT) {
+			return 3;
+		} else if (thermostatMode == ThermostatMode.SETPOINT) {
+			return 2;
+		} else { // (thermostatMode == ThermostatMode.OFF)
+			return 0;
 		}
-		return tmode;
 	}
 
 	private URL constructTemperatureState(final NextState<Temperature> nextState) throws MalformedURLException {
