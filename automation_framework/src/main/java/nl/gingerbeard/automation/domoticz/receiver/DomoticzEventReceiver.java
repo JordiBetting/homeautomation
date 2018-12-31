@@ -2,8 +2,6 @@ package nl.gingerbeard.automation.domoticz.receiver;
 
 import java.io.IOException;
 import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import fi.iki.elonen.NanoHTTPD;
 import fi.iki.elonen.NanoHTTPD.Response.Status;
@@ -24,8 +22,6 @@ public final class DomoticzEventReceiver extends NanoHTTPD implements IDomoticzE
 		public boolean deviceChanged(int idx, String newState);
 	}
 
-	// matches /id/action/ e.g. /123/close or /123/close/
-	private static final Pattern URIPATTERN = Pattern.compile("/([0-9]+)/([0-9a-zA-Z_]+)/?");
 	private Optional<EventReceived> listener = Optional.empty();
 
 	public DomoticzEventReceiver(final DomoticzConfiguration config) throws IOException {
@@ -63,21 +59,10 @@ public final class DomoticzEventReceiver extends NanoHTTPD implements IDomoticzE
 		}
 	}
 
-	private static class ResponseParameters {
-		public final int idx;
-		public final String state;
-
-		public ResponseParameters(final int idx, final String state) {
-			this.idx = idx;
-			this.state = state;
-		}
-
-	}
-
 	private Response processGetRequest(final String uri) {
 		Response response;
 
-		final Optional<ResponseParameters> responseParams = parseParameters(uri);
+		final Optional<ResponseParameters> responseParams = UrlPatternParser.parseParameters(uri);
 		if (responseParams.isPresent()) {
 			final Response defaultResponse = newFixedLengthResponse(Status.OK, NanoHTTPD.MIME_PLAINTEXT, "OKIDOKI");
 			final Optional<Response> listenerResponse = triggerListener(responseParams.get());
@@ -93,7 +78,7 @@ public final class DomoticzEventReceiver extends NanoHTTPD implements IDomoticzE
 
 		if (listener.isPresent()) {
 			try {
-				final boolean result = listener.get().deviceChanged(responseParams.idx, responseParams.state);
+				final boolean result = listener.get().deviceChanged(responseParams.getIdx(), responseParams.getState());
 				if (result == false) {
 					response = Optional.of(newFixedLengthResponse(Status.NOT_FOUND, NanoHTTPD.MIME_PLAINTEXT, "Could not process request."));
 				}
@@ -104,16 +89,6 @@ public final class DomoticzEventReceiver extends NanoHTTPD implements IDomoticzE
 			}
 		}
 		return response;
-	}
-
-	private Optional<ResponseParameters> parseParameters(final String uri) {
-		final Matcher m = URIPATTERN.matcher(uri);
-		final boolean matches = m.matches();
-		Optional<ResponseParameters> responseParams = Optional.empty();
-		if (matches) {
-			responseParams = Optional.of(new ResponseParameters(Integer.parseInt(m.group(1)), m.group(2)));
-		}
-		return responseParams;
 	}
 
 }
