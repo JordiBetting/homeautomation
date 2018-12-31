@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Test;
 
 import nl.gingerbeard.automation.devices.Device;
 import nl.gingerbeard.automation.event.annotations.Subscribe;
-import nl.gingerbeard.automation.state.NextState;
 import nl.gingerbeard.automation.state.State;
 
 public class SynchronousEventsTest {
@@ -54,17 +53,6 @@ public class SynchronousEventsTest {
 		@Override
 		public boolean updateState(final String newState) {
 			return false;
-		}
-
-		@Override
-		public String getDomoticzParam() {
-			return null;
-		}
-
-		@Override
-		public String getDomoticzSwitchCmd(final NextState<Void> nextState) {
-			// TODO Auto-generated method stub
-			return null;
 		}
 
 	}

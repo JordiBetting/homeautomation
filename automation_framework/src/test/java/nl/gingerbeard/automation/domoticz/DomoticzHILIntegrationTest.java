@@ -1,8 +1,5 @@
 package nl.gingerbeard.automation.domoticz;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
-
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -12,11 +9,16 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import nl.gingerbeard.automation.devices.DimmeableLight;
+import nl.gingerbeard.automation.devices.ThermostatModeDevice;
+import nl.gingerbeard.automation.devices.ThermostatSetpointDevice;
 import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
 import nl.gingerbeard.automation.domoticz.transmitter.DomoticzUpdateTransmitter;
 import nl.gingerbeard.automation.domoticz.transmitter.IDomoticzUpdateTransmitter;
+import nl.gingerbeard.automation.state.Level;
 import nl.gingerbeard.automation.state.NextState;
-import nl.gingerbeard.automation.state.Percentage;
+import nl.gingerbeard.automation.state.Temperature;
+import nl.gingerbeard.automation.state.Temperature.Unit;
+import nl.gingerbeard.automation.state.ThermostatState.ThermostatMode;
 
 @Disabled
 public class DomoticzHILIntegrationTest {
@@ -33,33 +35,23 @@ public class DomoticzHILIntegrationTest {
 		final IDomoticzUpdateTransmitter transmitter = new DomoticzUpdateTransmitter(domoticzConfig);
 		final DimmeableLight device = new DimmeableLight(274);
 
-		transmitter.transmitDeviceUpdate(new NextState<>(device, new Percentage(10)));
-	}
-
-	private static class ErrorDimmeableLight extends DimmeableLight {
-
-		public ErrorDimmeableLight(final int idx) {
-			super(idx);
-		}
-
-		@Override
-		public String getDomoticzSwitchCmd(final NextState<Percentage> nextState) {
-			return "ThatWasUnexpected";
-		}
-
+		transmitter.transmitDeviceUpdate(new NextState<>(device, new Level(10)));
 	}
 
 	@Test
-	public void domoticz_returnError() throws IOException {
+	public void setHeatingSetpointLivingRoom() throws IOException {
 		final IDomoticzUpdateTransmitter transmitter = new DomoticzUpdateTransmitter(domoticzConfig);
-		final ErrorDimmeableLight device = new ErrorDimmeableLight(274);
+		final ThermostatSetpointDevice device = new ThermostatSetpointDevice(471);
 
-		try {
-			transmitter.transmitDeviceUpdate(new NextState<>(device, new Percentage(10)));
-			fail("Expected exception");
-		} catch (final IOException e) {
-			assertEquals("Failed setting value in domotics: {\"message\":\"Error sending switch command, check device\\/hardware !\",\"title\":\"SwitchLight\",\"status\":\"ERROR\"}", e.getMessage());
-		}
+		transmitter.transmitDeviceUpdate(new NextState<>(device, new Temperature(22, Unit.CELSIUS)));
+	}
+
+	@Test
+	public void setHeatingModeLivingRoom() throws IOException {
+		final IDomoticzUpdateTransmitter transmitter = new DomoticzUpdateTransmitter(domoticzConfig);
+		final ThermostatModeDevice device = new ThermostatModeDevice(469);
+
+		transmitter.transmitDeviceUpdate(new NextState<>(device, ThermostatMode.FULL_HEAT));
 	}
 
 }

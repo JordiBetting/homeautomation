@@ -67,6 +67,18 @@ public final class Temperature {
 		this.unit = unit;
 	}
 
+	public static Temperature celcius(final double temperature) {
+		return new Temperature(temperature, Unit.CELSIUS);
+	}
+
+	public static Temperature fahrenheit(final double temperature) {
+		return new Temperature(temperature, Unit.FAHRENHEIT);
+	}
+
+	public static Temperature kelvin(final double temperature) {
+		return new Temperature(temperature, Unit.KELVIN);
+	}
+
 	public double get(final Unit unit) {
 		if (unit != null) {
 			switch (unit) {

@@ -5,7 +5,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import nl.gingerbeard.automation.devices.Device;
+import nl.gingerbeard.automation.devices.StateDevice;
+import nl.gingerbeard.automation.devices.Subdevice;
 import nl.gingerbeard.automation.domoticz.IDomoticzDeviceStatusChanged;
 import nl.gingerbeard.automation.domoticz.transmitter.IDomoticzUpdateTransmitter;
 import nl.gingerbeard.automation.event.EventResult;
@@ -21,18 +22,21 @@ class Controlloop implements IDomoticzDeviceStatusChanged {
 		this.transmitter = transmitter;
 	}
 
-	// domoticz event: add change [trigger=device], commandArray['OpenURL']='www.yourdomain.com/api/movecamtopreset.cgi' with device ID of changed device
+	// TODO domoticz event: add change [trigger=device], commandArray['OpenURL']='www.yourdomain.com/api/movecamtopreset.cgi' with device ID of changed device
 	@Override
-	public void statusChanged(final Device<?> changedDevice) {
+	public void statusChanged(final StateDevice<?> changedDevice) {
 		final EventResult results = events.trigger(changedDevice);
 		for (final NextState<?> update : filter(results)) {
 			try {
 				transmitter.transmitDeviceUpdate(update);
 			} catch (final IOException e) {
-				e.printStackTrace();
+				e.printStackTrace(); // TODO: Logging
 			}
 		}
-
+		if (changedDevice instanceof Subdevice) {
+			final Subdevice<?, ?> sub = (Subdevice<?, ?>) changedDevice;
+			sub.getParent().ifPresent((parent) -> statusChanged(parent));
+		}
 	}
 
 	private List<NextState<?>> filter(final EventResult results) {
@@ -62,9 +66,5 @@ class Controlloop implements IDomoticzDeviceStatusChanged {
 	private boolean isCollection(final Object result) {
 		return Collection.class.isAssignableFrom(result.getClass());
 	}
-
-	// public void stateChanged() {
-	//
-	// }
 
 }

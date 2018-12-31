@@ -1,7 +1,7 @@
 package nl.gingerbeard.automation.domoticz;
 
-import nl.gingerbeard.automation.devices.Device;
+import nl.gingerbeard.automation.devices.StateDevice;
 
 public interface IDomoticzDeviceStatusChanged {
-	void statusChanged(Device<?> device);
+	void statusChanged(StateDevice<?> device);
 }

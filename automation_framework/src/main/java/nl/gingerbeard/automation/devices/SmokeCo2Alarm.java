@@ -2,8 +2,8 @@ package nl.gingerbeard.automation.devices;
 
 public class SmokeCo2Alarm extends OnOffDevice {
 
-	public SmokeCo2Alarm(final int idx, final int batteryDomoticzId) {
-		super(idx, batteryDomoticzId);
+	public SmokeCo2Alarm(final int idx) {
+		super(idx);
 	}
 
 	@Override

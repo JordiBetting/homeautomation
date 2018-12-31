@@ -1,8 +1,8 @@
 package nl.gingerbeard.automation.devices;
 
-public class TestDevice extends Device<Void> {
+public class StringTestDevice extends Device<String> {
 
-	public TestDevice() {
+	public StringTestDevice() {
 		super(0);
 	}
 

@@ -9,6 +9,8 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.AfterEach;
@@ -17,8 +19,14 @@ import org.junit.jupiter.api.Test;
 import nl.gingerbeard.automation.devices.Device;
 import nl.gingerbeard.automation.devices.Switch;
 import nl.gingerbeard.automation.devices.TestDevice;
+import nl.gingerbeard.automation.devices.Thermostat;
+import nl.gingerbeard.automation.devices.ThermostatModeDevice;
+import nl.gingerbeard.automation.devices.ThermostatSetpointDevice;
+import nl.gingerbeard.automation.domoticz.IDomoticz;
 import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
 import nl.gingerbeard.automation.domoticz.receiver.IDomoticzEventReceiver;
+import nl.gingerbeard.automation.event.EventResult;
+import nl.gingerbeard.automation.event.IEvents;
 import nl.gingerbeard.automation.event.annotations.EventState;
 import nl.gingerbeard.automation.event.annotations.Subscribe;
 import nl.gingerbeard.automation.service.Container;
@@ -319,4 +327,67 @@ public class AutomationFrameworkTest {
 		assertNotEquals(0, port);
 		return port;
 	}
+
+	private static class ThermostatRoom extends Room {
+		public ThermostatRoom() {
+			final Thermostat thermostat = new Thermostat(1, 2);
+			addDevice(thermostat);
+		}
+	}
+
+	@Test
+	public void compositeTest_allDevicesAdded() {
+		final DomoticzTransmitRecorder recorder = new DomoticzTransmitRecorder();
+		final IAutomationFrameworkInterface framework = new AutomationFramework(new MockEvents(), recorder);
+
+		framework.addRoom(new ThermostatRoom());
+
+		final List<Device<?>> devices = recorder.getDevices();
+		assertEquals(2, devices.size());
+
+		Optional<ThermostatSetpointDevice> setpoint = Optional.empty();
+		Optional<ThermostatModeDevice> mode = Optional.empty();
+		for (final Device<?> device : devices) {
+			if (device instanceof ThermostatSetpointDevice) {
+				setpoint = Optional.ofNullable((ThermostatSetpointDevice) device);
+			} else if (device instanceof ThermostatModeDevice) {
+				mode = Optional.ofNullable((ThermostatModeDevice) device);
+			}
+		}
+
+		assertTrue(setpoint.isPresent());
+		assertTrue(mode.isPresent());
+
+		assertEquals(1, setpoint.get().getIdx());
+		assertEquals(2, mode.get().getIdx());
+	}
+
+	private static class DomoticzTransmitRecorder implements IDomoticz {
+
+		private final List<Device<?>> devices = new ArrayList<>();
+
+		@Override
+		public boolean addDevice(final Device<?> device) {
+			devices.add(device);
+			return true;
+		}
+
+		public List<Device<?>> getDevices() {
+			return devices;
+		}
+
+	}
+
+	private static class MockEvents implements IEvents {
+
+		@Override
+		public EventResult trigger(final Object event) {
+			return null;
+		}
+
+		@Override
+		public void subscribe(final Object subscriber) {
+		}
+	}
+
 }
