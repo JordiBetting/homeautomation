@@ -13,7 +13,7 @@ public abstract class OnOffDevice extends Device<OnOffState> {
 	@Override
 	public boolean updateState(final String newStateString) {
 		try {
-			final OnOffState newState = OnOffState.valueOf(newStateString.toUpperCase(Locale.ENGLISH));
+			final OnOffState newState = OnOffState.valueOf(newStateString.toUpperCase(Locale.US));
 			setState(newState);
 			return true;
 		} catch (final IllegalArgumentException e) {
