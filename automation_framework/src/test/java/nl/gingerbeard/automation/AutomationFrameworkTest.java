@@ -2,6 +2,7 @@ package nl.gingerbeard.automation;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
@@ -17,6 +18,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import nl.gingerbeard.automation.devices.Device;
+import nl.gingerbeard.automation.devices.IDevice;
 import nl.gingerbeard.automation.devices.Switch;
 import nl.gingerbeard.automation.devices.TestDevice;
 import nl.gingerbeard.automation.devices.Thermostat;
@@ -390,4 +392,28 @@ public class AutomationFrameworkTest {
 		}
 	}
 
+	private static class FakeDevice implements IDevice<Void> {
+
+		@Override
+		public Void getState() {
+			return null;
+		}
+
+		@Override
+		public void setState(final Void newState) {
+		}
+
+	}
+
+	private static class RoomWithFakeDevice extends Room {
+		RoomWithFakeDevice() {
+			addDevice(new FakeDevice());
+		}
+	}
+
+	@Test
+	public void addUnsupportedDevice_throwsException() {
+		final IAutomationFrameworkInterface framework = new AutomationFramework(new MockEvents(), new DomoticzTransmitRecorder());
+		assertThrows(UnsupportedOperationException.class, () -> framework.addRoom(new RoomWithFakeDevice()));
+	}
 }
