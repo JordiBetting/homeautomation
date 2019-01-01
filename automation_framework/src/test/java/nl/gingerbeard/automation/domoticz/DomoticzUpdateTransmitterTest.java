@@ -1,6 +1,7 @@
 package nl.gingerbeard.automation.domoticz;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
@@ -158,7 +159,13 @@ public class DomoticzUpdateTransmitterTest {
 		} catch (final IOException e) {
 			assertEquals("Unable to parse JSON from domoticz", e.getMessage());
 		}
-
 	}
 
+	@Test
+	public void testFailedConnection() throws IOException {
+		final IDomoticzUpdateTransmitter transmitter = new DomoticzUpdateTransmitter(new DomoticzConfiguration(0, new URL("http://doesnotexist")));
+		final NextState<OnOffState> newState = new NextState<>(new Switch(0), OnOffState.OFF);
+
+		assertThrows(IOException.class, () -> transmitter.transmitDeviceUpdate(newState));
+	}
 }
