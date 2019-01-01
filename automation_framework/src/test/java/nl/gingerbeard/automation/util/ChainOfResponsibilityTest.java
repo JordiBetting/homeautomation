@@ -8,9 +8,9 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 
-public class ChainOfCommandTest {
+public class ChainOfResponsibilityTest {
 
-	static class MyChainOfCommand1 extends ChainOfCommand<String, String> {
+	static class MyChain1 extends ChainOfResponsibility<String, String> {
 
 		@Override
 		protected boolean matches(final String item) {
@@ -23,7 +23,7 @@ public class ChainOfCommandTest {
 		}
 	}
 
-	static class MyChainOfCommand2 extends ChainOfCommand<String, String> {
+	static class MyChain2 extends ChainOfResponsibility<String, String> {
 
 		@Override
 		protected boolean matches(final String item) {
@@ -39,23 +39,23 @@ public class ChainOfCommandTest {
 	@Test
 	public void execute() {
 		Optional<String> result;
-		final MyChainOfCommand1 first = new MyChainOfCommand1();
-		final MyChainOfCommand2 next = new MyChainOfCommand2();
+		final MyChain1 first = new MyChain1();
+		final MyChain2 next = new MyChain2();
 		first.setNextLink(next);
 
 		result = first.execute("alphabet");
 		assertTrue(result.isPresent());
-		assertEquals("MyChainOfCommand1", result.get());
+		assertEquals("MyChain1", result.get());
 
 		result = first.execute("bird");
 		assertTrue(result.isPresent());
-		assertEquals("MyChainOfCommand2", result.get());
+		assertEquals("MyChain2", result.get());
 	}
 
 	@Test
 	public void execute_notProcesssed() {
-		final MyChainOfCommand1 first = new MyChainOfCommand1();
-		final MyChainOfCommand2 next = new MyChainOfCommand2();
+		final MyChain1 first = new MyChain1();
+		final MyChain2 next = new MyChain2();
 		first.setNextLink(next);
 
 		final Optional<String> result = first.execute("notImplemented");
@@ -66,25 +66,25 @@ public class ChainOfCommandTest {
 	@Test
 	public void chainbuilder() {
 		Optional<String> result;
-		final ChainOfCommand.Builder<String, String> builder = ChainOfCommand.builder();
-		final ChainOfCommand<String, String> chain = builder//
-				.add(new MyChainOfCommand1())//
-				.add(new MyChainOfCommand2())//
+		final ChainOfResponsibility.Builder<String, String> builder = ChainOfResponsibility.builder();
+		final ChainOfResponsibility<String, String> chain = builder//
+				.add(new MyChain1())//
+				.add(new MyChain2())//
 				.build();
 
 		result = chain.execute("alphabet");
 		assertTrue(result.isPresent());
-		assertEquals("MyChainOfCommand1", result.get());
+		assertEquals("MyChain1", result.get());
 
 		result = chain.execute("bird");
 		assertTrue(result.isPresent());
-		assertEquals("MyChainOfCommand2", result.get());
+		assertEquals("MyChain2", result.get());
 	}
 
 	@Test
 	public void chainBuilder_empty_throwsException() {
 
-		final ChainOfCommand.Builder<String, String> builder = ChainOfCommand.builder();
+		final ChainOfResponsibility.Builder<String, String> builder = ChainOfResponsibility.builder();
 		try {
 			builder.build();
 			fail("Expected exception");

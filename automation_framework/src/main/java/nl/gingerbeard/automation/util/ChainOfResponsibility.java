@@ -2,9 +2,9 @@ package nl.gingerbeard.automation.util;
 
 import java.util.Optional;
 
-public abstract class ChainOfCommand<SubjectType, ReturnType> {
+public abstract class ChainOfResponsibility<SubjectType, ReturnType> {
 
-	private Optional<ChainOfCommand<SubjectType, ReturnType>> nextLink = Optional.empty();
+	private Optional<ChainOfResponsibility<SubjectType, ReturnType>> nextLink = Optional.empty();
 
 	public final Optional<ReturnType> execute(final SubjectType item) {
 		if (matches(item)) {
@@ -32,7 +32,7 @@ public abstract class ChainOfCommand<SubjectType, ReturnType> {
 		return Optional.ofNullable(doWork(item));
 	}
 
-	public final void setNextLink(final ChainOfCommand<SubjectType, ReturnType> nextType) {
+	public final void setNextLink(final ChainOfResponsibility<SubjectType, ReturnType> nextType) {
 		this.nextLink = Optional.ofNullable(nextType);
 	}
 
@@ -46,15 +46,15 @@ public abstract class ChainOfCommand<SubjectType, ReturnType> {
 
 	public static final class Builder<SubjectType, ReturnType> {
 
-		private Optional<ChainOfCommand<SubjectType, ReturnType>> chain = Optional.empty();
+		private Optional<ChainOfResponsibility<SubjectType, ReturnType>> chain = Optional.empty();
 
-		public Builder<SubjectType, ReturnType> add(final ChainOfCommand<SubjectType, ReturnType> link) {
+		public Builder<SubjectType, ReturnType> add(final ChainOfResponsibility<SubjectType, ReturnType> link) {
 			chain.ifPresent((nextLink) -> link.setNextLink(nextLink));
 			chain = Optional.of(link);
 			return this;
 		}
 
-		public ChainOfCommand<SubjectType, ReturnType> build() {
+		public ChainOfResponsibility<SubjectType, ReturnType> build() {
 			return chain.orElseThrow(() -> new IllegalStateException("No links present in chain."));
 		}
 

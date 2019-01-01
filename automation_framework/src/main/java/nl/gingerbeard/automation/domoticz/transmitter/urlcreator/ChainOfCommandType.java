@@ -3,9 +3,9 @@ package nl.gingerbeard.automation.domoticz.transmitter.urlcreator;
 import java.net.URL;
 
 import nl.gingerbeard.automation.state.NextState;
-import nl.gingerbeard.automation.util.ChainOfCommand;
+import nl.gingerbeard.automation.util.ChainOfResponsibility;
 
-public abstract class ChainOfCommandType<T> extends ChainOfCommand<Parameter<T>, URL> {
+public abstract class ChainOfCommandType<T> extends ChainOfResponsibility<Parameter<T>, URL> {
 
 	private final Class<T> backingClass;
 
