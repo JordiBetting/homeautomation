@@ -460,6 +460,10 @@ public class ContainerTest {
 		private void blaat() {
 
 		}
+
+		public void methodToAvoidMisleadingFindbugsWarning() {
+			blaat();
+		}
 	}
 
 	@Test
