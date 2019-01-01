@@ -13,6 +13,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import nl.gingerbeard.automation.devices.ColorLight;
 import nl.gingerbeard.automation.devices.WhiteAmbianceLight;
 import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
 import nl.gingerbeard.automation.domoticz.transmitter.urlcreator.URLBuilder;
@@ -56,14 +57,26 @@ public class ColorTypeTest {
 	}
 
 	@Test
-	public void createUrl() throws MalformedURLException {
-		final NextState<Color> nextState = new NextState<>(new WhiteAmbianceLight(0), Color.fromWhiteColorTemperature(Color.KELVIN_MAX, 50));
+	public void createUrlWhiteAmbiance() throws MalformedURLException {
+		final NextState<Color> nextState = new NextState<>(new WhiteAmbianceLight(0), Color.fromWhiteColorTemperature(Color.KELVIN_MIN, 50));
 		final ColorType colorType = new ColorType();
 		final URLBuilder builder = new URLBuilder(config);
 
 		colorType.createUrl(builder, nextState);
 		final URL result = builder.build();
 
-		assertEquals("http://localhost/json.htm?type=command&idx=0&color={\"m\":2,\"t\":0,\"r\":0,\"g\":0,\"b\":0,\"cw\":0,\"ww\":0}&brightness=50", result.toString());
+		assertEquals("http://localhost/json.htm?type=command&idx=0&color={\"m\":2,\"t\":100,\"r\":0,\"g\":0,\"b\":0,\"cw\":0,\"ww\":0}&brightness=50", result.toString());
+	}
+
+	@Test
+	public void createUrlRGB() throws MalformedURLException {
+		final NextState<Color> nextState = new NextState<>(new ColorLight(0), Color.fromRgb(1, 2, 3, 42));
+		final URLBuilder builder = URLBuilder.create(config);
+
+		final ColorType colorType = new ColorType();
+		colorType.createUrl(builder, nextState);
+		final URL result = builder.build();
+
+		assertEquals("http://localhost/json.htm?type=command&idx=0&color={\"m\":3,\"t\":0,\"r\":1,\"g\":2,\"b\":3,\"cw\":0,\"ww\":0}&brightness=42", result.toString());
 	}
 }
