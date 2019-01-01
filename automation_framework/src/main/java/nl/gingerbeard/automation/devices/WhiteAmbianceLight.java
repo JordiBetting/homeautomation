@@ -1,5 +1,7 @@
 package nl.gingerbeard.automation.devices;
 
+import nl.gingerbeard.automation.state.Color;
+
 public class WhiteAmbianceLight extends Device<Color> {
 
 	// Hue documentation: cold 6500K to a warm 2700K
