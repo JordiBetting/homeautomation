@@ -1,5 +1,7 @@
 package nl.gingerbeard.automation.devices;
 
+import nl.gingerbeard.automation.state.Color;
+
 public class ColorLight extends Device<Color> {
 
 	public ColorLight(final int idx) {
