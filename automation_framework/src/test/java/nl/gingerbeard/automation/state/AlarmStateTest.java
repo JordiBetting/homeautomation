@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 public class AlarmStateTest {
 
 	@Test
-	public void AlarmStateMeets() {
+	public void alarmStateMeets() {
 		assertEquals(true, AlarmState.ARM_AWAY.meets(AlarmState.ARM_AWAY));
 		assertEquals(false, AlarmState.ARM_AWAY.meets(AlarmState.ARM_HOME));
 		assertEquals(true, AlarmState.ARM_AWAY.meets(AlarmState.ALWAYS));
