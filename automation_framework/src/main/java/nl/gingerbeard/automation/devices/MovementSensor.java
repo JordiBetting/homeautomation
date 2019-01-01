@@ -6,9 +6,4 @@ public class MovementSensor extends OnOffDevice {
 		super(idx);
 	}
 
-	@Override
-	public boolean updateState(final String newState) {
-		return false;
-	}
-
 }

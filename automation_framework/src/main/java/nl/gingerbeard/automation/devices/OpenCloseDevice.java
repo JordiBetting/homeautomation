@@ -1,5 +1,7 @@
 package nl.gingerbeard.automation.devices;
 
+import java.util.Locale;
+
 import nl.gingerbeard.automation.state.OpenCloseState;
 
 public abstract class OpenCloseDevice extends Device<OpenCloseState> {
@@ -9,8 +11,14 @@ public abstract class OpenCloseDevice extends Device<OpenCloseState> {
 	}
 
 	@Override
-	public boolean updateState(final String newState) {
-		return false;
+	public final boolean updateState(final String newStateString) {
+		try {
+			final OpenCloseState newState = OpenCloseState.valueOf(newStateString.toUpperCase(Locale.US));
+			setState(newState);
+			return true;
+		} catch (final IllegalArgumentException e) {
+			return false;
+		}
 	}
 
 }
