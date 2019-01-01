@@ -1,6 +1,5 @@
 package nl.gingerbeard.automation.domoticz.transmitter.urlcreator;
 
-import java.net.MalformedURLException;
 import java.net.URL;
 
 import nl.gingerbeard.automation.state.NextState;
@@ -27,12 +26,7 @@ public abstract class ChainOfCommandType<T> extends ChainOfCommand<Parameter<T>,
 	protected final URL doWork(final Parameter<T> param) {
 		final URLBuilder builder = new URLBuilder(param.configuration);
 		createUrl(builder, param.nextState);
-		try {
-			return builder.build();
-		} catch (final MalformedURLException e) {
-			e.printStackTrace();
-			return null;
-		}
+		return builder.build();
 	}
 
 	protected abstract void createUrl(URLBuilder urlBuilder, NextState<T> nextState);

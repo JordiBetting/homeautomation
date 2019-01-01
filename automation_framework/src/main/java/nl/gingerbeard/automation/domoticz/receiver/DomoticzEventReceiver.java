@@ -44,19 +44,11 @@ public final class DomoticzEventReceiver extends NanoHTTPD implements IDomoticzE
 	public Response serve(final IHTTPSession session) {
 		Response response;
 		if (session.getMethod() == Method.GET) {
-			response = processGetRequest(session);
+			response = processGetRequest(session.getUri());
 		} else {
 			response = newFixedLengthResponse(Status.METHOD_NOT_ALLOWED, NanoHTTPD.MIME_PLAINTEXT, "Only GET is supported");
 		}
 		return response;
-	}
-
-	private Response processGetRequest(final IHTTPSession session) {
-		try {
-			return processGetRequest(session.getUri());
-		} catch (final Throwable t) {
-			return newFixedLengthResponse(Status.INTERNAL_ERROR, NanoHTTPD.MIME_PLAINTEXT, "Internal server error: " + t.getMessage());
-		}
 	}
 
 	private Response processGetRequest(final String uri) {
@@ -82,10 +74,8 @@ public final class DomoticzEventReceiver extends NanoHTTPD implements IDomoticzE
 				if (result == false) {
 					response = Optional.of(newFixedLengthResponse(Status.NOT_FOUND, NanoHTTPD.MIME_PLAINTEXT, "Could not process request."));
 				}
-			} catch (final Exception e) {
-				System.err.println(e.getMessage());
-				e.printStackTrace(System.err);
-				response = Optional.of(newFixedLengthResponse(Status.INTERNAL_ERROR, NanoHTTPD.MIME_PLAINTEXT, e.getMessage()));
+			} catch (final Throwable t) {
+				response = Optional.of(newFixedLengthResponse(Status.INTERNAL_ERROR, NanoHTTPD.MIME_PLAINTEXT, t.getMessage()));
 			}
 		}
 		return response;

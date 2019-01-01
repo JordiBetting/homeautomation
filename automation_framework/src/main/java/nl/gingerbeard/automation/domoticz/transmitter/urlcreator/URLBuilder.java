@@ -26,10 +26,15 @@ public final class URLBuilder {
 		return add(Keys.IDX, idx);
 	}
 
-	public URL build() throws MalformedURLException {
+	public URL build() {
 		final int lastCharIndex = url.length() - 1;
 		final String fullUrlString = url.substring(0, lastCharIndex); // trim off ? or &
-		return new URL(fullUrlString);
+		try {
+			return new URL(fullUrlString);
+		} catch (final MalformedURLException e) {
+			// Tried to cover this scenario by testing, but all surrounding code ensures that this will never happen.
+			return null;
+		}
 	}
 
 	public static URLBuilder create(final DomoticzConfiguration config) {
