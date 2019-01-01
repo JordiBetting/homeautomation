@@ -20,7 +20,6 @@ import org.junit.jupiter.api.Test;
 import nl.gingerbeard.automation.devices.Device;
 import nl.gingerbeard.automation.devices.IDevice;
 import nl.gingerbeard.automation.devices.Switch;
-import nl.gingerbeard.automation.devices.TestDevice;
 import nl.gingerbeard.automation.devices.Thermostat;
 import nl.gingerbeard.automation.devices.ThermostatModeDevice;
 import nl.gingerbeard.automation.devices.ThermostatSetpointDevice;
@@ -37,6 +36,7 @@ import nl.gingerbeard.automation.state.HomeAway;
 import nl.gingerbeard.automation.state.OnOffState;
 import nl.gingerbeard.automation.state.State;
 import nl.gingerbeard.automation.state.TimeOfDay;
+import nl.gingerbeard.automation.testdevices.TestDevice;
 
 public class AutomationFrameworkTest {
 

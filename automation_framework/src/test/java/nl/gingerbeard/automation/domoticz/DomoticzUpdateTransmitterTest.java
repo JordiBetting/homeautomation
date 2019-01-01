@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Test;
 
 import fi.iki.elonen.NanoHTTPD.Response.Status;
 import nl.gingerbeard.automation.devices.DimmeableLight;
-import nl.gingerbeard.automation.devices.StringTestDevice;
 import nl.gingerbeard.automation.devices.Switch;
 import nl.gingerbeard.automation.devices.ThermostatSetpointDevice;
 import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
@@ -26,6 +25,7 @@ import nl.gingerbeard.automation.state.NextState;
 import nl.gingerbeard.automation.state.OnOffState;
 import nl.gingerbeard.automation.state.Temperature;
 import nl.gingerbeard.automation.state.Temperature.Unit;
+import nl.gingerbeard.automation.testdevices.StringTestDevice;
 
 public class DomoticzUpdateTransmitterTest {
 
