@@ -4,6 +4,9 @@ import com.google.common.base.Preconditions;
 
 public class Color {
 
+	public static final int KELVIN_MAX = 6500;
+	public static final int KELVIN_MIN = 2700;
+
 	public static enum ColorMode {
 		WhiteTemperature, RGB
 	}
@@ -62,7 +65,7 @@ public class Color {
 	}
 
 	public static Color fromWhiteColorTemperature(final int kelvin, final int brightness) {
-		Preconditions.checkArgument(kelvin >= 2700 && kelvin <= 6500, "Supported values: [2700-6500] kelvin. Provided: " + kelvin);
+		Preconditions.checkArgument(kelvin >= KELVIN_MIN && kelvin <= KELVIN_MAX, "Supported values: [2700-6500] kelvin. Provided: " + kelvin);
 		return new Color(kelvin, new Level(brightness));
 	}
 

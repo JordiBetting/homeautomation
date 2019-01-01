@@ -12,6 +12,7 @@ public enum Keys implements QueryStringItem {
 	PROTECTED, //
 	USED, //
 	TMODE, //
+	COLOR, //
 	;
 
 }
