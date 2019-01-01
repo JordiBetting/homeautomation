@@ -12,7 +12,7 @@ public class WhiteAmbianceLight extends Device<Color> {
 	public boolean updateState(final String newState) {
 		// There seems to be no way in domoticz of capturing this.
 		// Consider implementing when using differnet backend than Domoticz
-		return false;
+		throw new UnsupportedOperationException("Not implemented");
 	}
 
 }
