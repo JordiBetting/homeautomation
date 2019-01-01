@@ -35,8 +35,6 @@ public class IntegrationTest {
 	private Container container;
 	private IAutomationFrameworkInterface automation;
 
-	// TODO: use local webserver, trigger transmitter, ensure room updates actuator based on sensor value.
-
 	@BeforeEach
 	public void start() throws IOException {
 		webserver = new TestWebServer();

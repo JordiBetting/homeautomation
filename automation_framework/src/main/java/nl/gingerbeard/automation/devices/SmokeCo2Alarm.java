@@ -6,9 +6,4 @@ public class SmokeCo2Alarm extends OnOffDevice {
 		super(idx);
 	}
 
-	@Override
-	public boolean updateState(final String newState) {
-		return false;
-	}
-
 }

@@ -4,7 +4,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import org.junit.jupiter.api.Test;
 
-import nl.gingerbeard.automation.devices.StringTestDevice;
+import nl.gingerbeard.automation.testdevices.StringTestDevice;
 
 public class NextStateTest {
 

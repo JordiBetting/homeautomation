@@ -6,9 +6,4 @@ public class WallPlug extends OnOffDevice {
 		super(idx);
 	}
 
-	@Override
-	public boolean updateState(final String newState) {
-		// TODO Auto-generated method stub
-		return false;
-	}
 }

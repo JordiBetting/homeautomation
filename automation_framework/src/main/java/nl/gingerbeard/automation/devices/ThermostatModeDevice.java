@@ -12,10 +12,14 @@ public final class ThermostatModeDevice extends Subdevice<Thermostat, Thermostat
 
 	@Override
 	public boolean updateState(final String newState) {
-		final ThermostatMode thermostatMode = ThermostatMode.valueOf(newState.toUpperCase(Locale.US));
-		setState(thermostatMode);
-		parent.ifPresent((parent) -> parent.modeUpdated());
-		return true;
+		try {
+			final ThermostatMode thermostatMode = ThermostatMode.valueOf(newState.toUpperCase(Locale.US));
+			setState(thermostatMode);
+			parent.ifPresent((parent) -> parent.modeUpdated());
+			return true;
+		} catch (final IllegalArgumentException e) {
+			return false;
+		}
 	}
 
 }

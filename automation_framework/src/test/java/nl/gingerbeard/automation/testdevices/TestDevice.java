@@ -1,4 +1,6 @@
-package nl.gingerbeard.automation.devices;
+package nl.gingerbeard.automation.testdevices;
+
+import nl.gingerbeard.automation.devices.Device;
 
 public class TestDevice extends Device<Void> {
 

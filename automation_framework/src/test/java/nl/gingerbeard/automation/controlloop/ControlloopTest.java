@@ -13,12 +13,12 @@ import org.junit.jupiter.api.Test;
 import com.google.common.collect.Lists;
 
 import nl.gingerbeard.automation.devices.Switch;
-import nl.gingerbeard.automation.devices.TestDevice;
 import nl.gingerbeard.automation.domoticz.transmitter.IDomoticzUpdateTransmitter;
 import nl.gingerbeard.automation.event.EventResult;
 import nl.gingerbeard.automation.event.IEvents;
 import nl.gingerbeard.automation.state.NextState;
 import nl.gingerbeard.automation.state.OnOffState;
+import nl.gingerbeard.automation.testdevices.TestDevice;
 
 public class ControlloopTest {
 

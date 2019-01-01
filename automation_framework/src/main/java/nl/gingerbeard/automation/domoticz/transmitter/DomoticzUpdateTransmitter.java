@@ -53,6 +53,7 @@ public final class DomoticzUpdateTransmitter implements IDomoticzUpdateTransmitt
 	private HttpURLConnection createConnection(final URL url) throws IOException, ProtocolException {
 		final HttpURLConnection con = (HttpURLConnection) url.openConnection();
 		con.setRequestMethod("GET");
+		con.connect();
 		return con;
 	}
 

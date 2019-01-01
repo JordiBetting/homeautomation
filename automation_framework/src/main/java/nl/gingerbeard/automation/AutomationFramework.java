@@ -33,6 +33,8 @@ public class AutomationFramework implements IAutomationFrameworkInterface {
 			}
 		} else if (device instanceof Device) {
 			domoticzEvents.addDevice((Device<?>) device);
+		} else {
+			throw new UnsupportedOperationException("Type not supported: " + device.getClass().getName());
 		}
 	}
 
