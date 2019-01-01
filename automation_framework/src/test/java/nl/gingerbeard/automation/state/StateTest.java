@@ -3,6 +3,7 @@ package nl.gingerbeard.automation.state;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
@@ -25,6 +26,7 @@ public class StateTest {
 		assertThrows(IllegalArgumentException.class, () -> state.setTimeOfDay(invalidTimeOfDay));
 	}
 
+	@Test
 	public void setTimeOfDay_null_throwsException() {
 		final State state = new State();
 
