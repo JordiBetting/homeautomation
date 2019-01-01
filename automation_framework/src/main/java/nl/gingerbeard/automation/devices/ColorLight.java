@@ -10,7 +10,8 @@ public class ColorLight extends Device<Color> {
 
 	@Override
 	public boolean updateState(final String newState) {
-		// TODO Auto-generated method stub
+		// There seems to be no way in domoticz of capturing this.
+		// Consider implementing when using differnet backend than Domoticz
 		return false;
 	}
 
