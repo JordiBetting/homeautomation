@@ -1,10 +1,15 @@
 package nl.gingerbeard.automation.util;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+
+import org.reflections.Reflections;
 
 public final class ReflectionUtil {
 	private ReflectionUtil() {
@@ -35,5 +40,29 @@ public final class ReflectionUtil {
 			return true;
 		}
 		return false;
+	}
+
+	public static final class ReflectionException extends RuntimeException {
+
+		private static final long serialVersionUID = 2955666324295948758L;
+
+		public ReflectionException(final String message, final Throwable cause) {
+			super(message, cause);
+		}
+
+	}
+
+	public static <T> Set<T> createInstancesBySubtype(final String packageName, final Class<T> type) {
+		final Reflections refl = new Reflections(packageName);
+		final Set<Class<? extends T>> subtypes = refl.getSubTypesOf(type);
+		final Set<T> instances = new HashSet<>();
+		for (final Class<? extends T> subtype : subtypes) {
+			try {
+				instances.add(subtype.getConstructor().newInstance());
+			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+				throw new ReflectionException("Cannot instantiate " + type.getName(), e);
+			}
+		}
+		return instances;
 	}
 }

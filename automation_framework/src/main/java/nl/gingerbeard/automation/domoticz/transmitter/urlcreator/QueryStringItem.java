@@ -5,7 +5,7 @@ import java.util.Locale;
 import com.google.common.escape.Escaper;
 import com.google.common.net.UrlEscapers;
 
-interface QueryStringItem {
+public interface QueryStringItem {
 	static final Escaper ESCAPER = UrlEscapers.urlFragmentEscaper();
 
 	String name();

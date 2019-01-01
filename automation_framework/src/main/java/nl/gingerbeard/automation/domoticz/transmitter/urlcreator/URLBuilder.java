@@ -8,7 +8,7 @@ import nl.gingerbeard.automation.devices.StateDevice;
 import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
 import nl.gingerbeard.automation.state.NextState;
 
-final class URLBuilder {
+public final class URLBuilder {
 
 	private final StringBuilder url;
 
@@ -31,7 +31,7 @@ final class URLBuilder {
 		return new URL(fullUrlString);
 	}
 
-	static URLBuilder create(final DomoticzConfiguration config) {
+	public static URLBuilder create(final DomoticzConfiguration config) {
 		return new URLBuilder(config);
 	}
 
