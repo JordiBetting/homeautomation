@@ -5,18 +5,18 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
-public class DoorSensorTest {
+public class WindowSensorTest {
 
 	@Test
 	public void idx_works() {
-		final DoorSensor device = new DoorSensor(42);
+		final WindowSensor device = new WindowSensor(42);
 
 		assertEquals(42, device.getIdx());
 	}
 
 	@Test
 	public void updateState_coveredBy_OpenCloseDevice() {
-		assertTrue(OpenCloseDevice.class.isAssignableFrom(DoorSensor.class));
+		assertTrue(OpenCloseDevice.class.isAssignableFrom(WindowSensor.class));
 	}
 
 }
