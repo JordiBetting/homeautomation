@@ -1,7 +1,12 @@
-package nl.gingerbeard.automation.domoticz.transmitter.urlcreator;
+package nl.gingerbeard.automation.domoticz.transmitter.urlcreator.devicetypes;
 
 import java.util.Locale;
 
+import nl.gingerbeard.automation.domoticz.transmitter.urlcreator.ChainOfCommandType;
+import nl.gingerbeard.automation.domoticz.transmitter.urlcreator.URLBuilder;
+import nl.gingerbeard.automation.domoticz.transmitter.urlcreator.domoticzapi.Keys;
+import nl.gingerbeard.automation.domoticz.transmitter.urlcreator.domoticzapi.Param;
+import nl.gingerbeard.automation.domoticz.transmitter.urlcreator.domoticzapi.Type;
 import nl.gingerbeard.automation.state.NextState;
 import nl.gingerbeard.automation.state.OnOffState;
 

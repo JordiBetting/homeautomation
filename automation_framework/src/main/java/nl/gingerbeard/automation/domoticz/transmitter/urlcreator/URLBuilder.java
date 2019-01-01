@@ -6,6 +6,7 @@ import java.net.URL;
 import nl.gingerbeard.automation.devices.Device;
 import nl.gingerbeard.automation.devices.StateDevice;
 import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
+import nl.gingerbeard.automation.domoticz.transmitter.urlcreator.domoticzapi.Keys;
 import nl.gingerbeard.automation.state.NextState;
 
 public final class URLBuilder {
@@ -35,14 +36,14 @@ public final class URLBuilder {
 		return new URLBuilder(config);
 	}
 
-	URLBuilder add(final QueryStringItem key, final QueryStringItem value) {
+	public URLBuilder add(final QueryStringItem key, final QueryStringItem value) {
 		final String keyString = key.getString();
 		final String valueString = value.getString();
 		add(keyString, valueString);
 		return this;
 	}
 
-	URLBuilder add(final QueryStringItem key, final Object value) {
+	public URLBuilder add(final QueryStringItem key, final Object value) {
 		final String keyString = key.getString();
 		final String valueString = value.toString();
 		add(keyString, valueString);

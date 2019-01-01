@@ -6,7 +6,7 @@ import java.net.URL;
 import nl.gingerbeard.automation.state.NextState;
 import nl.gingerbeard.automation.util.ChainOfCommand;
 
-abstract class ChainOfCommandType<T> extends ChainOfCommand<Parameter<T>, URL> {
+public abstract class ChainOfCommandType<T> extends ChainOfCommand<Parameter<T>, URL> {
 
 	private final Class<T> backingClass;
 
