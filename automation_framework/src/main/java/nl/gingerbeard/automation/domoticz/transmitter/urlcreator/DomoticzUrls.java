@@ -23,7 +23,7 @@ public final class DomoticzUrls {
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private ChainOfCommand<Parameter, URL> createChainOfCommand() {
-		final Set<ChainOfCommandType> types = ReflectionUtil.createInstancesBySubtype(this.getClass().getPackageName(), ChainOfCommandType.class);
+		final Set<ChainOfCommandType> types = ReflectionUtil.createInstancesBySubtype(DomoticzUrls.class.getPackageName(), ChainOfCommandType.class);
 		final ChainOfCommand.Builder<Parameter, URL> builder = ChainOfCommand.builder();
 		types.stream().forEach((type) -> builder.add(type));
 		return builder.build();
