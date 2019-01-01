@@ -23,7 +23,8 @@ public final class DomoticzUrls {
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private ChainOfCommand<Parameter, URL> createChainOfCommand() {
-		final Set<ChainOfCommandType> types = ReflectionUtil.createInstancesBySubtype(DomoticzUrls.class.getPackageName(), ChainOfCommandType.class);
+		final String deviceTypesPackageName = "nl.gingerbeard.automation.domoticz.transmitter.urlcreator.devicetypes";
+		final Set<ChainOfCommandType> types = ReflectionUtil.createInstancesBySubtype(deviceTypesPackageName, ChainOfCommandType.class);
 		final ChainOfCommand.Builder<Parameter, URL> builder = ChainOfCommand.builder();
 		types.stream().forEach((type) -> builder.add(type));
 		return builder.build();
