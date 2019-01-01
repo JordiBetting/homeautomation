@@ -13,9 +13,9 @@ import org.junit.jupiter.api.Test;
 
 import fi.iki.elonen.NanoHTTPD.Response.Status;
 import nl.gingerbeard.automation.devices.DimmeableLight;
-import nl.gingerbeard.automation.devices.Heating;
 import nl.gingerbeard.automation.devices.StringTestDevice;
 import nl.gingerbeard.automation.devices.Switch;
+import nl.gingerbeard.automation.devices.ThermostatSetpointDevice;
 import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
 import nl.gingerbeard.automation.domoticz.helpers.TestWebServer;
 import nl.gingerbeard.automation.domoticz.transmitter.DomoticzUpdateTransmitter;
@@ -102,7 +102,7 @@ public class DomoticzUpdateTransmitterTest {
 	@Test
 	public void transmitTemperature_correct() throws IOException {
 		final IDomoticzUpdateTransmitter transmitter = new DomoticzUpdateTransmitter(domoticzConfig);
-		final Heating device = new Heating(1);
+		final ThermostatSetpointDevice device = new ThermostatSetpointDevice(1);
 
 		// on
 		transmitter.transmitDeviceUpdate(new NextState<>(device, new Temperature(21, Unit.CELSIUS)));
