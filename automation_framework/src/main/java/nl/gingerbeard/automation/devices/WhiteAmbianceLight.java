@@ -1,8 +1,6 @@
 package nl.gingerbeard.automation.devices;
 
-import nl.gingerbeard.automation.state.ColorTest;
-
-public class WhiteAmbianceLight extends Device<ColorTest> {
+public class WhiteAmbianceLight extends Device<Color> {
 
 	// Hue documentation: cold 6500K to a warm 2700K
 	// /json.htm?type=command&param=setcolbrightnessvalue&idx=130&color={"m":3,"t":0,"r":0,"g":0,"b":50,"cw":0,"ww":0}&brightness=100
