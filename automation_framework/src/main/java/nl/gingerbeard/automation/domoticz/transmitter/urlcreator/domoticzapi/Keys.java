@@ -13,6 +13,7 @@ public enum Keys implements QueryStringItem {
 	USED, //
 	TMODE, //
 	COLOR, //
+	BRIGHTNESS, //
 	;
 
 }

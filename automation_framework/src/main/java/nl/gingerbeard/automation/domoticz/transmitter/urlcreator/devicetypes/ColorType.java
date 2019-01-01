@@ -19,6 +19,7 @@ public class ColorType extends ChainOfCommandType<Color> {
 		builder.add(Keys.TYPE, Type.COMMAND);
 		builder.addIdx(nextState);
 		builder.add(Keys.COLOR, createColor(nextState.get()));
+		builder.add(Keys.BRIGHTNESS, nextState.get().getBrightness().getLevel());
 	}
 
 	private String createColor(final Color color) {
