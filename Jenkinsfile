@@ -2,7 +2,9 @@ pipeline {
 	agent { label 'java'
 	}
 
-	env.JENKINS_NODE_COOKIE = 'dontKillMe' // this is necessary for the Gradle daemon to be kept alive
+	environment {
+		JENKINS_NODE_COOKIE = 'dontKillMe' // this is necessary for the Gradle daemon to be kept alive
+	}
 	
 	stages {
 		stage("Build") {
