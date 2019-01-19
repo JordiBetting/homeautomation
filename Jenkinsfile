@@ -10,7 +10,7 @@ pipeline {
 			}
 			steps {
 				sh 'echo Building with gradle'
-				sh 'gradle -b automation_framework/build.gradle test check build jacocoTestReport'
+				sh 'gradle -b build.gradle test check build jacocoTestReport'
 			}
 			post {
 				always {
