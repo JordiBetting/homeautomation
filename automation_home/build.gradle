@@ -1,0 +1,5 @@
+jar {
+    manifest {
+        attributes 'Main-Class': 'nl.gingerbeard.automation.MainClass'
+    }
+}
