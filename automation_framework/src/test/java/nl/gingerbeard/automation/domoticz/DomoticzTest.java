@@ -96,7 +96,8 @@ public class DomoticzTest {
 	@Test
 	public void update_listenerCalled() {
 		final TestListener listener = new TestListener();
-		final Domoticz domoticz = new Domoticz(Optional.of(listener));
+		final Domoticz domoticz = new Domoticz(Optional.of(listener), (t, level, message) -> {
+		});
 		domoticz.addDevice(new Switch(1));
 
 		final boolean result = domoticz.deviceChanged(1, "on");

@@ -14,6 +14,7 @@ import nl.gingerbeard.automation.devices.ThermostatSetpointDevice;
 import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
 import nl.gingerbeard.automation.domoticz.transmitter.DomoticzUpdateTransmitter;
 import nl.gingerbeard.automation.domoticz.transmitter.IDomoticzUpdateTransmitter;
+import nl.gingerbeard.automation.logging.TestLogger;
 import nl.gingerbeard.automation.state.Level;
 import nl.gingerbeard.automation.state.NextState;
 import nl.gingerbeard.automation.state.Temperature;
@@ -32,7 +33,7 @@ public class DomoticzHILIntegrationTest {
 
 	@Test
 	public void light_bank_on() throws IOException {
-		final IDomoticzUpdateTransmitter transmitter = new DomoticzUpdateTransmitter(domoticzConfig);
+		final IDomoticzUpdateTransmitter transmitter = new DomoticzUpdateTransmitter(domoticzConfig, new TestLogger());
 		final DimmeableLight device = new DimmeableLight(274);
 
 		transmitter.transmitDeviceUpdate(new NextState<>(device, new Level(10)));
@@ -40,7 +41,7 @@ public class DomoticzHILIntegrationTest {
 
 	@Test
 	public void setHeatingSetpointLivingRoom() throws IOException {
-		final IDomoticzUpdateTransmitter transmitter = new DomoticzUpdateTransmitter(domoticzConfig);
+		final IDomoticzUpdateTransmitter transmitter = new DomoticzUpdateTransmitter(domoticzConfig, new TestLogger());
 		final ThermostatSetpointDevice device = new ThermostatSetpointDevice(471);
 
 		transmitter.transmitDeviceUpdate(new NextState<>(device, new Temperature(22, Unit.CELSIUS)));
@@ -48,7 +49,7 @@ public class DomoticzHILIntegrationTest {
 
 	@Test
 	public void setHeatingModeLivingRoom() throws IOException {
-		final IDomoticzUpdateTransmitter transmitter = new DomoticzUpdateTransmitter(domoticzConfig);
+		final IDomoticzUpdateTransmitter transmitter = new DomoticzUpdateTransmitter(domoticzConfig, new TestLogger());
 		final ThermostatModeDevice device = new ThermostatModeDevice(469);
 
 		transmitter.transmitDeviceUpdate(new NextState<>(device, ThermostatMode.FULL_HEAT));

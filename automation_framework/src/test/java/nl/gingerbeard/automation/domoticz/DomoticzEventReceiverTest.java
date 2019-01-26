@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
 import nl.gingerbeard.automation.domoticz.receiver.DomoticzEventReceiver;
 import nl.gingerbeard.automation.domoticz.receiver.DomoticzEventReceiver.EventReceived;
+import nl.gingerbeard.automation.logging.TestLogger;
 
 public class DomoticzEventReceiverTest {
 
@@ -25,7 +26,7 @@ public class DomoticzEventReceiverTest {
 	@BeforeEach
 	public void initConfig() throws IOException {
 		CONFIG = new DomoticzConfiguration(0, new URL("http://localhost/"));
-		receiver = new DomoticzEventReceiver(CONFIG);
+		receiver = new DomoticzEventReceiver(CONFIG, new TestLogger());
 	}
 
 	@AfterEach

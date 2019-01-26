@@ -59,27 +59,39 @@ public class LoggingTest {
 		final PrintStream old_sysout = System.out;
 		System.setOut(ps);
 
-		final LoggingComponent component = new LoggingComponent();
-		component.createComponent();
-
-		component.logInput.debug("testdebug");
-		component.logInput.info("testinfo");
-		component.logInput.error("testerror");
-		component.logInput.warning("testwarning");
-		System.out.flush();
-		final String output = baos.toString();
-		assertEquals("[DEBUG] testdebug" + System.lineSeparator() + //
-				"[INFO] testinfo" + System.lineSeparator() + //
-				"[ERROR] testerror" + System.lineSeparator() + //
-				"[WARNING] testwarning" + System.lineSeparator(), //
-
-				output);
-
 		try {
+			final LoggingComponent component = new LoggingComponent();
+			component.createComponent();
+
+			component.logInput.debug("testdebug");
+			component.logInput.info("testinfo");
+			component.logInput.error("testerror");
+			component.logInput.warning("testwarning");
+			System.out.flush();
+			final String output = baos.toString();
+			assertEquals("[DEBUG] testdebug" + System.lineSeparator() + //
+					"[INFO] testinfo" + System.lineSeparator() + //
+					"[ERROR] testerror" + System.lineSeparator() + //
+					"[WARNING] testwarning" + System.lineSeparator(), //
+
+					output);
 
 		} finally {
 			System.setOut(old_sysout);
 		}
 	}
 
+	@Test
+	public void logException() {
+		final LogRecorder logOutput = new LogRecorder();
+		final LoggingComponent component = new LoggingComponent();
+		component.logOutput = Optional.of(logOutput);
+		component.createComponent();
+
+		component.logInput.exception(new NullPointerException("blaat"), "exception message");
+
+		assertEquals(2, logOutput.logs.size());
+		assertEquals("EXCEPTION exception message", logOutput.logs.get(0));
+		assertEquals("EXCEPTION blaat", logOutput.logs.get(1));
+	}
 }

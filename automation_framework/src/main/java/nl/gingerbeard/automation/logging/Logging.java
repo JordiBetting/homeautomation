@@ -11,11 +11,16 @@ public class Logging implements ILogger {
 	}
 
 	@Override
-	public void log(final LogLevel level, final String message) {
+	public void log(final Optional<Throwable> throwable, final LogLevel level, final String message) {
 		if (logOutput.isPresent()) {
 			logOutput.get().log(level, message);
 		} else {
 			System.out.println("[" + level.name() + "] " + message);
+		}
+
+		if (throwable.isPresent()) {
+			log(Optional.empty(), level, throwable.get().getMessage());
+			// log(Optional.empty(), level, throwable.get().); TODO: print stacktrace
 		}
 	}
 

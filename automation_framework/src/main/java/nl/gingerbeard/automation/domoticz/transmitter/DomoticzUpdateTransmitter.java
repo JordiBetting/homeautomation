@@ -14,13 +14,16 @@ import com.google.common.base.Charsets;
 
 import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
 import nl.gingerbeard.automation.domoticz.transmitter.urlcreator.DomoticzUrls;
+import nl.gingerbeard.automation.logging.ILogger;
 import nl.gingerbeard.automation.state.NextState;
 
 public final class DomoticzUpdateTransmitter implements IDomoticzUpdateTransmitter {
 
 	private final DomoticzUrls urlCreator;
+	private final ILogger log;
 
-	public DomoticzUpdateTransmitter(final DomoticzConfiguration configuration) {
+	public DomoticzUpdateTransmitter(final DomoticzConfiguration configuration, final ILogger log) {
+		this.log = log;
 		urlCreator = new DomoticzUrls(configuration);
 	}
 
@@ -33,8 +36,10 @@ public final class DomoticzUpdateTransmitter implements IDomoticzUpdateTransmitt
 	private void executeRequest(final URL url) throws IOException, ProtocolException {
 		HttpURLConnection con = null;
 		try {
+			log.debug("Creating request: " + url.toString());
 			con = createConnection(url);
 			final int responseCode = con.getResponseCode();
+			log.debug("Response on " + url.toString() + " - " + responseCode);
 			validateResponseCode(url, con, responseCode);
 			validateOutput(con);
 		} finally {
