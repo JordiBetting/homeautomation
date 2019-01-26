@@ -6,6 +6,7 @@ import nl.gingerbeard.automation.devices.DoorSensor;
 import nl.gingerbeard.automation.event.annotations.Subscribe;
 import nl.gingerbeard.automation.state.Level;
 import nl.gingerbeard.automation.state.NextState;
+import nl.gingerbeard.automation.state.OpenCloseState;
 
 public class Gang extends Room {
 
@@ -18,7 +19,13 @@ public class Gang extends Room {
 
 	@Subscribe
 	public NextState<?> trigger(final DoorSensor changedSensor) {
-		final NextState<Level> level = new NextState<>(lamp, new Level(42));
-		return level;
+		// if (changedSensor == sensor) { TODO: Add test to see that this works
+		int level = 0;
+		if (changedSensor.getState() == OpenCloseState.OPEN) {
+			level = 42;
+		}
+		return new NextState<>(lamp, new Level(level));
+		// }
+		// return null;
 	}
 }

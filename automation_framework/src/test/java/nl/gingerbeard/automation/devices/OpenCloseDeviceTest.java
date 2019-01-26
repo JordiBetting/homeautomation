@@ -27,6 +27,15 @@ public class OpenCloseDeviceTest {
 	}
 
 	@Test
+	public void updateState_closed() {
+		final OpenCloseDevice device = new MyOpenCloseDevice();
+
+		device.updateState("closed");
+
+		assertEquals(OpenCloseState.CLOSE, device.getState());
+	}
+
+	@Test
 	public void updateState_close() {
 		final OpenCloseDevice device = new MyOpenCloseDevice();
 

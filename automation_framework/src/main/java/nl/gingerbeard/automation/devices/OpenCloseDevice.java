@@ -13,7 +13,11 @@ public abstract class OpenCloseDevice extends Device<OpenCloseState> {
 	@Override
 	public final boolean updateState(final String newStateString) {
 		try {
-			final OpenCloseState newState = OpenCloseState.valueOf(newStateString.toUpperCase(Locale.US));
+			String upperCase = newStateString.toUpperCase(Locale.US);
+			if ("CLOSED".equals(upperCase)) {
+				upperCase = "CLOSE";
+			}
+			final OpenCloseState newState = OpenCloseState.valueOf(upperCase);
 			setState(newState);
 			return true;
 		} catch (final IllegalArgumentException e) {
