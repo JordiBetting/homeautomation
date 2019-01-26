@@ -5,11 +5,11 @@ pipeline {
 	environment {
 		JENKINS_NODE_COOKIE = 'dontKillMe' // this is necessary for the Gradle daemon to be kept alive
 	}
-	
+
 	stages {
 		stage("Build") {
 			tools {
-				gradle 'gradle4.10.2'
+				gradle 'gradle5.1.1'
 			}
 			steps {
 				sh 'echo Building with gradle'
