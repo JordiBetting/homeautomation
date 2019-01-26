@@ -20,7 +20,7 @@ public class MainClass {
 				container.stop();
 			}
 		});
-		final DomoticzConfiguration config = new DomoticzConfiguration(8081, new URL("http://home.gingerbread.nl:8080"));
+		final DomoticzConfiguration config = new DomoticzConfiguration(8081, new URL("http://127.0.0.1:8080"));
 		container = IAutomationFrameworkInterface.createFrameworkContainer(config);
 		container.start();
 		System.out.println("Running");
