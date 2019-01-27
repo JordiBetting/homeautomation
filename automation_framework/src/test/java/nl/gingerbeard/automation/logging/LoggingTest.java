@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -52,10 +53,10 @@ public class LoggingTest {
 	}
 
 	@Test
-	public void log_noOutputProvided_stdOut() {
+	public void log_noOutputProvided_stdOut() throws UnsupportedEncodingException {
 
 		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		final PrintStream ps = new PrintStream(baos);
+		final PrintStream ps = new PrintStream(baos, true, "UTF-8");
 		final PrintStream old_sysout = System.out;
 		System.setOut(ps);
 
@@ -67,8 +68,9 @@ public class LoggingTest {
 			component.logInput.info("testinfo");
 			component.logInput.error("testerror");
 			component.logInput.warning("testwarning");
+
 			System.out.flush();
-			final String output = baos.toString();
+			final String output = baos.toString("UTF-8");
 			assertEquals("[DEBUG] testdebug" + System.lineSeparator() + //
 					"[INFO] testinfo" + System.lineSeparator() + //
 					"[ERROR] testerror" + System.lineSeparator() + //
