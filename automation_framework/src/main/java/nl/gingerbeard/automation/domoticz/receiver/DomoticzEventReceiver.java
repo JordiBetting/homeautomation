@@ -50,6 +50,7 @@ public final class DomoticzEventReceiver extends NanoHTTPD implements IDomoticzE
 		if (session.getMethod() == Method.GET) {
 			response = processGetRequest(session.getUri());
 		} else {
+			log.warning("Received unsupported method " + session.getMethod().name() + " on " + session.getUri());
 			response = newFixedLengthResponse(Status.METHOD_NOT_ALLOWED, NanoHTTPD.MIME_PLAINTEXT, "Only GET is supported");
 		}
 		return response;
