@@ -2,6 +2,12 @@ package nl.gingerbeard.automation.controlloop;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -22,69 +28,21 @@ import nl.gingerbeard.automation.testdevices.TestDevice;
 
 public class ControlloopTest {
 
-	private static class EventsStore implements IEvents {
-
-		private final List<Object> receivedEvents = new ArrayList<>();
-
-		@Override
-		public void subscribe(final Object subscriber) {
-		}
-
-		@Override
-		public EventResult trigger(final Object event) {
-			getReceivedEvents().add(event);
-			return EventResult.empty();
-		}
-
-		public List<Object> getReceivedEvents() {
-			return receivedEvents;
-		}
-
-	}
-
-	private static class MockTransmitter implements IDomoticzUpdateTransmitter {
-
-		@Override
-		public <T> void transmitDeviceUpdate(final NextState<T> newState) throws IOException {
-
-		}
-	}
-
 	@Test
 	public void testStateChanged() {
-		final EventsStore events = new EventsStore();
-		final Controlloop control = new Controlloop(events, new MockTransmitter());
+		final IEvents events = mock(IEvents.class);
+		when(events.trigger(any())).thenReturn(EventResult.empty());
+		final Controlloop control = new Controlloop(events, mock(IDomoticzUpdateTransmitter.class));
 		final TestDevice myDevice = new TestDevice();
 
-		assertEquals(0, events.getReceivedEvents().size());
-
 		control.statusChanged(myDevice);
-
-		assertEquals(1, events.getReceivedEvents().size());
-		assertEquals(myDevice, events.getReceivedEvents().get(0));
+		verify(events, times(1)).trigger(myDevice);
+		verifyNoMoreInteractions(events);
 	}
 
 	@Test
 	public void learn_isAssignebleFrom() {
 		assertTrue(Collection.class.isAssignableFrom(ArrayList.class));
-	}
-
-	private static class CustomEvents implements IEvents {
-
-		private EventResult result = EventResult.empty();
-
-		@Override
-		public void subscribe(final Object subscriber) {
-		}
-
-		@Override
-		public EventResult trigger(final Object event) {
-			return result;
-		}
-
-		public void setResult(final EventResult result) {
-			this.result = result;
-		}
 	}
 
 	private static class RecordingTransmitter implements IDomoticzUpdateTransmitter {
@@ -109,9 +67,10 @@ public class ControlloopTest {
 	@Test
 	public void eventResultWithSingleNextState_transmitted() {
 		final RecordingTransmitter transmitter = new RecordingTransmitter();
-		final CustomEvents events = new CustomEvents();
+		final IEvents events = mock(IEvents.class);
 		final Controlloop control = new Controlloop(events, transmitter);
-		events.setResult(EventResult.of(new NextState<>(mockDevice1, OnOffState.ON)));
+
+		when(events.trigger(any())).thenReturn(EventResult.of(new NextState<>(mockDevice1, OnOffState.ON)));
 
 		control.statusChanged(changedDevice);
 
@@ -122,9 +81,9 @@ public class ControlloopTest {
 	@Test
 	public void eventResultWithNextStateCollection_transmitted() {
 		final RecordingTransmitter transmitter = new RecordingTransmitter();
-		final CustomEvents events = new CustomEvents();
+		final IEvents events = mock(IEvents.class);
 		final Controlloop control = new Controlloop(events, transmitter);
-		events.setResult(EventResult.of(Lists.newArrayList(//
+		when(events.trigger(any())).thenReturn(EventResult.of(Lists.newArrayList(//
 				new NextState<>(mockDevice1, OnOffState.ON), //
 				new NextState<>(mockDevice2, OnOffState.OFF)//
 		)));
@@ -146,9 +105,9 @@ public class ControlloopTest {
 	public void eventResultOtherType_ignored() {
 		// TODO: Should this somehow be handled/explictely tested? Like an error list, test logging or even throw an exception?
 		final RecordingTransmitter transmitter = new RecordingTransmitter();
-		final CustomEvents events = new CustomEvents();
+		final IEvents events = mock(IEvents.class);
 		final Controlloop control = new Controlloop(events, transmitter);
-		events.setResult(EventResult.of("StringIsNotNextState"));
+		when(events.trigger(any())).thenReturn(EventResult.of("StringIsNotNextState"));
 
 		control.statusChanged(changedDevice);
 		assertEquals(0, transmitter.getTransmitted().size());
@@ -172,9 +131,9 @@ public class ControlloopTest {
 	public void transmitterThrowsException_ignoredNoException() {
 		// TODO: Test logging here?
 		final ThrowExceptionOnFirstTransmit_Transmitter transmitter = new ThrowExceptionOnFirstTransmit_Transmitter();
-		final CustomEvents events = new CustomEvents();
+		final IEvents events = mock(IEvents.class);
 		final Controlloop control = new Controlloop(events, transmitter);
-		events.setResult(EventResult.of(Lists.newArrayList(//
+		when(events.trigger(any())).thenReturn(EventResult.of(Lists.newArrayList(//
 				new NextState<>(mockDevice1, OnOffState.ON), //
 				new NextState<>(mockDevice2, OnOffState.OFF)//
 		)));
