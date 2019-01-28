@@ -2,6 +2,7 @@ package nl.gingerbeard.automation;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -30,6 +31,7 @@ import nl.gingerbeard.automation.event.EventResult;
 import nl.gingerbeard.automation.event.IEvents;
 import nl.gingerbeard.automation.event.annotations.EventState;
 import nl.gingerbeard.automation.event.annotations.Subscribe;
+import nl.gingerbeard.automation.service.Container;
 import nl.gingerbeard.automation.state.AlarmState;
 import nl.gingerbeard.automation.state.HomeAway;
 import nl.gingerbeard.automation.state.OnOffState;
@@ -413,5 +415,16 @@ public class AutomationFrameworkTest {
 	public void addUnsupportedDevice_throwsException() {
 		final IAutomationFrameworkInterface framework = new AutomationFramework(new MockEvents(), new DomoticzTransmitRecorder());
 		assertThrows(UnsupportedOperationException.class, () -> framework.addRoom(new RoomWithFakeDevice()));
+	}
+
+	@Test
+	public void automationFrameworkContainerTest() {
+		final AutomationFrameworkContainer container = IAutomationFrameworkInterface.createFrameworkContainer(new DomoticzConfiguration(0, createMockUrl()));
+		container.start();
+		final IAutomationFrameworkInterface framework = container.getAutomationFramework();
+		final Container runtime = container.getRuntime();
+
+		assertNotNull(framework);
+		assertNotNull(runtime);
 	}
 }
