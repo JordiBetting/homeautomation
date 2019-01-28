@@ -1,3 +1,2 @@
 rootProject.name='homeautomation_root'
 include 'automation_framework'
-include 'automation_home'

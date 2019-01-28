@@ -5,6 +5,7 @@ subprojects {
 	apply plugin: 'findbugs'
 
 	repositories {
+		mavenLocal()
 		mavenCentral()
 	}
 
