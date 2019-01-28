@@ -22,6 +22,9 @@ pipeline {
 			}
 		}
 		stage("Publish") {
+			tools {
+				gradle 'gradle5.1.1'
+			}
 			when { branch 'master' }
 			steps {
 				sh 'gradle -b build.gradle assemble publishToMavenLocal'
