@@ -5,6 +5,11 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -31,6 +36,7 @@ import nl.gingerbeard.automation.event.EventResult;
 import nl.gingerbeard.automation.event.IEvents;
 import nl.gingerbeard.automation.event.annotations.EventState;
 import nl.gingerbeard.automation.event.annotations.Subscribe;
+import nl.gingerbeard.automation.logging.ILogOutput;
 import nl.gingerbeard.automation.service.Container;
 import nl.gingerbeard.automation.state.AlarmState;
 import nl.gingerbeard.automation.state.HomeAway;
@@ -423,8 +429,20 @@ public class AutomationFrameworkTest {
 		container.start();
 		final IAutomationFrameworkInterface framework = container.getAutomationFramework();
 		final Container runtime = container.getRuntime();
+		container.stop();
 
 		assertNotNull(framework);
 		assertNotNull(runtime);
+	}
+
+	@Test
+	public void automationFrameworkWithLogOutput() throws MalformedURLException, ProtocolException, IOException {
+		final ILogOutput logOut = mock(ILogOutput.class);
+		container = IAutomationFrameworkInterface.createFrameworkContainer(new DomoticzConfiguration(0, createMockUrl()), logOut);
+		container.start();
+		container.getAutomationFramework().addRoom(new TestRoom());
+		updateDevice(1, "on");
+		container.stop();
+		verify(logOut, atLeastOnce()).log(any(), anyString());
 	}
 }
