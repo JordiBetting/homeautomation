@@ -12,17 +12,19 @@ pipeline {
 				gradle 'gradle5.1.1'
 			}
 			steps {
-				sh 'echo Building with gradle'
 				sh 'gradle -b build.gradle test check build jacocoTestReport'
-				if (env.BRANCH_NAME == 'master') {
-					sh 'gradle -b build.gradle publishToMavenLocal'
-				}
 			}
 			post {
 				always {
 					sh 'touch automation_framework/build/test-results/test/*.xml'
 					junit allowEmptyResults: true, testResults: '**/build/test-results/test/*.xml'
 				}
+			}
+		}
+		stage("Publish") {
+			when { branch 'master' }
+			steps {
+				sh 'gradle -b build.gradle assemble publishToMavenLocal'
 			}
 		}
 		stage("Analysis") {
