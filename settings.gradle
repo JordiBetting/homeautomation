@@ -1,2 +1,3 @@
 rootProject.name='homeautomation_root'
 include 'automation_framework'
+include 'service'
