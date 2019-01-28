@@ -13,7 +13,10 @@ pipeline {
 			}
 			steps {
 				sh 'echo Building with gradle'
-				sh 'gradle -b build.gradle test check build jacocoTestReport publishToMavenLocal'
+				sh 'gradle -b build.gradle test check build jacocoTestReport'
+				if (env.BRANCH_NAME == 'master') {
+					sh 'gradle -b build.gradle publishToMavenLocal'
+				}
 			}
 			post {
 				always {
