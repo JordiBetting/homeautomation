@@ -1,0 +1,43 @@
+subprojects {
+	apply plugin: 'java'
+	apply plugin: 'eclipse'
+	apply plugin: 'jacoco'
+	apply plugin: 'findbugs'
+
+	repositories {
+		mavenLocal()
+		mavenCentral()
+	}
+
+	dependencies {
+		testCompile('org.junit.jupiter:junit-jupiter-api:5.3.2')
+		testCompile('org.junit.jupiter:junit-jupiter-params:5.3.2')
+		testRuntime('org.junit.jupiter:junit-jupiter-engine:5.3.2')
+		testCompile('junit:junit:4.12')
+		testCompile('org.mockito:mockito-core:2.23.4') 
+	}
+
+	test {
+	jacocoTestReport {
+		reports {
+			xml.enabled false
+			csv.enabled false
+		}
+
+		afterEvaluate {
+			classDirectories = files(classDirectories.files.collect {
+				fileTree(dir: it,
+						exclude: ['**Test**'])
+			})
+		}
+	}
+
+		useJUnitPlatform()
+	}
+
+	findbugs {
+		ignoreFailures = true
+		effort = "max"
+		reportLevel = "low"
+	}
+}	

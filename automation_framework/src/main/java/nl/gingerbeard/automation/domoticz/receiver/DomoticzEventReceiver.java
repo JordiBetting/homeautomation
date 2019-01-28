@@ -6,6 +6,7 @@ import java.util.Optional;
 import fi.iki.elonen.NanoHTTPD;
 import fi.iki.elonen.NanoHTTPD.Response.Status;
 import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
+import nl.gingerbeard.automation.logging.ILogger;
 
 public final class DomoticzEventReceiver extends NanoHTTPD implements IDomoticzEventReceiver {
 
@@ -23,9 +24,11 @@ public final class DomoticzEventReceiver extends NanoHTTPD implements IDomoticzE
 	}
 
 	private Optional<EventReceived> listener = Optional.empty();
+	private final ILogger log;
 
-	public DomoticzEventReceiver(final DomoticzConfiguration config) throws IOException {
+	public DomoticzEventReceiver(final DomoticzConfiguration config, final ILogger log) throws IOException {
 		super(config.getListenPort());
+		this.log = log;
 		start(NanoHTTPD.SOCKET_READ_TIMEOUT, true);
 		config.updateListenPort(getListeningPort());
 	}
@@ -43,9 +46,11 @@ public final class DomoticzEventReceiver extends NanoHTTPD implements IDomoticzE
 	@Override
 	public Response serve(final IHTTPSession session) {
 		Response response;
+		log.debug(session.getMethod() + " " + session.getUri() + " from " + session.getRemoteIpAddress());
 		if (session.getMethod() == Method.GET) {
 			response = processGetRequest(session.getUri());
 		} else {
+			log.warning("Received unsupported method " + session.getMethod().name() + " on " + session.getUri());
 			response = newFixedLengthResponse(Status.METHOD_NOT_ALLOWED, NanoHTTPD.MIME_PLAINTEXT, "Only GET is supported");
 		}
 		return response;
@@ -60,6 +65,7 @@ public final class DomoticzEventReceiver extends NanoHTTPD implements IDomoticzE
 			final Optional<Response> listenerResponse = triggerListener(responseParams.get());
 			response = listenerResponse.orElse(defaultResponse);
 		} else {
+			log.warning("Returning 404 after unrecognized URL: " + uri);
 			response = newFixedLengthResponse(Status.NOT_FOUND, NanoHTTPD.MIME_PLAINTEXT, "URL not in supported format");
 		}
 		return response;
@@ -71,10 +77,14 @@ public final class DomoticzEventReceiver extends NanoHTTPD implements IDomoticzE
 		if (listener.isPresent()) {
 			try {
 				final boolean result = listener.get().deviceChanged(responseParams.getIdx(), responseParams.getState());
-				if (result == false) {
+				if (result) {
+					log.debug("Success");
+				} else {
+					log.error("Could not process request idx=" + responseParams.getIdx() + ", state=" + responseParams.getState());
 					response = Optional.of(newFixedLengthResponse(Status.NOT_FOUND, NanoHTTPD.MIME_PLAINTEXT, "Could not process request."));
 				}
 			} catch (final Throwable t) {
+				log.exception(t, "Failure in processing request");
 				response = Optional.of(newFixedLengthResponse(Status.INTERNAL_ERROR, NanoHTTPD.MIME_PLAINTEXT, t.getMessage()));
 			}
 		}

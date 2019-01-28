@@ -20,6 +20,7 @@ import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
 import nl.gingerbeard.automation.domoticz.helpers.TestWebServer;
 import nl.gingerbeard.automation.domoticz.transmitter.DomoticzUpdateTransmitter;
 import nl.gingerbeard.automation.domoticz.transmitter.IDomoticzUpdateTransmitter;
+import nl.gingerbeard.automation.logging.TestLogger;
 import nl.gingerbeard.automation.state.Level;
 import nl.gingerbeard.automation.state.NextState;
 import nl.gingerbeard.automation.state.OnOffState;
@@ -50,7 +51,7 @@ public class DomoticzUpdateTransmitterTest {
 
 	@Test
 	public void transmitUpdate_urlCorrect() throws IOException {
-		final IDomoticzUpdateTransmitter transmitter = new DomoticzUpdateTransmitter(domoticzConfig);
+		final IDomoticzUpdateTransmitter transmitter = new DomoticzUpdateTransmitter(domoticzConfig, new TestLogger());
 		final Switch device = new Switch(1);
 
 		transmitter.transmitDeviceUpdate(new NextState<>(device, OnOffState.ON));
@@ -61,7 +62,7 @@ public class DomoticzUpdateTransmitterTest {
 
 	@Test
 	public void transmitUpdateOnOff_correct() throws IOException {
-		final IDomoticzUpdateTransmitter transmitter = new DomoticzUpdateTransmitter(domoticzConfig);
+		final IDomoticzUpdateTransmitter transmitter = new DomoticzUpdateTransmitter(domoticzConfig, new TestLogger());
 		final Switch device = new Switch(1);
 
 		// on
@@ -77,7 +78,7 @@ public class DomoticzUpdateTransmitterTest {
 
 	@Test
 	public void transmitUpdateLevel_correct() throws IOException {
-		final IDomoticzUpdateTransmitter transmitter = new DomoticzUpdateTransmitter(domoticzConfig);
+		final IDomoticzUpdateTransmitter transmitter = new DomoticzUpdateTransmitter(domoticzConfig, new TestLogger());
 		final DimmeableLight device = new DimmeableLight(1);
 
 		// on
@@ -88,7 +89,7 @@ public class DomoticzUpdateTransmitterTest {
 
 	@Test
 	public void transmitUnsupportedDevice_throwsException() {
-		final IDomoticzUpdateTransmitter transmitter = new DomoticzUpdateTransmitter(domoticzConfig);
+		final IDomoticzUpdateTransmitter transmitter = new DomoticzUpdateTransmitter(domoticzConfig, new TestLogger());
 		final StringTestDevice device = new StringTestDevice();
 
 		try {
@@ -102,7 +103,7 @@ public class DomoticzUpdateTransmitterTest {
 
 	@Test
 	public void transmitTemperature_correct() throws IOException {
-		final IDomoticzUpdateTransmitter transmitter = new DomoticzUpdateTransmitter(domoticzConfig);
+		final IDomoticzUpdateTransmitter transmitter = new DomoticzUpdateTransmitter(domoticzConfig, new TestLogger());
 		final ThermostatSetpointDevice device = new ThermostatSetpointDevice(1);
 
 		// on
@@ -121,7 +122,7 @@ public class DomoticzUpdateTransmitterTest {
 
 	@Test
 	public void errorResponse_throwsException() throws IOException {
-		final IDomoticzUpdateTransmitter transmitter = new DomoticzUpdateTransmitter(domoticzConfig);
+		final IDomoticzUpdateTransmitter transmitter = new DomoticzUpdateTransmitter(domoticzConfig, new TestLogger());
 		final Switch device = new Switch(1);
 		webserver.setResponse(Status.NOT_FOUND, TestWebServer.JSON_ERROR);
 
@@ -135,7 +136,7 @@ public class DomoticzUpdateTransmitterTest {
 
 	@Test
 	public void domoticzError_exceptionThrown() {
-		final IDomoticzUpdateTransmitter transmitter = new DomoticzUpdateTransmitter(domoticzConfig);
+		final IDomoticzUpdateTransmitter transmitter = new DomoticzUpdateTransmitter(domoticzConfig, new TestLogger());
 		final Switch device = new Switch(1);
 		webserver.setResponse(Status.OK, TestWebServer.JSON_ERROR); // Domoticz does this apparently :-(
 
@@ -149,7 +150,7 @@ public class DomoticzUpdateTransmitterTest {
 
 	@Test
 	public void malformedJSON_throwsException() {
-		final IDomoticzUpdateTransmitter transmitter = new DomoticzUpdateTransmitter(domoticzConfig);
+		final IDomoticzUpdateTransmitter transmitter = new DomoticzUpdateTransmitter(domoticzConfig, new TestLogger());
 		final Switch device = new Switch(1);
 		webserver.setResponse(Status.OK, TestWebServer.JSON_MALFORMED);
 
@@ -163,7 +164,7 @@ public class DomoticzUpdateTransmitterTest {
 
 	@Test
 	public void testFailedConnection() throws IOException {
-		final IDomoticzUpdateTransmitter transmitter = new DomoticzUpdateTransmitter(new DomoticzConfiguration(0, new URL("http://doesnotexist")));
+		final IDomoticzUpdateTransmitter transmitter = new DomoticzUpdateTransmitter(new DomoticzConfiguration(0, new URL("http://doesnotexist")), new TestLogger());
 		final NextState<OnOffState> newState = new NextState<>(new Switch(0), OnOffState.OFF);
 
 		assertThrows(IOException.class, () -> transmitter.transmitDeviceUpdate(newState));

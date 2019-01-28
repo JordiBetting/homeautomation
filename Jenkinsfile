@@ -1,22 +1,30 @@
 pipeline {
-	agent {
-		label 'java'
+	agent { label 'java'
+	}
+
+	environment {
+		JENKINS_NODE_COOKIE = 'dontKillMe' // this is necessary for the Gradle daemon to be kept alive
 	}
 
 	stages {
 		stage("Build") {
 			tools {
-				gradle 'gradle4.10.2'
+				gradle 'gradle5.1.1'
 			}
 			steps {
-				sh 'echo Building with gradle'
-				sh 'gradle -b automation_framework/build.gradle test check build jacocoTestReport'
+				sh 'gradle -b build.gradle test check build jacocoTestReport'
 			}
 			post {
 				always {
 					sh 'touch automation_framework/build/test-results/test/*.xml'
 					junit allowEmptyResults: true, testResults: '**/build/test-results/test/*.xml'
 				}
+			}
+		}
+		stage("Publish") {
+			when { branch 'master' }
+			steps {
+				sh 'gradle -b build.gradle assemble publishToMavenLocal'
 			}
 		}
 		stage("Analysis") {

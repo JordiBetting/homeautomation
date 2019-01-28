@@ -2,8 +2,14 @@ package nl.gingerbeard.automation;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -30,6 +36,7 @@ import nl.gingerbeard.automation.event.EventResult;
 import nl.gingerbeard.automation.event.IEvents;
 import nl.gingerbeard.automation.event.annotations.EventState;
 import nl.gingerbeard.automation.event.annotations.Subscribe;
+import nl.gingerbeard.automation.logging.ILogOutput;
 import nl.gingerbeard.automation.service.Container;
 import nl.gingerbeard.automation.state.AlarmState;
 import nl.gingerbeard.automation.state.HomeAway;
@@ -62,22 +69,21 @@ public class AutomationFrameworkTest {
 		}
 	}
 
-	private Container container;
+	private AutomationFrameworkContainer container;
 
 	@AfterEach
 	public void removeContainer() {
 		if (container != null) {
-			container.shutDown();
+			container.stop();
 			container = null;
 		}
 	}
 
 	private IAutomationFrameworkInterface createIntegration() {
-		container = IAutomationFrameworkInterface.createFrameworkContainer();
-		container.register(DomoticzConfiguration.class, new DomoticzConfiguration(0, createMockUrl()), 1);
+		container = IAutomationFrameworkInterface.createFrameworkContainer(new DomoticzConfiguration(0, createMockUrl()));
 		container.start();
 
-		final Optional<IAutomationFrameworkInterface> framework = container.getService(IAutomationFrameworkInterface.class);
+		final Optional<IAutomationFrameworkInterface> framework = container.getRuntime().getService(IAutomationFrameworkInterface.class);
 		assertTrue(framework.isPresent());
 
 		return framework.get();
@@ -92,7 +98,7 @@ public class AutomationFrameworkTest {
 	}
 
 	private State getState() {
-		final Optional<State> service = container.getService(State.class);
+		final Optional<State> service = container.getRuntime().getService(State.class);
 		assertTrue(service.isPresent());
 		return service.get();
 	}
@@ -276,7 +282,7 @@ public class AutomationFrameworkTest {
 	@Test
 	public void createAndStop_noException() {
 		createIntegration();
-		container.shutDown();
+		container.stop();
 		container = null;
 	}
 
@@ -322,7 +328,7 @@ public class AutomationFrameworkTest {
 	}
 
 	private int getListeningPort() {
-		final Optional<IDomoticzEventReceiver> eventReceiverOptional = container.getService(IDomoticzEventReceiver.class);
+		final Optional<IDomoticzEventReceiver> eventReceiverOptional = container.getRuntime().getService(IDomoticzEventReceiver.class);
 		assertTrue(eventReceiverOptional.isPresent());
 		final IDomoticzEventReceiver eventReceiver = eventReceiverOptional.get();
 		final int port = eventReceiver.getListeningPort();
@@ -415,5 +421,28 @@ public class AutomationFrameworkTest {
 	public void addUnsupportedDevice_throwsException() {
 		final IAutomationFrameworkInterface framework = new AutomationFramework(new MockEvents(), new DomoticzTransmitRecorder());
 		assertThrows(UnsupportedOperationException.class, () -> framework.addRoom(new RoomWithFakeDevice()));
+	}
+
+	@Test
+	public void automationFrameworkContainerTest() {
+		final AutomationFrameworkContainer container = IAutomationFrameworkInterface.createFrameworkContainer(new DomoticzConfiguration(0, createMockUrl()));
+		container.start();
+		final IAutomationFrameworkInterface framework = container.getAutomationFramework();
+		final Container runtime = container.getRuntime();
+		container.stop();
+
+		assertNotNull(framework);
+		assertNotNull(runtime);
+	}
+
+	@Test
+	public void automationFrameworkWithLogOutput() throws MalformedURLException, ProtocolException, IOException {
+		final ILogOutput logOut = mock(ILogOutput.class);
+		container = IAutomationFrameworkInterface.createFrameworkContainer(new DomoticzConfiguration(0, createMockUrl()), logOut);
+		container.start();
+		container.getAutomationFramework().addRoom(new TestRoom());
+		updateDevice(1, "on");
+		container.stop();
+		verify(logOut, atLeastOnce()).log(any(), anyString());
 	}
 }
