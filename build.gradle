@@ -52,9 +52,7 @@ task jacocoRootReport(type: org.gradle.testing.jacoco.tasks.JacocoReport) {
     classDirectories =  files(subprojects.sourceSets.main.output)
     executionData = files(subprojects.jacocoTestReport.executionData)
     reports {
-        html.enabled = true
-        html.destination = "${buildDir}/reports/jacoco/test/"
-		
+        html.enabled = true		
 		xml.enabled = false
         csv.enabled = false
     }
