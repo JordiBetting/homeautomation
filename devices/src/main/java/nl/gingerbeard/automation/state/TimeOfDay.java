@@ -7,6 +7,6 @@ public enum TimeOfDay {
 	;
 
 	public boolean meets(final TimeOfDay other) {
-		return equals(other) || other == TimeOfDay.ALLDAY;
+		return this == TimeOfDay.ALLDAY || equals(other) || other == TimeOfDay.ALLDAY;
 	}
 }

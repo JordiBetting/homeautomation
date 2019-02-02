@@ -10,8 +10,8 @@ public class HomeAwayTest {
 	@Test
 	public void matchesAlways() {
 		assertTrue(HomeAway.ALWAYS.meets(HomeAway.ALWAYS));
-		assertFalse(HomeAway.ALWAYS.meets(HomeAway.AWAY));
-		assertFalse(HomeAway.ALWAYS.meets(HomeAway.HOME));
+		assertTrue(HomeAway.ALWAYS.meets(HomeAway.AWAY));
+		assertTrue(HomeAway.ALWAYS.meets(HomeAway.HOME));
 	}
 
 	@Test

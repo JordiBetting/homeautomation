@@ -20,11 +20,11 @@ public class AlarmStateTest {
 		assertEquals(true, AlarmState.ARM_HOME.meets(AlarmState.ARMED));
 		assertEquals(false, AlarmState.ARM_HOME.meets(AlarmState.DISARMED));
 
-		assertEquals(false, AlarmState.ALWAYS.meets(AlarmState.ARM_AWAY));
-		assertEquals(false, AlarmState.ALWAYS.meets(AlarmState.ARM_HOME));
+		assertEquals(true, AlarmState.ALWAYS.meets(AlarmState.ARM_AWAY));
+		assertEquals(true, AlarmState.ALWAYS.meets(AlarmState.ARM_HOME));
 		assertEquals(true, AlarmState.ALWAYS.meets(AlarmState.ALWAYS));
-		assertEquals(false, AlarmState.ALWAYS.meets(AlarmState.ARMED));
-		assertEquals(false, AlarmState.ALWAYS.meets(AlarmState.DISARMED));
+		assertEquals(true, AlarmState.ALWAYS.meets(AlarmState.ARMED));
+		assertEquals(true, AlarmState.ALWAYS.meets(AlarmState.DISARMED));
 
 		assertEquals(false, AlarmState.ARMED.meets(AlarmState.ARM_AWAY));
 		assertEquals(false, AlarmState.ARMED.meets(AlarmState.ARM_HOME));
