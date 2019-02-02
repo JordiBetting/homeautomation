@@ -32,4 +32,52 @@ public class StateTest {
 
 		assertThrows(IllegalArgumentException.class, () -> state.setTimeOfDay(null));
 	}
+
+	@ParameterizedTest
+	@EnumSource(value = HomeAway.class, names = { "HOME", "AWAY" })
+	public void setHomeAway_valid_works(final HomeAway validHomeAway) {
+		final State state = new State();
+
+		state.setHomeAway(validHomeAway);
+		assertEquals(validHomeAway, state.getHomeAway());
+	}
+
+	@ParameterizedTest
+	@EnumSource(value = HomeAway.class, names = { "ALWAYS", })
+	public void setHomeAway_invalid_throwsException(final HomeAway invalidHomeAway) {
+		final State state = new State();
+
+		assertThrows(IllegalArgumentException.class, () -> state.setHomeAway(invalidHomeAway));
+	}
+
+	@Test
+	public void setHomeAway_null_throwsException() {
+		final State state = new State();
+
+		assertThrows(IllegalArgumentException.class, () -> state.setHomeAway(null));
+	}
+
+	@ParameterizedTest
+	@EnumSource(value = AlarmState.class, names = { "DISARMED", "ARM_HOME", "ARM_AWAY" })
+	public void setAlarmState_valid_works(final AlarmState validAlarmState) {
+		final State state = new State();
+
+		state.setAlarmState(validAlarmState);
+		assertEquals(validAlarmState, state.getAlarmState());
+	}
+
+	@ParameterizedTest
+	@EnumSource(value = AlarmState.class, names = { "ALWAYS", "ARMED" })
+	public void setAlarmState_invalid_throwsException(final AlarmState invalidAlarmState) {
+		final State state = new State();
+
+		assertThrows(IllegalArgumentException.class, () -> state.setAlarmState(invalidAlarmState));
+	}
+
+	@Test
+	public void setAlarmState_null_throwsException() {
+		final State state = new State();
+
+		assertThrows(IllegalArgumentException.class, () -> state.setAlarmState(null));
+	}
 }

@@ -86,7 +86,7 @@ final class SynchronousEvents implements IEvents {
 	}
 
 	private boolean stateMeets(final EventState eventState) {
-		return state.getTimeOfDay().meets(eventState.timeOfDay()) && state.getAlarm().meets(eventState.alarmState()) && state.getHomeAway().meets(eventState.homeAway());
+		return state.getTimeOfDay().meets(eventState.timeOfDay()) && state.getAlarmState().meets(eventState.alarmState()) && state.getHomeAway().meets(eventState.homeAway());
 	}
 
 	public void clear() {

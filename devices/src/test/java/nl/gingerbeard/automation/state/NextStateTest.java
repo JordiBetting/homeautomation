@@ -1,5 +1,6 @@
 package nl.gingerbeard.automation.state;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import org.junit.jupiter.api.Test;
@@ -12,6 +13,16 @@ public class NextStateTest {
 	@Test
 	public void init_noException() {
 		new NextState<>(createMockDevice(), "test");
+	}
+
+	@Test
+	public void nextState_returnsComponents() {
+		final Device<String> mock = createMockDevice();
+
+		final NextState<String> nextState = new NextState<>(mock, "test");
+
+		assertEquals("test", nextState.get());
+		assertEquals(mock, nextState.getDevice());
 	}
 
 	@Test

@@ -20,14 +20,16 @@ public final class State {
 	}
 
 	public void setAlarmState(final AlarmState alarmState) {
+		Preconditions.checkArgument(alarmState != null && alarmState != AlarmState.ALWAYS && alarmState != AlarmState.ARMED);
 		alarm = alarmState;
 	}
 
 	public void setHomeAway(final HomeAway homeAway) {
+		Preconditions.checkArgument(homeAway != null && homeAway != HomeAway.ALWAYS);
 		home = homeAway;
 	}
 
-	public AlarmState getAlarm() {
+	public AlarmState getAlarmState() {
 		return alarm;
 	}
 
