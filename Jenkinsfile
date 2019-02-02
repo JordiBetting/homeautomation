@@ -12,7 +12,7 @@ pipeline {
 				gradle 'gradle5.1.1'
 			}
 			steps {
-				sh 'gradle -b build.gradle test check build jacocoTestReport'
+				sh 'gradle -b build.gradle test check build jacocoRootReport'
 			}
 			post {
 				always {
@@ -43,7 +43,7 @@ pipeline {
 					allowMissing: false,
 					alwaysLinkToLastBuild: true,
 					keepAll: true,
-					reportDir: 'automation_framework/build/reports/jacoco/test/html/',
+					reportDir: 'build/reports/jacoco/test/html/',
 					reportFiles: 'index.html',
 					reportName: "Coverage Report (Excl. tests)"
 					])
