@@ -22,7 +22,7 @@ public class CompositeDeviceTest {
 
 	@Test
 	public void createWithSubdevices() {
-		final Set<Device<?>> set = new HashSet();
+		final Set<Device<?>> set = new HashSet<>();
 		set.add(new Switch(42));
 		set.add(new DoorSensor(666));
 
