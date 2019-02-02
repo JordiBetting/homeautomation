@@ -12,6 +12,7 @@ import nl.gingerbeard.automation.state.ThermostatState.ThermostatMode;
 public final class Thermostat extends CompositeDevice<ThermostatState> {
 
 	private ThermostatModeDevice modeDevice;
+
 	private ThermostatSetpointDevice setpointDevice;
 
 	public Thermostat(final int idxSetpoint, final int idxMode) {
@@ -50,4 +51,11 @@ public final class Thermostat extends CompositeDevice<ThermostatState> {
 		return nextStates;
 	}
 
+	public ThermostatModeDevice getModeDevice() {
+		return modeDevice;
+	}
+
+	public ThermostatSetpointDevice getSetpointDevice() {
+		return setpointDevice;
+	}
 }

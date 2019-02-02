@@ -7,7 +7,7 @@ public abstract class CompositeDevice<T> extends StateDevice<T> {
 
 	private final Set<Device<?>> devices;
 
-	public CompositeDevice(final Set<Device<?>> devices) {
+	protected CompositeDevice(final Set<Device<?>> devices) {
 		this.devices = devices;
 	}
 

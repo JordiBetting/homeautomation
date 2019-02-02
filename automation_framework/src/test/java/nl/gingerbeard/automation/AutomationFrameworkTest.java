@@ -270,7 +270,7 @@ public class AutomationFrameworkTest {
 	@Test
 	public void homeAwayAlwaysSubscriber_away_received() throws IOException {
 		final IAutomationFrameworkInterface framework = createIntegration();
-		getState().setHomeAway(HomeAway.ALWAYS);
+		getState().setHomeAway(HomeAway.AWAY);
 
 		final AlwaysHomeAwaySubscriber subscriber = new AlwaysHomeAwaySubscriber();
 		framework.addRoom(subscriber);

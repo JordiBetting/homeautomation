@@ -4,6 +4,6 @@ public enum HomeAway {
 	ALWAYS, HOME, AWAY;
 
 	public boolean meets(final HomeAway other) {
-		return equals(other) || other.equals(ALWAYS);
+		return this == HomeAway.ALWAYS || equals(other) || other.equals(ALWAYS);
 	}
 }

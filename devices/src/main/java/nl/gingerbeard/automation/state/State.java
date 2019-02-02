@@ -2,8 +2,6 @@ package nl.gingerbeard.automation.state;
 
 import com.google.common.base.Preconditions;
 
-import nl.gingerbeard.automation.event.annotations.EventState;
-
 public final class State {
 
 	// TODO: Initialize state via domoticz
@@ -21,15 +19,21 @@ public final class State {
 		return timeOfDay;
 	}
 
-	public boolean meets(final EventState eventState) {
-		return timeOfDay.meets(eventState.timeOfDay()) && alarm.meets(eventState.alarmState()) && home.meets(eventState.homeAway());
-	}
-
 	public void setAlarmState(final AlarmState alarmState) {
+		Preconditions.checkArgument(alarmState != null && alarmState != AlarmState.ALWAYS && alarmState != AlarmState.ARMED);
 		alarm = alarmState;
 	}
 
 	public void setHomeAway(final HomeAway homeAway) {
+		Preconditions.checkArgument(homeAway != null && homeAway != HomeAway.ALWAYS);
 		home = homeAway;
+	}
+
+	public AlarmState getAlarmState() {
+		return alarm;
+	}
+
+	public HomeAway getHomeAway() {
+		return home;
 	}
 }

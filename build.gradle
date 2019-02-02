@@ -1,13 +1,19 @@
-subprojects {
+apply plugin: 'jacoco'
+
+allprojects {
 	apply plugin: 'java'
-	apply plugin: 'eclipse'
 	apply plugin: 'jacoco'
-	apply plugin: 'findbugs'
+
 
 	repositories {
 		mavenLocal()
 		mavenCentral()
-	}
+	}	
+}
+
+subprojects {
+	apply plugin: 'eclipse'
+	apply plugin: 'findbugs'
 
 	dependencies {
 		testCompile('org.junit.jupiter:junit-jupiter-api:5.3.2')
@@ -15,6 +21,7 @@ subprojects {
 		testRuntime('org.junit.jupiter:junit-jupiter-engine:5.3.2')
 		testCompile('junit:junit:4.12')
 		testCompile('org.mockito:mockito-core:2.23.4') 
+		compile group: 'com.google.guava', name: 'guava', version: '23.5-jre'
 	}
 
 	test {
@@ -41,3 +48,16 @@ subprojects {
 		reportLevel = "low"
 	}
 }	
+
+task jacocoRootReport(type: org.gradle.testing.jacoco.tasks.JacocoReport) {
+    dependsOn = subprojects.test
+    additionalSourceDirs = files(subprojects.sourceSets.main.allSource.srcDirs)
+    sourceDirectories = files(subprojects.sourceSets.main.allSource.srcDirs)
+    classDirectories =  files(subprojects.sourceSets.main.output)
+    executionData = files(subprojects.jacocoTestReport.executionData)
+    reports {
+        html.enabled = true		
+		xml.enabled = false
+        csv.enabled = false
+    }
+}

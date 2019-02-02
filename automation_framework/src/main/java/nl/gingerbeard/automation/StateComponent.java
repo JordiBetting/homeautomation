@@ -1,8 +1,9 @@
-package nl.gingerbeard.automation.state;
+package nl.gingerbeard.automation;
 
 import nl.gingerbeard.automation.service.annotation.Activate;
 import nl.gingerbeard.automation.service.annotation.Deactivate;
 import nl.gingerbeard.automation.service.annotation.Provides;
+import nl.gingerbeard.automation.state.State;
 
 public final class StateComponent {
 	@Provides

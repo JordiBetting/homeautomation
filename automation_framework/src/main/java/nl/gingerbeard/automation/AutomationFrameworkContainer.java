@@ -9,7 +9,6 @@ import nl.gingerbeard.automation.event.EventsComponent;
 import nl.gingerbeard.automation.logging.ILogOutput;
 import nl.gingerbeard.automation.logging.LoggingComponent;
 import nl.gingerbeard.automation.service.Container;
-import nl.gingerbeard.automation.state.StateComponent;
 
 public final class AutomationFrameworkContainer {
 
