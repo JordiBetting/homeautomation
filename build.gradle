@@ -1,15 +1,19 @@
 apply plugin: 'jacoco'
 
-subprojects {
+allprojects {
 	apply plugin: 'java'
-	apply plugin: 'eclipse'
 	apply plugin: 'jacoco'
-	apply plugin: 'findbugs'
+
 
 	repositories {
 		mavenLocal()
 		mavenCentral()
-	}
+	}	
+}
+
+subprojects {
+	apply plugin: 'eclipse'
+	apply plugin: 'findbugs'
 
 	dependencies {
 		testCompile('org.junit.jupiter:junit-jupiter-api:5.3.2')
