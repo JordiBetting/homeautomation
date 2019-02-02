@@ -79,10 +79,14 @@ final class SynchronousEvents implements IEvents {
 
 	private void triggerSubscribers(final Object event, final EventResult results, final Class<?> callbackEventType) {
 		for (final Subscriber subscriber : callback.get(callbackEventType)) {
-			if (state.meets(subscriber.getEventState())) {
+			if (stateMeets(subscriber.getEventState())) {
 				results.add(subscriber.call(event));
 			}
 		}
+	}
+
+	private boolean stateMeets(final EventState eventState) {
+		return state.getTimeOfDay().meets(eventState.timeOfDay()) && state.getAlarm().meets(eventState.alarmState()) && state.getHomeAway().meets(eventState.homeAway());
 	}
 
 	public void clear() {

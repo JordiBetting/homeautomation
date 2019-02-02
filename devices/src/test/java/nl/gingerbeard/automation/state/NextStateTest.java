@@ -3,14 +3,15 @@ package nl.gingerbeard.automation.state;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
-import nl.gingerbeard.automation.testdevices.StringTestDevice;
+import nl.gingerbeard.automation.devices.Device;
 
 public class NextStateTest {
 
 	@Test
 	public void init_noException() {
-		new NextState<>(new StringTestDevice(), "test");
+		new NextState<>(createMockDevice(), "test");
 	}
 
 	@Test
@@ -26,11 +27,17 @@ public class NextStateTest {
 	@Test
 	public void init_nullState_throwsException() {
 		try {
-			new NextState<>(new StringTestDevice(), null);
+			new NextState<>(createMockDevice(), null);
 			fail("expected exception");
 		} catch (final IllegalArgumentException e) {
 			// expected
 		}
+	}
+
+	private Device<String> createMockDevice() {
+		@SuppressWarnings("unchecked")
+		final Device<String> mock = Mockito.mock(Device.class);
+		return mock;
 	}
 
 }
