@@ -6,9 +6,17 @@ public final class State {
 
 	// TODO: Initialize state via domoticz
 	// state in domoticz is always leading
-	public AlarmState alarm = AlarmState.DISARMED;
-	public HomeAway home = HomeAway.HOME;
-	private TimeOfDay timeOfDay = TimeOfDay.DAYTIME;
+	public AlarmState alarm;
+	public HomeAway home;
+	private TimeOfDay timeOfDay;
+	private Time time;
+
+	public State() {
+		time = new Time();
+		timeOfDay = TimeOfDay.DAYTIME;
+		home = HomeAway.HOME;
+		alarm = AlarmState.DISARMED;
+	}
 
 	public void setTimeOfDay(final TimeOfDay newTimeOfDay) {
 		Preconditions.checkArgument(newTimeOfDay != null && newTimeOfDay != TimeOfDay.ALLDAY);
@@ -35,5 +43,13 @@ public final class State {
 
 	public HomeAway getHomeAway() {
 		return home;
+	}
+
+	public Time getTime() {
+		return time;
+	}
+
+	public void setTime(final Time time) {
+		this.time = time;
 	}
 }
