@@ -41,11 +41,11 @@ public final class DeclarativeRulesRegistry {
 	private void executeDeviceRules(final Device<?> device, final List<DeclarativeRuleBuilder> rules) {
 		final Object nextState = device.getState();
 		rules.stream().forEach((rule) -> {
-			rule.getAction().ifPresentOrElse(//
-					// if action present:
-					(action) -> rule.execute(nextState),
-					// if action absent:
-					() -> log.warning("No action defined for idx=" + device.getIdx() + ", state=" + nextState));
+			if (rule.hasActions()) {
+				rule.execute(nextState);
+			} else {
+				log.warning("No action defined for idx=" + device.getIdx() + ", state=" + nextState);
+			}
 		});
 	}
 }

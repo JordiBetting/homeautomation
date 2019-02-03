@@ -1,6 +1,7 @@
 package nl.gingerbeard.automation.declarative;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.Arrays;
@@ -9,6 +10,7 @@ import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 
 import nl.gingerbeard.automation.devices.Device;
 import nl.gingerbeard.automation.devices.Switch;
@@ -23,7 +25,8 @@ public class DeclarativeRulesTest {
 	private TransmitterToDeviceUpdate deviceManager;
 	private TestLogger log;
 	private Switch switchInput;
-	private Switch switchOutput;
+	private Switch switchOutput1;
+	private Switch switchOutput2;
 
 	// glue-ing the output of NextState to update device to improve test readability
 	private static class TransmitterToDeviceUpdate implements IDeviceUpdate {
@@ -49,44 +52,42 @@ public class DeclarativeRulesTest {
 	@BeforeEach
 	public void createRules() {
 		switchInput = new Switch(1);
-		switchOutput = new Switch(2);
+		switchOutput1 = new Switch(2);
+		switchOutput2 = new Switch(3);
 		log = new TestLogger();
-		deviceManager = new TransmitterToDeviceUpdate(switchInput, switchOutput);
+		deviceManager = new TransmitterToDeviceUpdate(switchInput, switchOutput1, switchOutput2);
 		rules = new DeclarativeRules(log, deviceManager);
 	}
 
 	@Test
 	public void whenthen_single() {
-
-		rules.when(switchInput, OnOffState.ON).then(switchOutput, OnOffState.ON);
+		rules.when(switchInput, OnOffState.ON)//
+				.then(switchOutput1, OnOffState.ON);
 
 		switchInput.setState(OnOffState.ON);
 		rules.deviceUpdated(switchInput);
 
-		assertEquals(OnOffState.ON, switchOutput.getState());
+		assertEquals(OnOffState.ON, switchOutput1.getState());
 	}
 
 	@Test
 	public void whenthen_2conditions() {
-		final Switch switchInput = new Switch(1);
-		final Switch switchOutput = new Switch(2);
-
-		rules.when(switchInput, OnOffState.ON).then(switchOutput, OnOffState.ON);
-		rules.when(switchInput, OnOffState.OFF).then(switchOutput, OnOffState.OFF);
+		rules.when(switchInput, OnOffState.ON)//
+				.then(switchOutput1, OnOffState.ON);
+		rules.when(switchInput, OnOffState.OFF)//
+				.then(switchOutput1, OnOffState.OFF);
 
 		switchInput.setState(OnOffState.ON);
 		rules.deviceUpdated(switchInput);
-		assertEquals(OnOffState.ON, switchOutput.getState());
+		assertEquals(OnOffState.ON, switchOutput1.getState());
 
 		switchInput.setState(OnOffState.OFF);
 		rules.deviceUpdated(switchInput);
-		assertEquals(OnOffState.OFF, switchOutput.getState());
+		assertEquals(OnOffState.OFF, switchOutput1.getState());
 	}
 
 	@Test
 	public void when_withoutThen_warningLogged() {
-
-		final Switch switchInput = new Switch(1);
 		switchInput.setState(OnOffState.ON);
 
 		rules.when(switchInput, OnOffState.ON);
@@ -95,4 +96,74 @@ public class DeclarativeRulesTest {
 		log.assertContains(LogLevel.WARNING, "No action defined for idx=1, state=ON");
 	}
 
+	@Test
+	public void when_multipleThen() {
+		rules.when(switchInput, OnOffState.ON)//
+				.then(switchOutput1, OnOffState.ON)//
+				.and(switchOutput2, OnOffState.ON);
+
+		switchInput.setState(OnOffState.ON);
+		rules.deviceUpdated(switchInput);
+		assertEquals(OnOffState.ON, switchOutput1.getState());
+		assertEquals(OnOffState.ON, switchOutput2.getState());
+
+	}
+
+	@Test
+	public void when_multipleThen_2conditions() {
+		rules.when(switchInput, OnOffState.ON)//
+				.then(switchOutput1, OnOffState.ON)//
+				.and(switchOutput2, OnOffState.ON);
+		rules.when(switchInput, OnOffState.OFF)//
+				.then(switchOutput1, OnOffState.OFF)//
+				.and(switchOutput2, OnOffState.OFF);
+
+		switchInput.setState(OnOffState.ON);
+		rules.deviceUpdated(switchInput);
+		assertEquals(OnOffState.ON, switchOutput1.getState());
+		assertEquals(OnOffState.ON, switchOutput2.getState());
+
+		switchInput.setState(OnOffState.OFF);
+		rules.deviceUpdated(switchInput);
+		assertEquals(OnOffState.OFF, switchOutput1.getState());
+		assertEquals(OnOffState.OFF, switchOutput2.getState());
+	}
+
+	@Test
+	public void whenThenElse() {
+		rules.when(switchInput, OnOffState.ON)//
+				.then(switchOutput1, OnOffState.ON) //
+				.orElse(switchOutput1, OnOffState.OFF);
+
+		switchInput.setState(OnOffState.ON);
+		rules.deviceUpdated(switchInput);
+
+		assertEquals(OnOffState.ON, switchOutput1.getState());
+
+		switchInput.setState(OnOffState.OFF);
+		rules.deviceUpdated(switchInput);
+
+		assertEquals(OnOffState.OFF, switchOutput1.getState());
+	}
+
+	@Test
+	public void and_withoutThen_throwsException() {
+		final Executable test = () -> rules.when(switchInput, OnOffState.ON).and(switchOutput1, OnOffState.ON);
+
+		final IllegalStateException exception = assertThrows(IllegalStateException.class, test);
+		assertEquals("and() called without then() or orElse()", exception.getMessage());
+	}
+
+	@Test
+	public void orElse_withoutThen_isNegation() {
+		switchOutput1.setState(OnOffState.ON);
+
+		rules.when(switchInput, OnOffState.ON)//
+				.orElse(switchOutput1, OnOffState.OFF);
+
+		switchInput.setState(OnOffState.OFF);
+		rules.deviceUpdated(switchInput);
+
+		assertEquals(OnOffState.OFF, switchOutput1.getState());
+	}
 }

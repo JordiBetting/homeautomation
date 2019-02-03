@@ -1,11 +1,15 @@
 package nl.gingerbeard.automation.declarative;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import nl.gingerbeard.automation.devices.Device;
 
 public final class DeclarativeRuleBuilder {
-	private Optional<Action<?>> action = Optional.empty();
+	private final List<Action<?>> actions = new ArrayList<>();
+	private final List<Action<?>> elseActions = new ArrayList<>();
+	private Optional<List<Action<?>>> lastActionList = Optional.empty();
 	private final Object expectedState;
 	private final IDeviceUpdate output;
 
@@ -16,22 +20,46 @@ public final class DeclarativeRuleBuilder {
 
 	public <StateType> DeclarativeRuleBuilder then(final Device<StateType> device, final StateType newState) {
 		final Action<StateType> action = new Action<>(device, newState, output);
-		this.action = Optional.of(action);
+		actions.add(action);
+		lastActionList = Optional.of(actions);
 		return this;
 	}
 
-	public Optional<Action<?>> getAction() {
-		return action;
+	public <StateType> DeclarativeRuleBuilder and(final Device<StateType> device, final StateType newState) {
+		if (lastActionList.isPresent()) {
+			final Action<StateType> action = new Action<>(device, newState, output);
+			lastActionList.get().add(action);
+		} else {
+			throw new IllegalStateException("and() called without then() or orElse()");
+		}
+		return then(device, newState);
+	}
+
+	public List<Action<?>> getActions() {
+		return actions;
 	}
 
 	public void execute(final Object newState) {
-		if (action.isPresent() && isExpectedState(newState)) {
-			action.get().execute();
+		if (isExpectedState(newState)) {
+			actions.stream().forEach((action) -> action.execute());
+		} else {
+			elseActions.stream().forEach((action) -> action.execute());
 		}
 	}
 
-	boolean isExpectedState(final Object newState) {
+	private boolean isExpectedState(final Object newState) {
 		return expectedState.equals(newState);
+	}
+
+	boolean hasActions() {
+		return !actions.isEmpty() || !elseActions.isEmpty();
+	}
+
+	public <StateType> DeclarativeRuleBuilder orElse(final Device<StateType> device, final StateType newState) {
+		final Action<StateType> action = new Action<>(device, newState, output);
+		elseActions.add(action);
+		lastActionList = Optional.of(elseActions);
+		return this;
 	}
 
 }
