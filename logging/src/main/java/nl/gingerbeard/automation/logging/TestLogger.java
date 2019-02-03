@@ -1,7 +1,5 @@
 package nl.gingerbeard.automation.logging;
 
-import static org.junit.jupiter.api.Assertions.fail;
-
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
@@ -40,9 +38,17 @@ public class TestLogger implements ILogger {
 		assertContains(format(level, message));
 	}
 
+	private static class TestLoggerException extends RuntimeException {
+		private static final long serialVersionUID = 3019916957991833314L;
+
+		public TestLoggerException(final String message) {
+			super(message);
+		}
+	}
+
 	private void assertContains(final String expectation) {
 		if (testContains(expectation) == false) {
-			fail("Logmessage not present: " + expectation + System.lineSeparator() + "Full log:" + System.lineSeparator() + getFullLog());
+			throw new TestLoggerException("Logmessage not present: " + expectation + System.lineSeparator() + "Full log:" + System.lineSeparator() + getFullLog());
 		}
 	}
 

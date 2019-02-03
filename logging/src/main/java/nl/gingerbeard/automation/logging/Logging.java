@@ -2,7 +2,7 @@ package nl.gingerbeard.automation.logging;
 
 import java.util.Optional;
 
-public class Logging implements ILogger {
+public final class Logging implements ILogger {
 
 	private final Optional<ILogOutput> logOutput;
 
