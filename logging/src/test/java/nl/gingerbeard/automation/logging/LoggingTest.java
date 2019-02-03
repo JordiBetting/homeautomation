@@ -50,7 +50,6 @@ public class LoggingTest {
 		System.setOut(ps);
 
 		try {
-			final LogRecorder logOutput = new LogRecorder();
 			final ILogger logging = new Logging(Optional.empty());
 
 			logging.debug("testdebug");
