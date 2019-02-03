@@ -21,15 +21,7 @@ pipeline {
 				}
 			}
 		}
-		stage("Publish") {
-			tools {
-				gradle 'gradle5.1.1'
-			}
-			when { branch 'master' }
-			steps {
-				sh 'gradle -b build.gradle assemble publishToMavenLocal'
-			}
-		}
+
 		stage("Analysis") {
 			steps {
 				sh 'touch automation_framework/build/test-results/test/*.xml'
@@ -48,6 +40,17 @@ pipeline {
 					reportName: "Coverage Report (Excl. tests)"
 					])
 			}
+		}
+			
+		stage("Publish") {
+			tools {
+				gradle 'gradle5.1.1'
+			}
+			when { branch 'master' }
+			steps {
+				sh 'gradle -b build.gradle assemble publishToMavenLocal'
+			}
+
 			post {
 				always {
 					cleanWs()
