@@ -1,11 +1,17 @@
 package nl.gingerbeard.automation.declarative;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,9 +38,14 @@ public class DeclarativeRulesTest {
 	private static class TransmitterToDeviceUpdate implements IDeviceUpdate {
 
 		private final Map<Integer, Device<?>> devices = new HashMap<>();
+		private Optional<CountDownLatch> latch = Optional.empty();
 
 		public TransmitterToDeviceUpdate(final Device<?>... devices) {
 			Arrays.stream(devices).forEach((device) -> this.devices.put(device.getIdx(), device));
+		}
+
+		void setLatch(final CountDownLatch latch) {
+			this.latch = Optional.ofNullable(latch);
 		}
 
 		@Override
@@ -42,6 +53,7 @@ public class DeclarativeRulesTest {
 			final Device<?> changedDevice = nextState.getDevice();
 			if (devices.containsKey(changedDevice.getIdx())) {
 				changedDevice.updateState(nextState.get().toString());
+				latch.ifPresent((latch) -> latch.countDown());
 			} else {
 				fail("Got update of non existent device with idx=" + changedDevice.getIdx() + " : " + changedDevice.toString());
 			}
@@ -191,4 +203,48 @@ public class DeclarativeRulesTest {
 		assertEquals(OnOffState.OFF, switchOutput1.getState());
 	}
 
+	@Test
+	public void whenForDuration() throws InterruptedException {
+		final CountDownLatch latch = new CountDownLatch(1);
+		deviceManager.setLatch(latch);
+
+		switchInput1.setState(OnOffState.ON);
+		switchOutput1.setState(OnOffState.OFF);
+
+		rules.when(switchInput1, OnOffState.ON) //
+				.forDuration(Duration.ofMillis(250)) //
+				.then(switchOutput1, OnOffState.ON);
+
+		// trigger and directly check that output is still off (i.e. it has been delayed)
+		rules.updateDevice(switchInput1);
+		assertEquals(OnOffState.OFF, switchOutput1.getState());
+
+		// await outcome of rule
+		assertTrue(latch.await(30, TimeUnit.SECONDS)); // returns false on timeout
+
+		// assert that after rule is completd, the output has been updated
+		assertEquals(OnOffState.ON, switchOutput1.getState());
+	}
+
+	@Test
+	public void whenForDuration_cancelled() throws InterruptedException {
+		final CountDownLatch latch = new CountDownLatch(1);
+		deviceManager.setLatch(latch);
+
+		switchInput1.setState(OnOffState.ON);
+		switchOutput1.setState(OnOffState.OFF);
+
+		rules.when(switchInput1, OnOffState.ON) //
+				.forDuration(Duration.ofMillis(500)) //
+				.then(switchOutput1, OnOffState.ON);
+
+		// trigger and directly check that output is still off (i.e. it has been delayed)
+		rules.updateDevice(switchInput1);
+		assertEquals(OnOffState.OFF, switchOutput1.getState());
+		switchInput1.setState(OnOffState.OFF);
+		rules.updateDevice(switchInput1);
+
+		// await outcome of rule
+		assertFalse(latch.await(1, TimeUnit.SECONDS)); // returns false on timeout
+	}
 }
