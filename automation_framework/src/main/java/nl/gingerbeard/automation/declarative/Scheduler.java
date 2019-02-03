@@ -15,6 +15,7 @@ final class Scheduler {
 
 	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 	private final Map<Device<?>, SchedulerAction> scheduledTasks = new HashMap<>();
+	private Duration duration;
 
 	private static class SchedulerAction {
 		ScheduledFuture<?> task;
@@ -35,7 +36,7 @@ final class Scheduler {
 
 	}
 
-	void schedule(final Device<?> device, final List<Action<?>> actions, final Duration duration) {
+	void schedule(final Device<?> device, final List<Action<?>> actions) {
 		final ScheduledFuture<?> task = scheduler.schedule(() -> {
 			execute(device);
 		}, duration.toMillis(), TimeUnit.MILLISECONDS);
@@ -54,5 +55,9 @@ final class Scheduler {
 			task.getScheduledTask().cancel(false);
 			scheduledTasks.remove(device);
 		}
+	}
+
+	public void setDuration(final Duration duration) {
+		this.duration = duration;
 	}
 }

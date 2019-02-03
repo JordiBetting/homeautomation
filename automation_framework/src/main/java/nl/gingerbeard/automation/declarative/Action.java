@@ -5,11 +5,14 @@ import nl.gingerbeard.automation.state.NextState;
 
 final class Action<StateType> {
 
-	private final IDeviceUpdate output;
 	private final NextState<StateType> nextState;
+	private IDeviceUpdate output;
 
-	public Action(final Device<StateType> device, final StateType newState, final IDeviceUpdate output) {
+	Action(final Device<StateType> device, final StateType newState) {
 		nextState = new NextState<>(device, newState);
+	}
+
+	void setOutput(final IDeviceUpdate output) {
 		this.output = output;
 	}
 

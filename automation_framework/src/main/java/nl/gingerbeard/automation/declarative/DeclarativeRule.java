@@ -1,81 +1,53 @@
 package nl.gingerbeard.automation.declarative;
 
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import nl.gingerbeard.automation.devices.Device;
 
 final class DeclarativeRule {
-	// TODO: yeah this is becoming a mess. Split up class, use classes
-	// for state or think of something better. This needs cleaning!
-	private final List<Action<?>> actions = new ArrayList<>();
-	private final List<Action<?>> elseActions = new ArrayList<>();
-	private final Map<Device<?>, Object> expectedStates = new HashMap<>();
-	private final IDeviceUpdate output;
 	private final DeclarativeRulesRegistry registry;
-	private Duration duration;
-	private RuleType type = RuleType.INSTANT;
 	private final Scheduler scheduler = new Scheduler();
-
-	private static enum RuleType {
-		INSTANT, //
-		DELAYED, //
-		;
-	}
-
-	// isolates possible actions after a then() call.
-	public class DeclarativeThenBuilder {
-		private List<Action<?>> lastActionList;
-
-		public DeclarativeThenBuilder() {
-			lastActionList = actions;
-		}
-
-		public <StateType> DeclarativeThenBuilder orElse(final Device<StateType> device, final StateType newState) {
-			final Action<StateType> action = new Action<>(device, newState, output);
-			elseActions.add(action);
-			lastActionList = elseActions;
-			return this;
-		}
-
-		public <StateType> DeclarativeThenBuilder and(final Device<StateType> device, final StateType newState) {
-			final Action<StateType> action = new Action<>(device, newState, output);
-			lastActionList.add(action);
-			return this;
-		}
-	}
+	private final Map<Device<?>, Object> expectedStates = new HashMap<>();
+	private final DeclarativeRuleActions actions;
+	private DeclarativeRuleType type = DeclarativeRuleType.INSTANT;
 
 	DeclarativeRule(final DeclarativeRulesRegistry registry, final Device<?> device, final IDeviceUpdate output, final Object expectedState) {
 		this.registry = registry;
-		this.output = output;
 		expectedStates.put(device, expectedState);
+		actions = new DeclarativeRuleActions(output);
 	}
 
-	public <StateType> DeclarativeThenBuilder then(final Device<StateType> device, final StateType newState) {
-		final Action<StateType> action = new Action<>(device, newState, output);
-		actions.add(action);
-		return new DeclarativeThenBuilder();
+	public <StateType> DeclarativeRuleActions then(final Device<StateType> device, final StateType newState) {
+		final Action<StateType> action = new Action<>(device, newState);
+		actions.when(action);
+		return actions;
 	}
 
 	void updateDevice(final Device<?> device, final Object newState) {
-		// TODO: I don't like this if/this/then/then structure
 		if (isExpectedState(device, newState)) {
-			if (type == RuleType.INSTANT) {
-				actions.stream().forEach((action) -> action.execute());
-			} else {
-				scheduler.schedule(device, actions, duration);
-			}
+			updateDeviceExpectedState(device);
 		} else {
-			scheduler.cancel(device);
-			if (type == RuleType.INSTANT) {
-				elseActions.stream().forEach((elseAction) -> elseAction.execute());
-			} else {
-				scheduler.schedule(device, elseActions, duration);
-			}
+			updateDeviceNotExpectedState(device);
+		}
+	}
+
+	private void updateDeviceExpectedState(final Device<?> device) {
+		if (type == DeclarativeRuleType.INSTANT) {
+			actions.forEachAction((action) -> action.execute());
+		} else {
+			scheduler.schedule(device, actions.getActions());
+		}
+	}
+
+	private void updateDeviceNotExpectedState(final Device<?> device) {
+		scheduler.cancel(device);
+		if (type == DeclarativeRuleType.INSTANT) {
+			actions.forEachElseAction((elseAction) -> elseAction.execute());
+		} else {
+			scheduler.schedule(device, actions.getElseActions());
 		}
 	}
 
@@ -89,7 +61,7 @@ final class DeclarativeRule {
 	}
 
 	boolean hasActions() {
-		return !actions.isEmpty() || !elseActions.isEmpty();
+		return actions.hasActions();
 	}
 
 	public <StateType> DeclarativeRule and(final Device<StateType> device, final StateType expectedState) {
@@ -99,8 +71,8 @@ final class DeclarativeRule {
 	}
 
 	public DeclarativeRule forDuration(final Duration duration) {
-		type = RuleType.DELAYED;
-		this.duration = duration;
+		type = DeclarativeRuleType.DELAYED;
+		scheduler.setDuration(duration);
 		return this;
 	}
 
