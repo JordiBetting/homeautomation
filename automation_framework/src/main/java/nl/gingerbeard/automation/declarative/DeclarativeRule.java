@@ -1,5 +1,6 @@
 package nl.gingerbeard.automation.declarative;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -8,7 +9,7 @@ import java.util.Map.Entry;
 
 import nl.gingerbeard.automation.devices.Device;
 
-public final class DeclarativeRuleBuilder {
+final class DeclarativeRule {
 	private final List<Action<?>> actions = new ArrayList<>();
 	private final List<Action<?>> elseActions = new ArrayList<>();
 	private final Map<Device<?>, Object> expectedStates = new HashMap<>();
@@ -37,7 +38,7 @@ public final class DeclarativeRuleBuilder {
 		}
 	}
 
-	DeclarativeRuleBuilder(final DeclarativeRulesRegistry registry, final Device<?> device, final IDeviceUpdate output, final Object expectedState) {
+	DeclarativeRule(final DeclarativeRulesRegistry registry, final Device<?> device, final IDeviceUpdate output, final Object expectedState) {
 		this.registry = registry;
 		this.output = output;
 		expectedStates.put(device, expectedState);
@@ -49,7 +50,7 @@ public final class DeclarativeRuleBuilder {
 		return new DeclarativeThenBuilder();
 	}
 
-	public void execute(final Device<?> device, final Object newState) {
+	void updateDevice(final Device<?> device, final Object newState) {
 		if (isExpectedState(device, newState)) {
 			actions.stream().forEach((action) -> action.execute());
 		} else {
@@ -70,10 +71,15 @@ public final class DeclarativeRuleBuilder {
 		return !actions.isEmpty() || !elseActions.isEmpty();
 	}
 
-	public <StateType> DeclarativeRuleBuilder and(final Device<StateType> device, final StateType expectedState) {
+	public <StateType> DeclarativeRule and(final Device<StateType> device, final StateType expectedState) {
 		registry.add(device, this);
 		expectedStates.put(device, expectedState);
 		return this;
+	}
+
+	public DeclarativeRule forDuration(final Duration ofSeconds) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

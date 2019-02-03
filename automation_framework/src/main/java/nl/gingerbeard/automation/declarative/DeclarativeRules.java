@@ -14,13 +14,13 @@ public class DeclarativeRules {
 		ruleRegistry = new DeclarativeRulesRegistry(log);
 	}
 
-	public <T> DeclarativeRuleBuilder when(final Device<T> device, final T expectedState) {
-		final DeclarativeRuleBuilder declarativeRuleBuilder = new DeclarativeRuleBuilder(ruleRegistry, device, output, expectedState);
-		ruleRegistry.add(device, declarativeRuleBuilder);
-		return declarativeRuleBuilder;
+	public <T> DeclarativeRule when(final Device<T> device, final T expectedState) {
+		final DeclarativeRule declarativeRule = new DeclarativeRule(ruleRegistry, device, output, expectedState);
+		ruleRegistry.add(device, declarativeRule);
+		return declarativeRule;
 	}
 
-	public void deviceUpdated(final Switch switchInput) {
-		ruleRegistry.execute(switchInput);
+	public void updateDevice(final Switch switchInput) {
+		ruleRegistry.updateDevice(switchInput);
 	}
 }

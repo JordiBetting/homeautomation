@@ -66,7 +66,7 @@ public class DeclarativeRulesTest {
 				.then(switchOutput1, OnOffState.ON);
 
 		switchInput1.setState(OnOffState.ON);
-		rules.deviceUpdated(switchInput1);
+		rules.updateDevice(switchInput1);
 
 		assertEquals(OnOffState.ON, switchOutput1.getState());
 	}
@@ -79,11 +79,11 @@ public class DeclarativeRulesTest {
 				.then(switchOutput1, OnOffState.OFF);
 
 		switchInput1.setState(OnOffState.ON);
-		rules.deviceUpdated(switchInput1);
+		rules.updateDevice(switchInput1);
 		assertEquals(OnOffState.ON, switchOutput1.getState());
 
 		switchInput1.setState(OnOffState.OFF);
-		rules.deviceUpdated(switchInput1);
+		rules.updateDevice(switchInput1);
 		assertEquals(OnOffState.OFF, switchOutput1.getState());
 	}
 
@@ -92,7 +92,7 @@ public class DeclarativeRulesTest {
 		switchInput1.setState(OnOffState.ON);
 
 		rules.when(switchInput1, OnOffState.ON);
-		rules.deviceUpdated(switchInput1);
+		rules.updateDevice(switchInput1);
 
 		log.assertContains(LogLevel.WARNING, "No action defined for idx=1, state=ON");
 	}
@@ -104,7 +104,7 @@ public class DeclarativeRulesTest {
 				.and(switchOutput2, OnOffState.ON);
 
 		switchInput1.setState(OnOffState.ON);
-		rules.deviceUpdated(switchInput1);
+		rules.updateDevice(switchInput1);
 		assertEquals(OnOffState.ON, switchOutput1.getState());
 		assertEquals(OnOffState.ON, switchOutput2.getState());
 
@@ -120,12 +120,12 @@ public class DeclarativeRulesTest {
 				.and(switchOutput2, OnOffState.OFF);
 
 		switchInput1.setState(OnOffState.ON);
-		rules.deviceUpdated(switchInput1);
+		rules.updateDevice(switchInput1);
 		assertEquals(OnOffState.ON, switchOutput1.getState());
 		assertEquals(OnOffState.ON, switchOutput2.getState());
 
 		switchInput1.setState(OnOffState.OFF);
-		rules.deviceUpdated(switchInput1);
+		rules.updateDevice(switchInput1);
 		assertEquals(OnOffState.OFF, switchOutput1.getState());
 		assertEquals(OnOffState.OFF, switchOutput2.getState());
 	}
@@ -137,12 +137,12 @@ public class DeclarativeRulesTest {
 				.orElse(switchOutput1, OnOffState.OFF);
 
 		switchInput1.setState(OnOffState.ON);
-		rules.deviceUpdated(switchInput1);
+		rules.updateDevice(switchInput1);
 
 		assertEquals(OnOffState.ON, switchOutput1.getState());
 
 		switchInput1.setState(OnOffState.OFF);
-		rules.deviceUpdated(switchInput1);
+		rules.updateDevice(switchInput1);
 
 		assertEquals(OnOffState.OFF, switchOutput1.getState());
 	}
@@ -156,12 +156,12 @@ public class DeclarativeRulesTest {
 				.and(switchOutput2, OnOffState.ON);
 
 		switchInput1.setState(OnOffState.ON);
-		rules.deviceUpdated(switchInput1);
+		rules.updateDevice(switchInput1);
 		assertEquals(OnOffState.ON, switchOutput1.getState());
 		assertEquals(OnOffState.OFF, switchOutput2.getState());
 
 		switchInput1.setState(OnOffState.OFF);
-		rules.deviceUpdated(switchInput1);
+		rules.updateDevice(switchInput1);
 		assertEquals(OnOffState.OFF, switchOutput1.getState());
 		assertEquals(OnOffState.ON, switchOutput2.getState());
 	}
@@ -175,20 +175,20 @@ public class DeclarativeRulesTest {
 
 		switchInput1.setState(OnOffState.OFF);
 		switchInput2.setState(OnOffState.ON);
-		rules.deviceUpdated(switchInput1);
+		rules.updateDevice(switchInput1);
 		assertEquals(OnOffState.OFF, switchOutput1.getState());
 
 		switchInput1.setState(OnOffState.ON);
-		rules.deviceUpdated(switchInput1);
+		rules.updateDevice(switchInput1);
 		assertEquals(OnOffState.ON, switchOutput1.getState());
 
 		switchInput2.setState(OnOffState.OFF);
-		rules.deviceUpdated(switchInput2);
+		rules.updateDevice(switchInput2);
 		assertEquals(OnOffState.OFF, switchOutput1.getState());
 
 		switchInput1.setState(OnOffState.OFF);
-		rules.deviceUpdated(switchInput1);
+		rules.updateDevice(switchInput1);
 		assertEquals(OnOffState.OFF, switchOutput1.getState());
-
 	}
+
 }
