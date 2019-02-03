@@ -1,6 +1,6 @@
 package nl.gingerbeard.automation.logging;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -30,12 +30,20 @@ public class TestLogger implements ILogger {
 		log.stream().forEach(s -> System.out.println(s));
 	}
 
+	String getFullLog() {
+		final StringBuilder fullLog = new StringBuilder();
+		log.stream().forEach(s -> fullLog.append(s).append(System.lineSeparator()));
+		return fullLog.toString();
+	}
+
 	public void assertContains(final LogLevel level, final String message) {
 		assertContains(format(level, message));
 	}
 
 	private void assertContains(final String expectation) {
-		assertTrue(testContains(expectation), "Logmessage not present: " + expectation);
+		if (testContains(expectation) == false) {
+			fail("Logmessage not present: " + expectation + System.lineSeparator() + "Full log:" + System.lineSeparator() + getFullLog());
+		}
 	}
 
 	private boolean testContains(final String expectation) {
