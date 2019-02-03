@@ -43,10 +43,6 @@ public final class DeclarativeRuleBuilder {
 		return new DeclarativeThenBuilder();
 	}
 
-	public List<Action<?>> getActions() {
-		return actions;
-	}
-
 	public void execute(final Object newState) {
 		if (isExpectedState(newState)) {
 			actions.stream().forEach((action) -> action.execute());

@@ -13,14 +13,6 @@ final class Action<StateType> {
 		this.output = output;
 	}
 
-	public Device<StateType> getDevice() {
-		return nextState.getDevice();
-	}
-
-	public StateType getNewState() {
-		return nextState.get();
-	}
-
 	public void execute() {
 		output.updateDevice(nextState);
 	}
