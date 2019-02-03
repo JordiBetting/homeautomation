@@ -6,21 +6,21 @@ import nl.gingerbeard.automation.logging.ILogger;
 
 public class DeclarativeRules {
 
-	private final DeclarativeRulesRegistry rules;
+	private final DeclarativeRulesRegistry ruleRegistry;
 	private final IDeviceUpdate output;
 
 	public DeclarativeRules(final ILogger log, final IDeviceUpdate output) {
 		this.output = output;
-		rules = new DeclarativeRulesRegistry(log);
+		ruleRegistry = new DeclarativeRulesRegistry(log);
 	}
 
 	public <T> DeclarativeRuleBuilder when(final Device<T> device, final T expectedState) {
-		final DeclarativeRuleBuilder declarativeRuleBuilder = new DeclarativeRuleBuilder(output, expectedState);
-		rules.add(device, declarativeRuleBuilder);
+		final DeclarativeRuleBuilder declarativeRuleBuilder = new DeclarativeRuleBuilder(ruleRegistry, device, output, expectedState);
+		ruleRegistry.add(device, declarativeRuleBuilder);
 		return declarativeRuleBuilder;
 	}
 
 	public void deviceUpdated(final Switch switchInput) {
-		rules.execute(switchInput);
+		ruleRegistry.execute(switchInput);
 	}
 }

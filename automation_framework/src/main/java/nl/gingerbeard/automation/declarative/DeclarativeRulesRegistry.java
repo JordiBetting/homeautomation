@@ -8,12 +8,12 @@ import java.util.Map;
 import nl.gingerbeard.automation.devices.Device;
 import nl.gingerbeard.automation.logging.ILogger;
 
-public final class DeclarativeRulesRegistry {
+final class DeclarativeRulesRegistry {
 
 	private final Map<Device<?>, List<DeclarativeRuleBuilder>> deviceRules = new HashMap<>();
 	private final ILogger log;
 
-	public DeclarativeRulesRegistry(final ILogger log) {
+	DeclarativeRulesRegistry(final ILogger log) {
 		this.log = log;
 	}
 
@@ -31,7 +31,7 @@ public final class DeclarativeRulesRegistry {
 		return rule;
 	}
 
-	public void execute(final Device<?> device) {
+	void execute(final Device<?> device) {
 		final List<DeclarativeRuleBuilder> rules = deviceRules.get(device);
 		if (rules != null) {
 			executeDeviceRules(device, rules);
@@ -42,7 +42,7 @@ public final class DeclarativeRulesRegistry {
 		final Object nextState = device.getState();
 		rules.stream().forEach((rule) -> {
 			if (rule.hasActions()) {
-				rule.execute(nextState);
+				rule.execute(device, nextState);
 			} else {
 				log.warning("No action defined for idx=" + device.getIdx() + ", state=" + nextState);
 			}
