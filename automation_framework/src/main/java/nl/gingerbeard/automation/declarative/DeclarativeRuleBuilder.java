@@ -7,13 +7,15 @@ import nl.gingerbeard.automation.devices.Device;
 public final class DeclarativeRuleBuilder {
 	private Optional<Action<?>> action = Optional.empty();
 	private final Object expectedState;
+	private final IDeviceUpdate output;
 
-	DeclarativeRuleBuilder(final Object expectedState) {
+	DeclarativeRuleBuilder(final IDeviceUpdate output, final Object expectedState) {
+		this.output = output;
 		this.expectedState = expectedState;
 	}
 
-	public <T> DeclarativeRuleBuilder then(final Device<T> device, final T newState) {
-		final Action<T> action = new Action<>(device, newState);
+	public <StateType> DeclarativeRuleBuilder then(final Device<StateType> device, final StateType newState) {
+		final Action<StateType> action = new Action<>(device, newState, output);
 		this.action = Optional.of(action);
 		return this;
 	}

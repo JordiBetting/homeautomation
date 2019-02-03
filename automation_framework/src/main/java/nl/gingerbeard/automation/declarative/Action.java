@@ -1,27 +1,28 @@
 package nl.gingerbeard.automation.declarative;
 
 import nl.gingerbeard.automation.devices.Device;
+import nl.gingerbeard.automation.state.NextState;
 
-final class Action<T> {
+final class Action<StateType> {
 
-	private final Device<T> device;
-	private final T newState;
+	private final IDeviceUpdate output;
+	private final NextState<StateType> nextState;
 
-	public Action(final Device<T> device, final T newState) {
-		this.device = device;
-		this.newState = newState;
+	public Action(final Device<StateType> device, final StateType newState, final IDeviceUpdate output) {
+		nextState = new NextState<>(device, newState);
+		this.output = output;
 	}
 
-	public Device<T> getDevice() {
-		return device;
+	public Device<StateType> getDevice() {
+		return nextState.getDevice();
 	}
 
-	public T getNewState() {
-		return newState;
+	public StateType getNewState() {
+		return nextState.get();
 	}
 
 	public void execute() {
-		device.setState(newState);
+		output.updateDevice(nextState);
 	}
 
 }
