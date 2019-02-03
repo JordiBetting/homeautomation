@@ -1,7 +1,6 @@
 package nl.gingerbeard.automation.declarative;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.Arrays;
@@ -10,7 +9,6 @@ import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.function.Executable;
 
 import nl.gingerbeard.automation.devices.Device;
 import nl.gingerbeard.automation.devices.Switch;
@@ -27,6 +25,7 @@ public class DeclarativeRulesTest {
 	private Switch switchInput;
 	private Switch switchOutput1;
 	private Switch switchOutput2;
+	private Switch switchOutput3;
 
 	// glue-ing the output of NextState to update device to improve test readability
 	private static class TransmitterToDeviceUpdate implements IDeviceUpdate {
@@ -45,7 +44,6 @@ public class DeclarativeRulesTest {
 			} else {
 				fail("Got update of non existent device with idx=" + changedDevice.getIdx() + " : " + changedDevice.toString());
 			}
-			// nextState.getDevice()
 		}
 	}
 
@@ -54,8 +52,9 @@ public class DeclarativeRulesTest {
 		switchInput = new Switch(1);
 		switchOutput1 = new Switch(2);
 		switchOutput2 = new Switch(3);
+		switchOutput3 = new Switch(4);
 		log = new TestLogger();
-		deviceManager = new TransmitterToDeviceUpdate(switchInput, switchOutput1, switchOutput2);
+		deviceManager = new TransmitterToDeviceUpdate(switchInput, switchOutput1, switchOutput2, switchOutput3);
 		rules = new DeclarativeRules(log, deviceManager);
 	}
 
@@ -147,23 +146,21 @@ public class DeclarativeRulesTest {
 	}
 
 	@Test
-	public void and_withoutThen_throwsException() {
-		final Executable test = () -> rules.when(switchInput, OnOffState.ON).and(switchOutput1, OnOffState.ON);
-
-		final IllegalStateException exception = assertThrows(IllegalStateException.class, test);
-		assertEquals("and() called without then() or orElse()", exception.getMessage());
-	}
-
-	@Test
-	public void orElse_withoutThen_isNegation() {
-		switchOutput1.setState(OnOffState.ON);
-
+	public void whenThenAndOrElseAnd() {
 		rules.when(switchInput, OnOffState.ON)//
-				.orElse(switchOutput1, OnOffState.OFF);
+				.then(switchOutput1, OnOffState.ON) //
+				.and(switchOutput2, OnOffState.OFF) //
+				.orElse(switchOutput1, OnOffState.OFF) //
+				.and(switchOutput2, OnOffState.ON);
+
+		switchInput.setState(OnOffState.ON);
+		rules.deviceUpdated(switchInput);
+		assertEquals(OnOffState.ON, switchOutput1.getState());
+		assertEquals(OnOffState.OFF, switchOutput2.getState());
 
 		switchInput.setState(OnOffState.OFF);
 		rules.deviceUpdated(switchInput);
-
 		assertEquals(OnOffState.OFF, switchOutput1.getState());
+		assertEquals(OnOffState.ON, switchOutput2.getState());
 	}
 }
