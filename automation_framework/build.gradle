@@ -10,7 +10,13 @@ dependencies {
 	implementation project(':logging')
 }
 
-version = "0.0.4"
+jar {
+    from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
+
+version = "0.0.5"
 group = "nl.gingerbeard"
     
 publishing {
