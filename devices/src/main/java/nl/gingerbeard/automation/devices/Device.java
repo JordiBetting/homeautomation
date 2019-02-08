@@ -7,7 +7,7 @@ public abstract class Device<T> extends StateDevice<T> {
 		this.idx = idx;
 	}
 
-	public int getIdx() {
+	public int getIdx() { 
 		return idx;
 	}
 

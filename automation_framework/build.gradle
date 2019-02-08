@@ -7,9 +7,10 @@ dependencies {
 	compile group: 'org.reflections', name: 'reflections', version: '0.9.11'
 	implementation project(':service')
 	implementation project(':devices')
+	implementation project(':logging')
 }
 
-version = "0.0.3"
+version = "0.0.4"
 group = "nl.gingerbeard"
     
 publishing {

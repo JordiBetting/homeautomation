@@ -7,7 +7,6 @@ import nl.gingerbeard.automation.domoticz.receiver.DomoticzEventReceiverComponen
 import nl.gingerbeard.automation.domoticz.transmitter.DomoticzUpdateTransmitterComponent;
 import nl.gingerbeard.automation.event.EventsComponent;
 import nl.gingerbeard.automation.logging.ILogOutput;
-import nl.gingerbeard.automation.logging.LoggingComponent;
 import nl.gingerbeard.automation.service.Container;
 
 public final class AutomationFrameworkContainer {

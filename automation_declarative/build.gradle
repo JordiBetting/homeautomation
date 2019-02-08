@@ -1,0 +1,18 @@
+apply plugin: 'maven-publish'
+
+dependencies {
+	implementation project(':automation_framework')
+	implementation project(':devices')
+	implementation project(':logging')
+}
+
+version = "0.0.1"
+group = "nl.gingerbeard"
+    
+publishing {
+	publications {
+	    mavenJava(MavenPublication) {
+	        from components.java
+	    }
+	}
+}

@@ -1,7 +1,6 @@
 package nl.gingerbeard.automation.logging;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
@@ -13,14 +12,6 @@ import java.util.Optional;
 import org.junit.jupiter.api.Test;
 
 public class LoggingTest {
-
-	@Test
-	public void activate_createsLoggingInterface() {
-		final LoggingComponent component = new LoggingComponent();
-		component.createComponent();
-
-		assertNotNull(component.logInput);
-	}
 
 	private static class LogRecorder implements ILogOutput {
 
@@ -36,14 +27,12 @@ public class LoggingTest {
 	@Test
 	public void log_wired() {
 		final LogRecorder logOutput = new LogRecorder();
-		final LoggingComponent component = new LoggingComponent();
-		component.logOutput = Optional.of(logOutput);
-		component.createComponent();
+		final ILogger logging = new Logging(Optional.of(logOutput));
 
-		component.logInput.debug("testdebug");
-		component.logInput.info("testinfo");
-		component.logInput.error("testerror");
-		component.logInput.warning("testwarning");
+		logging.debug("testdebug");
+		logging.info("testinfo");
+		logging.error("testerror");
+		logging.warning("testwarning");
 
 		assertEquals(4, logOutput.logs.size());
 		assertEquals("DEBUG testdebug", logOutput.logs.get(0));
@@ -61,13 +50,12 @@ public class LoggingTest {
 		System.setOut(ps);
 
 		try {
-			final LoggingComponent component = new LoggingComponent();
-			component.createComponent();
+			final ILogger logging = new Logging(Optional.empty());
 
-			component.logInput.debug("testdebug");
-			component.logInput.info("testinfo");
-			component.logInput.error("testerror");
-			component.logInput.warning("testwarning");
+			logging.debug("testdebug");
+			logging.info("testinfo");
+			logging.error("testerror");
+			logging.warning("testwarning");
 
 			System.out.flush();
 			final String output = baos.toString("UTF-8");
@@ -86,11 +74,9 @@ public class LoggingTest {
 	@Test
 	public void logException() {
 		final LogRecorder logOutput = new LogRecorder();
-		final LoggingComponent component = new LoggingComponent();
-		component.logOutput = Optional.of(logOutput);
-		component.createComponent();
+		final ILogger logging = new Logging(Optional.of(logOutput));
 
-		component.logInput.exception(new NullPointerException("blaat"), "exception message");
+		logging.exception(new NullPointerException("blaat"), "exception message");
 
 		assertEquals(2, logOutput.logs.size());
 		assertEquals("EXCEPTION exception message", logOutput.logs.get(0));
