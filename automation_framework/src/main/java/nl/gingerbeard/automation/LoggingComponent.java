@@ -1,7 +1,10 @@
-package nl.gingerbeard.automation.logging;
+package nl.gingerbeard.automation;
 
 import java.util.Optional;
 
+import nl.gingerbeard.automation.logging.ILogOutput;
+import nl.gingerbeard.automation.logging.ILogger;
+import nl.gingerbeard.automation.logging.Logging;
 import nl.gingerbeard.automation.service.annotation.Activate;
 import nl.gingerbeard.automation.service.annotation.Provides;
 import nl.gingerbeard.automation.service.annotation.Requires;
