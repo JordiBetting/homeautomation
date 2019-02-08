@@ -9,7 +9,13 @@ dependencies {
 	implementation project(':devices')
 }
 
-version = "0.0.3"
+jar {
+    from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
+
+version = "0.0.5"
 group = "nl.gingerbeard"
     
 publishing {
