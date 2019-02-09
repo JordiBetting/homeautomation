@@ -17,10 +17,6 @@ public class TestLogger implements ILogger {
 			testLogger.log(Optional.empty(), level, message);
 		}
 
-		public TestLogger getLogger() {
-			return testLogger;
-		}
-
 	}
 
 	List<String> log = new ArrayList<>();

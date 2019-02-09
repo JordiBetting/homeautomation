@@ -18,6 +18,7 @@ import nl.gingerbeard.automation.devices.Switch;
 import nl.gingerbeard.automation.devices.Thermostat;
 import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
 import nl.gingerbeard.automation.domoticz.helpers.TestWebServer;
+import nl.gingerbeard.automation.event.annotations.EventState;
 import nl.gingerbeard.automation.event.annotations.Subscribe;
 import nl.gingerbeard.automation.logging.TestLogger.LogOutputToTestLogger;
 import nl.gingerbeard.automation.state.NextState;
@@ -26,6 +27,7 @@ import nl.gingerbeard.automation.state.Temperature;
 import nl.gingerbeard.automation.state.Temperature.Unit;
 import nl.gingerbeard.automation.state.ThermostatState;
 import nl.gingerbeard.automation.state.ThermostatState.ThermostatMode;
+import nl.gingerbeard.automation.state.TimeOfDay;
 
 public class IntegrationTest {
 
@@ -216,5 +218,120 @@ public class IntegrationTest {
 		assertEquals(4, room.getThermostatChangeCount());
 		assertTrue(room.getThermostat().getState().getSetPoint().isPresent());
 		assertEquals(14, room.getThermostat().getState().getSetPoint().get().get(Unit.CELSIUS));
+	}
+
+	public static class TimeRoom extends Room {
+
+		private static final Switch ACTUATOR = new Switch(1);
+		private int nighttime_count = 0;
+		private int daytime_count;
+
+		TimeRoom() {
+			super();
+			addDevice(ACTUATOR);
+		}
+
+		@Subscribe
+		public void receiveTime(final TimeOfDay timeofday) {
+			switch (timeofday) {
+			case DAYTIME:
+				daytime_count++;
+				break;
+			case NIGHTTIME:
+				nighttime_count++;
+				break;
+			}
+		}
+
+		public int getNighttime_count() {
+			return nighttime_count;
+		}
+
+		public int getDaytime_count() {
+			return daytime_count;
+		}
+
+	}
+
+	@Test
+	public void updateTime_eventReceived() throws IOException {
+		final TimeRoom room = new TimeRoom();
+		automation.addRoom(room);
+
+		assertEquals(0, room.getDaytime_count());
+		assertEquals(0, room.getNighttime_count());
+
+		sendNightTime();
+
+		assertEquals(0, room.getDaytime_count());
+		assertEquals(1, room.getNighttime_count());
+
+		sendDaytime();
+
+		assertEquals(1, room.getDaytime_count());
+		assertEquals(1, room.getNighttime_count());
+	}
+
+	private void sendRequest(final int curTime, final int sunrise, final int sunset) throws IOException {
+		final URL url = new URL("http://localhost:" + port + "/time/" + curTime + "/" + sunrise + "/" + sunset);
+		final HttpURLConnection con = (HttpURLConnection) url.openConnection();
+		con.setRequestMethod("GET");
+		assertEquals(200, con.getResponseCode(), "Status expected: 200 but was: " + con.getResponseCode() + ". Content: " + con.getContent());
+	}
+
+	@EventState(timeOfDay = TimeOfDay.DAYTIME)
+	public static class DayTimeSwitchRoom extends Room {
+
+		private static final Switch SENSOR = new Switch(0);
+		private static final Switch ACTUATOR = new Switch(1);
+		private int callCount = 0;
+
+		DayTimeSwitchRoom() {
+			super();
+			addDevice(SENSOR);
+			addDevice(ACTUATOR);
+		}
+
+		@Subscribe
+		public void receiveEvent(final Switch input) {
+			callCount++;
+		}
+
+		public int getCallCount() {
+			return callCount;
+		}
+	}
+
+	@Test
+	public void switch_daytime_received() throws IOException {
+		final DayTimeSwitchRoom room = new DayTimeSwitchRoom();
+		automation.addRoom(room);
+
+		// initial, no calls
+		assertEquals(0, room.getCallCount());
+
+		// daytime event should not be triggered on room
+		sendDaytime();
+		assertEquals(0, room.getCallCount());
+
+		// it is daytime, switch changed, expect to receive event
+		sendRequest(0, "on");
+		assertEquals(1, room.getCallCount());
+
+		// switch to nighttime, should not be triggered in room
+		sendNightTime();
+		assertEquals(1, room.getCallCount());
+
+		// it is nighttime, switch changed, expect no event
+		sendRequest(0, "off");
+		assertEquals(1, room.getCallCount());
+	}
+
+	private void sendDaytime() throws IOException {
+		sendRequest(150, 100, 200);
+	}
+
+	private void sendNightTime() throws IOException {
+		sendRequest(10, 100, 200);
 	}
 }
