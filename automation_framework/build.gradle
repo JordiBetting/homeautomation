@@ -5,9 +5,9 @@ dependencies {
 	compile group: 'org.nanohttpd', name: 'nanohttpd', version: '2.3.1'
 	compile group: 'com.googlecode.json-simple', name: 'json-simple', version: '1.1.1'
 	compile group: 'org.reflections', name: 'reflections', version: '0.9.11'
-	implementation project(':service')
-	implementation project(':devices')
-	implementation project(':logging')
+	compile project(':service')
+	compile project(':devices')
+	compile project(':logging')
 }
 
 jar {
@@ -16,7 +16,7 @@ jar {
     }
 }
 
-version = "0.0.5"
+version = "0.0.6"
 group = "nl.gingerbeard"
     
 publishing {
