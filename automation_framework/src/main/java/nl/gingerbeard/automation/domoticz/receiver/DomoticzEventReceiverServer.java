@@ -28,15 +28,15 @@ public final class DomoticzEventReceiverServer extends NanoHTTPD implements IDom
 		/**
 		 * Update to the current time
 		 *
-		 * @param curTime
+		 * @param curtime
 		 *            The current time in minutes since start of day
-		 * @param sunRise
+		 * @param sunrise
 		 *            The sunrise time in minutes since start of day
-		 * @param sunSet
+		 * @param sunset
 		 *            The sunset time in minutes since start of day
 		 * @return True if processing was successful. False otherwise.
 		 */
-		public boolean timeChanged(int curTime, int sunRise, int sunSet);
+		public boolean timeChanged(int curtime, int sunrise, int sunset);
 	}
 
 	private Optional<EventReceived> listener = Optional.empty();
