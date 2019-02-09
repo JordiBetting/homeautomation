@@ -6,7 +6,7 @@ import java.util.regex.Pattern;
 
 final class UrlPatternParser {
 
-	private static final Pattern URIPATTERN = Pattern.compile("/([0-9]+)/([0-9a-zA-Z_]+)/?");
+	private static final Pattern URIPATTERN = Pattern.compile("/device/([0-9]+)/([0-9a-zA-Z_]+)/?");
 
 	private UrlPatternParser() {
 		// avoid instantiation

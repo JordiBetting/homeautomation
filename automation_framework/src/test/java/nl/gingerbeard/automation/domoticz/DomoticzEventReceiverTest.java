@@ -67,7 +67,7 @@ public class DomoticzEventReceiverTest {
 
 		final int port = receiver.getListeningPort();
 
-		final URL url = new URL("http://localhost:" + port + "/1234/hello");
+		final URL url = new URL("http://localhost:" + port + "/device/1234/hello");
 		final HttpURLConnection con = (HttpURLConnection) url.openConnection();
 		con.setRequestMethod("GET");
 
@@ -84,7 +84,7 @@ public class DomoticzEventReceiverTest {
 
 		final int port = receiver.getListeningPort();
 
-		final URL url = new URL("http://localhost:" + port + "/1234/hello/");
+		final URL url = new URL("http://localhost:" + port + "/device/1234/hello/");
 		final HttpURLConnection con = (HttpURLConnection) url.openConnection();
 		con.setRequestMethod("GET");
 
@@ -101,12 +101,12 @@ public class DomoticzEventReceiverTest {
 
 		final int port = receiver.getListeningPort();
 
-		final URL url = new URL("http://localhost:" + port + "/1234/hello/");
+		final URL url = new URL("http://localhost:" + port + "/device/1234/hello/");
 		final HttpURLConnection con = (HttpURLConnection) url.openConnection();
 		con.setRequestMethod("GET");
 
 		assertEquals(200, con.getResponseCode());
-		log.assertContains(LogLevel.DEBUG, "GET /1234/hello/ from 127.0.0.1");
+		log.assertContains(LogLevel.DEBUG, "GET /device/1234/hello/ from 127.0.0.1");
 		log.assertContains(LogLevel.DEBUG, "Success");
 	}
 
@@ -126,7 +126,7 @@ public class DomoticzEventReceiverTest {
 	public void noListener_noException() throws IOException {
 		final int port = receiver.getListeningPort();
 
-		final URL url = new URL("http://localhost:" + port + "/1234/test");
+		final URL url = new URL("http://localhost:" + port + "/device/1234/test");
 		final HttpURLConnection con = (HttpURLConnection) url.openConnection();
 		con.setRequestMethod("GET");
 
@@ -137,12 +137,12 @@ public class DomoticzEventReceiverTest {
 	public void unsupportedMethod_returns405() throws IOException {
 		final int port = receiver.getListeningPort();
 
-		final URL url = new URL("http://localhost:" + port + "/1234/test");
+		final URL url = new URL("http://localhost:" + port + "/device/1234/test");
 		final HttpURLConnection con = (HttpURLConnection) url.openConnection();
 		con.setRequestMethod("PUT");
 
 		assertEquals(405, con.getResponseCode());
-		log.assertContains(LogLevel.WARNING, "Received unsupported method PUT on /1234/test");
+		log.assertContains(LogLevel.WARNING, "Received unsupported method PUT on /device/1234/test");
 	}
 
 	@Test
@@ -153,7 +153,7 @@ public class DomoticzEventReceiverTest {
 
 		when(listener.deviceChanged(anyInt(), any())).thenThrow(new UnsupportedOperationException());
 
-		final URL url = new URL("http://localhost:" + port + "/1234/hello/");
+		final URL url = new URL("http://localhost:" + port + "/device/1234/hello/");
 		final HttpURLConnection con = (HttpURLConnection) url.openConnection();
 		con.setRequestMethod("GET");
 
@@ -168,7 +168,7 @@ public class DomoticzEventReceiverTest {
 		receiver.setEventListener(listener);
 
 		final int port = receiver.getListeningPort();
-		final URL url = new URL("http://localhost:" + port + "/1234/hello/");
+		final URL url = new URL("http://localhost:" + port + "/device/1234/hello/");
 		final HttpURLConnection con = (HttpURLConnection) url.openConnection();
 		con.setRequestMethod("GET");
 

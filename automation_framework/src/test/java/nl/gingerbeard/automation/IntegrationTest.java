@@ -84,7 +84,7 @@ public class IntegrationTest {
 	}
 
 	private void sendRequest(final int idx, final String state) throws IOException {
-		final URL url = new URL("http://localhost:" + port + "/" + idx + "/" + state);
+		final URL url = new URL("http://localhost:" + port + "/device/" + idx + "/" + state);
 		final HttpURLConnection con = (HttpURLConnection) url.openConnection();
 		con.setRequestMethod("GET");
 		assertEquals(200, con.getResponseCode(), "Status expected: 200 but was: " + con.getResponseCode() + ". Content: " + con.getContent());

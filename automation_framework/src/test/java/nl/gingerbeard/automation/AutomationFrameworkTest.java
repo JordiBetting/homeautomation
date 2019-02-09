@@ -320,7 +320,7 @@ public class AutomationFrameworkTest {
 	}
 
 	private void updateDevice(final int idx, final String newValue) throws MalformedURLException, IOException, ProtocolException {
-		final URL url = new URL("http://localhost:" + getListeningPort() + "/" + idx + "/" + newValue + "/");
+		final URL url = new URL("http://localhost:" + getListeningPort() + "/device/" + idx + "/" + newValue + "/");
 		final HttpURLConnection con = (HttpURLConnection) url.openConnection();
 		con.setRequestMethod("GET");
 
