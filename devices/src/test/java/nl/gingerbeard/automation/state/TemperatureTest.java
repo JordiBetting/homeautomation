@@ -69,4 +69,11 @@ public class TemperatureTest {
 
 		assertEquals(15, temperature.get(Unit.KELVIN));
 	}
+
+	@Test
+	public void temperature_toString() {
+		assertEquals("Temperature [value=1.0, unit=CELSIUS]", Temperature.celcius(1).toString());
+		assertEquals("Temperature [value=1.0, unit=KELVIN]", Temperature.kelvin(1).toString());
+		assertEquals("Temperature [value=1.0, unit=FAHRENHEIT]", Temperature.fahrenheit(1).toString());
+	}
 }

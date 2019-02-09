@@ -114,4 +114,19 @@ public class ColorTest {
 			assertEquals("Supported values: [2700-6500] kelvin. Provided: 6501", e.getMessage());
 		}
 	}
+
+	@Test
+	public void whiteColorTemperature_toString() {
+		final Color color = Color.fromWhiteColorTemperature(3000, 50);
+
+		assertEquals("Color [mode=WhiteTemperature, brightness=Level [level=50], whiteTemperature=3000]", color.toString());
+	}
+
+	@Test
+	public void rgbColor_toString() {
+		final Color color = Color.fromRgb(1, 2, 3, 4);
+
+		assertEquals("Color [mode=RGB, brightness=Level [level=4] rgbColor=RGBColor [r=1, g=2, b=3]]", color.toString());
+	}
+
 }

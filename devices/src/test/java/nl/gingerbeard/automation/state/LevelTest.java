@@ -38,4 +38,11 @@ public class LevelTest {
 		}
 	}
 
+	@Test
+	public void test_toString() {
+		final Level level = new Level(42);
+
+		assertEquals("Level [level=42]", level.toString());
+	}
+
 }
