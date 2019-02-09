@@ -240,6 +240,8 @@ public class IntegrationTest {
 			case NIGHTTIME:
 				nighttime_count++;
 				break;
+			default:
+				throw new RuntimeException();
 			}
 		}
 
