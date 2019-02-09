@@ -27,6 +27,9 @@ import nl.gingerbeard.automation.logging.LogLevel;
 import nl.gingerbeard.automation.logging.TestLogger;
 import nl.gingerbeard.automation.state.NextState;
 import nl.gingerbeard.automation.state.OnOffState;
+import nl.gingerbeard.automation.state.State;
+import nl.gingerbeard.automation.state.TimeOfDay;
+import nl.gingerbeard.automation.state.TimeOfDayValues;
 import nl.gingerbeard.automation.testdevices.TestDevice;
 
 public class ControlloopTest {
@@ -35,9 +38,10 @@ public class ControlloopTest {
 	public void testStateChanged() {
 		final IEvents events = mock(IEvents.class);
 		final ILogger log = mock(ILogger.class);
+		final State state = new State();
 		final IDomoticzUpdateTransmitter transmitter = mock(IDomoticzUpdateTransmitter.class);
 		when(events.trigger(any())).thenReturn(EventResult.empty());
-		final Controlloop control = new Controlloop(events, transmitter, log);
+		final Controlloop control = new Controlloop(events, transmitter, state, log);
 		final TestDevice myDevice = new TestDevice();
 
 		control.statusChanged(myDevice);
@@ -75,7 +79,8 @@ public class ControlloopTest {
 		final RecordingTransmitter transmitter = new RecordingTransmitter();
 		final IEvents events = mock(IEvents.class);
 		final ILogger log = mock(ILogger.class);
-		final Controlloop control = new Controlloop(events, transmitter, log);
+		final State state = new State();
+		final Controlloop control = new Controlloop(events, transmitter, state, log);
 
 		when(events.trigger(any())).thenReturn(EventResult.of(new NextState<>(mockDevice1, OnOffState.ON)));
 
@@ -90,7 +95,8 @@ public class ControlloopTest {
 		final RecordingTransmitter transmitter = new RecordingTransmitter();
 		final IEvents events = mock(IEvents.class);
 		final ILogger log = mock(ILogger.class);
-		final Controlloop control = new Controlloop(events, transmitter, log);
+		final State state = new State();
+		final Controlloop control = new Controlloop(events, transmitter, state, log);
 		when(events.trigger(any())).thenReturn(EventResult.of(Lists.newArrayList(//
 				new NextState<>(mockDevice1, OnOffState.ON), //
 				new NextState<>(mockDevice2, OnOffState.OFF)//
@@ -115,7 +121,8 @@ public class ControlloopTest {
 		final RecordingTransmitter transmitter = new RecordingTransmitter();
 		final IEvents events = mock(IEvents.class);
 		final ILogger log = mock(ILogger.class);
-		final Controlloop control = new Controlloop(events, transmitter, log);
+		final State state = new State();
+		final Controlloop control = new Controlloop(events, transmitter, state, log);
 		when(events.trigger(any())).thenReturn(EventResult.of("StringIsNotNextState"));
 
 		control.statusChanged(changedDevice);
@@ -141,7 +148,8 @@ public class ControlloopTest {
 		final ThrowExceptionOnFirstTransmit_Transmitter transmitter = new ThrowExceptionOnFirstTransmit_Transmitter();
 		final IEvents events = mock(IEvents.class);
 		final TestLogger log = new TestLogger();
-		final Controlloop control = new Controlloop(events, transmitter, log);
+		final State state = new State();
+		final Controlloop control = new Controlloop(events, transmitter, state, log);
 		when(events.trigger(any())).thenReturn(EventResult.of(Lists.newArrayList(//
 				new NextState<>(mockDevice1, OnOffState.ON), //
 				new NextState<>(mockDevice2, OnOffState.OFF)//
@@ -152,5 +160,20 @@ public class ControlloopTest {
 		assertEquals(1, transmitter.getTransmitted().size());
 		assertTransmitted(transmitter, 0, mockDevice2, OnOffState.OFF);
 		log.assertContains(LogLevel.EXCEPTION, "Failed to transmit device update");
+	}
+
+	@Test
+	public void timeUpdated_eventTriggered() {
+		final IDomoticzUpdateTransmitter transmitter = mock(IDomoticzUpdateTransmitter.class);
+		final IEvents events = mock(IEvents.class);
+		final TestLogger log = new TestLogger();
+		final State state = new State();
+		state.setTimeOfDay(TimeOfDay.NIGHTTIME);
+		final Controlloop control = new Controlloop(events, transmitter, state, log);
+
+		control.timeChanged(new TimeOfDayValues(5, 1, 10));
+
+		assertEquals(TimeOfDay.DAYTIME, state.getTimeOfDay());
+		verify(events, times(1)).trigger(any(TimeOfDay.class));
 	}
 }

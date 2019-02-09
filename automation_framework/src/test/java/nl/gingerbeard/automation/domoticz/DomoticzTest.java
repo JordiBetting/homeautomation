@@ -87,7 +87,6 @@ public class DomoticzTest {
 		final boolean result = domoticz.deviceChanged(1, "does not exist");
 
 		assertFalse(result);
-
 	}
 
 	private static class TestListener implements IDomoticzDeviceStatusChanged {

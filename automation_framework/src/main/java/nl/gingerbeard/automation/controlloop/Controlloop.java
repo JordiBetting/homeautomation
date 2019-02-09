@@ -8,21 +8,27 @@ import java.util.List;
 import nl.gingerbeard.automation.devices.StateDevice;
 import nl.gingerbeard.automation.devices.Subdevice;
 import nl.gingerbeard.automation.domoticz.IDomoticzDeviceStatusChanged;
+import nl.gingerbeard.automation.domoticz.IDomoticzTimeOfDayChanged;
 import nl.gingerbeard.automation.domoticz.transmitter.IDomoticzUpdateTransmitter;
 import nl.gingerbeard.automation.event.EventResult;
 import nl.gingerbeard.automation.event.IEvents;
 import nl.gingerbeard.automation.logging.ILogger;
 import nl.gingerbeard.automation.state.NextState;
+import nl.gingerbeard.automation.state.State;
+import nl.gingerbeard.automation.state.TimeOfDay;
+import nl.gingerbeard.automation.state.TimeOfDayValues;
 
-class Controlloop implements IDomoticzDeviceStatusChanged {
+class Controlloop implements IDomoticzDeviceStatusChanged, IDomoticzTimeOfDayChanged {
 	private final IEvents events;
 	private final IDomoticzUpdateTransmitter transmitter;
 	private final ILogger log;
+	private final State state;
 
-	public Controlloop(final IEvents events, final IDomoticzUpdateTransmitter transmitter, final ILogger log) {
+	public Controlloop(final IEvents events, final IDomoticzUpdateTransmitter transmitter, final State state, final ILogger log) {
 		this.events = events;
 		this.transmitter = transmitter;
 		this.log = log;
+		this.state = state;
 	}
 
 	// TODO domoticz event: add change [trigger=device], commandArray['OpenURL']='www.yourdomain.com/api/movecamtopreset.cgi' with device ID of changed device
@@ -68,6 +74,21 @@ class Controlloop implements IDomoticzDeviceStatusChanged {
 
 	private boolean isCollection(final Object result) {
 		return Collection.class.isAssignableFrom(result.getClass());
+	}
+
+	@Override
+	public boolean timeChanged(final TimeOfDayValues time) {
+		final TimeOfDay prevTod = state.getTimeOfDay();
+		updateTimeState(time);
+		if (state.getTimeOfDay() != prevTod) {
+			events.trigger(state.getTimeOfDay());
+		}
+		return true;
+	}
+
+	private void updateTimeState(final TimeOfDayValues time) {
+		final TimeOfDay newTimeOfDay = time.isDayTime() ? TimeOfDay.DAYTIME : TimeOfDay.NIGHTTIME;
+		state.setTimeOfDay(newTimeOfDay);
 	}
 
 }

@@ -12,20 +12,20 @@ public final class TimeOfDayValues {
 		this.sunset = sunset;
 	}
 
-	boolean isDayTime() {
+	public boolean isDayTime() {
 		return isDayTime(0);
 	}
 
-	boolean isNightTime() {
+	public boolean isNightTime() {
 		return !isDayTime(0);
 	}
 
-	boolean isDayTime(final int offsetMinutes) {
+	public boolean isDayTime(final int offsetMinutes) {
 		return curtime + offsetMinutes <= sunset && //
 				curtime - offsetMinutes >= sunrise;
 	}
 
-	boolean isNightTime(final int offsetMinutes) {
+	public boolean isNightTime(final int offsetMinutes) {
 		return !isDayTime(offsetMinutes);
 	}
 }
