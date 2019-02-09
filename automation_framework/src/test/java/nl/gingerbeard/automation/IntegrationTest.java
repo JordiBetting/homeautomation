@@ -19,6 +19,7 @@ import nl.gingerbeard.automation.devices.Thermostat;
 import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
 import nl.gingerbeard.automation.domoticz.helpers.TestWebServer;
 import nl.gingerbeard.automation.event.annotations.Subscribe;
+import nl.gingerbeard.automation.logging.TestLogger.LogOutputToTestLogger;
 import nl.gingerbeard.automation.state.NextState;
 import nl.gingerbeard.automation.state.OnOffState;
 import nl.gingerbeard.automation.state.Temperature;
@@ -41,7 +42,7 @@ public class IntegrationTest {
 		webserver.start();
 
 		config = new DomoticzConfiguration(0, new URL("http://localhost:" + webserver.getListeningPort()));
-		container = IAutomationFrameworkInterface.createFrameworkContainer(config);
+		container = IAutomationFrameworkInterface.createFrameworkContainer(config, new LogOutputToTestLogger());
 		container.start();
 
 		port = config.getListenPort();

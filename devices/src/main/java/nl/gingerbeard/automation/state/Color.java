@@ -87,4 +87,16 @@ public class Color {
 		return brightness;
 	}
 
+	@Override
+	public String toString() {
+		switch (mode) {
+		case RGB:
+			return "Color [mode=" + mode + ", brightness=" + brightness + " rgbColor=" + rgbColor + "]";
+		case WhiteTemperature:
+			return "Color [mode=" + mode + ", brightness=" + brightness + ", whiteTemperature=" + whiteTemperature + "]";
+		default:
+			return super.toString();
+		}
+	}
+
 }

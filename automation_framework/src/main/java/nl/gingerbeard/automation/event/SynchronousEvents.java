@@ -10,6 +10,7 @@ import com.google.common.collect.ListMultimap;
 
 import nl.gingerbeard.automation.event.annotations.EventState;
 import nl.gingerbeard.automation.event.annotations.Subscribe;
+import nl.gingerbeard.automation.logging.ILogger;
 import nl.gingerbeard.automation.state.State;
 import nl.gingerbeard.automation.util.ReflectionUtil;
 
@@ -20,13 +21,16 @@ final class SynchronousEvents implements IEvents {
 	private final List<Object> subscribers = new ArrayList<>();
 	private final State state;
 
+	private final ILogger log;
+
 	@EventState
 	private static class EventStateDefaults {
 
 	}
 
-	public SynchronousEvents(final State state) {
+	public SynchronousEvents(final State state, final ILogger log) {
 		this.state = state;
+		this.log = log;
 	}
 
 	@Override
@@ -80,7 +84,11 @@ final class SynchronousEvents implements IEvents {
 	private void triggerSubscribers(final Object event, final EventResult results, final Class<?> callbackEventType) {
 		for (final Subscriber subscriber : callback.get(callbackEventType)) {
 			if (stateMeets(subscriber.getEventState())) {
-				results.add(subscriber.call(event));
+				try {
+					results.add(subscriber.call(event));
+				} catch (final Exception e) {
+					log.exception(e, "Received exception during invocation of subscriber. Ignoring.");
+				}
 			}
 		}
 	}

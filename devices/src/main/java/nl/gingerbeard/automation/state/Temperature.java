@@ -2,7 +2,7 @@ package nl.gingerbeard.automation.state;
 
 public final class Temperature {
 
-	public enum Unit {
+	public static enum Unit {
 		CELSIUS, //
 		FAHRENHEIT, //
 		KELVIN, //
@@ -91,6 +91,11 @@ public final class Temperature {
 			}
 		}
 		throw new UnsupportedOperationException("Unit " + unit + " unknown");
+	}
+
+	@Override
+	public String toString() {
+		return "Temperature [value=" + value + ", unit=" + unit + "]";
 	}
 
 }

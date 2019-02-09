@@ -11,15 +11,18 @@ import nl.gingerbeard.automation.domoticz.IDomoticzDeviceStatusChanged;
 import nl.gingerbeard.automation.domoticz.transmitter.IDomoticzUpdateTransmitter;
 import nl.gingerbeard.automation.event.EventResult;
 import nl.gingerbeard.automation.event.IEvents;
+import nl.gingerbeard.automation.logging.ILogger;
 import nl.gingerbeard.automation.state.NextState;
 
 class Controlloop implements IDomoticzDeviceStatusChanged {
 	private final IEvents events;
 	private final IDomoticzUpdateTransmitter transmitter;
+	private final ILogger log;
 
-	public Controlloop(final IEvents events, final IDomoticzUpdateTransmitter transmitter) {
+	public Controlloop(final IEvents events, final IDomoticzUpdateTransmitter transmitter, final ILogger log) {
 		this.events = events;
 		this.transmitter = transmitter;
+		this.log = log;
 	}
 
 	// TODO domoticz event: add change [trigger=device], commandArray['OpenURL']='www.yourdomain.com/api/movecamtopreset.cgi' with device ID of changed device
@@ -30,7 +33,7 @@ class Controlloop implements IDomoticzDeviceStatusChanged {
 			try {
 				transmitter.transmitDeviceUpdate(update);
 			} catch (final IOException e) {
-				e.printStackTrace(); // TODO: Logging
+				log.exception(e, "Failed to transmit device update: " + update);
 			}
 		}
 		if (changedDevice instanceof Subdevice) {

@@ -46,4 +46,9 @@ public final class ThermostatState {
 		mode = newMode;
 	}
 
+	@Override
+	public String toString() {
+		return "ThermostatState [mode=" + mode + ", setPoint=" + getSetPoint() + "]";
+	}
+
 }
