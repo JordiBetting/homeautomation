@@ -6,6 +6,8 @@ import java.util.Optional;
 import fi.iki.elonen.NanoHTTPD;
 import fi.iki.elonen.NanoHTTPD.Response.Status;
 import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
+import nl.gingerbeard.automation.domoticz.receiver.ResponseParameters.ResponseDeviceParameters;
+import nl.gingerbeard.automation.domoticz.receiver.ResponseParameters.ResponseParametersType;
 import nl.gingerbeard.automation.logging.ILogger;
 
 public final class DomoticzEventReceiver extends NanoHTTPD implements IDomoticzEventReceiver {
@@ -74,13 +76,23 @@ public final class DomoticzEventReceiver extends NanoHTTPD implements IDomoticzE
 	private Optional<Response> triggerListener(final ResponseParameters responseParams) {
 		Optional<Response> response = Optional.empty();
 
+		if (responseParams.getType() == ResponseParametersType.DEVICE) {
+			response = triggerDeviceListener(responseParams);
+		}
+
+		return response;
+	}
+
+	private Optional<Response> triggerDeviceListener(final ResponseParameters responseParams) {
+		Optional<Response> response = Optional.empty();
+		final ResponseDeviceParameters device = responseParams.getDeviceParameters().get();
 		if (listener.isPresent()) {
 			try {
-				final boolean result = listener.get().deviceChanged(responseParams.getIdx(), responseParams.getState());
+				final boolean result = listener.get().deviceChanged(device.getIdx(), device.getState());
 				if (result) {
 					log.debug("Success");
 				} else {
-					log.error("Could not process request idx=" + responseParams.getIdx() + ", state=" + responseParams.getState());
+					log.error("Could not process request idx=" + device.getIdx() + ", state=" + device.getState());
 					response = Optional.of(newFixedLengthResponse(Status.NOT_FOUND, NanoHTTPD.MIME_PLAINTEXT, "Could not process request."));
 				}
 			} catch (final Throwable t) {
