@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import nl.gingerbeard.automation.devices.Device;
-import nl.gingerbeard.automation.domoticz.receiver.DomoticzEventReceiver.EventReceived;
+import nl.gingerbeard.automation.domoticz.receiver.DomoticzEventReceiverServer.EventReceived;
 import nl.gingerbeard.automation.logging.ILogger;
 
 // high - level access
@@ -58,6 +58,12 @@ final class Domoticz implements EventReceived, IDomoticz {
 			return result;
 		}
 		logger.debug("Received update for unknown device with idx: " + idx);
+		return false;
+	}
+
+	@Override
+	public boolean timeChanged(final int curTime, final int sunRise, final int sunSet) {
+		// TODO Auto-generated method stub
 		return false;
 	}
 }

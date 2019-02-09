@@ -8,9 +8,10 @@ import fi.iki.elonen.NanoHTTPD.Response.Status;
 import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
 import nl.gingerbeard.automation.domoticz.receiver.ResponseParameters.ResponseDeviceParameters;
 import nl.gingerbeard.automation.domoticz.receiver.ResponseParameters.ResponseParametersType;
+import nl.gingerbeard.automation.domoticz.receiver.ResponseParameters.ResponseTimeParameters;
 import nl.gingerbeard.automation.logging.ILogger;
 
-public final class DomoticzEventReceiver extends NanoHTTPD implements IDomoticzEventReceiver {
+public final class DomoticzEventReceiverServer extends NanoHTTPD implements IDomoticzEventReceiver {
 
 	public static interface EventReceived {
 		/**
@@ -23,12 +24,25 @@ public final class DomoticzEventReceiver extends NanoHTTPD implements IDomoticzE
 		 * @return True in case the device update was processed succesfully. False otherwise.
 		 */
 		public boolean deviceChanged(int idx, String newState);
+
+		/**
+		 * Update to the current time
+		 *
+		 * @param curTime
+		 *            The current time in minutes since start of day
+		 * @param sunRise
+		 *            The sunrise time in minutes since start of day
+		 * @param sunSet
+		 *            The sunset time in minutes since start of day
+		 * @return True if processing was successful. False otherwise.
+		 */
+		public boolean timeChanged(int curTime, int sunRise, int sunSet);
 	}
 
 	private Optional<EventReceived> listener = Optional.empty();
 	private final ILogger log;
 
-	public DomoticzEventReceiver(final DomoticzConfiguration config, final ILogger log) throws IOException {
+	public DomoticzEventReceiverServer(final DomoticzConfiguration config, final ILogger log) throws IOException {
 		super(config.getListenPort());
 		this.log = log;
 		start(NanoHTTPD.SOCKET_READ_TIMEOUT, true);
@@ -63,9 +77,8 @@ public final class DomoticzEventReceiver extends NanoHTTPD implements IDomoticzE
 
 		final Optional<ResponseParameters> responseParams = UrlPatternParser.parseParameters(uri);
 		if (responseParams.isPresent()) {
-			final Response defaultResponse = newFixedLengthResponse(Status.OK, NanoHTTPD.MIME_PLAINTEXT, "OKIDOKI");
 			final Optional<Response> listenerResponse = triggerListener(responseParams.get());
-			response = listenerResponse.orElse(defaultResponse);
+			response = listenerResponse.orElse(newFixedLengthResponse(Status.OK, NanoHTTPD.MIME_PLAINTEXT, "OKIDOKI"));
 		} else {
 			log.warning("Returning 404 after unrecognized URL: " + uri);
 			response = newFixedLengthResponse(Status.NOT_FOUND, NanoHTTPD.MIME_PLAINTEXT, "URL not in supported format");
@@ -78,6 +91,28 @@ public final class DomoticzEventReceiver extends NanoHTTPD implements IDomoticzE
 
 		if (responseParams.getType() == ResponseParametersType.DEVICE) {
 			response = triggerDeviceListener(responseParams);
+		} else {
+			response = triggerTimeListener(responseParams);
+		}
+
+		return response;
+	}
+
+	private Optional<Response> triggerTimeListener(final ResponseParameters responseParams) {
+		Optional<Response> response = Optional.empty();
+
+		if (listener.isPresent()) {
+			final ResponseTimeParameters time = responseParams.getTimeParameters().get();
+			final int curtime = time.getCurrentTime();
+			final int sunrise = time.getSunriseTime();
+			final int sunset = time.getSunsetTime();
+			final boolean result = listener.get().timeChanged(curtime, sunrise, sunset);
+			if (result) {
+				log.debug("Success");
+			} else {
+				log.error("Could not process time request: " + time);
+				response = Optional.of(newFixedLengthResponse(Status.NOT_FOUND, NanoHTTPD.MIME_PLAINTEXT, "Could not process request."));
+			}
 		}
 
 		return response;
@@ -88,17 +123,23 @@ public final class DomoticzEventReceiver extends NanoHTTPD implements IDomoticzE
 		final ResponseDeviceParameters device = responseParams.getDeviceParameters().get();
 		if (listener.isPresent()) {
 			try {
-				final boolean result = listener.get().deviceChanged(device.getIdx(), device.getState());
-				if (result) {
-					log.debug("Success");
-				} else {
-					log.error("Could not process request idx=" + device.getIdx() + ", state=" + device.getState());
-					response = Optional.of(newFixedLengthResponse(Status.NOT_FOUND, NanoHTTPD.MIME_PLAINTEXT, "Could not process request."));
-				}
+				response = triggerDeviceListenerWithLogging(device);
 			} catch (final Throwable t) {
 				log.exception(t, "Failure in processing request");
 				response = Optional.of(newFixedLengthResponse(Status.INTERNAL_ERROR, NanoHTTPD.MIME_PLAINTEXT, t.getMessage()));
 			}
+		}
+		return response;
+	}
+
+	private Optional<Response> triggerDeviceListenerWithLogging(final ResponseDeviceParameters device) {
+		Optional<Response> response = Optional.empty();
+		final boolean result = listener.get().deviceChanged(device.getIdx(), device.getState());
+		if (result) {
+			log.debug("Success");
+		} else {
+			log.error("Could not process device request: " + device);
+			response = Optional.of(newFixedLengthResponse(Status.NOT_FOUND, NanoHTTPD.MIME_PLAINTEXT, "Could not process request."));
 		}
 		return response;
 	}
