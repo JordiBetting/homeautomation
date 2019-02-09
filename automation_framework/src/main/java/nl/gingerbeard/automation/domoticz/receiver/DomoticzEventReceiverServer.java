@@ -87,15 +87,10 @@ public final class DomoticzEventReceiverServer extends NanoHTTPD implements IDom
 	}
 
 	private Optional<Response> triggerListener(final ResponseParameters responseParams) {
-		Optional<Response> response = Optional.empty();
-
 		if (responseParams.getType() == ResponseParametersType.DEVICE) {
-			response = triggerDeviceListener(responseParams);
-		} else {
-			response = triggerTimeListener(responseParams);
+			return triggerDeviceListener(responseParams);
 		}
-
-		return response;
+		return triggerTimeListener(responseParams);
 	}
 
 	private Optional<Response> triggerTimeListener(final ResponseParameters responseParams) {

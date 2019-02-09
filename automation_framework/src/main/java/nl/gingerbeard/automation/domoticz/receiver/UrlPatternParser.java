@@ -1,5 +1,6 @@
 package nl.gingerbeard.automation.domoticz.receiver;
 
+import java.util.Locale;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -27,7 +28,7 @@ final class UrlPatternParser {
 	static Optional<ResponseParameters> parseParameters(final String uri) {
 		Optional<ResponseParameters> responseParams = Optional.empty();
 
-		final String lcUri = uri.toLowerCase();
+		final String lcUri = uri.toLowerCase(Locale.US);
 		if (lcUri.startsWith("/device/")) {
 			responseParams = parseDeviceParameters(uri);
 		} else if (lcUri.startsWith("/time/")) {

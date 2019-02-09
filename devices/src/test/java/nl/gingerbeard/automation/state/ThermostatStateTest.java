@@ -41,4 +41,29 @@ public class ThermostatStateTest {
 		assertTrue(state.getSetPoint().isPresent());
 		assertEquals(1, state.getSetPoint().get().get(Unit.CELSIUS));
 	}
+
+	@Test
+	public void testToString_setpoint() {
+		final ThermostatState state = new ThermostatState();
+		state.setTemperature(Temperature.celcius(1));
+
+		assertEquals("ThermostatState [mode=SETPOINT, setPoint=Optional[Temperature [value=1.0, unit=CELSIUS]]]", state.toString());
+	}
+
+	@Test
+	public void testToString_off() {
+		final ThermostatState state = new ThermostatState();
+		state.setOff();
+
+		assertEquals("ThermostatState [mode=OFF, setPoint=Optional.empty]", state.toString());
+	}
+
+	@Test
+	public void testToString_fullheat() {
+		final ThermostatState state = new ThermostatState();
+		state.setFullHeat();
+		;
+
+		assertEquals("ThermostatState [mode=FULL_HEAT, setPoint=Optional.empty]", state.toString());
+	}
 }

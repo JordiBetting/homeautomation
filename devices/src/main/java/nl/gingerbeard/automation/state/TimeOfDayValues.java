@@ -28,4 +28,9 @@ public final class TimeOfDayValues {
 	public boolean isNightTime(final int offsetMinutes) {
 		return !isDayTime(offsetMinutes);
 	}
+
+	@Override
+	public String toString() {
+		return "TimeOfDayValues [curtime=" + curtime + ", sunrise=" + sunrise + ", sunset=" + sunset + "]";
+	}
 }
