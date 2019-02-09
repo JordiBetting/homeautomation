@@ -12,7 +12,10 @@ import nl.gingerbeard.automation.service.annotation.Requires;
 
 public final class DomoticzComponent {
 	@Requires
-	public Optional<IDomoticzDeviceStatusChanged> listener;
+	public Optional<IDomoticzDeviceStatusChanged> deviceListener;
+
+	@Requires
+	public Optional<IDomoticzTimeOfDayChanged> timeListener;
 
 	@Requires
 	public IDomoticzEventReceiver domoticzReceiver;
@@ -30,7 +33,7 @@ public final class DomoticzComponent {
 
 	@Activate
 	public void registerReceiver() {
-		domoticz = domoticzInstance = new Domoticz(listener, logger);
+		domoticz = domoticzInstance = new Domoticz(deviceListener, timeListener, logger);
 		domoticzReceiver.setEventListener(domoticzInstance);
 	}
 

@@ -18,4 +18,9 @@ public final class Time {
 		return fixedTime.orElse(LocalDateTime.now());
 	}
 
+	@Override
+	public String toString() {
+		return "Time [fixedTime=" + fixedTime + "]";
+	}
+
 }

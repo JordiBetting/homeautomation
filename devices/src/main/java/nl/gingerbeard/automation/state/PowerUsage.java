@@ -15,4 +15,9 @@ public class PowerUsage {
 		return usageWatt;
 	}
 
+	@Override
+	public String toString() {
+		return "PowerUsage [usageWatt=" + usageWatt + "]";
+	}
+
 }

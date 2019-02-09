@@ -13,4 +13,10 @@ public class LightIntensity {
 	public int getLux() {
 		return lux;
 	}
+
+	@Override
+	public String toString() {
+		return "LightIntensity [lux=" + lux + "]";
+	}
+
 }

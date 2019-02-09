@@ -15,4 +15,9 @@ public class Level {
 		return level;
 	}
 
+	@Override
+	public String toString() {
+		return "Level [level=" + level + "]";
+	}
+
 }

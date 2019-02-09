@@ -1,6 +1,6 @@
 package nl.gingerbeard.automation.domoticz.receiver;
 
-import nl.gingerbeard.automation.domoticz.receiver.DomoticzEventReceiver.EventReceived;
+import nl.gingerbeard.automation.domoticz.receiver.DomoticzEventReceiverServer.EventReceived;
 
 public interface IDomoticzEventReceiver {
 

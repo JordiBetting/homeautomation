@@ -5,25 +5,29 @@ import java.util.Map;
 import java.util.Optional;
 
 import nl.gingerbeard.automation.devices.Device;
-import nl.gingerbeard.automation.domoticz.receiver.DomoticzEventReceiver.EventReceived;
+import nl.gingerbeard.automation.domoticz.receiver.DomoticzEventReceiverServer.EventReceived;
 import nl.gingerbeard.automation.logging.ILogger;
+import nl.gingerbeard.automation.state.TimeOfDayValues;
 
 // high - level access
 final class Domoticz implements EventReceived, IDomoticz {
 
-	private final Optional<IDomoticzDeviceStatusChanged> listener;
+	private final Optional<IDomoticzDeviceStatusChanged> deviceListener;
+	private final Optional<IDomoticzTimeOfDayChanged> timeListener;
 	private final ILogger logger;
 
-	public Domoticz() {
+	// for testing
+	Domoticz() {
 		super();
 		logger = (t, level, message) -> {
 		};
-		listener = Optional.empty();
+		deviceListener = Optional.empty();
+		timeListener = Optional.empty();
 	}
 
-	// for testing
-	Domoticz(final Optional<IDomoticzDeviceStatusChanged> listener, final ILogger logger) {
-		this.listener = listener;
+	public Domoticz(final Optional<IDomoticzDeviceStatusChanged> deviceListener, final Optional<IDomoticzTimeOfDayChanged> timeListener, final ILogger logger) {
+		this.deviceListener = deviceListener;
+		this.timeListener = timeListener;
 		this.logger = logger;
 
 	}
@@ -52,12 +56,21 @@ final class Domoticz implements EventReceived, IDomoticz {
 			logger.debug("Device with idx " + idx + " changed state into: " + newState);
 			final Device<?> changedDevice = device.get();
 			final boolean result = changedDevice.updateState(newState);
-			if (result && listener.isPresent()) {
-				listener.get().statusChanged(changedDevice);
+			if (result) {
+				deviceListener.ifPresent((listener) -> listener.statusChanged(changedDevice));
 			}
 			return result;
 		}
 		logger.debug("Received update for unknown device with idx: " + idx);
+		return false;
+	}
+
+	@Override
+	public boolean timeChanged(final int curtime, final int sunrise, final int sunset) {
+		if (timeListener.isPresent()) {
+			return timeListener.get().timeChanged(new TimeOfDayValues(curtime, sunrise, sunset));
+		}
+
 		return false;
 	}
 }

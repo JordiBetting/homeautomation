@@ -24,4 +24,8 @@ public class NextState<StateType> {
 		return device;
 	}
 
+	@Override
+	public String toString() {
+		return "NextState [device=" + device + ", nextState=" + nextState + "]";
+	}
 }

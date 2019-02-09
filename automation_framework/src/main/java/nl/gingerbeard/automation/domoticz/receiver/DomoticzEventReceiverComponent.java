@@ -20,11 +20,11 @@ public final class DomoticzEventReceiverComponent {
 	@Requires
 	public ILogger log;
 
-	private DomoticzEventReceiver instance;
+	private DomoticzEventReceiverServer instance;
 
 	@Activate
 	public void createReceiver() throws IOException {
-		receiver = instance = new DomoticzEventReceiver(config, log);
+		receiver = instance = new DomoticzEventReceiverServer(config, log);
 	}
 
 	@Deactivate

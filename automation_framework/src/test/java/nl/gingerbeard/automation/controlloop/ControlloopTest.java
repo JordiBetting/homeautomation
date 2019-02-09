@@ -22,8 +22,14 @@ import nl.gingerbeard.automation.devices.Switch;
 import nl.gingerbeard.automation.domoticz.transmitter.IDomoticzUpdateTransmitter;
 import nl.gingerbeard.automation.event.EventResult;
 import nl.gingerbeard.automation.event.IEvents;
+import nl.gingerbeard.automation.logging.ILogger;
+import nl.gingerbeard.automation.logging.LogLevel;
+import nl.gingerbeard.automation.logging.TestLogger;
 import nl.gingerbeard.automation.state.NextState;
 import nl.gingerbeard.automation.state.OnOffState;
+import nl.gingerbeard.automation.state.State;
+import nl.gingerbeard.automation.state.TimeOfDay;
+import nl.gingerbeard.automation.state.TimeOfDayValues;
 import nl.gingerbeard.automation.testdevices.TestDevice;
 
 public class ControlloopTest {
@@ -31,11 +37,15 @@ public class ControlloopTest {
 	@Test
 	public void testStateChanged() {
 		final IEvents events = mock(IEvents.class);
+		final ILogger log = mock(ILogger.class);
+		final State state = new State();
+		final IDomoticzUpdateTransmitter transmitter = mock(IDomoticzUpdateTransmitter.class);
 		when(events.trigger(any())).thenReturn(EventResult.empty());
-		final Controlloop control = new Controlloop(events, mock(IDomoticzUpdateTransmitter.class));
+		final Controlloop control = new Controlloop(events, transmitter, state, log);
 		final TestDevice myDevice = new TestDevice();
 
 		control.statusChanged(myDevice);
+
 		verify(events, times(1)).trigger(myDevice);
 		verifyNoMoreInteractions(events);
 	}
@@ -68,7 +78,9 @@ public class ControlloopTest {
 	public void eventResultWithSingleNextState_transmitted() {
 		final RecordingTransmitter transmitter = new RecordingTransmitter();
 		final IEvents events = mock(IEvents.class);
-		final Controlloop control = new Controlloop(events, transmitter);
+		final ILogger log = mock(ILogger.class);
+		final State state = new State();
+		final Controlloop control = new Controlloop(events, transmitter, state, log);
 
 		when(events.trigger(any())).thenReturn(EventResult.of(new NextState<>(mockDevice1, OnOffState.ON)));
 
@@ -82,7 +94,9 @@ public class ControlloopTest {
 	public void eventResultWithNextStateCollection_transmitted() {
 		final RecordingTransmitter transmitter = new RecordingTransmitter();
 		final IEvents events = mock(IEvents.class);
-		final Controlloop control = new Controlloop(events, transmitter);
+		final ILogger log = mock(ILogger.class);
+		final State state = new State();
+		final Controlloop control = new Controlloop(events, transmitter, state, log);
 		when(events.trigger(any())).thenReturn(EventResult.of(Lists.newArrayList(//
 				new NextState<>(mockDevice1, OnOffState.ON), //
 				new NextState<>(mockDevice2, OnOffState.OFF)//
@@ -106,7 +120,9 @@ public class ControlloopTest {
 		// TODO: Should this somehow be handled/explictely tested? Like an error list, test logging or even throw an exception?
 		final RecordingTransmitter transmitter = new RecordingTransmitter();
 		final IEvents events = mock(IEvents.class);
-		final Controlloop control = new Controlloop(events, transmitter);
+		final ILogger log = mock(ILogger.class);
+		final State state = new State();
+		final Controlloop control = new Controlloop(events, transmitter, state, log);
 		when(events.trigger(any())).thenReturn(EventResult.of("StringIsNotNextState"));
 
 		control.statusChanged(changedDevice);
@@ -129,10 +145,11 @@ public class ControlloopTest {
 
 	@Test
 	public void transmitterThrowsException_ignoredNoException() {
-		// TODO: Test logging here?
 		final ThrowExceptionOnFirstTransmit_Transmitter transmitter = new ThrowExceptionOnFirstTransmit_Transmitter();
 		final IEvents events = mock(IEvents.class);
-		final Controlloop control = new Controlloop(events, transmitter);
+		final TestLogger log = new TestLogger();
+		final State state = new State();
+		final Controlloop control = new Controlloop(events, transmitter, state, log);
 		when(events.trigger(any())).thenReturn(EventResult.of(Lists.newArrayList(//
 				new NextState<>(mockDevice1, OnOffState.ON), //
 				new NextState<>(mockDevice2, OnOffState.OFF)//
@@ -142,5 +159,21 @@ public class ControlloopTest {
 
 		assertEquals(1, transmitter.getTransmitted().size());
 		assertTransmitted(transmitter, 0, mockDevice2, OnOffState.OFF);
+		log.assertContains(LogLevel.EXCEPTION, "Failed to transmit device update");
+	}
+
+	@Test
+	public void timeUpdated_eventTriggered() {
+		final IDomoticzUpdateTransmitter transmitter = mock(IDomoticzUpdateTransmitter.class);
+		final IEvents events = mock(IEvents.class);
+		final TestLogger log = new TestLogger();
+		final State state = new State();
+		state.setTimeOfDay(TimeOfDay.NIGHTTIME);
+		final Controlloop control = new Controlloop(events, transmitter, state, log);
+
+		control.timeChanged(new TimeOfDayValues(5, 1, 10));
+
+		assertEquals(TimeOfDay.DAYTIME, state.getTimeOfDay());
+		verify(events, times(1)).trigger(any(TimeOfDay.class));
 	}
 }

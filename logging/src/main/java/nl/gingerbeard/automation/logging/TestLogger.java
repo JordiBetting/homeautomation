@@ -8,6 +8,17 @@ import java.util.Optional;
 
 public class TestLogger implements ILogger {
 
+	public static class LogOutputToTestLogger implements ILogOutput {
+
+		private static TestLogger testLogger = new TestLogger();
+
+		@Override
+		public void log(final LogLevel level, final String message) {
+			testLogger.log(Optional.empty(), level, message);
+		}
+
+	}
+
 	List<String> log = new ArrayList<>();
 
 	@Override

@@ -5,16 +5,28 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.Mockito.mock;
 
 import java.util.Optional;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import nl.gingerbeard.automation.devices.Device;
 import nl.gingerbeard.automation.event.annotations.Subscribe;
+import nl.gingerbeard.automation.logging.ILogger;
+import nl.gingerbeard.automation.logging.LogLevel;
+import nl.gingerbeard.automation.logging.TestLogger;
 import nl.gingerbeard.automation.state.State;
 
 public class SynchronousEventsTest {
+
+	private static ILogger logMock;
+
+	@BeforeAll
+	public static void createLogMock() {
+		logMock = mock(ILogger.class);
+	}
 
 	private static class TestSubscriber {
 
@@ -77,7 +89,7 @@ public class SynchronousEventsTest {
 
 	@Test
 	public void receiveCallback() {
-		final IEvents events = new SynchronousEvents(new State());
+		final IEvents events = new SynchronousEvents(new State(), logMock);
 		final TestSubscriber subscriber = new TestSubscriber();
 		events.subscribe(subscriber);
 
@@ -90,7 +102,7 @@ public class SynchronousEventsTest {
 
 	@Test
 	public void feedbackReceivedOnce() {
-		final IEvents events = new SynchronousEvents(new State());
+		final IEvents events = new SynchronousEvents(new State(), logMock);
 		final TestSubscriber subscriber = new TestSubscriber();
 		events.subscribe(subscriber);
 
@@ -102,7 +114,7 @@ public class SynchronousEventsTest {
 
 	@Test
 	public void otherTypeNotReceived() {
-		final IEvents events = new SynchronousEvents(new State());
+		final IEvents events = new SynchronousEvents(new State(), logMock);
 		final TestSubscriber subscriber = new TestSubscriber();
 		events.subscribe(subscriber);
 
@@ -114,7 +126,7 @@ public class SynchronousEventsTest {
 
 	@Test
 	public void superClassNotDeliveredToChild() {
-		final IEvents events = new SynchronousEvents(new State());
+		final IEvents events = new SynchronousEvents(new State(), logMock);
 		final MyEventSubscriber subscriber = new MyEventSubscriber();
 		events.subscribe(subscriber);
 
@@ -128,7 +140,7 @@ public class SynchronousEventsTest {
 
 	@Test
 	public void derivedClassAlsoDeliveredtoSuperClass() {
-		final IEvents events = new SynchronousEvents(new State());
+		final IEvents events = new SynchronousEvents(new State(), logMock);
 		final MyEventSubscriber subscriber = new MyEventSubscriber();
 		events.subscribe(subscriber);
 
@@ -142,7 +154,7 @@ public class SynchronousEventsTest {
 
 	@Test
 	public void multipleSubscribed() {
-		final IEvents events = new SynchronousEvents(new State());
+		final IEvents events = new SynchronousEvents(new State(), logMock);
 		final MultipleSubscribe subscriber = new MultipleSubscribe();
 		events.subscribe(subscriber);
 
@@ -153,7 +165,7 @@ public class SynchronousEventsTest {
 
 	@Test
 	public void nullCallbackThrowsException() {
-		final IEvents events = new SynchronousEvents(new State());
+		final IEvents events = new SynchronousEvents(new State(), logMock);
 		try {
 			events.trigger((Device<?>) null);
 			fail("expected exception");
@@ -164,13 +176,13 @@ public class SynchronousEventsTest {
 
 	@Test
 	public void callbackNoSubscribersNoException() {
-		final IEvents events = new SynchronousEvents(new State());
+		final IEvents events = new SynchronousEvents(new State(), logMock);
 		events.trigger("test");
 	}
 
 	@Test
 	public void registerSubscriberTwoReceivesSingle() {
-		final IEvents events = new SynchronousEvents(new State());
+		final IEvents events = new SynchronousEvents(new State(), logMock);
 		final TestSubscriber subscriber = new TestSubscriber();
 		events.subscribe(subscriber);
 		events.subscribe(subscriber);
@@ -189,7 +201,7 @@ public class SynchronousEventsTest {
 
 	@Test
 	public void registerTooManyParametersIgnored() {
-		final IEvents events = new SynchronousEvents(new State());
+		final IEvents events = new SynchronousEvents(new State(), logMock);
 		final TooManyParametersSubscriber subscriber = new TooManyParametersSubscriber();
 
 		try {
@@ -202,7 +214,7 @@ public class SynchronousEventsTest {
 
 	@Test
 	public void registerNoParametersThrowsException() {
-		final IEvents events = new SynchronousEvents(new State());
+		final IEvents events = new SynchronousEvents(new State(), logMock);
 		final NoParametersSubscriber subscriber = new NoParametersSubscriber();
 
 		try {
@@ -222,7 +234,7 @@ public class SynchronousEventsTest {
 
 	@Test
 	public void registerNullThrowsException() {
-		final IEvents events = new SynchronousEvents(new State());
+		final IEvents events = new SynchronousEvents(new State(), logMock);
 		try {
 			events.subscribe(null);
 			fail("Expected exception");
@@ -233,7 +245,7 @@ public class SynchronousEventsTest {
 
 	@Test
 	public void testReturnTypeNoSubscribersEmptyList() {
-		final IEvents events = new SynchronousEvents(new State());
+		final IEvents events = new SynchronousEvents(new State(), logMock);
 		final EventResult returned = events.trigger("test");
 
 		assertNotNull(returned);
@@ -250,7 +262,7 @@ public class SynchronousEventsTest {
 
 	@Test
 	public void testReturnTypeReturnsValue() {
-		final IEvents events = new SynchronousEvents(new State());
+		final IEvents events = new SynchronousEvents(new State(), logMock);
 		final ReturningSubscriber subscriber = new ReturningSubscriber();
 		events.subscribe(subscriber);
 
@@ -270,13 +282,15 @@ public class SynchronousEventsTest {
 
 	@Test
 	public void testThrowExeption_noresult() {
-		final IEvents events = new SynchronousEvents(new State());
+		final TestLogger log = new TestLogger();
+		final IEvents events = new SynchronousEvents(new State(), log);
 		final ThrowingSubscriber subscriber = new ThrowingSubscriber();
 		events.subscribe(subscriber);
 
 		final EventResult trigger = events.trigger("");
 
 		assertEquals(0, trigger.getAll().size());
+		log.assertContains(LogLevel.EXCEPTION, "Received exception during invocation of subscriber. Ignoring.");
 	}
 
 	private static class NullSubscriber {
@@ -288,7 +302,7 @@ public class SynchronousEventsTest {
 
 	@Test
 	public void test_returnNull_noresult() {
-		final IEvents events = new SynchronousEvents(new State());
+		final IEvents events = new SynchronousEvents(new State(), logMock);
 		final NullSubscriber subscriber = new NullSubscriber();
 		events.subscribe(subscriber);
 
@@ -306,7 +320,7 @@ public class SynchronousEventsTest {
 
 	@Test
 	public void return_otherType_wrapped() {
-		final IEvents events = new SynchronousEvents(new State());
+		final IEvents events = new SynchronousEvents(new State(), logMock);
 		final WrongReturnTypeSubscriber subscriber = new WrongReturnTypeSubscriber();
 		events.subscribe(subscriber);
 

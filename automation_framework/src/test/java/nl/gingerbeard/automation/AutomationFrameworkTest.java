@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import nl.gingerbeard.automation.devices.Device;
@@ -37,6 +38,7 @@ import nl.gingerbeard.automation.event.IEvents;
 import nl.gingerbeard.automation.event.annotations.EventState;
 import nl.gingerbeard.automation.event.annotations.Subscribe;
 import nl.gingerbeard.automation.logging.ILogOutput;
+import nl.gingerbeard.automation.logging.TestLogger.LogOutputToTestLogger;
 import nl.gingerbeard.automation.service.Container;
 import nl.gingerbeard.automation.state.AlarmState;
 import nl.gingerbeard.automation.state.HomeAway;
@@ -70,6 +72,12 @@ public class AutomationFrameworkTest {
 	}
 
 	private AutomationFrameworkContainer container;
+	private LogOutputToTestLogger log;
+
+	@BeforeEach
+	public void initLogger() {
+		log = new LogOutputToTestLogger();
+	}
 
 	@AfterEach
 	public void removeContainer() {
@@ -77,10 +85,11 @@ public class AutomationFrameworkTest {
 			container.stop();
 			container = null;
 		}
+		log = null;
 	}
 
 	private IAutomationFrameworkInterface createIntegration() {
-		container = IAutomationFrameworkInterface.createFrameworkContainer(new DomoticzConfiguration(0, createMockUrl()));
+		container = IAutomationFrameworkInterface.createFrameworkContainer(new DomoticzConfiguration(0, createMockUrl()), log);
 		container.start();
 
 		final Optional<IAutomationFrameworkInterface> framework = container.getRuntime().getService(IAutomationFrameworkInterface.class);
@@ -320,7 +329,7 @@ public class AutomationFrameworkTest {
 	}
 
 	private void updateDevice(final int idx, final String newValue) throws MalformedURLException, IOException, ProtocolException {
-		final URL url = new URL("http://localhost:" + getListeningPort() + "/" + idx + "/" + newValue + "/");
+		final URL url = new URL("http://localhost:" + getListeningPort() + "/device/" + idx + "/" + newValue + "/");
 		final HttpURLConnection con = (HttpURLConnection) url.openConnection();
 		con.setRequestMethod("GET");
 
