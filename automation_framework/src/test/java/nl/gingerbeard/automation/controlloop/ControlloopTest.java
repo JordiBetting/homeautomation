@@ -209,5 +209,4 @@ public class ControlloopTest {
 
 		verify(events, times(1)).trigger(AlarmState.ARM_AWAY);
 	}
-
 }

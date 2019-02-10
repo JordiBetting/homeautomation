@@ -465,6 +465,5 @@ public class IntegrationTest {
 		con.setRequestMethod("GET");
 
 		assertEquals(404, con.getResponseCode());
-	}
-
+  }
 }

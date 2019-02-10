@@ -175,7 +175,7 @@ public class DomoticzTest {
 
 		domoticz.alarmChanged("arm_home");
 
-		Mockito.verify(listener, times(1)).alarmChanged(AlarmState.ARM_HOME);
+    Mockito.verify(listener, times(1)).alarmChanged(AlarmState.ARM_HOME);
 		verifyNoMoreInteractions(listener);
 	}
 
