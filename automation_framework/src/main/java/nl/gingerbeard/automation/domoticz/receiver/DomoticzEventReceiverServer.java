@@ -6,6 +6,7 @@ import java.util.Optional;
 import fi.iki.elonen.NanoHTTPD;
 import fi.iki.elonen.NanoHTTPD.Response.Status;
 import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
+import nl.gingerbeard.automation.domoticz.receiver.ResponseParameters.ResponseAlarmParameters;
 import nl.gingerbeard.automation.domoticz.receiver.ResponseParameters.ResponseDeviceParameters;
 import nl.gingerbeard.automation.domoticz.receiver.ResponseParameters.ResponseParametersType;
 import nl.gingerbeard.automation.domoticz.receiver.ResponseParameters.ResponseTimeParameters;
@@ -37,6 +38,15 @@ public final class DomoticzEventReceiverServer extends NanoHTTPD implements IDom
 		 * @return True if processing was successful. False otherwise.
 		 */
 		public boolean timeChanged(int curtime, int sunrise, int sunset);
+
+		/**
+		 * Update the alarm state
+		 *
+		 * @param alarmState
+		 *            the new state
+		 * @return True if processing was successful. False otherwise.
+		 */
+		public boolean alarmChanged(String alarmState);
 	}
 
 	private Optional<EventReceived> listener = Optional.empty();
@@ -49,11 +59,6 @@ public final class DomoticzEventReceiverServer extends NanoHTTPD implements IDom
 		config.updateListenPort(getListeningPort());
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see nl.gingerbeard.automation.domoticz.IDomoticzEventReceiver#setEventListener(nl.gingerbeard.automation.domoticz.DomoticzEventReceiver.EventReceived)
-	 */
 	@Override
 	public void setEventListener(final EventReceived listener) {
 		this.listener = Optional.ofNullable(listener);
@@ -88,16 +93,34 @@ public final class DomoticzEventReceiverServer extends NanoHTTPD implements IDom
 
 	private Optional<Response> triggerListener(final ResponseParameters responseParams) {
 		if (responseParams.getType() == ResponseParametersType.DEVICE) {
-			return triggerDeviceListener(responseParams);
+			return triggerDeviceListener(responseParams.getDeviceParameters().get());
+		} else if (responseParams.getType() == ResponseParametersType.TIME) {
+			return triggerTimeListener(responseParams.getTimeParameters().get());
 		}
-		return triggerTimeListener(responseParams);
+		return triggerAlarmListener(responseParams.getAlarmParametres().get());
 	}
 
-	private Optional<Response> triggerTimeListener(final ResponseParameters responseParams) {
+	private Optional<Response> triggerAlarmListener(final ResponseAlarmParameters alarm) {
 		Optional<Response> response = Optional.empty();
 
 		if (listener.isPresent()) {
-			final ResponseTimeParameters time = responseParams.getTimeParameters().get();
+			final boolean result = listener.get().alarmChanged(alarm.getAlarmState());
+
+			if (result) {
+				log.debug("Success");
+			} else {
+				log.error("Could not process alarm request: " + alarm);
+				response = Optional.of(newFixedLengthResponse(Status.NOT_FOUND, NanoHTTPD.MIME_PLAINTEXT, "Could not process request."));
+			}
+		}
+
+		return response;
+	}
+
+	private Optional<Response> triggerTimeListener(final ResponseTimeParameters time) {
+		Optional<Response> response = Optional.empty();
+
+		if (listener.isPresent()) {
 			final int curtime = time.getCurrentTime();
 			final int sunrise = time.getSunriseTime();
 			final int sunset = time.getSunsetTime();
@@ -113,9 +136,8 @@ public final class DomoticzEventReceiverServer extends NanoHTTPD implements IDom
 		return response;
 	}
 
-	private Optional<Response> triggerDeviceListener(final ResponseParameters responseParams) {
+	private Optional<Response> triggerDeviceListener(final ResponseDeviceParameters device) {
 		Optional<Response> response = Optional.empty();
-		final ResponseDeviceParameters device = responseParams.getDeviceParameters().get();
 		if (listener.isPresent()) {
 			try {
 				response = triggerDeviceListenerWithLogging(device);

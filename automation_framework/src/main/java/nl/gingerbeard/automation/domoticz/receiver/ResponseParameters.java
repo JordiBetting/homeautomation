@@ -7,12 +7,14 @@ final class ResponseParameters {
 	static enum ResponseParametersType {
 		DEVICE, //
 		TIME, //
+		ALARM, //
 		;
 	}
 
 	private final ResponseParametersType type;
 	private final Optional<ResponseDeviceParameters> deviceParams;
 	private final Optional<ResponseTimeParameters> timeParams;
+	private final Optional<ResponseAlarmParameters> alarmParams;
 
 	static ResponseParameters ofDevice(final int idx, final String state) {
 		return new ResponseParameters(new ResponseDeviceParameters(idx, state));
@@ -22,16 +24,29 @@ final class ResponseParameters {
 		return new ResponseParameters(new ResponseTimeParameters(curtime, sunrise, sunset));
 	}
 
+	static ResponseParameters ofAlarm(final String newState) {
+		return new ResponseParameters(new ResponseAlarmParameters(newState));
+	}
+
 	private ResponseParameters(final ResponseDeviceParameters deviceParams) {
 		type = ResponseParametersType.DEVICE;
-		this.deviceParams = Optional.of(deviceParams);
 		timeParams = Optional.empty();
+		this.deviceParams = Optional.of(deviceParams);
+		alarmParams = Optional.empty();
 	}
 
 	private ResponseParameters(final ResponseTimeParameters timeParams) {
 		type = ResponseParametersType.TIME;
 		this.timeParams = Optional.of(timeParams);
 		deviceParams = Optional.empty();
+		alarmParams = Optional.empty();
+	}
+
+	private ResponseParameters(final ResponseAlarmParameters responseAlarmParameters) {
+		type = ResponseParametersType.ALARM;
+		timeParams = Optional.empty();
+		deviceParams = Optional.empty();
+		alarmParams = Optional.of(responseAlarmParameters);
 	}
 
 	public ResponseParametersType getType() {
@@ -44,6 +59,10 @@ final class ResponseParameters {
 
 	public Optional<ResponseTimeParameters> getTimeParameters() {
 		return timeParams;
+	}
+
+	public Optional<ResponseAlarmParameters> getAlarmParametres() {
+		return alarmParams;
 	}
 
 	static class ResponseDeviceParameters {
@@ -97,6 +116,22 @@ final class ResponseParameters {
 		public String toString() {
 			return "ResponseTimeParameters [currentTime=" + currentTime + ", sunriseTime=" + sunriseTime + ", sunsetTime=" + sunsetTime + "]";
 		}
+	}
 
+	static class ResponseAlarmParameters {
+		private final String alarmState;
+
+		public ResponseAlarmParameters(final String alarmState) {
+			this.alarmState = alarmState;
+		}
+
+		public String getAlarmState() {
+			return alarmState;
+		}
+
+		@Override
+		public String toString() {
+			return "ResponseAlarmParameters [alarmState=" + alarmState + "]";
+		}
 	}
 }

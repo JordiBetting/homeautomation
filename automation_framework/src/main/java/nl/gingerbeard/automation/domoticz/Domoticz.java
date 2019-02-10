@@ -73,4 +73,10 @@ final class Domoticz implements EventReceived, IDomoticz {
 
 		return false;
 	}
+
+	@Override
+	public boolean alarmChanged(final String alarmState) {
+		// TODO Auto-generated method stub
+		return false;
+	}
 }
