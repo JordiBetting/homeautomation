@@ -18,6 +18,9 @@ public final class DomoticzComponent {
 	public Optional<IDomoticzTimeOfDayChanged> timeListener;
 
 	@Requires
+	public Optional<IDomoticzAlarmChanged> alarmListener;
+
+	@Requires
 	public IDomoticzEventReceiver domoticzReceiver;
 
 	@Requires
@@ -33,7 +36,7 @@ public final class DomoticzComponent {
 
 	@Activate
 	public void registerReceiver() {
-		domoticz = domoticzInstance = new Domoticz(deviceListener, timeListener, logger);
+		domoticz = domoticzInstance = new Domoticz(deviceListener, timeListener, alarmListener, logger);
 		domoticzReceiver.setEventListener(domoticzInstance);
 	}
 
