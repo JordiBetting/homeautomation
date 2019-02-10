@@ -95,14 +95,10 @@ public class Color {
 
 	@Override
 	public String toString() {
-		switch (mode) {
-		case RGB:
+		if (mode == ColorMode.RGB) {
 			return "Color [mode=" + mode + ", brightness=" + brightness + " rgbColor=" + rgbColor + "]";
-		case WhiteTemperature:
-			return "Color [mode=" + mode + ", brightness=" + brightness + ", whiteTemperature=" + whiteTemperature + "]";
-		default:
-			return super.toString();
 		}
+		return "Color [mode=" + mode + ", brightness=" + brightness + ", whiteTemperature=" + whiteTemperature + "]";
 	}
 
 }

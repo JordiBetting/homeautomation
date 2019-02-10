@@ -6,7 +6,7 @@ dependencies {
 	implementation project(':logging')
 }
 
-version = "0.0.1"
+version = "0.0.2"
 group = "nl.gingerbeard"
     
 publishing {
