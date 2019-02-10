@@ -387,12 +387,12 @@ public class IntegrationTest {
 		assertEquals(0, room.getHome_count());
 		assertEquals(0, room.getDisarmed_count());
 
-		sendRequest("arm-away");
+		sendRequest("arm_away");
 		assertEquals(1, room.getAway_count());
 		assertEquals(0, room.getHome_count());
 		assertEquals(0, room.getDisarmed_count());
 
-		sendRequest("arm-home");
+		sendRequest("arm_home");
 		assertEquals(1, room.getAway_count());
 		assertEquals(1, room.getHome_count());
 		assertEquals(0, room.getDisarmed_count());
@@ -441,11 +441,11 @@ public class IntegrationTest {
 		sendRequest(0, "on");
 		assertEquals(0, room.getCallCount());
 
-		sendRequest("arm-home");
+		sendRequest("arm_home");
 		sendRequest(0, "on");
 		assertEquals(1, room.getCallCount());
 
-		sendRequest("arm-away");
+		sendRequest("arm_away");
 		sendRequest(0, "on");
 		assertEquals(1, room.getCallCount());
 
@@ -453,7 +453,7 @@ public class IntegrationTest {
 		sendRequest(0, "on");
 		assertEquals(1, room.getCallCount());
 
-		sendRequest("arm-home");
+		sendRequest("arm_home");
 		sendRequest(0, "on");
 		assertEquals(2, room.getCallCount());
 	}

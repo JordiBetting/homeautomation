@@ -281,7 +281,7 @@ public class DomoticzEventReceiverTest {
 
 		final int port = receiver.getListeningPort();
 
-		final URL url = new URL("http://localhost:" + port + "/alarm/arm-away");
+		final URL url = new URL("http://localhost:" + port + "/alarm/arm_away");
 		final HttpURLConnection con = (HttpURLConnection) url.openConnection();
 		con.setRequestMethod("GET");
 
@@ -306,7 +306,7 @@ public class DomoticzEventReceiverTest {
 	public void alarm_nolistener_noException() throws IOException {
 		final int port = receiver.getListeningPort();
 
-		final URL url = new URL("http://localhost:" + port + "/alarm/arm-away");
+		final URL url = new URL("http://localhost:" + port + "/alarm/arm_away");
 		final HttpURLConnection con = (HttpURLConnection) url.openConnection();
 		con.setRequestMethod("GET");
 
@@ -321,7 +321,7 @@ public class DomoticzEventReceiverTest {
 
 		final int port = receiver.getListeningPort();
 
-		final URL url = new URL("http://localhost:" + port + "/alarm/arm-away");
+		final URL url = new URL("http://localhost:" + port + "/alarm/arm_away");
 		final HttpURLConnection con = (HttpURLConnection) url.openConnection();
 		con.setRequestMethod("GET");
 

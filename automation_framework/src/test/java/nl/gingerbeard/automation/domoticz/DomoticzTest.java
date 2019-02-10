@@ -162,7 +162,7 @@ public class DomoticzTest {
 		final IDomoticzAlarmChanged listener = mock(IDomoticzAlarmChanged.class);
 		final Domoticz domoticz = new Domoticz(Optional.empty(), Optional.empty(), Optional.of(listener), mock(ILogger.class));
 
-		domoticz.alarmChanged("arm-away");
+		domoticz.alarmChanged("arm_away");
 
 		Mockito.verify(listener, times(1)).alarmChanged(AlarmState.ARM_AWAY);
 		verifyNoMoreInteractions(listener);
@@ -173,7 +173,7 @@ public class DomoticzTest {
 		final IDomoticzAlarmChanged listener = mock(IDomoticzAlarmChanged.class);
 		final Domoticz domoticz = new Domoticz(Optional.empty(), Optional.empty(), Optional.of(listener), mock(ILogger.class));
 
-		domoticz.alarmChanged("arm-home");
+		domoticz.alarmChanged("arm_home");
 
 		Mockito.verify(listener, times(1)).alarmChanged(AlarmState.ARM_HOME);
 		verifyNoMoreInteractions(listener);

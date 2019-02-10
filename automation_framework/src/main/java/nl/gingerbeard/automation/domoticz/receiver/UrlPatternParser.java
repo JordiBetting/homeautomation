@@ -9,7 +9,7 @@ final class UrlPatternParser {
 
 	private static final Pattern DEVICEPATTERN = Pattern.compile("/device/([0-9]+)/([0-9a-zA-Z_]+)/?");
 	private static final Pattern TIMEPATTERN = Pattern.compile("/time/([0-9]{1,4})/([0-9]{1,4})/([0-9]{1,4})/?");
-	private static final Pattern ALARMPATTERN = Pattern.compile("/alarm/([0-9a-zA-Z_-]+)/?");
+	private static final Pattern ALARMPATTERN = Pattern.compile("/alarm/(arm_away|arm_home|disarmed)/?");
 
 	private UrlPatternParser() {
 		// avoid instantiation
@@ -31,11 +31,11 @@ final class UrlPatternParser {
 
 		final String lcUri = uri.toLowerCase(Locale.US);
 		if (lcUri.startsWith("/device/")) {
-			responseParams = parseDeviceParameters(uri);
+			responseParams = parseDeviceParameters(lcUri);
 		} else if (lcUri.startsWith("/time/")) {
-			responseParams = parseTimeParameters(uri);
+			responseParams = parseTimeParameters(lcUri);
 		} else if (lcUri.startsWith("/alarm/")) {
-			responseParams = parseAlarmParameters(uri);
+			responseParams = parseAlarmParameters(lcUri);
 		}
 
 		return responseParams;

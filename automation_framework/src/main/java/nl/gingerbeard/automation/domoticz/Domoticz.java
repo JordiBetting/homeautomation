@@ -92,15 +92,11 @@ final class Domoticz implements EventReceived, IDomoticz {
 	}
 
 	private Optional<AlarmState> getAlarmState(final String alarmState) {
-		final String lcState = alarmState.toLowerCase(Locale.US);
-		// TODO: Can this be fixed in URLPattern regex, so that AlarmState.valueOf() can be used?
-		if ("arm-away".equals(lcState)) {
-			return Optional.of(AlarmState.ARM_AWAY);
-		} else if ("arm-home".equals(lcState)) {
-			return Optional.of(AlarmState.ARM_HOME);
-		} else if ("disarmed".equals(lcState)) {
-			return Optional.of(AlarmState.DISARMED);
+		final String ucState = alarmState.toUpperCase(Locale.US);
+		try {
+			return Optional.of(AlarmState.valueOf(ucState));
+		} catch (final IllegalArgumentException e) {
+			return Optional.empty();
 		}
-		return Optional.empty();
 	}
 }
