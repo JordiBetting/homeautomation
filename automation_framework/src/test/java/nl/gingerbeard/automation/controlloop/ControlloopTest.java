@@ -193,4 +193,21 @@ public class ControlloopTest {
 		assertEquals(AlarmState.ARM_AWAY, state.getAlarmState());
 		verify(events, times(1)).trigger(AlarmState.ARM_AWAY);
 	}
+
+	@Test
+	public void alarmUpdatedSameState_noeventTriggered() {
+		final IDomoticzUpdateTransmitter transmitter = mock(IDomoticzUpdateTransmitter.class);
+		final IEvents events = mock(IEvents.class);
+		final TestLogger log = new TestLogger();
+		final State state = new State();
+		state.setAlarmState(AlarmState.DISARMED);
+
+		final Controlloop control = new Controlloop(events, transmitter, state, log);
+
+		control.alarmChanged(AlarmState.ARM_AWAY);
+		control.alarmChanged(AlarmState.ARM_AWAY);
+
+		verify(events, times(1)).trigger(AlarmState.ARM_AWAY);
+	}
+
 }
