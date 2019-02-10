@@ -215,4 +215,13 @@ public class DeclarativeRulesTest {
 		// await outcome of rule
 		assertFalse(latch.await(1, TimeUnit.SECONDS)); // returns false on timeout
 	}
+
+	@Test
+	public void update_unknowndevice_noException() {
+		rules.when(switchInput1, OnOffState.ON)//
+				.then(switchOutput1, OnOffState.ON) //
+				.orElse(switchOutput1, OnOffState.OFF);
+
+		rules.updateDevice(new Switch(666));
+	}
 }

@@ -1,7 +1,6 @@
 package nl.gingerbeard.automation.declarative;
 
 import nl.gingerbeard.automation.devices.Device;
-import nl.gingerbeard.automation.devices.Switch;
 import nl.gingerbeard.automation.logging.ILogger;
 
 public class DeclarativeRules {
@@ -20,7 +19,7 @@ public class DeclarativeRules {
 		return declarativeRule;
 	}
 
-	public void updateDevice(final Switch switchInput) {
+	public void updateDevice(final Device<?> switchInput) {
 		ruleRegistry.updateDevice(switchInput);
 	}
 }
