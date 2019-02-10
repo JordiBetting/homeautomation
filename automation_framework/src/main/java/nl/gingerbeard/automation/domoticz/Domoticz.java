@@ -83,20 +83,14 @@ final class Domoticz implements EventReceived, IDomoticz {
 	@Override
 	public boolean alarmChanged(final String alarmState) {
 		if (alarmListener.isPresent()) {
-			final Optional<AlarmState> alarm = getAlarmState(alarmState);
-			if (alarm.isPresent()) {
-				return alarmListener.get().alarmChanged(alarm.get());
-			}
+			final AlarmState alarm = getAlarmStateByString(alarmState);
+			return alarmListener.get().alarmChanged(alarm);
 		}
 		return false;
 	}
 
-	private Optional<AlarmState> getAlarmState(final String alarmState) {
-		final String ucState = alarmState.toUpperCase(Locale.US);
-		try {
-			return Optional.of(AlarmState.valueOf(ucState));
-		} catch (final IllegalArgumentException e) {
-			return Optional.empty();
-		}
+	private AlarmState getAlarmStateByString(final String alarmStateString) {
+		final String ucState = alarmStateString.toUpperCase(Locale.US);
+		return AlarmState.valueOf(ucState);
 	}
 }
