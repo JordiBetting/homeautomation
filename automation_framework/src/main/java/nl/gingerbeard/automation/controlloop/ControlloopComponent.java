@@ -48,6 +48,5 @@ public class ControlloopComponent {
 		devicelistener = null;
 		timeListener = null;
 		alarmListener = null;
-
 	}
 }

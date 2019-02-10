@@ -21,6 +21,7 @@ import nl.gingerbeard.automation.domoticz.helpers.TestWebServer;
 import nl.gingerbeard.automation.event.annotations.EventState;
 import nl.gingerbeard.automation.event.annotations.Subscribe;
 import nl.gingerbeard.automation.logging.TestLogger.LogOutputToTestLogger;
+import nl.gingerbeard.automation.state.AlarmState;
 import nl.gingerbeard.automation.state.NextState;
 import nl.gingerbeard.automation.state.OnOffState;
 import nl.gingerbeard.automation.state.Temperature;
@@ -336,4 +337,126 @@ public class IntegrationTest {
 	private void sendNightTime() throws IOException {
 		sendRequest(10, 100, 200);
 	}
+
+	public static class AlarmRoom extends Room {
+
+		private int away_count = 0;
+		private int home_count = 0;
+		private int disarmed_count = 0;
+
+		AlarmRoom() {
+			super();
+		}
+
+		@Subscribe
+		public void receiveTime(final AlarmState alarm) {
+			switch (alarm) {
+			case ARM_AWAY:
+				away_count++;
+				break;
+			case ARM_HOME:
+				home_count++;
+				break;
+			case DISARMED:
+				disarmed_count++;
+				break;
+			default:
+				throw new RuntimeException();
+			}
+		}
+
+		public int getAway_count() {
+			return away_count;
+		}
+
+		public int getHome_count() {
+			return home_count;
+		}
+
+		public int getDisarmed_count() {
+			return disarmed_count;
+		}
+	}
+
+	@Test
+	public void sendAlarm() throws IOException {
+		final AlarmRoom room = new AlarmRoom();
+		automation.addRoom(room);
+
+		assertEquals(0, room.getAway_count());
+		assertEquals(0, room.getHome_count());
+		assertEquals(0, room.getDisarmed_count());
+
+		sendRequest("arm-away");
+		assertEquals(1, room.getAway_count());
+		assertEquals(0, room.getHome_count());
+		assertEquals(0, room.getDisarmed_count());
+
+		sendRequest("arm-home");
+		assertEquals(1, room.getAway_count());
+		assertEquals(1, room.getHome_count());
+		assertEquals(0, room.getDisarmed_count());
+
+		sendRequest("disarmed");
+		assertEquals(1, room.getAway_count());
+		assertEquals(1, room.getHome_count());
+		assertEquals(1, room.getDisarmed_count());
+
+	}
+
+	private void sendRequest(final String alarmCommand) throws IOException {
+		final URL url = new URL("http://localhost:" + port + "/alarm/" + alarmCommand);
+		final HttpURLConnection con = (HttpURLConnection) url.openConnection();
+		con.setRequestMethod("GET");
+		assertEquals(200, con.getResponseCode(), "Status expected: 200 but was: " + con.getResponseCode() + ". Content: " + con.getContent());
+	}
+
+	@EventState(alarmState = AlarmState.ARM_HOME)
+	public static class AlarmSwitchRoom extends Room {
+
+		private static final Switch SENSOR = new Switch(0);
+		private int callCount = 0;
+
+		AlarmSwitchRoom() {
+			super();
+			addDevice(SENSOR);
+		}
+
+		@Subscribe
+		public void receiveEvent(final Switch input) {
+			callCount++;
+		}
+
+		public int getCallCount() {
+			return callCount;
+		}
+	}
+
+	@Test
+	public void switch_alarmstate_received() throws IOException {
+		final AlarmSwitchRoom room = new AlarmSwitchRoom();
+		automation.addRoom(room);
+
+		// intial state = disarmed. No receiving stuff
+		sendRequest(0, "on");
+		assertEquals(0, room.getCallCount());
+
+		sendRequest("arm-home");
+		sendRequest(0, "on");
+		assertEquals(1, room.getCallCount());
+
+		sendRequest("arm-away");
+		sendRequest(0, "on");
+		assertEquals(1, room.getCallCount());
+
+		sendRequest("disarmed");
+		sendRequest(0, "on");
+		assertEquals(1, room.getCallCount());
+
+		sendRequest("arm-home");
+		sendRequest(0, "on");
+		assertEquals(2, room.getCallCount());
+
+	}
+
 }
