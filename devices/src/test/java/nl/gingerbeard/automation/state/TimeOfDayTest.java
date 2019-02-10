@@ -46,4 +46,21 @@ public class TimeOfDayTest {
 		final Time timenow = new Time();
 		assertEquals("Time [fixedTime=Optional.empty]", timenow.toString());
 	}
+
+	@Test
+	public void timeofdayvalues_isNight() {
+		final TimeOfDayValues tod = new TimeOfDayValues(100, 99, 101);
+
+		assertTrue(tod.isDayTime());
+		assertFalse(tod.isNightTime());
+	}
+
+	@Test
+	public void timeofdayvalues_sNightOffset() {
+		final TimeOfDayValues tod = new TimeOfDayValues(100, 90, 110);
+
+		assertFalse(tod.isDayTime(15));
+		assertTrue(tod.isNightTime(15));
+	}
+
 }

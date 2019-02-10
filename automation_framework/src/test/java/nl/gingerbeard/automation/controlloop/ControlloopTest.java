@@ -25,6 +25,7 @@ import nl.gingerbeard.automation.event.IEvents;
 import nl.gingerbeard.automation.logging.ILogger;
 import nl.gingerbeard.automation.logging.LogLevel;
 import nl.gingerbeard.automation.logging.TestLogger;
+import nl.gingerbeard.automation.state.AlarmState;
 import nl.gingerbeard.automation.state.NextState;
 import nl.gingerbeard.automation.state.OnOffState;
 import nl.gingerbeard.automation.state.State;
@@ -175,5 +176,21 @@ public class ControlloopTest {
 
 		assertEquals(TimeOfDay.DAYTIME, state.getTimeOfDay());
 		verify(events, times(1)).trigger(any(TimeOfDay.class));
+	}
+
+	@Test
+	public void alarmUpdated_eventTriggered() {
+		final IDomoticzUpdateTransmitter transmitter = mock(IDomoticzUpdateTransmitter.class);
+		final IEvents events = mock(IEvents.class);
+		final TestLogger log = new TestLogger();
+		final State state = new State();
+		state.setAlarmState(AlarmState.DISARMED);
+
+		final Controlloop control = new Controlloop(events, transmitter, state, log);
+
+		control.alarmChanged(AlarmState.ARM_AWAY);
+
+		assertEquals(AlarmState.ARM_AWAY, state.getAlarmState());
+		verify(events, times(1)).trigger(AlarmState.ARM_AWAY);
 	}
 }

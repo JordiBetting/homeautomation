@@ -1,12 +1,14 @@
 package nl.gingerbeard.automation.domoticz;
 
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
 import nl.gingerbeard.automation.devices.Device;
 import nl.gingerbeard.automation.domoticz.receiver.DomoticzEventReceiverServer.EventReceived;
 import nl.gingerbeard.automation.logging.ILogger;
+import nl.gingerbeard.automation.state.AlarmState;
 import nl.gingerbeard.automation.state.TimeOfDayValues;
 
 // high - level access
@@ -15,6 +17,7 @@ final class Domoticz implements EventReceived, IDomoticz {
 	private final Optional<IDomoticzDeviceStatusChanged> deviceListener;
 	private final Optional<IDomoticzTimeOfDayChanged> timeListener;
 	private final ILogger logger;
+	private final Optional<IDomoticzAlarmChanged> alarmListener;
 
 	// for testing
 	Domoticz() {
@@ -23,11 +26,14 @@ final class Domoticz implements EventReceived, IDomoticz {
 		};
 		deviceListener = Optional.empty();
 		timeListener = Optional.empty();
+		alarmListener = Optional.empty();
 	}
 
-	public Domoticz(final Optional<IDomoticzDeviceStatusChanged> deviceListener, final Optional<IDomoticzTimeOfDayChanged> timeListener, final ILogger logger) {
+	public Domoticz(final Optional<IDomoticzDeviceStatusChanged> deviceListener, final Optional<IDomoticzTimeOfDayChanged> timeListener, final Optional<IDomoticzAlarmChanged> alarmListener,
+			final ILogger logger) {
 		this.deviceListener = deviceListener;
 		this.timeListener = timeListener;
+		this.alarmListener = alarmListener;
 		this.logger = logger;
 
 	}
@@ -72,5 +78,29 @@ final class Domoticz implements EventReceived, IDomoticz {
 		}
 
 		return false;
+	}
+
+	@Override
+	public boolean alarmChanged(final String alarmState) {
+		if (alarmListener.isPresent()) {
+			final Optional<AlarmState> alarm = getAlarmState(alarmState);
+			if (alarm.isPresent()) {
+				return alarmListener.get().alarmChanged(alarm.get());
+			}
+		}
+		return false;
+	}
+
+	private Optional<AlarmState> getAlarmState(final String alarmState) {
+		final String lcState = alarmState.toLowerCase(Locale.US);
+		// TODO: Can this be fixed in URLPattern regex, so that AlarmState.valueOf() can be used?
+		if ("arm-away".equals(lcState)) {
+			return Optional.of(AlarmState.ARM_AWAY);
+		} else if ("arm-home".equals(lcState)) {
+			return Optional.of(AlarmState.ARM_HOME);
+		} else if ("disarmed".equals(lcState)) {
+			return Optional.of(AlarmState.DISARMED);
+		}
+		return Optional.empty();
 	}
 }

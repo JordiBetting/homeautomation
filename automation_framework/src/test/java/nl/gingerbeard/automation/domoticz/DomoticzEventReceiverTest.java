@@ -272,4 +272,59 @@ public class DomoticzEventReceiverTest {
 
 		assertEquals(404, con.getResponseCode());
 	}
+
+	@Test
+	public void alarm_received() throws IOException {
+		final EventReceived listener = mock(EventReceived.class);
+		when(listener.alarmChanged(any())).thenReturn(true);
+		receiver.setEventListener(listener);
+
+		final int port = receiver.getListeningPort();
+
+		final URL url = new URL("http://localhost:" + port + "/alarm/arm-away");
+		final HttpURLConnection con = (HttpURLConnection) url.openConnection();
+		con.setRequestMethod("GET");
+
+		assertEquals(200, con.getResponseCode());
+	}
+
+	@Test
+	public void alarm_novar_404() throws IOException {
+		final EventReceived listener = mock(EventReceived.class);
+		receiver.setEventListener(listener);
+
+		final int port = receiver.getListeningPort();
+
+		final URL url = new URL("http://localhost:" + port + "/alarm/");
+		final HttpURLConnection con = (HttpURLConnection) url.openConnection();
+		con.setRequestMethod("GET");
+
+		assertEquals(404, con.getResponseCode());
+	}
+
+	@Test
+	public void alarm_nolistener_noException() throws IOException {
+		final int port = receiver.getListeningPort();
+
+		final URL url = new URL("http://localhost:" + port + "/alarm/arm-away");
+		final HttpURLConnection con = (HttpURLConnection) url.openConnection();
+		con.setRequestMethod("GET");
+
+		assertEquals(200, con.getResponseCode());
+	}
+
+	@Test
+	public void alarm_receiverFalse_404() throws IOException {
+		final EventReceived listener = mock(EventReceived.class);
+		when(listener.alarmChanged(any())).thenReturn(false);
+		receiver.setEventListener(listener);
+
+		final int port = receiver.getListeningPort();
+
+		final URL url = new URL("http://localhost:" + port + "/alarm/arm-away");
+		final HttpURLConnection con = (HttpURLConnection) url.openConnection();
+		con.setRequestMethod("GET");
+
+		assertEquals(404, con.getResponseCode());
+	}
 }

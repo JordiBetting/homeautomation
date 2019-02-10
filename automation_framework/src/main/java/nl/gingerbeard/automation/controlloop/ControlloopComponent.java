@@ -1,5 +1,6 @@
 package nl.gingerbeard.automation.controlloop;
 
+import nl.gingerbeard.automation.domoticz.IDomoticzAlarmChanged;
 import nl.gingerbeard.automation.domoticz.IDomoticzDeviceStatusChanged;
 import nl.gingerbeard.automation.domoticz.IDomoticzTimeOfDayChanged;
 import nl.gingerbeard.automation.domoticz.transmitter.IDomoticzUpdateTransmitter;
@@ -31,16 +32,21 @@ public class ControlloopComponent {
 	@Provides
 	public IDomoticzTimeOfDayChanged timeListener;
 
+	@Provides
+	public IDomoticzAlarmChanged alarmListener;
+
 	@Activate
 	public void provideListener() {
 		final Controlloop controlloop = new Controlloop(events, transmitter, state, log);
 		devicelistener = controlloop;
 		timeListener = controlloop;
+		alarmListener = controlloop;
 	}
 
 	@Deactivate
 	public void removeListener() {
 		devicelistener = null;
 		timeListener = null;
+		alarmListener = null;
 	}
 }

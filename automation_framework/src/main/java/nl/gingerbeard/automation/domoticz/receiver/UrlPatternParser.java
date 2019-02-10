@@ -9,6 +9,7 @@ final class UrlPatternParser {
 
 	private static final Pattern DEVICEPATTERN = Pattern.compile("/device/([0-9]+)/([0-9a-zA-Z_]+)/?");
 	private static final Pattern TIMEPATTERN = Pattern.compile("/time/([0-9]{1,4})/([0-9]{1,4})/([0-9]{1,4})/?");
+	private static final Pattern ALARMPATTERN = Pattern.compile("/alarm/([0-9a-zA-Z_-]+)/?");
 
 	private UrlPatternParser() {
 		// avoid instantiation
@@ -33,6 +34,20 @@ final class UrlPatternParser {
 			responseParams = parseDeviceParameters(uri);
 		} else if (lcUri.startsWith("/time/")) {
 			responseParams = parseTimeParameters(uri);
+		} else if (lcUri.startsWith("/alarm/")) {
+			responseParams = parseAlarmParameters(uri);
+		}
+
+		return responseParams;
+	}
+
+	private static Optional<ResponseParameters> parseAlarmParameters(final String uri) {
+		Optional<ResponseParameters> responseParams = Optional.empty();
+
+		final Matcher m = ALARMPATTERN.matcher(uri);
+		if (m.matches()) {
+			final String newState = m.group(1);
+			responseParams = Optional.of(ResponseParameters.ofAlarm(newState));
 		}
 
 		return responseParams;
