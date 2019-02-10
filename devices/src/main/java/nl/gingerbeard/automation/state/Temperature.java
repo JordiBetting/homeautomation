@@ -80,17 +80,15 @@ public final class Temperature {
 	}
 
 	public double get(final Unit unit) {
-		if (unit != null) {
-			switch (unit) {
-			case CELSIUS:
-				return this.unit.toCelcius(value);
-			case FAHRENHEIT:
-				return this.unit.toFahrenheit(value);
-			case KELVIN:
-				return this.unit.toKelvin(value);
-			}
+		if (unit == Unit.CELSIUS) {
+			return this.unit.toCelcius(value);
+		} else if (unit == Unit.FAHRENHEIT) {
+			return this.unit.toFahrenheit(value);
+		} else if (unit == Unit.KELVIN) {
+			return this.unit.toKelvin(value);
+		} else {
+			throw new UnsupportedOperationException("Unit " + unit + " unknown");
 		}
-		throw new UnsupportedOperationException("Unit " + unit + " unknown");
 	}
 
 	@Override
