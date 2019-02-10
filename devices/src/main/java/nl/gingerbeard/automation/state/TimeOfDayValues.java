@@ -21,8 +21,8 @@ public final class TimeOfDayValues {
 	}
 
 	public boolean isDayTime(final int offsetMinutes) {
-		return curtime + offsetMinutes <= sunset && //
-				curtime - offsetMinutes >= sunrise;
+		return curtime - offsetMinutes <= sunset && //
+				curtime + offsetMinutes >= sunrise;
 	}
 
 	public boolean isNightTime(final int offsetMinutes) {
