@@ -7,18 +7,20 @@ import java.util.List;
 
 import nl.gingerbeard.automation.devices.StateDevice;
 import nl.gingerbeard.automation.devices.Subdevice;
+import nl.gingerbeard.automation.domoticz.IDomoticzAlarmChanged;
 import nl.gingerbeard.automation.domoticz.IDomoticzDeviceStatusChanged;
 import nl.gingerbeard.automation.domoticz.IDomoticzTimeOfDayChanged;
 import nl.gingerbeard.automation.domoticz.transmitter.IDomoticzUpdateTransmitter;
 import nl.gingerbeard.automation.event.EventResult;
 import nl.gingerbeard.automation.event.IEvents;
 import nl.gingerbeard.automation.logging.ILogger;
+import nl.gingerbeard.automation.state.AlarmState;
 import nl.gingerbeard.automation.state.NextState;
 import nl.gingerbeard.automation.state.State;
 import nl.gingerbeard.automation.state.TimeOfDay;
 import nl.gingerbeard.automation.state.TimeOfDayValues;
 
-class Controlloop implements IDomoticzDeviceStatusChanged, IDomoticzTimeOfDayChanged {
+class Controlloop implements IDomoticzDeviceStatusChanged, IDomoticzTimeOfDayChanged, IDomoticzAlarmChanged {
 	private final IEvents events;
 	private final IDomoticzUpdateTransmitter transmitter;
 	private final ILogger log;
@@ -89,6 +91,16 @@ class Controlloop implements IDomoticzDeviceStatusChanged, IDomoticzTimeOfDayCha
 	private void updateTimeState(final TimeOfDayValues time) {
 		final TimeOfDay newTimeOfDay = time.isDayTime() ? TimeOfDay.DAYTIME : TimeOfDay.NIGHTTIME;
 		state.setTimeOfDay(newTimeOfDay);
+	}
+
+	@Override
+	public boolean alarmChanged(final AlarmState newState) {
+		final AlarmState curState = state.getAlarmState();
+		if (curState != newState) {
+			state.setAlarmState(newState);
+			events.trigger(state.getAlarmState());
+		}
+		return true;
 	}
 
 }
