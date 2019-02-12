@@ -1,5 +1,3 @@
-apply plugin: 'maven-publish'
-
 dependencies {
 	compile group: 'com.google.guava', name: 'guava', version: '23.5-jre'
 	compile group: 'org.nanohttpd', name: 'nanohttpd', version: '2.3.1'
@@ -8,21 +6,4 @@ dependencies {
 	compile project(':service')
 	compile project(':devices')
 	compile project(':logging')
-}
-
-jar {
-    from {
-        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
-    }
-}
-
-version = "0.0.12"
-group = "nl.gingerbeard"
-    
-publishing {
-	publications {
-	    mavenJava(MavenPublication) {
-	        from components.java
-	    }
-	}
 }

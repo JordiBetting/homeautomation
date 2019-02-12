@@ -14,6 +14,10 @@ allprojects {
 subprojects {
 	apply plugin: 'eclipse'
 	apply plugin: 'findbugs'
+	apply plugin: 'maven-publish'
+	
+	version = "0.0.13"
+	group = "nl.gingerbeard"
 
 	dependencies {
 		testCompile('org.junit.jupiter:junit-jupiter-api:5.3.2')
@@ -25,19 +29,19 @@ subprojects {
 	}
 
 	test {
-	jacocoTestReport {
-		reports {
-			xml.enabled false
-			csv.enabled false
-		}
+		jacocoTestReport {
+			reports {
+				xml.enabled false
+				csv.enabled false
+			}
 
-		afterEvaluate {
-			classDirectories = files(classDirectories.files.collect {
-				fileTree(dir: it,
-						exclude: ['**Test**'])
-			})
+			afterEvaluate {
+				classDirectories = files(classDirectories.files.collect {
+					fileTree(dir: it,
+							exclude: ['**Test**'])
+				})
+			}
 		}
-	}
 
 		useJUnitPlatform()
 	}
@@ -46,6 +50,14 @@ subprojects {
 		ignoreFailures = true
 		effort = "max"
 		reportLevel = "low"
+	}
+	
+	publishing {
+		publications {
+			mavenJava(MavenPublication) {
+				from components.java
+			}
+		}
 	}
 }	
 
