@@ -10,6 +10,8 @@ public interface IAutomationFrameworkInterface {
 
 	void deviceChanged(Device<?> changedDevice);
 
+	void addRooms(Room... rooms);
+
 	public static AutomationFrameworkContainer createFrameworkContainer(final DomoticzConfiguration domoticzConfig) {
 		return new AutomationFrameworkContainer(domoticzConfig);
 	}
