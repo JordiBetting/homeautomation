@@ -3,6 +3,7 @@ package nl.gingerbeard.automation.integration;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
@@ -11,6 +12,8 @@ import nl.gingerbeard.automation.devices.Switch;
 import nl.gingerbeard.automation.event.annotations.EventState;
 import nl.gingerbeard.automation.event.annotations.Subscribe;
 import nl.gingerbeard.automation.state.AlarmState;
+import nl.gingerbeard.automation.state.NextState;
+import nl.gingerbeard.automation.state.OnOffState;
 
 public class AlarmIntegrationTest extends IntegrationTest {
 
@@ -130,5 +133,30 @@ public class AlarmIntegrationTest extends IntegrationTest {
 	@Test
 	public void alarmState_invalid_404() throws IOException {
 		updateAlarm("invalid", 404);
+	}
+
+	public static class AlarmWithDeviceOutput extends Room {
+		private final Switch output = new Switch(1);
+
+		public AlarmWithDeviceOutput() {
+			addDevice(output);
+		}
+
+		@Subscribe
+		public NextState<?> updateAlarm(final AlarmState alarmState) {
+			return new NextState<>(output, OnOffState.ON);
+		}
+	}
+
+	@Test
+	public void alarmChange_triggersOutput() throws IOException {
+		final AlarmWithDeviceOutput room = new AlarmWithDeviceOutput();
+		automation.addRoom(room);
+
+		updateAlarm("arm_away");
+
+		final List<String> requests = webserver.getRequests();
+		assertEquals(1, requests.size());
+		assertEquals("GET /json.htm?type=command&param=switchlight&idx=1&switchcmd=on", requests.get(0));
 	}
 }

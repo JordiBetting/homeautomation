@@ -103,7 +103,8 @@ class Controlloop implements IDomoticzDeviceStatusChanged, IDomoticzTimeOfDayCha
 		final AlarmState curState = state.getAlarmState();
 		if (curState != newState) {
 			state.setAlarmState(newState);
-			events.trigger(state.getAlarmState());
+			final EventResult results = events.trigger(state.getAlarmState());
+			processEventResult(results);
 		}
 		return true;
 	}

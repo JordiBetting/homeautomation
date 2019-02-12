@@ -188,6 +188,8 @@ public class ControlloopTest {
 		final State state = new State();
 		state.setAlarmState(AlarmState.DISARMED);
 
+		when(events.trigger(any())).thenReturn(EventResult.empty());
+
 		final Controlloop control = new Controlloop(events, transmitter, state, log);
 
 		control.alarmChanged(AlarmState.ARM_AWAY);
@@ -203,6 +205,8 @@ public class ControlloopTest {
 		final TestLogger log = new TestLogger();
 		final State state = new State();
 		state.setAlarmState(AlarmState.DISARMED);
+
+		when(events.trigger(any())).thenReturn(EventResult.empty());
 
 		final Controlloop control = new Controlloop(events, transmitter, state, log);
 
