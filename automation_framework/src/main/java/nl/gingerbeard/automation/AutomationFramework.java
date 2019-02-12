@@ -1,5 +1,6 @@
 package nl.gingerbeard.automation;
 
+import java.util.Arrays;
 import java.util.Set;
 
 import nl.gingerbeard.automation.devices.CompositeDevice;
@@ -48,6 +49,13 @@ public class AutomationFramework implements IAutomationFrameworkInterface {
 	@Override
 	public void deviceChanged(final Device<?> changedDevice) {
 		events.trigger(changedDevice);
+	}
+
+	@Override
+	public void addRooms(final Room... rooms) {
+		if (rooms != null) {
+			Arrays.stream(rooms).forEach((room) -> addRoom(room));
+		}
 	}
 
 	// TODO: Add synchronization method to ensure devices are not updated while processing an update, etc. Consider grouping events that come in right after each other.
