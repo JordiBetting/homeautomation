@@ -9,7 +9,7 @@ import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
 
 public abstract class DomoticzHILIntegrationTest {
 
-	protected static DomoticzConfiguration domoticzConfig;
+	static DomoticzConfiguration domoticzConfig;
 
 	@BeforeAll
 	public static void initConfig() throws MalformedURLException {
