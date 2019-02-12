@@ -289,6 +289,20 @@ public class DomoticzEventReceiverTest {
 	}
 
 	@Test
+	public void alarm_sameTwice_onceUpdated() throws IOException {
+		final EventReceived listener = mock(EventReceived.class);
+		when(listener.alarmChanged(any())).thenReturn(true);
+		receiver.setEventListener(listener);
+
+		final int port = receiver.getListeningPort();
+
+		final URL url = new URL("http://localhost:" + port + "/alarm/arm_away");
+		final HttpURLConnection con = (HttpURLConnection) url.openConnection();
+		con.setRequestMethod("GET");
+		assertEquals(200, con.getResponseCode());
+	}
+
+	@Test
 	public void alarm_novar_404() throws IOException {
 		final EventReceived listener = mock(EventReceived.class);
 		receiver.setEventListener(listener);

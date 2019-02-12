@@ -172,6 +172,8 @@ public class ControlloopTest {
 		state.setTimeOfDay(TimeOfDay.NIGHTTIME);
 		final Controlloop control = new Controlloop(events, transmitter, state, log);
 
+		when(events.trigger(any())).thenReturn(EventResult.empty());
+
 		control.timeChanged(new TimeOfDayValues(5, 1, 10));
 
 		assertEquals(TimeOfDay.DAYTIME, state.getTimeOfDay());
@@ -185,6 +187,8 @@ public class ControlloopTest {
 		final TestLogger log = new TestLogger();
 		final State state = new State();
 		state.setAlarmState(AlarmState.DISARMED);
+
+		when(events.trigger(any())).thenReturn(EventResult.empty());
 
 		final Controlloop control = new Controlloop(events, transmitter, state, log);
 
@@ -201,6 +205,8 @@ public class ControlloopTest {
 		final TestLogger log = new TestLogger();
 		final State state = new State();
 		state.setAlarmState(AlarmState.DISARMED);
+
+		when(events.trigger(any())).thenReturn(EventResult.empty());
 
 		final Controlloop control = new Controlloop(events, transmitter, state, log);
 

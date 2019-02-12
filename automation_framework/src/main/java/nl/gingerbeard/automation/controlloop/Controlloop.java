@@ -37,16 +37,20 @@ class Controlloop implements IDomoticzDeviceStatusChanged, IDomoticzTimeOfDayCha
 	@Override
 	public void statusChanged(final StateDevice<?> changedDevice) {
 		final EventResult results = events.trigger(changedDevice);
+		processEventResult(results);
+		if (changedDevice instanceof Subdevice) {
+			final Subdevice<?, ?> sub = (Subdevice<?, ?>) changedDevice;
+			sub.getParent().ifPresent((parent) -> statusChanged(parent));
+		}
+	}
+
+	private void processEventResult(final EventResult results) {
 		for (final NextState<?> update : filter(results)) {
 			try {
 				transmitter.transmitDeviceUpdate(update);
 			} catch (final IOException e) {
 				log.exception(e, "Failed to transmit device update: " + update);
 			}
-		}
-		if (changedDevice instanceof Subdevice) {
-			final Subdevice<?, ?> sub = (Subdevice<?, ?>) changedDevice;
-			sub.getParent().ifPresent((parent) -> statusChanged(parent));
 		}
 	}
 
@@ -83,7 +87,8 @@ class Controlloop implements IDomoticzDeviceStatusChanged, IDomoticzTimeOfDayCha
 		final TimeOfDay prevTod = state.getTimeOfDay();
 		updateTimeState(time);
 		if (state.getTimeOfDay() != prevTod) {
-			events.trigger(state.getTimeOfDay());
+			final EventResult result = events.trigger(state.getTimeOfDay());
+			processEventResult(result);
 		}
 		return true;
 	}
@@ -98,7 +103,8 @@ class Controlloop implements IDomoticzDeviceStatusChanged, IDomoticzTimeOfDayCha
 		final AlarmState curState = state.getAlarmState();
 		if (curState != newState) {
 			state.setAlarmState(newState);
-			events.trigger(state.getAlarmState());
+			final EventResult results = events.trigger(state.getAlarmState());
+			processEventResult(results);
 		}
 		return true;
 	}
