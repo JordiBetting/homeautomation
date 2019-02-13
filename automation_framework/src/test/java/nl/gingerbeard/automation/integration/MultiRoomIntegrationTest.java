@@ -83,14 +83,14 @@ public class MultiRoomIntegrationTest extends IntegrationTest {
 
 		assertEquals(2, requests.size());
 		assertEquals("GET /json.htm?type=command&param=switchlight&idx=2&switchcmd=Set%20Level&level=100", requests.get(0));
-		assertEquals("GET /json.htm?type=command&param=switchlight&idx=3&switchcmd=on", requests.get(1));
+		assertEquals("GET /json.htm?type=command&param=switchlight&idx=3&switchcmd=On", requests.get(1));
 
 		setNightTime();
 		deviceChanged(1, "OFF");
 
 		assertEquals(4, requests.size());
 		assertEquals("GET /json.htm?type=command&param=switchlight&idx=2&switchcmd=Set%20Level&level=50", requests.get(2));
-		assertEquals("GET /json.htm?type=command&param=switchlight&idx=3&switchcmd=off", requests.get(3));
+		assertEquals("GET /json.htm?type=command&param=switchlight&idx=3&switchcmd=Off", requests.get(3));
 
 	}
 
