@@ -107,7 +107,7 @@ public final class DomoticzEventReceiverServer extends NanoHTTPD implements IDom
 			final boolean result = listener.get().alarmChanged(alarm.getAlarmState());
 
 			if (result) {
-				log.debug("Success");
+				log.debug("Alarm state updated to " + alarm.getAlarmState());
 			} else {
 				log.error("Could not process alarm request: " + alarm);
 				response = Optional.of(newFixedLengthResponse(Status.NOT_FOUND, NanoHTTPD.MIME_PLAINTEXT, "Could not process request."));
@@ -126,7 +126,7 @@ public final class DomoticzEventReceiverServer extends NanoHTTPD implements IDom
 			final int sunset = time.getSunsetTime();
 			final boolean result = listener.get().timeChanged(curtime, sunrise, sunset);
 			if (result) {
-				log.debug("Success");
+				log.debug("Updated time to " + time.toString());
 			} else {
 				log.error("Could not process time request: " + time);
 				response = Optional.of(newFixedLengthResponse(Status.NOT_FOUND, NanoHTTPD.MIME_PLAINTEXT, "Could not process request."));
@@ -153,9 +153,9 @@ public final class DomoticzEventReceiverServer extends NanoHTTPD implements IDom
 		Optional<Response> response = Optional.empty();
 		final boolean result = listener.get().deviceChanged(device.getIdx(), device.getState());
 		if (result) {
-			log.debug("Success");
+			log.debug("Successfully updated device with id " + device.getIdx());
 		} else {
-			log.error("Could not process device request: " + device);
+			log.warning("Device is not handled by this instance " + device);
 			response = Optional.of(newFixedLengthResponse(Status.NOT_FOUND, NanoHTTPD.MIME_PLAINTEXT, "Could not process request."));
 		}
 		return response;
