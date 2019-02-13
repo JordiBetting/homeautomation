@@ -4,6 +4,8 @@ import nl.gingerbeard.automation.domoticz.transmitter.urlcreator.QueryStringItem
 
 public enum SwitchCMD implements QueryStringItem {
 	SET_LEVEL("Set Level"), //
+	ON("On"), //
+	OFF("Off"), //
 	;
 
 	private final String customName;
