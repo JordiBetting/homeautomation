@@ -6,7 +6,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import nl.gingerbeard.automation.devices.Shutters;
@@ -18,22 +17,16 @@ import nl.gingerbeard.automation.state.OpenCloseState;
 public class OpenCloseTypeTest {
 
 	private static DomoticzConfiguration config;
-	private OpenCloseType type;
-	private URLBuilder builder;
 
 	@BeforeAll
 	public static void initConfig() throws MalformedURLException {
 		config = new DomoticzConfiguration(1, new URL("http://localhost"));
 	}
 
-	@BeforeEach
-	public void createCommonObjects() {
-		type = new OpenCloseType();
-		builder = new URLBuilder(config);
-	}
-
 	@Test
 	public void open_urlCorrect() {
+		final OpenCloseType type = new OpenCloseType();
+		final URLBuilder builder = new URLBuilder(config);
 		final NextState<OpenCloseState> nextState = new NextState<>(new Shutters(42), OpenCloseState.OPEN);
 
 		type.createUrl(builder, nextState);
@@ -44,6 +37,8 @@ public class OpenCloseTypeTest {
 
 	@Test
 	public void close_urlCorrect() {
+		final OpenCloseType type = new OpenCloseType();
+		final URLBuilder builder = new URLBuilder(config);
 		final NextState<OpenCloseState> nextState = new NextState<>(new Shutters(42), OpenCloseState.CLOSE);
 
 		type.createUrl(builder, nextState);
