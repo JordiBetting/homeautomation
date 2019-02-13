@@ -12,7 +12,7 @@ import nl.gingerbeard.automation.state.OpenCloseState;
 
 public class OpenCloseType extends ChainOfCommandType<OpenCloseState> {
 
-	protected OpenCloseType() {
+	public OpenCloseType() {
 		super(OpenCloseState.class);
 	}
 
