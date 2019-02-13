@@ -44,13 +44,13 @@ public class ActuatorSensorIntegrationTest extends IntegrationTest {
 
 		List<String> requests = webserver.getRequests();
 		assertEquals(1, requests.size());
-		assertEquals("GET /json.htm?type=command&param=switchlight&idx=1&switchcmd=on", requests.get(0));
+		assertEquals("GET /json.htm?type=command&param=switchlight&idx=1&switchcmd=On", requests.get(0));
 
 		// reply with device update 'in Domoticz'
 		deviceChanged(1, "on");
 		requests = webserver.getRequests();
 		assertEquals(2, requests.size());
-		assertEquals("GET /json.htm?type=command&param=switchlight&idx=1&switchcmd=off", requests.get(1));
+		assertEquals("GET /json.htm?type=command&param=switchlight&idx=1&switchcmd=Off", requests.get(1));
 
 	}
 }

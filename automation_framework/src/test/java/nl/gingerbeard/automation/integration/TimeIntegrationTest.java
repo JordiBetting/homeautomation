@@ -172,6 +172,6 @@ public class TimeIntegrationTest extends IntegrationTest {
 		setNightTime();
 		final List<String> requests = webserver.getRequests();
 		assertEquals(1, requests.size());
-		assertEquals("GET /json.htm?type=command&param=switchlight&idx=1&switchcmd=on", requests.get(0));
+		assertEquals("GET /json.htm?type=command&param=switchlight&idx=1&switchcmd=On", requests.get(0));
 	}
 }

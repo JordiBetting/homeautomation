@@ -1,7 +1,5 @@
 package nl.gingerbeard.automation.domoticz.transmitter.urlcreator.devicetypes;
 
-import java.util.Locale;
-
 import nl.gingerbeard.automation.domoticz.transmitter.urlcreator.ChainOfCommandType;
 import nl.gingerbeard.automation.domoticz.transmitter.urlcreator.URLBuilder;
 import nl.gingerbeard.automation.domoticz.transmitter.urlcreator.domoticzapi.Keys;
@@ -26,7 +24,10 @@ public class OnOffType extends ChainOfCommandType<OnOffState> {
 	}
 
 	private String getValue(final NextState<OnOffState> nextState) {
-		return nextState.get().name().toLowerCase(Locale.US);
+		if (nextState.get() == OnOffState.ON) {
+			return "On";
+		}
+		return "Off";
 	}
 
 }

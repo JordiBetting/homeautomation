@@ -57,7 +57,7 @@ public class DomoticzUpdateTransmitterTest {
 		transmitter.transmitDeviceUpdate(new NextState<>(device, OnOffState.ON));
 
 		assertEquals(1, webserver.getRequests().size());
-		assertEquals("GET /json.htm?type=command&param=switchlight&idx=1&switchcmd=on", webserver.getRequests().get(0));
+		assertEquals("GET /json.htm?type=command&param=switchlight&idx=1&switchcmd=On", webserver.getRequests().get(0));
 	}
 
 	@Test
@@ -68,12 +68,12 @@ public class DomoticzUpdateTransmitterTest {
 		// on
 		transmitter.transmitDeviceUpdate(new NextState<>(device, OnOffState.ON));
 		assertEquals(1, webserver.getRequests().size());
-		assertEquals("GET /json.htm?type=command&param=switchlight&idx=1&switchcmd=on", webserver.getRequests().get(0));
+		assertEquals("GET /json.htm?type=command&param=switchlight&idx=1&switchcmd=On", webserver.getRequests().get(0));
 
 		// off
 		transmitter.transmitDeviceUpdate(new NextState<>(device, OnOffState.OFF));
 		assertEquals(2, webserver.getRequests().size());
-		assertEquals("GET /json.htm?type=command&param=switchlight&idx=1&switchcmd=off", webserver.getRequests().get(1));
+		assertEquals("GET /json.htm?type=command&param=switchlight&idx=1&switchcmd=Off", webserver.getRequests().get(1));
 	}
 
 	@Test
@@ -130,7 +130,7 @@ public class DomoticzUpdateTransmitterTest {
 			transmitter.transmitDeviceUpdate(new NextState<>(device, OnOffState.ON));
 			fail("Expected exception");
 		} catch (final IOException e) {
-			assertEquals("http://localhost:" + webserver.getListeningPort() + "/json.htm?type=command&param=switchlight&idx=1&switchcmd=on Not Found", e.getMessage());
+			assertEquals("http://localhost:" + webserver.getListeningPort() + "/json.htm?type=command&param=switchlight&idx=1&switchcmd=On Not Found", e.getMessage());
 		}
 	}
 
