@@ -126,7 +126,7 @@ public class DomoticzEventReceiverTest {
 
 		assertEquals(200, con.getResponseCode());
 		log.assertContains(LogLevel.DEBUG, "GET /time/1/2/3/ from 127.0.0.1");
-		log.assertContains(LogLevel.DEBUG, "Success");
+		log.assertContains(LogLevel.DEBUG, "Updated time to ResponseTimeParameters [currentTime=1, sunriseTime=2, sunsetTime=3]");
 	}
 
 	@Test
