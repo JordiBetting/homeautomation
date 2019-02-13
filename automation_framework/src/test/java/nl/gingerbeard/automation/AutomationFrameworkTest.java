@@ -454,4 +454,24 @@ public class AutomationFrameworkTest {
 		container.stop();
 		verify(logOut, atLeastOnce()).log(any(), anyString());
 	}
+
+	@Test
+	public void addRooms_nullArgument_noException() {
+		container = IAutomationFrameworkInterface.createFrameworkContainer(new DomoticzConfiguration(0, createMockUrl()), mock(ILogOutput.class));
+		container.start();
+
+		assertThrows(IllegalArgumentException.class, () -> container.getAutomationFramework().addRooms((Room[]) null));
+
+		container.stop();
+	}
+
+	@Test
+	public void addRooms_oneRoomNull_noException() {
+		container = IAutomationFrameworkInterface.createFrameworkContainer(new DomoticzConfiguration(0, createMockUrl()), mock(ILogOutput.class));
+		container.start();
+
+		assertThrows(IllegalArgumentException.class, () -> container.getAutomationFramework().addRooms(new Room[] { null }));
+
+		container.stop();
+	}
 }
