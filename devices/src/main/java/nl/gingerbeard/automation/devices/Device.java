@@ -16,5 +16,6 @@ public abstract class Device<T> extends StateDevice<T> {
 	@Override
 	public String toString() {
 		return "Device [idx=" + idx + "]";
+		// TODO: add state from superclass
 	}
 }

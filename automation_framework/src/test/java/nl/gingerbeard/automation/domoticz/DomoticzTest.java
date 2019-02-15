@@ -13,9 +13,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import nl.gingerbeard.automation.deviceregistry.DeviceRegistry;
+import nl.gingerbeard.automation.deviceregistry.IDeviceRegistry;
 import nl.gingerbeard.automation.devices.OnOffDevice;
 import nl.gingerbeard.automation.devices.StateDevice;
 import nl.gingerbeard.automation.devices.Switch;
@@ -25,55 +28,34 @@ import nl.gingerbeard.automation.state.OnOffState;
 
 public class DomoticzTest {
 
+	private IDeviceRegistry registry;
+	private Domoticz domoticz;
+
+	@BeforeEach
+	public void initDomoticz() {
+		registry = new DeviceRegistry();
+		domoticz = new Domoticz(registry);
+	}
+
 	@Test
 	public void updateDevice_deviceUpdated() {
-		final Domoticz domoticz = new Domoticz();
-
 		final OnOffDevice device = new Switch(1);
-		device.updateState(OnOffState.OFF.name());
-		domoticz.addDevice(device);
+		device.setState(OnOffState.OFF);
+		registry.addDevice(device);
 
-		assertEquals(OnOffState.OFF, device.getState());
 		domoticz.deviceChanged(1, "on");
+
 		assertEquals(OnOffState.ON, device.getState());
 	}
 
 	@Test
 	public void updateNotExistingDevice_noException() {
-		final Domoticz domoticz = new Domoticz();
-
 		domoticz.deviceChanged(1, "does not exist");
 	}
 
 	@Test
-	public void addDevice_twice_fails() {
-		final Domoticz domoticz = new Domoticz();
-		final Switch switch1 = new Switch(1);
-		boolean result = domoticz.addDevice(switch1);
-		assertTrue(result);
-
-		result = domoticz.addDevice(switch1);
-
-		assertFalse(result);
-	}
-
-	@Test
-	public void addDevices_sameidx_fails() {
-		final Domoticz domoticz = new Domoticz();
-		final Switch switch1 = new Switch(1);
-		final Switch switch2 = new Switch(1);
-		boolean result = domoticz.addDevice(switch1);
-		assertTrue(result);
-
-		result = domoticz.addDevice(switch2);
-
-		assertFalse(result);
-	}
-
-	@Test
 	public void noListener_deviceChanged_noException() {
-		final Domoticz domoticz = new Domoticz();
-		domoticz.addDevice(new Switch(1));
+		registry.addDevice(new Switch(1));
 
 		final boolean result = domoticz.deviceChanged(1, "on");
 
@@ -82,8 +64,7 @@ public class DomoticzTest {
 
 	@Test
 	public void update_invalidNewState_returnsFalse() {
-		final Domoticz domoticz = new Domoticz();
-		domoticz.addDevice(new Switch(1));
+		registry.addDevice(new Switch(1));
 
 		final boolean result = domoticz.deviceChanged(1, "does not exist");
 
@@ -104,8 +85,8 @@ public class DomoticzTest {
 	public void update_devicelistenerCalled() {
 		final TestListener listener = new TestListener();
 		final Domoticz domoticz = new Domoticz(Optional.of(listener), Optional.empty(), Optional.empty(), (t, level, message) -> {
-		});
-		domoticz.addDevice(new Switch(1));
+		}, registry);
+		registry.addDevice(new Switch(1));
 
 		final boolean result = domoticz.deviceChanged(1, "on");
 
@@ -116,7 +97,7 @@ public class DomoticzTest {
 	@Test
 	public void update_timelistenerCalled() {
 		final IDomoticzTimeOfDayChanged listener = mock(IDomoticzTimeOfDayChanged.class);
-		final Domoticz domoticz = new Domoticz(Optional.empty(), Optional.of(listener), Optional.empty(), mock(ILogger.class));
+		final Domoticz domoticz = new Domoticz(Optional.empty(), Optional.of(listener), Optional.empty(), mock(ILogger.class), registry);
 
 		domoticz.timeChanged(1, 2, 3);
 
@@ -127,7 +108,7 @@ public class DomoticzTest {
 	@Test
 	public void update_timelistener_returnsTrue() {
 		final IDomoticzTimeOfDayChanged listener = mock(IDomoticzTimeOfDayChanged.class);
-		final Domoticz domoticz = new Domoticz(Optional.empty(), Optional.of(listener), Optional.empty(), mock(ILogger.class));
+		final Domoticz domoticz = new Domoticz(Optional.empty(), Optional.of(listener), Optional.empty(), mock(ILogger.class), registry);
 
 		when(listener.timeChanged(any())).thenReturn(true);
 
@@ -139,7 +120,7 @@ public class DomoticzTest {
 	@Test
 	public void update_timelistener_returnsFalse() {
 		final IDomoticzTimeOfDayChanged listener = mock(IDomoticzTimeOfDayChanged.class);
-		final Domoticz domoticz = new Domoticz(Optional.empty(), Optional.of(listener), Optional.empty(), mock(ILogger.class));
+		final Domoticz domoticz = new Domoticz(Optional.empty(), Optional.of(listener), Optional.empty(), mock(ILogger.class), registry);
 
 		when(listener.timeChanged(any())).thenReturn(false);
 
@@ -150,7 +131,7 @@ public class DomoticzTest {
 
 	@Test
 	public void update_timeListener_noListener_noException() {
-		final Domoticz domoticz = new Domoticz(Optional.empty(), Optional.empty(), Optional.empty(), mock(ILogger.class));
+		final Domoticz domoticz = new Domoticz(Optional.empty(), Optional.empty(), Optional.empty(), mock(ILogger.class), registry);
 
 		final boolean result = domoticz.timeChanged(1, 2, 3);
 
@@ -160,7 +141,7 @@ public class DomoticzTest {
 	@Test
 	public void update_alarm_away_ListenerCalled() {
 		final IDomoticzAlarmChanged listener = mock(IDomoticzAlarmChanged.class);
-		final Domoticz domoticz = new Domoticz(Optional.empty(), Optional.empty(), Optional.of(listener), mock(ILogger.class));
+		final Domoticz domoticz = new Domoticz(Optional.empty(), Optional.empty(), Optional.of(listener), mock(ILogger.class), registry);
 
 		domoticz.alarmChanged("arm_away");
 
@@ -171,18 +152,18 @@ public class DomoticzTest {
 	@Test
 	public void update_alarm_home_ListenerCalled() {
 		final IDomoticzAlarmChanged listener = mock(IDomoticzAlarmChanged.class);
-		final Domoticz domoticz = new Domoticz(Optional.empty(), Optional.empty(), Optional.of(listener), mock(ILogger.class));
+		final Domoticz domoticz = new Domoticz(Optional.empty(), Optional.empty(), Optional.of(listener), mock(ILogger.class), registry);
 
 		domoticz.alarmChanged("arm_home");
 
-    Mockito.verify(listener, times(1)).alarmChanged(AlarmState.ARM_HOME);
+		Mockito.verify(listener, times(1)).alarmChanged(AlarmState.ARM_HOME);
 		verifyNoMoreInteractions(listener);
 	}
 
 	@Test
 	public void update_alarm_disarm_ListenerCalled() {
 		final IDomoticzAlarmChanged listener = mock(IDomoticzAlarmChanged.class);
-		final Domoticz domoticz = new Domoticz(Optional.empty(), Optional.empty(), Optional.of(listener), mock(ILogger.class));
+		final Domoticz domoticz = new Domoticz(Optional.empty(), Optional.empty(), Optional.of(listener), mock(ILogger.class), registry);
 
 		domoticz.alarmChanged("disarmed");
 
@@ -194,7 +175,7 @@ public class DomoticzTest {
 	public void update_alarmlistenre_returnsTrue() {
 		final IDomoticzAlarmChanged listener = mock(IDomoticzAlarmChanged.class);
 		when(listener.alarmChanged(any())).thenReturn(true);
-		final Domoticz domoticz = new Domoticz(Optional.empty(), Optional.empty(), Optional.of(listener), mock(ILogger.class));
+		final Domoticz domoticz = new Domoticz(Optional.empty(), Optional.empty(), Optional.of(listener), mock(ILogger.class), registry);
 
 		final boolean result = domoticz.alarmChanged("disarmed");
 
@@ -205,7 +186,7 @@ public class DomoticzTest {
 	public void update_alarmlistenre_returnsFalse() {
 		final IDomoticzAlarmChanged listener = mock(IDomoticzAlarmChanged.class);
 		when(listener.alarmChanged(any())).thenReturn(false);
-		final Domoticz domoticz = new Domoticz(Optional.empty(), Optional.empty(), Optional.of(listener), mock(ILogger.class));
+		final Domoticz domoticz = new Domoticz(Optional.empty(), Optional.empty(), Optional.of(listener), mock(ILogger.class), registry);
 
 		final boolean result = domoticz.alarmChanged("disarmed");
 
@@ -214,7 +195,7 @@ public class DomoticzTest {
 
 	@Test
 	public void update_alarm_notlistener_noException() {
-		final Domoticz domoticz = new Domoticz(Optional.empty(), Optional.empty(), Optional.empty(), mock(ILogger.class));
+		final Domoticz domoticz = new Domoticz(Optional.empty(), Optional.empty(), Optional.empty(), mock(ILogger.class), registry);
 
 		final boolean result = domoticz.alarmChanged("disarmed");
 

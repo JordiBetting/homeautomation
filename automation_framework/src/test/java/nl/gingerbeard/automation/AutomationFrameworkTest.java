@@ -16,7 +16,6 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,16 +23,16 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import nl.gingerbeard.automation.deviceregistry.DeviceRegistry;
+import nl.gingerbeard.automation.deviceregistry.IDeviceRegistry;
 import nl.gingerbeard.automation.devices.Device;
 import nl.gingerbeard.automation.devices.IDevice;
 import nl.gingerbeard.automation.devices.Switch;
 import nl.gingerbeard.automation.devices.Thermostat;
 import nl.gingerbeard.automation.devices.ThermostatModeDevice;
 import nl.gingerbeard.automation.devices.ThermostatSetpointDevice;
-import nl.gingerbeard.automation.domoticz.IDomoticz;
 import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
 import nl.gingerbeard.automation.domoticz.receiver.IDomoticzEventReceiver;
-import nl.gingerbeard.automation.event.EventResult;
 import nl.gingerbeard.automation.event.IEvents;
 import nl.gingerbeard.automation.event.annotations.EventState;
 import nl.gingerbeard.automation.event.annotations.Subscribe;
@@ -354,12 +353,12 @@ public class AutomationFrameworkTest {
 
 	@Test
 	public void compositeTest_allDevicesAdded() {
-		final DomoticzTransmitRecorder recorder = new DomoticzTransmitRecorder();
-		final IAutomationFrameworkInterface framework = new AutomationFramework(new MockEvents(), recorder);
+		final DeviceRegistry registry = new DeviceRegistry();
+		final IAutomationFrameworkInterface framework = new AutomationFramework(mock(IEvents.class), registry);
 
 		framework.addRoom(new ThermostatRoom());
 
-		final List<Device<?>> devices = recorder.getDevices();
+		final List<Device<?>> devices = registry.getAllDevices();
 		assertEquals(2, devices.size());
 
 		Optional<ThermostatSetpointDevice> setpoint = Optional.empty();
@@ -377,34 +376,6 @@ public class AutomationFrameworkTest {
 
 		assertEquals(1, setpoint.get().getIdx());
 		assertEquals(2, mode.get().getIdx());
-	}
-
-	private static class DomoticzTransmitRecorder implements IDomoticz {
-
-		private final List<Device<?>> devices = new ArrayList<>();
-
-		@Override
-		public boolean addDevice(final Device<?> device) {
-			devices.add(device);
-			return true;
-		}
-
-		public List<Device<?>> getDevices() {
-			return devices;
-		}
-
-	}
-
-	private static class MockEvents implements IEvents {
-
-		@Override
-		public EventResult trigger(final Object event) {
-			return null;
-		}
-
-		@Override
-		public void subscribe(final Object subscriber) {
-		}
 	}
 
 	private static class FakeDevice implements IDevice<Void> {
@@ -428,7 +399,7 @@ public class AutomationFrameworkTest {
 
 	@Test
 	public void addUnsupportedDevice_throwsException() {
-		final IAutomationFrameworkInterface framework = new AutomationFramework(new MockEvents(), new DomoticzTransmitRecorder());
+		final IAutomationFrameworkInterface framework = new AutomationFramework(mock(IEvents.class), mock(IDeviceRegistry.class));
 		assertThrows(UnsupportedOperationException.class, () -> framework.addRoom(new RoomWithFakeDevice()));
 	}
 

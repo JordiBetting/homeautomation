@@ -1,6 +1,6 @@
 package nl.gingerbeard.automation;
 
-import nl.gingerbeard.automation.domoticz.IDomoticz;
+import nl.gingerbeard.automation.deviceregistry.IDeviceRegistry;
 import nl.gingerbeard.automation.event.IEvents;
 import nl.gingerbeard.automation.service.annotation.Activate;
 import nl.gingerbeard.automation.service.annotation.Deactivate;
@@ -12,15 +12,15 @@ public class AutomationFrameworkComponent {
 	@Requires
 	public IEvents events;
 
-	@Requires
-	public IDomoticz domoticz;
-
 	@Provides
 	public IAutomationFrameworkInterface framework;
 
+	@Requires
+	public IDeviceRegistry deviceRegistry;
+
 	@Activate
 	public void createFramework() {
-		framework = new AutomationFramework(events, domoticz);
+		framework = new AutomationFramework(events, deviceRegistry);
 	}
 
 	@Deactivate
