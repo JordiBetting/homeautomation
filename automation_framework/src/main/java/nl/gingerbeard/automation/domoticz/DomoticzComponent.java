@@ -2,7 +2,7 @@ package nl.gingerbeard.automation.domoticz;
 
 import java.util.Optional;
 
-import nl.gingerbeard.automation.DeviceRegistry;
+import nl.gingerbeard.automation.deviceregistry.DeviceRegistry;
 import nl.gingerbeard.automation.domoticz.receiver.IDomoticzEventReceiver;
 import nl.gingerbeard.automation.domoticz.transmitter.IDomoticzUpdateTransmitter;
 import nl.gingerbeard.automation.logging.ILogger;

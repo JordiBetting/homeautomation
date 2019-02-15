@@ -1,5 +1,6 @@
 package nl.gingerbeard.automation;
 
+import nl.gingerbeard.automation.deviceregistry.DeviceRegistry;
 import nl.gingerbeard.automation.event.IEvents;
 import nl.gingerbeard.automation.service.annotation.Activate;
 import nl.gingerbeard.automation.service.annotation.Deactivate;

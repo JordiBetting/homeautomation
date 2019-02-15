@@ -1,4 +1,4 @@
-package nl.gingerbeard.automation;
+package nl.gingerbeard.automation.deviceregistry;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -8,6 +8,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import nl.gingerbeard.automation.deviceregistry.DeviceRegistry;
 import nl.gingerbeard.automation.devices.Device;
 import nl.gingerbeard.automation.devices.Switch;
 import nl.gingerbeard.automation.state.OnOffState;

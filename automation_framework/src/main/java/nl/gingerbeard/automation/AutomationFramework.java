@@ -5,6 +5,7 @@ import java.util.Set;
 
 import com.google.common.base.Preconditions;
 
+import nl.gingerbeard.automation.deviceregistry.DeviceRegistry;
 import nl.gingerbeard.automation.devices.CompositeDevice;
 import nl.gingerbeard.automation.devices.Device;
 import nl.gingerbeard.automation.devices.IDevice;

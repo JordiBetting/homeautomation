@@ -17,7 +17,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import nl.gingerbeard.automation.DeviceRegistry;
+import nl.gingerbeard.automation.deviceregistry.DeviceRegistry;
 import nl.gingerbeard.automation.devices.OnOffDevice;
 import nl.gingerbeard.automation.devices.StateDevice;
 import nl.gingerbeard.automation.devices.Switch;

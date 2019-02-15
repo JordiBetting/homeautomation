@@ -3,7 +3,7 @@ package nl.gingerbeard.automation.domoticz;
 import java.util.Locale;
 import java.util.Optional;
 
-import nl.gingerbeard.automation.DeviceRegistry;
+import nl.gingerbeard.automation.deviceregistry.DeviceRegistry;
 import nl.gingerbeard.automation.devices.Device;
 import nl.gingerbeard.automation.domoticz.receiver.DomoticzEventReceiverServer.EventReceived;
 import nl.gingerbeard.automation.logging.ILogger;

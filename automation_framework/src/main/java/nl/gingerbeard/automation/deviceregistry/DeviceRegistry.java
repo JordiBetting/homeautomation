@@ -1,4 +1,4 @@
-package nl.gingerbeard.automation;
+package nl.gingerbeard.automation.deviceregistry;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,39 +11,6 @@ import com.google.common.base.Preconditions;
 import nl.gingerbeard.automation.devices.Device;
 
 public class DeviceRegistry {
-
-	private static class DeviceGroup extends Device<Object> {
-		private final List<Device<?>> devices = new ArrayList<>();
-
-		DeviceGroup(final int idx) {
-			super(idx);
-		}
-
-		void addDevice(final Device<?> device) {
-			devices.add(device);
-		}
-
-		@Override
-		public boolean updateState(final String newState) {
-			boolean groupResult = true;
-			for (final Device<?> device : devices) {
-				final boolean deviceResult = device.updateState(newState);
-				if (deviceResult == false) {
-					groupResult = false;
-				}
-			}
-			return groupResult;
-		}
-
-		Optional<Device<?>> getAny() {
-			return Optional.of(devices.get(0));
-		}
-
-		List<? extends Device<?>> getAll() {
-			return devices;
-		}
-
-	}
 
 	private final Map<Integer, DeviceGroup> deviceGroups = new HashMap<>();
 
