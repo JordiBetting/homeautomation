@@ -6,6 +6,7 @@ import nl.gingerbeard.automation.service.annotation.Activate;
 import nl.gingerbeard.automation.service.annotation.Deactivate;
 import nl.gingerbeard.automation.service.annotation.Provides;
 import nl.gingerbeard.automation.service.annotation.Requires;
+import nl.gingerbeard.automation.state.State;
 
 public class AutomationFrameworkComponent {
 
@@ -18,9 +19,12 @@ public class AutomationFrameworkComponent {
 	@Requires
 	public IDeviceRegistry deviceRegistry;
 
+	@Requires
+	public State state;
+
 	@Activate
 	public void createFramework() {
-		framework = new AutomationFramework(events, deviceRegistry);
+		framework = new AutomationFramework(events, deviceRegistry, state);
 	}
 
 	@Deactivate

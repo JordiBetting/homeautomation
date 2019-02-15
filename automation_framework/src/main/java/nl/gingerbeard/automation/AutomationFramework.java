@@ -10,23 +10,28 @@ import nl.gingerbeard.automation.devices.CompositeDevice;
 import nl.gingerbeard.automation.devices.Device;
 import nl.gingerbeard.automation.devices.IDevice;
 import nl.gingerbeard.automation.event.IEvents;
+import nl.gingerbeard.automation.state.State;
 
 public class AutomationFramework implements IAutomationFrameworkInterface {
 
 	private final IEvents events;
 	private final IDeviceRegistry deviceRegistry;
+	private final State state;
 
-	public AutomationFramework(final IEvents events, final IDeviceRegistry deviceRegistry) {
+	public AutomationFramework(final IEvents events, final IDeviceRegistry deviceRegistry, final State state) {
 		this.events = events;
 		this.deviceRegistry = deviceRegistry;
+		this.state = state;
 	}
 
 	@Override
 	public void addRoom(final Room room) {
-		events.subscribe(room);
+		Preconditions.checkArgument(room != null, "Please provide a non-null room");
+		room.setState(state);
 		for (final IDevice<?> device : room.getDevices()) {
 			addDevice(device);
 		}
+		events.subscribe(room);
 	}
 
 	private void addDevice(final IDevice<?> device) {

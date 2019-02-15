@@ -1,5 +1,6 @@
 package nl.gingerbeard.automation;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -354,7 +355,7 @@ public class AutomationFrameworkTest {
 	@Test
 	public void compositeTest_allDevicesAdded() {
 		final DeviceRegistry registry = new DeviceRegistry();
-		final IAutomationFrameworkInterface framework = new AutomationFramework(mock(IEvents.class), registry);
+		final IAutomationFrameworkInterface framework = new AutomationFramework(mock(IEvents.class), registry, new State());
 
 		framework.addRoom(new ThermostatRoom());
 
@@ -399,7 +400,7 @@ public class AutomationFrameworkTest {
 
 	@Test
 	public void addUnsupportedDevice_throwsException() {
-		final IAutomationFrameworkInterface framework = new AutomationFramework(mock(IEvents.class), mock(IDeviceRegistry.class));
+		final IAutomationFrameworkInterface framework = new AutomationFramework(mock(IEvents.class), mock(IDeviceRegistry.class), new State());
 		assertThrows(UnsupportedOperationException.class, () -> framework.addRoom(new RoomWithFakeDevice()));
 	}
 
@@ -444,5 +445,40 @@ public class AutomationFrameworkTest {
 		assertThrows(IllegalArgumentException.class, () -> container.getAutomationFramework().addRooms(new Room[] { null }));
 
 		container.stop();
+	}
+
+	public static class StateRoom extends Room {
+
+		public State exposeState() {
+			return getState();
+		}
+
+	}
+
+	@Test
+	public void roomState_notAddedToFramework_throwsException() {
+		final StateRoom stateroom = new StateRoom();
+
+		final IllegalStateException e = assertThrows(IllegalStateException.class, () -> stateroom.exposeState());
+		assertEquals("State is not available when room has not been added to the automation framework.", e.getMessage());
+	}
+
+	@Test
+	public void roomState_isSystemState() {
+		final StateRoom stateroom = new StateRoom();
+
+		final IAutomationFrameworkInterface framework = createIntegration();
+		final Optional<State> optionalState = container.getRuntime().getService(State.class);
+		assertTrue(optionalState.isPresent());
+		final State state = optionalState.get();
+		state.setTimeOfDay(TimeOfDay.DAYTIME);
+
+		framework.addRoom(stateroom);
+
+		assertDoesNotThrow(() -> stateroom.getState());
+		assertEquals(TimeOfDay.DAYTIME, stateroom.getState().getTimeOfDay());
+		state.setTimeOfDay(TimeOfDay.NIGHTTIME);
+		assertEquals(TimeOfDay.NIGHTTIME, stateroom.getState().getTimeOfDay());
+
 	}
 }
