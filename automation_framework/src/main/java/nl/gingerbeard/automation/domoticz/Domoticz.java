@@ -3,7 +3,7 @@ package nl.gingerbeard.automation.domoticz;
 import java.util.Locale;
 import java.util.Optional;
 
-import nl.gingerbeard.automation.deviceregistry.DeviceRegistry;
+import nl.gingerbeard.automation.deviceregistry.IDeviceRegistry;
 import nl.gingerbeard.automation.devices.Device;
 import nl.gingerbeard.automation.domoticz.receiver.DomoticzEventReceiverServer.EventReceived;
 import nl.gingerbeard.automation.logging.ILogger;
@@ -17,10 +17,10 @@ final class Domoticz implements EventReceived {
 	private final Optional<IDomoticzTimeOfDayChanged> timeListener;
 	private final ILogger logger;
 	private final Optional<IDomoticzAlarmChanged> alarmListener;
-	private final DeviceRegistry deviceRegistry;
+	private final IDeviceRegistry deviceRegistry;
 
 	// for testing
-	Domoticz(final DeviceRegistry registry) {
+	Domoticz(final IDeviceRegistry registry) {
 		super();
 		logger = (t, level, message) -> {
 		};
@@ -31,7 +31,7 @@ final class Domoticz implements EventReceived {
 	}
 
 	public Domoticz(final Optional<IDomoticzDeviceStatusChanged> deviceListener, final Optional<IDomoticzTimeOfDayChanged> timeListener, final Optional<IDomoticzAlarmChanged> alarmListener,
-			final ILogger logger, final DeviceRegistry deviceRegistry) {
+			final ILogger logger, final IDeviceRegistry deviceRegistry) {
 		this.deviceListener = deviceListener;
 		this.timeListener = timeListener;
 		this.alarmListener = alarmListener;

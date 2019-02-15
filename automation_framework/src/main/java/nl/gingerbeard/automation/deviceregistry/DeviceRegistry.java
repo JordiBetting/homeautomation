@@ -10,10 +10,11 @@ import com.google.common.base.Preconditions;
 
 import nl.gingerbeard.automation.devices.Device;
 
-public class DeviceRegistry {
+public final class DeviceRegistry implements IDeviceRegistry {
 
 	private final Map<Integer, DeviceGroup> deviceGroups = new HashMap<>();
 
+	@Override
 	public void addDevice(final Device<?> device) {
 		Preconditions.checkArgument(device != null, "Please provide a non-null device to registry");
 		final DeviceGroup deviceGroup = getOrCreateGroup(device.getIdx());
@@ -44,13 +45,7 @@ public class DeviceRegistry {
 		return totalList;
 	}
 
-	/**
-	 * Updates the devices with the specifix idx, returns one of those registered
-	 *
-	 * @param idx
-	 * @param newState
-	 * @return
-	 */
+	@Override
 	public Optional<Device<?>> updateDevice(final int idx, final String newState) {
 		final DeviceGroup group = deviceGroups.get(idx);
 		if (group != null) {

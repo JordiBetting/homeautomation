@@ -24,6 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import nl.gingerbeard.automation.deviceregistry.DeviceRegistry;
+import nl.gingerbeard.automation.deviceregistry.IDeviceRegistry;
 import nl.gingerbeard.automation.devices.Device;
 import nl.gingerbeard.automation.devices.IDevice;
 import nl.gingerbeard.automation.devices.Switch;
@@ -398,7 +399,7 @@ public class AutomationFrameworkTest {
 
 	@Test
 	public void addUnsupportedDevice_throwsException() {
-		final IAutomationFrameworkInterface framework = new AutomationFramework(mock(IEvents.class), mock(DeviceRegistry.class));
+		final IAutomationFrameworkInterface framework = new AutomationFramework(mock(IEvents.class), mock(IDeviceRegistry.class));
 		assertThrows(UnsupportedOperationException.class, () -> framework.addRoom(new RoomWithFakeDevice()));
 	}
 

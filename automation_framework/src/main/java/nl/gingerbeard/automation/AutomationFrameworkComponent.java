@@ -1,6 +1,7 @@
 package nl.gingerbeard.automation;
 
 import nl.gingerbeard.automation.deviceregistry.DeviceRegistry;
+import nl.gingerbeard.automation.deviceregistry.IDeviceRegistry;
 import nl.gingerbeard.automation.event.IEvents;
 import nl.gingerbeard.automation.service.annotation.Activate;
 import nl.gingerbeard.automation.service.annotation.Deactivate;
@@ -16,7 +17,7 @@ public class AutomationFrameworkComponent {
 	public IAutomationFrameworkInterface framework;
 
 	@Provides
-	public DeviceRegistry deviceRegistry;
+	public IDeviceRegistry deviceRegistry;
 
 	@Activate
 	public void createFramework() {

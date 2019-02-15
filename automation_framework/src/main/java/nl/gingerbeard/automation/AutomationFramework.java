@@ -5,7 +5,7 @@ import java.util.Set;
 
 import com.google.common.base.Preconditions;
 
-import nl.gingerbeard.automation.deviceregistry.DeviceRegistry;
+import nl.gingerbeard.automation.deviceregistry.IDeviceRegistry;
 import nl.gingerbeard.automation.devices.CompositeDevice;
 import nl.gingerbeard.automation.devices.Device;
 import nl.gingerbeard.automation.devices.IDevice;
@@ -14,9 +14,9 @@ import nl.gingerbeard.automation.event.IEvents;
 public class AutomationFramework implements IAutomationFrameworkInterface {
 
 	private final IEvents events;
-	private final DeviceRegistry deviceRegistry;
+	private final IDeviceRegistry deviceRegistry;
 
-	public AutomationFramework(final IEvents events, final DeviceRegistry deviceRegistry) {
+	public AutomationFramework(final IEvents events, final IDeviceRegistry deviceRegistry) {
 		this.events = events;
 		this.deviceRegistry = deviceRegistry;
 	}

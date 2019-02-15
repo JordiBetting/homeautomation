@@ -18,6 +18,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import nl.gingerbeard.automation.deviceregistry.DeviceRegistry;
+import nl.gingerbeard.automation.deviceregistry.IDeviceRegistry;
 import nl.gingerbeard.automation.devices.OnOffDevice;
 import nl.gingerbeard.automation.devices.StateDevice;
 import nl.gingerbeard.automation.devices.Switch;
@@ -27,7 +28,7 @@ import nl.gingerbeard.automation.state.OnOffState;
 
 public class DomoticzTest {
 
-	private DeviceRegistry registry;
+	private IDeviceRegistry registry;
 	private Domoticz domoticz;
 
 	@BeforeEach
