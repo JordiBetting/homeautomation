@@ -15,12 +15,11 @@ public class DeviceRegistry {
 	private static class DeviceGroup extends Device<Object> {
 		private final List<Device<?>> devices = new ArrayList<>();
 
-		public DeviceGroup(final int idx) {
+		DeviceGroup(final int idx) {
 			super(idx);
 		}
 
-		public void addDevice(final Device<?> device) {
-			Preconditions.checkArgument(getIdx() == device.getIdx(), "Idx must match");
+		void addDevice(final Device<?> device) {
 			devices.add(device);
 		}
 
@@ -36,14 +35,11 @@ public class DeviceRegistry {
 			return groupResult;
 		}
 
-		public Optional<Device<?>> getAny() {
-			if (devices.isEmpty()) {
-				return Optional.empty();
-			}
+		Optional<Device<?>> getAny() {
 			return Optional.of(devices.get(0));
 		}
 
-		public List<? extends Device<?>> getAll() {
+		List<? extends Device<?>> getAll() {
 			return devices;
 		}
 
@@ -52,6 +48,7 @@ public class DeviceRegistry {
 	private final Map<Integer, DeviceGroup> deviceGroups = new HashMap<>();
 
 	public void addDevice(final Device<?> device) {
+		Preconditions.checkArgument(device != null, "Please provide a non-null device to registry");
 		final DeviceGroup deviceGroup = getOrCreateGroup(device.getIdx());
 		deviceGroup.addDevice(device);
 	}

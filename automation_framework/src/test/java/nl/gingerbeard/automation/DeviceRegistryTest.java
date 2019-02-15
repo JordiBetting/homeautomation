@@ -1,10 +1,14 @@
 package nl.gingerbeard.automation;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import nl.gingerbeard.automation.devices.Device;
 import nl.gingerbeard.automation.devices.Switch;
 import nl.gingerbeard.automation.state.OnOffState;
 
@@ -81,7 +85,42 @@ public class DeviceRegistryTest {
 		registry.updateDevice(1, "Off");
 		assertEquals(OnOffState.OFF, testDevice.getState());
 		assertEquals(OnOffState.OFF, testDeviceOff.getState());
-
 	}
 
+	@Test
+	public void addNullDevice_throwsException() {
+		final IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> registry.addDevice(null));
+		assertEquals("Please provide a non-null device to registry", e.getMessage());
+	}
+
+	@Test
+	public void updateDevice_unknownIdx_returnsEmpty() {
+		final Optional<Device<?>> returned = registry.updateDevice(1, "");
+
+		assertEquals(Optional.empty(), returned);
+	}
+
+	@Test
+	public void updateIllegal_returnsFalse() {
+		final Switch testDevice = new Switch(1);
+		registry.addDevice(testDevice);
+
+		final Optional<Device<?>> result = registry.updateDevice(1, "blaat");
+
+		assertEquals(Optional.empty(), result);
+	}
+
+	@Test
+	public void getAllDevices() {
+		final Switch testDevice1 = new Switch(1);
+		final Switch testDevice2 = new Switch(1);
+		final Switch testDevice3 = new Switch(2);
+
+		registry.addDevice(testDevice1);
+		registry.addDevice(testDevice2);
+		registry.addDevice(testDevice3);
+
+		assertEquals(3, registry.getAllDevices().size());
+		assertEquals(2, registry.getUniqueDeviceCount());
+	}
 }
