@@ -15,8 +15,8 @@ final class Domoticz implements EventReceived {
 
 	private final Optional<IDomoticzDeviceStatusChanged> deviceListener;
 	private final Optional<IDomoticzTimeOfDayChanged> timeListener;
-	private final ILogger logger;
 	private final Optional<IDomoticzAlarmChanged> alarmListener;
+	private final ILogger logger;
 	private final IDeviceRegistry deviceRegistry;
 
 	// for testing

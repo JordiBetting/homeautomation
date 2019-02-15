@@ -1,6 +1,7 @@
 package nl.gingerbeard.automation;
 
 import nl.gingerbeard.automation.controlloop.ControlloopComponent;
+import nl.gingerbeard.automation.deviceregistry.DeviceRegistryComponent;
 import nl.gingerbeard.automation.domoticz.DomoticzComponent;
 import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
 import nl.gingerbeard.automation.domoticz.receiver.DomoticzEventReceiverComponent;
@@ -32,6 +33,7 @@ public final class AutomationFrameworkContainer {
 		container.register(AutomationFrameworkComponent.class);
 		container.register(LoggingComponent.class);
 		container.register(DomoticzConfiguration.class, domoticzConfig, 1);
+		container.register(DeviceRegistryComponent.class);
 	}
 
 	public IAutomationFrameworkInterface getAutomationFramework() {

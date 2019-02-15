@@ -23,6 +23,7 @@ public final class DomoticzComponent {
 	@Requires
 	public Optional<IDomoticzAlarmChanged> alarmListener;
 
+	// TODO: IDomoticzEventReceiver shall be a @Provide. GetListeningPort needs refactoring
 	@Requires
 	public IDomoticzEventReceiver domoticzReceiver;
 
