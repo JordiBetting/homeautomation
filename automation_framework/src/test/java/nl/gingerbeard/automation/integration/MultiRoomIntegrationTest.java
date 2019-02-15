@@ -15,6 +15,7 @@ import nl.gingerbeard.automation.event.annotations.EventState;
 import nl.gingerbeard.automation.event.annotations.Subscribe;
 import nl.gingerbeard.automation.state.Level;
 import nl.gingerbeard.automation.state.NextState;
+import nl.gingerbeard.automation.state.OnOffState;
 import nl.gingerbeard.automation.state.TimeOfDay;
 
 public class MultiRoomIntegrationTest extends IntegrationTest {
@@ -91,7 +92,25 @@ public class MultiRoomIntegrationTest extends IntegrationTest {
 		assertEquals(4, requests.size());
 		assertEquals("GET /json.htm?type=command&param=switchlight&idx=2&switchcmd=Set%20Level&level=50", requests.get(2));
 		assertEquals("GET /json.htm?type=command&param=switchlight&idx=3&switchcmd=Off", requests.get(3));
+	}
 
+	@Test
+	public void multiroom_deviceSync() throws IOException {
+		final Room1Daytime room1day = new Room1Daytime();
+		final Room1Nighttime room1night = new Room1Nighttime();
+
+		automation.addRooms(room1day, room1night);
+
+		setDaytime();
+		deviceChanged(1, "ON");
+
+		assertEquals(OnOffState.ON, room1day.input.getState());
+		assertEquals(OnOffState.ON, room1night.input.getState());
+
+		deviceChanged(1, "OFF");
+
+		assertEquals(OnOffState.OFF, room1day.input.getState());
+		assertEquals(OnOffState.OFF, room1night.input.getState());
 	}
 
 }

@@ -4,11 +4,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import com.google.common.base.Preconditions;
 
 import nl.gingerbeard.automation.devices.Device;
-import nl.gingerbeard.automation.devices.Switch;
 
 public class DeviceRegistry {
 
@@ -36,11 +36,22 @@ public class DeviceRegistry {
 			return groupResult;
 		}
 
+		public Optional<Device<?>> getAny() {
+			if (devices.isEmpty()) {
+				return Optional.empty();
+			}
+			return Optional.of(devices.get(0));
+		}
+
+		public List<? extends Device<?>> getAll() {
+			return devices;
+		}
+
 	}
 
 	private final Map<Integer, DeviceGroup> deviceGroups = new HashMap<>();
 
-	public void addDevice(final Switch device) {
+	public void addDevice(final Device<?> device) {
 		final DeviceGroup deviceGroup = getOrCreateGroup(device.getIdx());
 		deviceGroup.addDevice(device);
 	}
@@ -58,12 +69,33 @@ public class DeviceRegistry {
 		return deviceGroups.size();
 	}
 
-	public boolean updateDevice(final int idx, final String newState) {
+	/**
+	 * Returns all instances of the devices, may include duplicates
+	 *
+	 * @return
+	 */
+	public List<Device<?>> getAllDevices() {
+		final List<Device<?>> totalList = new ArrayList<>();
+		deviceGroups.forEach((idx, deviceGroup) -> totalList.addAll(deviceGroup.getAll()));
+		return totalList;
+	}
+
+	/**
+	 * Updates the devices with the specifix idx, returns one of those registered
+	 *
+	 * @param idx
+	 * @param newState
+	 * @return
+	 */
+	public Optional<Device<?>> updateDevice(final int idx, final String newState) {
 		final DeviceGroup group = deviceGroups.get(idx);
 		if (group != null) {
-			return group.updateState(newState);
+			final boolean result = group.updateState(newState);
+			if (result) {
+				return group.getAny();
+			}
 		}
-		return false;
+		return Optional.empty();
 	}
 
 }
