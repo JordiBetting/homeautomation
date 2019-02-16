@@ -33,7 +33,6 @@ class Controlloop implements IDomoticzDeviceStatusChanged, IDomoticzTimeOfDayCha
 		this.state = state;
 	}
 
-	// TODO domoticz event: add change [trigger=device], commandArray['OpenURL']='www.yourdomain.com/api/movecamtopreset.cgi' with device ID of changed device
 	@Override
 	public void statusChanged(final StateDevice<?> changedDevice) {
 		final EventResult results = events.trigger(changedDevice);
@@ -56,22 +55,22 @@ class Controlloop implements IDomoticzDeviceStatusChanged, IDomoticzTimeOfDayCha
 
 	private List<NextState<?>> filter(final EventResult results) {
 		final List<NextState<?>> filtered = new ArrayList<>();
-		for (final Object result : results.getAll()) {
-			filtered.addAll(filter(result));
-		}
+		results.getAll().stream().forEach((result) -> filtered.addAll(filter(result)));
 		return filtered;
 	}
 
 	private List<NextState<?>> filter(final Object input) {
 		final List<NextState<?>> filtered = new ArrayList<>();
-		if (isNextState(input)) {
+		if (isNextState(input) && isDifferentState((NextState<?>) input)) {
 			filtered.add((NextState<?>) input);
 		} else if (isCollection(input)) {
-			for (final Object item : (Collection<?>) input) {
-				filtered.addAll(filter(item)); // recursive search
-			}
+			((Collection<?>) input).stream().forEach((item) -> filtered.addAll(filter(item)));
 		}
 		return filtered;
+	}
+
+	private boolean isDifferentState(final NextState<?> nextState) {
+		return !nextState.get().equals(nextState.getDevice().getState());
 	}
 
 	private boolean isNextState(final Object result) {
