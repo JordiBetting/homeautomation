@@ -1,4 +1,4 @@
-package nl.gingerbeard.automation.declarative;
+package nl.gingerbeard.automation.declarativeold;
 
 import java.time.Duration;
 import java.util.HashMap;

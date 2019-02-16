@@ -1,4 +1,4 @@
-package nl.gingerbeard.automation.declarative;
+package nl.gingerbeard.automation.declarativeold;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -11,6 +11,7 @@ import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import nl.gingerbeard.automation.declarativeold.DeclarativeRules;
 import nl.gingerbeard.automation.devices.Switch;
 import nl.gingerbeard.automation.logging.LogLevel;
 import nl.gingerbeard.automation.logging.TestLogger;

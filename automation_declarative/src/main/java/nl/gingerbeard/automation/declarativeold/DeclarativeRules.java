@@ -1,4 +1,4 @@
-package nl.gingerbeard.automation.declarative;
+package nl.gingerbeard.automation.declarativeold;
 
 import nl.gingerbeard.automation.devices.Device;
 import nl.gingerbeard.automation.logging.ILogger;

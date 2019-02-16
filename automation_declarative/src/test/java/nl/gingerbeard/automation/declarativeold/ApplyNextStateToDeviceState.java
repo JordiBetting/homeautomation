@@ -1,4 +1,4 @@
-package nl.gingerbeard.automation.declarative;
+package nl.gingerbeard.automation.declarativeold;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 
+import nl.gingerbeard.automation.declarativeold.IDeviceUpdate;
 import nl.gingerbeard.automation.devices.Device;
 import nl.gingerbeard.automation.state.NextState;
 

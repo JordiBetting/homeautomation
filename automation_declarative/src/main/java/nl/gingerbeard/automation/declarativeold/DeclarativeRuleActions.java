@@ -1,4 +1,4 @@
-package nl.gingerbeard.automation.declarative;
+package nl.gingerbeard.automation.declarativeold;
 
 import java.util.ArrayList;
 import java.util.List;
