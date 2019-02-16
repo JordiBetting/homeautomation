@@ -18,6 +18,7 @@ import org.junit.jupiter.api.Test;
 
 import com.google.common.collect.Lists;
 
+import nl.gingerbeard.automation.devices.Device;
 import nl.gingerbeard.automation.devices.Switch;
 import nl.gingerbeard.automation.domoticz.transmitter.IDomoticzUpdateTransmitter;
 import nl.gingerbeard.automation.event.EventResult;
@@ -214,5 +215,22 @@ public class ControlloopTest {
 		control.alarmChanged(AlarmState.ARM_AWAY);
 
 		verify(events, times(1)).trigger(AlarmState.ARM_AWAY);
+	}
+
+	@Test
+	public void nextState_noUpdate_notTransmitted() throws IOException {
+		final Switch device = new Switch(1);
+		final NextState<OnOffState> nextState = new NextState<>(device, OnOffState.ON);
+
+		final IEvents events = mock(IEvents.class);
+		when(events.trigger(any(Device.class))).thenReturn(EventResult.of(nextState));
+
+		final IDomoticzUpdateTransmitter transmitter = mock(IDomoticzUpdateTransmitter.class);
+		final Controlloop control = new Controlloop(events, transmitter, new State(), mock(ILogger.class));
+
+		device.setState(OnOffState.ON);
+		control.statusChanged(device);
+
+		verify(transmitter, times(0)).transmitDeviceUpdate(nextState);
 	}
 }
