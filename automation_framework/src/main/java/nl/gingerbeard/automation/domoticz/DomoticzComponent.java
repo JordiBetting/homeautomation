@@ -3,6 +3,7 @@ package nl.gingerbeard.automation.domoticz;
 import java.util.Optional;
 
 import nl.gingerbeard.automation.deviceregistry.IDeviceRegistry;
+import nl.gingerbeard.automation.domoticz.clients.TimeOfDayClient;
 import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
 import nl.gingerbeard.automation.domoticz.receiver.IDomoticzEventReceiver;
 import nl.gingerbeard.automation.domoticz.transmitter.IDomoticzUpdateTransmitter;
