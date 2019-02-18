@@ -33,9 +33,9 @@ public class TimeOfDayTest {
 
 	@Test
 	public void timeofdayValues_toString() {
-		final TimeOfDayValues todv = new TimeOfDayValues(1, 2, 3);
+		final TimeOfDayValues todv = new TimeOfDayValues(1, 2, 3, 4, 5);
 
-		assertEquals("TimeOfDayValues [curtime=1, sunrise=2, sunset=3]", todv.toString());
+		assertEquals("TimeOfDayValues [curtime=1, sunrise=2, sunset=3, civilTwilightStart=4, civilTwilightEnd=5]", todv.toString());
 	}
 
 	@Test
@@ -48,8 +48,15 @@ public class TimeOfDayTest {
 	}
 
 	@Test
+	public void curtime() {
+		final TimeOfDayValues tod = new TimeOfDayValues(100, 99, 101, 99, 101);
+
+		assertEquals(100, tod.getCurtime());
+	}
+
+	@Test
 	public void timeofdayvalues_isDay() {
-		final TimeOfDayValues tod = new TimeOfDayValues(100, 99, 101);
+		final TimeOfDayValues tod = new TimeOfDayValues(100, 99, 101, 99, 101);
 
 		assertTrue(tod.isDayTime());
 		assertFalse(tod.isNightTime());
@@ -57,7 +64,7 @@ public class TimeOfDayTest {
 
 	@Test
 	public void timeOfDayValue_isNight_beforeSunrise() {
-		final TimeOfDayValues tod = new TimeOfDayValues(90, 100, 110);
+		final TimeOfDayValues tod = new TimeOfDayValues(90, 100, 110, 100, 110);
 
 		assertTrue(tod.isNightTime());
 		assertFalse(tod.isDayTime());
@@ -65,7 +72,7 @@ public class TimeOfDayTest {
 
 	@Test
 	public void timeOfDayValue_isNight_afterSunset() {
-		final TimeOfDayValues tod = new TimeOfDayValues(120, 100, 110);
+		final TimeOfDayValues tod = new TimeOfDayValues(120, 100, 110, 100, 110);
 
 		assertTrue(tod.isNightTime());
 		assertFalse(tod.isDayTime());
@@ -75,7 +82,7 @@ public class TimeOfDayTest {
 	public void timeOfDay_offsetDaytime() {
 		TimeOfDayValues tod;
 
-		tod = new TimeOfDayValues(125, 110, 120);
+		tod = new TimeOfDayValues(125, 110, 120, 110, 120);
 
 		assertFalse(tod.isDayTime());
 		assertTrue(tod.isDayTime(5));
@@ -86,11 +93,20 @@ public class TimeOfDayTest {
 	public void timeOfDay_offsetNighttime() {
 		TimeOfDayValues tod;
 
-		tod = new TimeOfDayValues(125, 100, 130);
+		tod = new TimeOfDayValues(125, 100, 130, 100, 130);
 
 		assertFalse(tod.isNightTime());
 		assertTrue(tod.isNightTime(-6));
 		assertFalse(tod.isNightTime(-5));
 	}
 
+	@Test
+	public void civilTwilightTest() {
+		final TimeOfDayValues tod = new TimeOfDayValues(1, 2, 3, 4, 5);
+
+		assertEquals(2, tod.getSunrise());
+		assertEquals(3, tod.getSunset());
+		assertEquals(4, tod.getCivilTwilightStart());
+		assertEquals(5, tod.getCivilTwilightEnd());
+	}
 }

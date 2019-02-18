@@ -175,7 +175,7 @@ public class ControlloopTest {
 
 		when(events.trigger(any())).thenReturn(EventResult.empty());
 
-		control.timeChanged(new TimeOfDayValues(5, 1, 10));
+		control.timeChanged(new TimeOfDayValues(5, 1, 10, 1, 10));
 
 		assertEquals(TimeOfDay.DAYTIME, state.getTimeOfDay());
 		verify(events, times(1)).trigger(any(TimeOfDay.class));

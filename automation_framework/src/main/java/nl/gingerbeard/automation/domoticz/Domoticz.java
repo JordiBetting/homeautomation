@@ -1,10 +1,12 @@
 package nl.gingerbeard.automation.domoticz;
 
+import java.io.IOException;
 import java.util.Locale;
 import java.util.Optional;
 
 import nl.gingerbeard.automation.deviceregistry.IDeviceRegistry;
 import nl.gingerbeard.automation.devices.Device;
+import nl.gingerbeard.automation.domoticz.clients.TimeOfDayClient;
 import nl.gingerbeard.automation.domoticz.receiver.DomoticzEventReceiverServer.EventReceived;
 import nl.gingerbeard.automation.logging.ILogger;
 import nl.gingerbeard.automation.state.AlarmState;
@@ -18,6 +20,7 @@ final class Domoticz implements EventReceived {
 	private final Optional<IDomoticzAlarmChanged> alarmListener;
 	private final ILogger logger;
 	private final IDeviceRegistry deviceRegistry;
+	private TimeOfDayClient timeOfDayClient;
 
 	// for testing
 	Domoticz(final IDeviceRegistry registry) {
@@ -31,12 +34,13 @@ final class Domoticz implements EventReceived {
 	}
 
 	public Domoticz(final Optional<IDomoticzDeviceStatusChanged> deviceListener, final Optional<IDomoticzTimeOfDayChanged> timeListener, final Optional<IDomoticzAlarmChanged> alarmListener,
-			final ILogger logger, final IDeviceRegistry deviceRegistry) {
+			final ILogger logger, final IDeviceRegistry deviceRegistry, final TimeOfDayClient timeOfDayClient) {
 		this.deviceListener = deviceListener;
 		this.timeListener = timeListener;
 		this.alarmListener = alarmListener;
 		this.logger = logger;
 		this.deviceRegistry = deviceRegistry;
+		this.timeOfDayClient = timeOfDayClient;
 	}
 
 	@Override
@@ -54,8 +58,13 @@ final class Domoticz implements EventReceived {
 
 	@Override
 	public boolean timeChanged(final int curtime, final int sunrise, final int sunset) {
-		if (timeListener.isPresent()) {
-			return timeListener.get().timeChanged(new TimeOfDayValues(curtime, sunrise, sunset));
+		try {
+			if (timeListener.isPresent()) {
+				final TimeOfDayValues timeOfDayValues = timeOfDayClient.createTimeOfDayValues(curtime, sunrise, sunset);
+				return timeListener.get().timeChanged(timeOfDayValues);
+			}
+		} catch (final IOException e) {
+			logger.exception(e, "Could not process time");
 		}
 
 		return false;

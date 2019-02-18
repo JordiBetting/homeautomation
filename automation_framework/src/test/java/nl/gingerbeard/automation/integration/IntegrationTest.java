@@ -27,7 +27,6 @@ public abstract class IntegrationTest {
 	@BeforeEach
 	public void start() throws IOException {
 		webserver = new TestWebServer();
-		webserver.setResponse(Status.OK, TestWebServer.JSON_OK);
 		webserver.start();
 
 		config = new DomoticzConfiguration(0, new URL("http://localhost:" + webserver.getListeningPort()));
@@ -59,10 +58,37 @@ public abstract class IntegrationTest {
 	}
 
 	private void sendRequest(final int curTime, final int sunrise, final int sunset) throws IOException {
+		final String uri = "/json.htm?type=command&param=getSunRiseSet";
+		webserver.setResponse(uri, Status.OK, createSunRiseSetResponse(sunrise, sunset));
+
 		final URL url = new URL("http://localhost:" + port + "/time/" + curTime + "/" + sunrise + "/" + sunset);
 		final HttpURLConnection con = (HttpURLConnection) url.openConnection();
 		con.setRequestMethod("GET");
 		assertEquals(200, con.getResponseCode(), "Status expected: 200 but was: " + con.getResponseCode() + ". Content: " + con.getContent());
+
+		webserver.forgetRequest("GET " + uri);
+	}
+
+	private String createSunRiseSetResponse(final int sunrise, final int sunset) {
+		return String.format("{ " //
+				+ "\"AstrTwilightEnd\" : \"19:51\", " //
+				+ "\"AstrTwilightStart\" : \"05:56\", " //
+				+ "\"CivTwilightEnd\" : \"%d:%d\", " /// FILLED
+				+ "\"CivTwilightStart\" : \"%d:%d\", " // FILLED
+				+ "\"DayLength\" : \"10:11\"," //
+				+ "\"NautTwilightEnd\" : \"19:13\"," //
+				+ "\"NautTwilightStart\" : \"06:35\"," //
+				+ "\"ServerTime\" : \"2019-02-18 19:46:13\"," //
+				+ "\"SunAtSouth\" : \"12:05\"," //
+				+ "\"Sunrise\" : \"07:48\"," //
+				+ "\"Sunset\" : \"17:59\"," //
+				+ "\"status\" : \"OK\"," //
+				+ "\"title\" : \"getSunRiseSet\"" //
+				+ "}", //
+				sunset / 60, //
+				sunset % 60, //
+				sunrise / 60, //
+				sunrise % 60);
 	}
 
 	protected void setDaytime() throws IOException {

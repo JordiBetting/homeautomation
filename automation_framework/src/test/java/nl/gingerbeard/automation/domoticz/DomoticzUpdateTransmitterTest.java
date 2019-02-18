@@ -124,7 +124,7 @@ public class DomoticzUpdateTransmitterTest {
 	public void errorResponse_throwsException() throws IOException {
 		final IDomoticzUpdateTransmitter transmitter = new DomoticzUpdateTransmitter(domoticzConfig, new TestLogger());
 		final Switch device = new Switch(1);
-		webserver.setResponse(Status.NOT_FOUND, TestWebServer.JSON_ERROR);
+		webserver.setDefaultResponse(Status.NOT_FOUND, TestWebServer.JSON_ERROR);
 
 		try {
 			transmitter.transmitDeviceUpdate(new NextState<>(device, OnOffState.ON));
@@ -138,7 +138,7 @@ public class DomoticzUpdateTransmitterTest {
 	public void domoticzError_exceptionThrown() {
 		final IDomoticzUpdateTransmitter transmitter = new DomoticzUpdateTransmitter(domoticzConfig, new TestLogger());
 		final Switch device = new Switch(1);
-		webserver.setResponse(Status.OK, TestWebServer.JSON_ERROR); // Domoticz does this apparently :-(
+		webserver.setDefaultResponse(Status.OK, TestWebServer.JSON_ERROR); // Domoticz does this apparently :-(
 
 		try {
 			transmitter.transmitDeviceUpdate(new NextState<>(device, OnOffState.ON));
@@ -152,7 +152,7 @@ public class DomoticzUpdateTransmitterTest {
 	public void malformedJSON_throwsException() {
 		final IDomoticzUpdateTransmitter transmitter = new DomoticzUpdateTransmitter(domoticzConfig, new TestLogger());
 		final Switch device = new Switch(1);
-		webserver.setResponse(Status.OK, TestWebServer.JSON_MALFORMED);
+		webserver.setDefaultResponse(Status.OK, TestWebServer.JSON_MALFORMED);
 
 		try {
 			transmitter.transmitDeviceUpdate(new NextState<>(device, OnOffState.ON));
