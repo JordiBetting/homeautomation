@@ -3,6 +3,7 @@ dependencies {
 	compile group: 'org.nanohttpd', name: 'nanohttpd', version: '2.3.1'
 	compile group: 'com.googlecode.json-simple', name: 'json-simple', version: '1.1.1'
 	compile group: 'org.reflections', name: 'reflections', version: '0.9.11'
+	implementation 'com.google.code.gson:gson:2.8.5'
 	compile project(':service')
 	compile project(':devices')
 	compile project(':logging')

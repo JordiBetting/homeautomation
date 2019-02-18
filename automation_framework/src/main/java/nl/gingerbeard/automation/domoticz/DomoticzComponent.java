@@ -3,6 +3,7 @@ package nl.gingerbeard.automation.domoticz;
 import java.util.Optional;
 
 import nl.gingerbeard.automation.deviceregistry.IDeviceRegistry;
+import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
 import nl.gingerbeard.automation.domoticz.receiver.IDomoticzEventReceiver;
 import nl.gingerbeard.automation.domoticz.transmitter.IDomoticzUpdateTransmitter;
 import nl.gingerbeard.automation.logging.ILogger;
@@ -36,11 +37,15 @@ public final class DomoticzComponent {
 	@Requires
 	public IDeviceRegistry deviceRegistry;
 
+	@Requires
+	public DomoticzConfiguration domoticzConfig;
+
 	private Domoticz domoticzInstance;
 
 	@Activate
 	public void registerReceiver() {
-		domoticzInstance = new Domoticz(deviceListener, timeListener, alarmListener, logger, deviceRegistry);
+		final TimeOfDayClient todClient = new TimeOfDayClient(domoticzConfig);
+		domoticzInstance = new Domoticz(deviceListener, timeListener, alarmListener, logger, deviceRegistry, todClient);
 		domoticzReceiver.setEventListener(domoticzInstance);
 	}
 
