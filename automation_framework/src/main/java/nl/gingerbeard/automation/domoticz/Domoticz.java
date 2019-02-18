@@ -58,8 +58,8 @@ final class Domoticz implements EventReceived {
 	@Override
 	public boolean timeChanged(final int curtime, final int sunrise, final int sunset) {
 		try {
-			final TimeOfDayValues timeOfDayValues = timeOfDayClient.createTimeOfDayValues(curtime, sunrise, sunset);
 			if (timeListener.isPresent()) {
+				final TimeOfDayValues timeOfDayValues = timeOfDayClient.createTimeOfDayValues(curtime, sunrise, sunset);
 				return timeListener.get().timeChanged(timeOfDayValues);
 			}
 		} catch (final IOException e) {

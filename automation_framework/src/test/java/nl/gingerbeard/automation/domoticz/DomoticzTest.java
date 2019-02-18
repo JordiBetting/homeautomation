@@ -25,6 +25,8 @@ import nl.gingerbeard.automation.devices.OnOffDevice;
 import nl.gingerbeard.automation.devices.StateDevice;
 import nl.gingerbeard.automation.devices.Switch;
 import nl.gingerbeard.automation.logging.ILogger;
+import nl.gingerbeard.automation.logging.LogLevel;
+import nl.gingerbeard.automation.logging.TestLogger;
 import nl.gingerbeard.automation.state.AlarmState;
 import nl.gingerbeard.automation.state.OnOffState;
 import nl.gingerbeard.automation.state.TimeOfDayValues;
@@ -211,4 +213,15 @@ public class DomoticzTest {
 		assertFalse(result);
 	}
 
+	@Test
+	public void getCivilTwilightFails_exceptionLogged() throws IOException {
+		final TestLogger logger = new TestLogger();
+		final TimeOfDayClient todClient = mock(TimeOfDayClient.class);
+		when(todClient.createTimeOfDayValues(anyInt(), anyInt(), anyInt())).thenThrow(new IOException("testing exception"));
+		final Domoticz domoticz = new Domoticz(Optional.empty(), Optional.of(mock(IDomoticzTimeOfDayChanged.class)), Optional.empty(), logger, registry, todClient);
+
+		domoticz.timeChanged(1, 2, 3);
+
+		logger.assertContains(LogLevel.EXCEPTION, "Could not process time");
+	}
 }
