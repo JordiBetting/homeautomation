@@ -5,7 +5,9 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import com.google.common.base.Charsets;
 import com.google.gson.Gson;
+import com.google.gson.annotations.SerializedName;
 
 import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
 import nl.gingerbeard.automation.state.TimeOfDayValues;
@@ -30,17 +32,19 @@ public class TimeOfDayClient {
 			throw new IOException("responsecode expected 200, but was: " + httpCode);
 		}
 
-		final GetSunRiseSet domoticzTime = gson.fromJson(new InputStreamReader(con.getInputStream()), GetSunRiseSet.class);
+		final GetSunRiseSet domoticzTime = gson.fromJson(new InputStreamReader(con.getInputStream(), Charsets.UTF_8), GetSunRiseSet.class);
 
 		// TODO: fully fill timeOfDayValues and provide as info to controllers.
-		final int civTwilightEnd = domoticzTime.getCivTwilightEnd();
-		final int civTwilightStart = domoticzTime.getCivTwilightStart();
+		final int civTwilightEnd = domoticzTime.getCivilTwilightEnd();
+		final int civTwilightStart = domoticzTime.getCivilTwilightStart();
 		return new TimeOfDayValues(curtime, sunrise, sunset, civTwilightStart, civTwilightEnd);
 	}
 
 	private static class GetSunRiseSet {
-		private String CivTwilightEnd;// " : "18:32",
-		private String CivTwilightStart;// " : "07:16",
+		@SerializedName("CivTwilightEnd")
+		private String civilTwilightEnd;
+		@SerializedName("CivTwilightStart")
+		private String civilTwilightStart;
 
 		@SuppressWarnings("unused") // used by Gson
 		public GetSunRiseSet() {
@@ -60,12 +64,12 @@ public class TimeOfDayClient {
 			}
 		}
 
-		public int getCivTwilightEnd() throws IOException {
-			return toMinutes(CivTwilightEnd);
+		public int getCivilTwilightEnd() throws IOException {
+			return toMinutes(civilTwilightEnd);
 		}
 
-		public int getCivTwilightStart() throws IOException {
-			return toMinutes(CivTwilightStart);
+		public int getCivilTwilightStart() throws IOException {
+			return toMinutes(civilTwilightStart);
 		}
 
 	}
