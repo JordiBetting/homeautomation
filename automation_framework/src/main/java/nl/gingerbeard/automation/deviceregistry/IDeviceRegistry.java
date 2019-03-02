@@ -17,4 +17,12 @@ public interface IDeviceRegistry {
 	 */
 	Optional<Device<?>> updateDevice(int idx, String newState);
 
+	/**
+	 * Returns true if a device with provided idx is present in the registry
+	 * 
+	 * @param idx
+	 * @return
+	 */
+	boolean devicePresent(int idx);
+
 }

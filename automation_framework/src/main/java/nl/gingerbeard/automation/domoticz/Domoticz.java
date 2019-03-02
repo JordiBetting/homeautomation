@@ -1,86 +1,79 @@
 package nl.gingerbeard.automation.domoticz;
 
 import java.io.IOException;
-import java.util.Locale;
 import java.util.Optional;
 
 import nl.gingerbeard.automation.deviceregistry.IDeviceRegistry;
-import nl.gingerbeard.automation.devices.Device;
 import nl.gingerbeard.automation.domoticz.clients.TimeOfDayClient;
 import nl.gingerbeard.automation.domoticz.receiver.DomoticzEventReceiverServer.EventReceived;
 import nl.gingerbeard.automation.logging.ILogger;
-import nl.gingerbeard.automation.state.AlarmState;
 import nl.gingerbeard.automation.state.TimeOfDayValues;
 
 // high - level access
 final class Domoticz implements EventReceived {
 
-	private final Optional<IDomoticzDeviceStatusChanged> deviceListener;
-	private final Optional<IDomoticzTimeOfDayChanged> timeListener;
-	private final Optional<IDomoticzAlarmChanged> alarmListener;
 	private final ILogger logger;
-	private final IDeviceRegistry deviceRegistry;
-	private TimeOfDayClient timeOfDayClient;
+	private final Optional<DomoticzThreadHandler> threadHandler;
+	private final TimeOfDayClient timeOfDayClient;
 
 	// for testing
 	Domoticz(final IDeviceRegistry registry) {
 		super();
 		logger = (t, level, message) -> {
 		};
-		deviceListener = Optional.empty();
-		timeListener = Optional.empty();
-		alarmListener = Optional.empty();
-		deviceRegistry = registry;
+		threadHandler = Optional.empty();
+		timeOfDayClient = null;
 	}
 
-	public Domoticz(final Optional<IDomoticzDeviceStatusChanged> deviceListener, final Optional<IDomoticzTimeOfDayChanged> timeListener, final Optional<IDomoticzAlarmChanged> alarmListener,
-			final ILogger logger, final IDeviceRegistry deviceRegistry, final TimeOfDayClient timeOfDayClient) {
-		this.deviceListener = deviceListener;
-		this.timeListener = timeListener;
-		this.alarmListener = alarmListener;
+	public Domoticz(final ILogger logger, final DomoticzThreadHandler threadHandler, final TimeOfDayClient timeOfDayClient) {
 		this.logger = logger;
-		this.deviceRegistry = deviceRegistry;
+		this.threadHandler = Optional.of(threadHandler);
 		this.timeOfDayClient = timeOfDayClient;
 	}
 
 	@Override
 	public boolean deviceChanged(final int idx, final String newState) {
-		final Optional<Device<?>> device = deviceRegistry.updateDevice(idx, newState);
-		if (device.isPresent()) {
-			logger.debug("Device with idx " + idx + " changed state into: " + newState);
-			final Device<?> changedDevice = device.get();
-			deviceListener.ifPresent((listener) -> listener.statusChanged(changedDevice));
-			return true;
+		boolean success = false;
+		if (threadHandler.isPresent() && threadHandler.get().handlesDevice(idx)) {
+			try {
+				threadHandler.get().deviceChanged(idx, newState);
+				success = true;
+			} catch (final InterruptedException e) {
+				logger.warning(e, "Interrupted while updating device");
+			}
+		} else {
+			logger.debug("Received update for unknown device with idx: " + idx);
 		}
-		logger.debug("Received update for unknown device with idx: " + idx);
-		return false;
+		return success;
 	}
 
 	@Override
 	public boolean timeChanged(final int curtime, final int sunrise, final int sunset) {
-		try {
-			if (timeListener.isPresent()) {
+		boolean success = false;
+		if (threadHandler.isPresent() && threadHandler.get().handlesTime()) {
+			try {
 				final TimeOfDayValues timeOfDayValues = timeOfDayClient.createTimeOfDayValues(curtime, sunrise, sunset);
-				return timeListener.get().timeChanged(timeOfDayValues);
+				threadHandler.get().timeChanged(timeOfDayValues);
+				success = true;
+			} catch (final IOException | InterruptedException e) {
+				logger.warning(e, "Failed retrieving time of day values");
 			}
-		} catch (final IOException e) {
-			logger.exception(e, "Could not process time");
 		}
-
-		return false;
+		return success;
 	}
 
 	@Override
 	public boolean alarmChanged(final String alarmState) {
-		if (alarmListener.isPresent()) {
-			final AlarmState alarm = getAlarmStateByString(alarmState);
-			return alarmListener.get().alarmChanged(alarm);
+		boolean success = false;
+		if (threadHandler.isPresent() && threadHandler.get().handlesAlarm()) {
+			try {
+				threadHandler.get().alarmChanged(alarmState);
+				success = true;
+			} catch (final InterruptedException e) {
+				logger.warning(e, "Interrupted while changing alarm state");
+			}
 		}
-		return false;
+		return success;
 	}
 
-	private AlarmState getAlarmStateByString(final String alarmStateString) {
-		final String ucState = alarmStateString.toUpperCase(Locale.US);
-		return AlarmState.valueOf(ucState);
-	}
 }

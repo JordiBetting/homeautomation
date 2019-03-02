@@ -82,14 +82,13 @@ class Controlloop implements IDomoticzDeviceStatusChanged, IDomoticzTimeOfDayCha
 	}
 
 	@Override
-	public boolean timeChanged(final TimeOfDayValues time) {
+	public void timeChanged(final TimeOfDayValues time) {
 		final TimeOfDay prevTod = state.getTimeOfDay();
 		updateTimeState(time);
 		if (state.getTimeOfDay() != prevTod) {
 			final EventResult result = events.trigger(state.getTimeOfDay());
 			processEventResult(result);
 		}
-		return true;
 	}
 
 	private void updateTimeState(final TimeOfDayValues time) {
@@ -98,14 +97,13 @@ class Controlloop implements IDomoticzDeviceStatusChanged, IDomoticzTimeOfDayCha
 	}
 
 	@Override
-	public boolean alarmChanged(final AlarmState newState) {
+	public void alarmChanged(final AlarmState newState) {
 		final AlarmState curState = state.getAlarmState();
 		if (curState != newState) {
 			state.setAlarmState(newState);
 			final EventResult results = events.trigger(state.getAlarmState());
 			processEventResult(results);
 		}
-		return true;
 	}
 
 }

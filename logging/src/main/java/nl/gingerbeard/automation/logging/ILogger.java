@@ -25,4 +25,8 @@ public interface ILogger {
 	default void exception(final Throwable t, final String message) {
 		log(Optional.of(t), LogLevel.EXCEPTION, message);
 	}
+
+	default void warning(final Throwable t, final String message) {
+		log(Optional.of(t), LogLevel.WARNING, message);
+	}
 }

@@ -82,4 +82,16 @@ public class LoggingTest {
 		assertEquals("EXCEPTION exception message", logOutput.logs.get(0));
 		assertEquals("EXCEPTION blaat", logOutput.logs.get(1));
 	}
+
+	@Test
+	public void logException_asWarning() {
+		final LogRecorder logOutput = new LogRecorder();
+		final ILogger logging = new Logging(Optional.of(logOutput));
+
+		logging.warning(new NullPointerException("blaat"), "exception message");
+
+		assertEquals(2, logOutput.logs.size());
+		assertEquals("WARNING exception message", logOutput.logs.get(0));
+		assertEquals("WARNING blaat", logOutput.logs.get(1));
+	}
 }
