@@ -10,6 +10,7 @@ import nl.gingerbeard.automation.domoticz.transmitter.IDomoticzUpdateTransmitter
 import nl.gingerbeard.automation.logging.ILogger;
 import nl.gingerbeard.automation.service.annotation.Activate;
 import nl.gingerbeard.automation.service.annotation.Deactivate;
+import nl.gingerbeard.automation.service.annotation.Provides;
 import nl.gingerbeard.automation.service.annotation.Requires;
 
 public final class DomoticzComponent {
@@ -43,7 +44,8 @@ public final class DomoticzComponent {
 
 	private Domoticz domoticzInstance;
 
-	private DomoticzThreadHandler threadHandler;
+	@Provides
+	public DomoticzThreadHandler threadHandler;
 
 	@Activate
 	public void registerReceiver() {

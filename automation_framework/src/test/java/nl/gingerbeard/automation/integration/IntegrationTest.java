@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Optional;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,6 +13,7 @@ import org.junit.jupiter.api.BeforeEach;
 import fi.iki.elonen.NanoHTTPD.Response.Status;
 import nl.gingerbeard.automation.AutomationFrameworkContainer;
 import nl.gingerbeard.automation.IAutomationFrameworkInterface;
+import nl.gingerbeard.automation.domoticz.DomoticzThreadHandler;
 import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
 import nl.gingerbeard.automation.domoticz.helpers.TestWebServer;
 import nl.gingerbeard.automation.logging.TestLogger.LogOutputToTestLogger;
@@ -35,6 +37,8 @@ public abstract class IntegrationTest {
 
 		port = config.getListenPort();
 		automation = container.getRuntime().getService(IAutomationFrameworkInterface.class).get();
+		final Optional<DomoticzThreadHandler> threadHandler = container.getRuntime().getService(DomoticzThreadHandler.class);
+		threadHandler.ifPresent((th) -> th.setSynchronous());
 	}
 
 	@AfterEach

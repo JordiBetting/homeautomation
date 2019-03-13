@@ -171,6 +171,7 @@ public class DomoticzTest {
 		final IDomoticzAlarmChanged listener = mock(IDomoticzAlarmChanged.class);
 		final ILogger log = mock(ILogger.class);
 		final DomoticzThreadHandler threadHandler = new DomoticzThreadHandler(log, registry);
+		threadHandler.setSynchronous();
 		final Domoticz domoticz = new Domoticz(log, threadHandler, null);
 		threadHandler.setAlarmListener(Optional.of(listener));
 
@@ -192,17 +193,17 @@ public class DomoticzTest {
 	}
 
 	@Test
-	public void getCivilTwilightFails_exceptionLogged() throws IOException {
+	public void getCivilTwilightFails_warningLogged() throws IOException {
 		final TestLogger logger = new TestLogger();
 		final TimeOfDayClient todClient = mock(TimeOfDayClient.class);
 		when(todClient.createTimeOfDayValues(anyInt(), anyInt(), anyInt())).thenThrow(new IOException("testing exception"));
-		final ILogger log = mock(ILogger.class);
-		final DomoticzThreadHandler threadHandler = new DomoticzThreadHandler(log, registry);
+		final DomoticzThreadHandler threadHandler = new DomoticzThreadHandler(logger, registry);
 		threadHandler.setSynchronous();
-		final Domoticz domoticz = new Domoticz(log, threadHandler, todClient);
+		threadHandler.setTimeListener(Optional.of(mock(IDomoticzTimeOfDayChanged.class)));
+		final Domoticz domoticz = new Domoticz(logger, threadHandler, todClient);
 
 		domoticz.timeChanged(1, 2, 3);
 
-		logger.assertContains(LogLevel.EXCEPTION, "Could not process time");
+		logger.assertContains(LogLevel.WARNING, "Failed retrieving time of day values");
 	}
 }
