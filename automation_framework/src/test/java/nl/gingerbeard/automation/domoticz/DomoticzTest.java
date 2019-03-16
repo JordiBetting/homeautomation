@@ -206,4 +206,9 @@ public class DomoticzTest {
 
 		logger.assertContains(LogLevel.WARNING, "Failed retrieving time of day values");
 	}
+
+	@Test
+	public void updateMissingDevice() {
+
+	}
 }

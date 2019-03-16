@@ -6,6 +6,8 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 
+import com.google.common.base.Preconditions;
+
 import nl.gingerbeard.automation.deviceregistry.IDeviceRegistry;
 import nl.gingerbeard.automation.devices.Device;
 import nl.gingerbeard.automation.logging.ILogger;
@@ -66,6 +68,7 @@ public class DomoticzThreadHandler {
 	}
 
 	public void deviceChanged(final int idx, final String newState) throws InterruptedException {
+		Preconditions.checkArgument(newState != null);
 		execute(() -> {
 			final Optional<Device<?>> device = deviceRegistry.updateDevice(idx, newState);
 			if (device.isPresent()) {
@@ -77,6 +80,7 @@ public class DomoticzThreadHandler {
 	}
 
 	public void timeChanged(final TimeOfDayValues timeOfDayValues) throws InterruptedException {
+		Preconditions.checkArgument(timeOfDayValues != null);
 		execute(() -> {
 			timeListener.ifPresent((listener) -> listener.timeChanged(timeOfDayValues));
 		});
