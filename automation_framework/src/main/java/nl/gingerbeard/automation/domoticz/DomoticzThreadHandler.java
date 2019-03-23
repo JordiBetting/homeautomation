@@ -5,6 +5,7 @@ import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import com.google.common.base.Preconditions;
 
@@ -21,7 +22,7 @@ public class DomoticzThreadHandler {
 	private final IDeviceRegistry deviceRegistry;
 	private final ThreadPoolExecutor executor;
 	private final ILogger logger;
-	private volatile boolean async = true;
+	private volatile boolean isSynchronous = false;
 
 	public DomoticzThreadHandler(final ILogger logger, final IDeviceRegistry deviceRegistry) {
 		this.logger = logger;
@@ -62,7 +63,7 @@ public class DomoticzThreadHandler {
 			sync.countDown();
 		});
 
-		if (!async) {
+		if (isSynchronous) {
 			sync.await();
 		}
 	}
@@ -102,7 +103,11 @@ public class DomoticzThreadHandler {
 	 * By default, this class handles all events asynchronuos, by calling this method, all will be handled synchronously
 	 */
 	public void setSynchronous() {
-		async = false;
+		isSynchronous = true;
 	}
 
+	public void stop(final long timeout, final TimeUnit unit) throws InterruptedException {
+		executor.shutdown();
+		executor.awaitTermination(timeout, unit);
+	}
 }
