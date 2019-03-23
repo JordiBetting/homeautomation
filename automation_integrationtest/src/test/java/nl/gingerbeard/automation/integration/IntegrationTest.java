@@ -16,8 +16,8 @@ import nl.gingerbeard.automation.AutomationFrameworkContainer;
 import nl.gingerbeard.automation.IAutomationFrameworkInterface;
 import nl.gingerbeard.automation.domoticz.DomoticzThreadHandler;
 import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
-import nl.gingerbeard.automation.domoticz.helpers.TestWebServer;
 import nl.gingerbeard.automation.logging.TestLogger.LogOutputToTestLogger;
+import nl.gingerbeard.automation.testutils.TestWebServer;
 
 public abstract class IntegrationTest {
 

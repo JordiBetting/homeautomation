@@ -1,4 +1,4 @@
-package nl.gingerbeard.automation.domoticz.helpers;
+package nl.gingerbeard.automation.testutils;
 
 import java.util.ArrayList;
 import java.util.HashMap;

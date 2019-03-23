@@ -11,8 +11,8 @@ import org.junit.jupiter.api.Test;
 
 import fi.iki.elonen.NanoHTTPD.Response.Status;
 import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
-import nl.gingerbeard.automation.domoticz.helpers.TestWebServer;
 import nl.gingerbeard.automation.state.TimeOfDayValues;
+import nl.gingerbeard.automation.testutils.TestWebServer;
 
 public class TimeOfDayClientTest {
 
