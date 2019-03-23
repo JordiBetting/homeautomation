@@ -1,13 +1,17 @@
 package nl.gingerbeard.automation.autocontrol;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.annotation.Annotation;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import nl.gingerbeard.automation.autocontrol.AutoControl.AutoControlOutputListener;
 import nl.gingerbeard.automation.devices.Switch;
 import nl.gingerbeard.automation.event.annotations.Subscribe;
 import nl.gingerbeard.automation.state.NextState;
@@ -17,10 +21,29 @@ public class AutoControlTest {
 
 	private Switch sensor1, sensor2, actuator;
 	private AutoControl autoControl;
+	private TestListener listener;
+
+	private static class TestListener implements AutoControlOutputListener {
+
+		private Optional<List<NextState<OnOffState>>> output = Optional.empty();
+
+		@Override
+		public void outputChanged(final List<NextState<OnOffState>> output) {
+			this.output = Optional.of(output);
+		}
+
+		public Optional<List<NextState<OnOffState>>> getAndClearOutput() {
+			final Optional<List<NextState<OnOffState>>> out = output;
+			output = Optional.empty();
+			return out;
+		}
+
+	}
 
 	@BeforeEach
 	public void initSensorsActuators() {
-		autoControl = new AutoControl();
+		listener = new TestListener();
+		autoControl = new AutoControl(listener);
 		sensor1 = new Switch(1);
 		sensor2 = new Switch(2);
 		actuator = new Switch(3);
@@ -42,18 +65,20 @@ public class AutoControlTest {
 	}
 
 	private void triggerAutoControl(final Switch sensor) {
-		final List<NextState<OnOffState>> output = autoControl.switchChanged(sensor);
-		for (final NextState<OnOffState> next : output) {
+		final List<NextState<OnOffState>> out = triggerAutoControlAndGetResult(sensor);
+		for (final NextState<OnOffState> next : out) {
 			next.getDevice().setState(next.get());
 		}
 	}
 
-	// private void assertOutput(final List<NextState<?>> output, final OnOffState expectedOutput) {
-	// assertEquals(1, output.size());
-	// final NextState<?> outputState = output.get(0);
-	// assertEquals(actuator, outputState.getDevice());
-	// assertEquals(expectedOutput, outputState.get());
-	// }
+	private List<NextState<OnOffState>> triggerAutoControlAndGetResult(final Switch sensor) {
+		autoControl.switchChanged(sensor);
+
+		final Optional<List<NextState<OnOffState>>> output = listener.getAndClearOutput();
+		assertTrue(output.isPresent());
+
+		return output.get();
+	}
 
 	@Test
 	public void switchChanged_noActuator_emptyList() {
@@ -61,7 +86,7 @@ public class AutoControlTest {
 		autoControl.addSensor(sensor1);
 
 		sensor1.setState(OnOffState.ON);
-		final List<NextState<OnOffState>> output = autoControl.switchChanged(sensor1);
+		final List<NextState<OnOffState>> output = triggerAutoControlAndGetResult(sensor1);
 
 		assertEquals(0, output.size());
 	}
@@ -104,9 +129,19 @@ public class AutoControlTest {
 	public void unknownDeviceUpdated_noOutput() {
 		autoControl.addSensor(sensor1);
 
-		final List<NextState<OnOffState>> switchChanged = autoControl.switchChanged(new Switch(666));
+		autoControl.switchChanged(new Switch(666));
 
-		assertEquals(0, switchChanged.size());
+		assertFalse(listener.getAndClearOutput().isPresent());
 	}
 
+	// @Test
+	// public void delayedExecution() {
+	// autoControl.addSensor(sensor1);
+	// autoControl.addActuator(actuator);
+	//
+	// autoControl.setDelayedOff(1, TimeUnit.SECONDS);
+	//
+	// sensor1.setState(OnOffState.ON);
+	//
+	// }
 }
