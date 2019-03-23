@@ -1,4 +1,4 @@
-package nl.gingerbeard.automation.autocontrol;
+package nl.gingerbeard.automation.autocontrol.timer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -13,6 +13,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.junit.jupiter.api.Test;
+
+import nl.gingerbeard.automation.autocontrol.timer.AutoControlTimer;
 
 public class AutoControlTimerTest {
 

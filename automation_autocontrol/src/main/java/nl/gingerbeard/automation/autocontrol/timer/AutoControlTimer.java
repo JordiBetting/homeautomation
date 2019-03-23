@@ -1,4 +1,4 @@
-package nl.gingerbeard.automation.autocontrol;
+package nl.gingerbeard.automation.autocontrol.timer;
 
 import java.util.Timer;
 import java.util.TimerTask;
