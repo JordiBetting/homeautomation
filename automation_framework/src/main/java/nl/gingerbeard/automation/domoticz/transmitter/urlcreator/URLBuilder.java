@@ -13,10 +13,15 @@ public final class URLBuilder {
 
 	private final StringBuilder url;
 
-	public URLBuilder(final DomoticzConfiguration config) {
+	// for testing
+	URLBuilder(final String baseUrl) {
 		url = new StringBuilder();
-		url.append(config.getBaseURL());
+		url.append(baseUrl);
 		url.append("/json.htm?");
+	}
+
+	public URLBuilder(final DomoticzConfiguration config) {
+		this(config.getBaseURL().toString());
 	}
 
 	public URLBuilder addIdx(final NextState<?> nextState) {
@@ -32,7 +37,6 @@ public final class URLBuilder {
 		try {
 			return new URL(fullUrlString);
 		} catch (final MalformedURLException e) {
-			// Tried to cover this scenario by testing, but all surrounding code ensures that this will never happen.
 			return null;
 		}
 	}
