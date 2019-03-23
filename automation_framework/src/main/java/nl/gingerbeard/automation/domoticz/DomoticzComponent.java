@@ -10,6 +10,7 @@ import nl.gingerbeard.automation.domoticz.transmitter.IDomoticzUpdateTransmitter
 import nl.gingerbeard.automation.logging.ILogger;
 import nl.gingerbeard.automation.service.annotation.Activate;
 import nl.gingerbeard.automation.service.annotation.Deactivate;
+import nl.gingerbeard.automation.service.annotation.Provides;
 import nl.gingerbeard.automation.service.annotation.Requires;
 
 public final class DomoticzComponent {
@@ -43,16 +44,29 @@ public final class DomoticzComponent {
 
 	private Domoticz domoticzInstance;
 
+	@Provides
+	public DomoticzThreadHandler threadHandler;
+
 	@Activate
 	public void registerReceiver() {
+		threadHandler = createThreadHandler();
 		final TimeOfDayClient todClient = new TimeOfDayClient(domoticzConfig);
-		domoticzInstance = new Domoticz(deviceListener, timeListener, alarmListener, logger, deviceRegistry, todClient);
+		domoticzInstance = new Domoticz(logger, threadHandler, todClient);
 		domoticzReceiver.setEventListener(domoticzInstance);
+	}
+
+	private DomoticzThreadHandler createThreadHandler() {
+		final DomoticzThreadHandler threadHandler = new DomoticzThreadHandler(logger, deviceRegistry);
+		threadHandler.setAlarmListener(alarmListener);
+		threadHandler.setDeviceListener(deviceListener);
+		threadHandler.setTimeListener(timeListener);
+		return threadHandler;
 	}
 
 	@Deactivate
 	public void unregisterReceiver() {
 		domoticzReceiver.setEventListener(null);
 		domoticzInstance = null;
+		threadHandler = null;
 	}
 }

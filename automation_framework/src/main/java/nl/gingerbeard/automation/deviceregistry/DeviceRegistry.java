@@ -57,4 +57,9 @@ public final class DeviceRegistry implements IDeviceRegistry {
 		return Optional.empty();
 	}
 
+	@Override
+	public boolean devicePresent(final int idx) {
+		return deviceGroups.get(idx) != null;
+	}
+
 }

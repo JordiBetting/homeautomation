@@ -5,11 +5,11 @@ import nl.gingerbeard.automation.state.TimeOfDayValues;
 public interface IDomoticzTimeOfDayChanged {
 	/**
 	 * All in units since start of day.
-	 * 
+	 *
 	 * @param currentTime
 	 * @param sunrise
 	 * @param sunset
 	 * @return if update was successful
 	 */
-	boolean timeChanged(TimeOfDayValues time);
+	void timeChanged(TimeOfDayValues time);
 }

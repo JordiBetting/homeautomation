@@ -1,14 +1,15 @@
 package nl.gingerbeard.automation.deviceregistry;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import nl.gingerbeard.automation.deviceregistry.DeviceRegistry;
 import nl.gingerbeard.automation.devices.Device;
 import nl.gingerbeard.automation.devices.Switch;
 import nl.gingerbeard.automation.state.OnOffState;
@@ -123,5 +124,28 @@ public class DeviceRegistryTest {
 
 		assertEquals(3, registry.getAllDevices().size());
 		assertEquals(2, registry.getUniqueDeviceCount());
+	}
+
+	@Test
+	public void addDevice_devicePresent_true() {
+		final Switch testDevice = new Switch(42);
+
+		registry.addDevice(testDevice);
+
+		assertTrue(registry.devicePresent(42));
+	}
+
+	@Test
+	public void noDevice_devicePresent_false() {
+		assertFalse(registry.devicePresent(42));
+	}
+
+	@Test
+	public void addDeviceCheckOther_devicePresent_false() {
+		final Switch testDevice = new Switch(42);
+
+		registry.addDevice(testDevice);
+
+		assertFalse(registry.devicePresent(66));
 	}
 }
