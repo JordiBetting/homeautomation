@@ -52,7 +52,7 @@ public final class OnOffAutoControl<DeviceType extends Device<StateType>, StateT
 	}
 
 	private void reportResults(final List<NextState<OutputType>> output, final OutputType actuatorState) {
-		final long delay = actuatorState == inputOn ? 0L : delayMs;
+		final long delay = actuatorState == outputOn ? 0L : delayMs;
 		timer.executeDelayed(() -> updateActuators(toGeneric(output)), delay);
 	}
 
