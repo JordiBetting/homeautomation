@@ -1,4 +1,4 @@
-package nl.gingerbeard.automation.autocontrol;
+package nl.gingerbeard.automation;
 
 import java.util.List;
 

@@ -1,4 +1,4 @@
-package nl.gingerbeard.automation.autocontrol.controls;
+package nl.gingerbeard.automation.autocontrol;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -13,8 +13,7 @@ import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import nl.gingerbeard.automation.autocontrol.AutoControlListener;
-import nl.gingerbeard.automation.autocontrol.controls.OnOffAutoControl;
+import nl.gingerbeard.automation.AutoControlListener;
 import nl.gingerbeard.automation.devices.Switch;
 import nl.gingerbeard.automation.event.annotations.Subscribe;
 import nl.gingerbeard.automation.state.NextState;

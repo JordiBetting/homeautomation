@@ -1,4 +1,4 @@
-package nl.gingerbeard.automation.autocontrol;
+package nl.gingerbeard.automation;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
@@ -11,6 +11,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
+import nl.gingerbeard.automation.devices.Device;
 import nl.gingerbeard.automation.state.NextState;
 import nl.gingerbeard.automation.state.OnOffState;
 
@@ -20,6 +21,11 @@ public class AutoControlTest {
 
 		void triggerListener(final List<NextState<OnOffState>> updates) {
 			super.updateActuators(updates);
+		}
+
+		@Override
+		protected List<Device<?>> getDevices() {
+			return null;
 		}
 	}
 
@@ -37,6 +43,7 @@ public class AutoControlTest {
 	@Test
 	public void noListener_noException() {
 		final TestAutoControl control = new TestAutoControl();
+
 		assertDoesNotThrow(() -> //
 		control.triggerListener(new ArrayList<>())//
 		);

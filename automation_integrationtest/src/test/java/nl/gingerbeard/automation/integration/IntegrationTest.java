@@ -1,6 +1,7 @@
 package nl.gingerbeard.automation.integration;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -38,7 +39,8 @@ public abstract class IntegrationTest {
 		port = config.getListenPort();
 		automation = container.getRuntime().getService(IAutomationFrameworkInterface.class).get();
 		final Optional<DomoticzThreadHandler> threadHandler = container.getRuntime().getService(DomoticzThreadHandler.class);
-		threadHandler.ifPresent((th) -> th.setSynchronous());
+		assertTrue(threadHandler.isPresent());
+		threadHandler.get().setSynchronous();
 	}
 
 	@AfterEach

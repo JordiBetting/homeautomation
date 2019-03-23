@@ -16,22 +16,32 @@ public class AutomationFramework implements IAutomationFrameworkInterface {
 
 	private final IEvents events;
 	private final IDeviceRegistry deviceRegistry;
+	private final AutoControlToDomoticz autoControlToDomoticz;
 	private final State state;
 
-	public AutomationFramework(final IEvents events, final IDeviceRegistry deviceRegistry, final State state) {
+	public AutomationFramework(final IEvents events, final IDeviceRegistry deviceRegistry, final State state, final AutoControlToDomoticz autoControlToDomoticz) {
 		this.events = events;
 		this.deviceRegistry = deviceRegistry;
 		this.state = state;
+		this.autoControlToDomoticz = autoControlToDomoticz;
 	}
 
 	@Override
 	public void addRoom(final Room room) {
 		Preconditions.checkArgument(room != null, "Please provide a non-null room");
 		room.setState(state);
-		for (final IDevice<?> device : room.getDevices()) {
-			addDevice(device);
-		}
+		room.getDevices().stream().forEach((device) -> addDevice(device));
+		room.getAutoControls().stream().forEach((autoControl) -> {
+			addAutoControl(autoControl);
+			autoControl.getDevices().forEach((device) -> addDevice(device));
+			events.subscribe(autoControl);
+		});
 		events.subscribe(room);
+
+	}
+
+	private void addAutoControl(final AutoControl autoControl) {
+		autoControl.setListener(autoControlToDomoticz);
 	}
 
 	private void addDevice(final IDevice<?> device) {
@@ -63,7 +73,5 @@ public class AutomationFramework implements IAutomationFrameworkInterface {
 		Preconditions.checkArgument(rooms != null, "addRooms() shall be passed a non-null array");
 		Arrays.stream(rooms).forEach((room) -> addRoom(room));
 	}
-
-	// TODO: Add synchronization method to ensure devices are not updated while processing an update, etc. Consider grouping events that come in right after each other.
 
 }

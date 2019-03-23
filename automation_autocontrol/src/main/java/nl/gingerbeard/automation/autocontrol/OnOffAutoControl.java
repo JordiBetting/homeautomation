@@ -1,4 +1,4 @@
-package nl.gingerbeard.automation.autocontrol.controls;
+package nl.gingerbeard.automation.autocontrol;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -6,8 +6,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import nl.gingerbeard.automation.autocontrol.AutoControl;
+import nl.gingerbeard.automation.AutoControl;
 import nl.gingerbeard.automation.autocontrol.timer.AutoControlTimer;
+import nl.gingerbeard.automation.devices.Device;
 import nl.gingerbeard.automation.devices.Switch;
 import nl.gingerbeard.automation.event.annotations.Subscribe;
 import nl.gingerbeard.automation.state.NextState;
@@ -69,6 +70,14 @@ public final class OnOffAutoControl extends AutoControl {
 
 	public void setDelayedOff(final long delay, final TimeUnit unit) {
 		delayMs = unit.toMillis(delay);
+	}
+
+	@Override
+	protected List<Device<?>> getDevices() {
+		final List<Device<?>> devices = new ArrayList<>();
+		devices.addAll(sensors.values());
+		devices.addAll(actuators);
+		return devices;
 	}
 
 }

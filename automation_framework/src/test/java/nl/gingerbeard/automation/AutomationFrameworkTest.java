@@ -360,7 +360,7 @@ public class AutomationFrameworkTest {
 	@Test
 	public void compositeTest_allDevicesAdded() {
 		final DeviceRegistry registry = new DeviceRegistry();
-		final IAutomationFrameworkInterface framework = new AutomationFramework(mock(IEvents.class), registry, new State());
+		final IAutomationFrameworkInterface framework = new AutomationFramework(mock(IEvents.class), registry, new State(), mock(AutoControlToDomoticz.class));
 
 		framework.addRoom(new ThermostatRoom());
 
@@ -405,7 +405,7 @@ public class AutomationFrameworkTest {
 
 	@Test
 	public void addUnsupportedDevice_throwsException() {
-		final IAutomationFrameworkInterface framework = new AutomationFramework(mock(IEvents.class), mock(IDeviceRegistry.class), new State());
+		final IAutomationFrameworkInterface framework = new AutomationFramework(mock(IEvents.class), mock(IDeviceRegistry.class), new State(), mock(AutoControlToDomoticz.class));
 		assertThrows(UnsupportedOperationException.class, () -> framework.addRoom(new RoomWithFakeDevice()));
 	}
 
@@ -484,6 +484,5 @@ public class AutomationFrameworkTest {
 		assertEquals(TimeOfDay.DAYTIME, stateroom.getState().getTimeOfDay());
 		state.setTimeOfDay(TimeOfDay.NIGHTTIME);
 		assertEquals(TimeOfDay.NIGHTTIME, stateroom.getState().getTimeOfDay());
-
 	}
 }
