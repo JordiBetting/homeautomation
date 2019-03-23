@@ -21,6 +21,8 @@ public final class AutoControl extends Room {
 	private final Map<Integer, Switch> sensors = new HashMap<>();
 	private final List<Switch> actuators = new ArrayList<>();
 	private final AutoControlOutputListener listener;
+	private long delayMs = 0;
+	private final AutoControlTimer timer = new AutoControlTimer();
 
 	public AutoControl(final AutoControlOutputListener listener) {
 		this.listener = listener;
@@ -44,7 +46,12 @@ public final class AutoControl extends Room {
 	private void sensorChanged() {
 		final OnOffState actuatorState = determineActuatorState();
 		final ArrayList<NextState<OnOffState>> output = createOutput(actuatorState);
-		listener.outputChanged(output);
+		reportResults(output, actuatorState);
+	}
+
+	private void reportResults(final ArrayList<NextState<OnOffState>> output, final OnOffState actuatorState) {
+		final long delay = actuatorState == OnOffState.ON ? 0L : delayMs;
+		timer.executeDelayed(() -> listener.outputChanged(output), delay);
 	}
 
 	private ArrayList<NextState<OnOffState>> createOutput(final OnOffState actuatorState) {
@@ -68,9 +75,8 @@ public final class AutoControl extends Room {
 		return OnOffState.OFF;
 	}
 
-	public void setDelayedOff(final int delay, final TimeUnit unit) {
-		// TODO Auto-generated method stub
-
+	public void setDelayedOff(final long delay, final TimeUnit unit) {
+		delayMs = unit.toMillis(delay);
 	}
 
 }

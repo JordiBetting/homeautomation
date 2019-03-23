@@ -1,12 +1,14 @@
 package nl.gingerbeard.automation.autocontrol;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,16 +28,47 @@ public class AutoControlTest {
 	private static class TestListener implements AutoControlOutputListener {
 
 		private Optional<List<NextState<OnOffState>>> output = Optional.empty();
+		private final Optional<CountDownLatch> triggerLatch;
+
+		private TestListener() {
+			triggerLatch = Optional.empty();
+		}
+
+		private TestListener(final CountDownLatch triggerLatch) {
+			this.triggerLatch = Optional.of(triggerLatch);
+
+		}
 
 		@Override
 		public void outputChanged(final List<NextState<OnOffState>> output) {
 			this.output = Optional.of(output);
+			if (triggerLatch.isPresent()) {
+				triggerLatch.get().countDown();
+			}
 		}
 
 		public Optional<List<NextState<OnOffState>>> getAndClearOutput() {
 			final Optional<List<NextState<OnOffState>>> out = output;
-			output = Optional.empty();
+			reset();
 			return out;
+		}
+
+		private void reset() {
+			output = Optional.empty();
+		}
+
+		public void assertActuatorUnchanged() {
+			if (output.isPresent()) {
+				fail("Expected no output, but output was: " + output.get());
+			}
+			reset();
+		}
+
+		public void assertActuatorChanged() {
+			if (!output.isPresent()) {
+				fail("Expected output to be present, but no output was received");
+			}
+			reset();
 		}
 
 	}
@@ -131,17 +164,55 @@ public class AutoControlTest {
 
 		autoControl.switchChanged(new Switch(666));
 
-		assertFalse(listener.getAndClearOutput().isPresent());
+		listener.assertActuatorUnchanged();
 	}
 
-	// @Test
-	// public void delayedExecution() {
-	// autoControl.addSensor(sensor1);
-	// autoControl.addActuator(actuator);
-	//
-	// autoControl.setDelayedOff(1, TimeUnit.SECONDS);
-	//
-	// sensor1.setState(OnOffState.ON);
-	//
-	// }
+	@Test
+	public void delayedExecution() throws InterruptedException {
+		final CountDownLatch outputReceivedLatch = new CountDownLatch(1);
+		final TestListener listener = new TestListener(outputReceivedLatch);
+		final AutoControl autoControl = new AutoControl(listener);
+
+		autoControl.addSensor(sensor1);
+		autoControl.addActuator(actuator);
+		autoControl.setDelayedOff(1, TimeUnit.SECONDS);
+
+		sensor1.setState(OnOffState.OFF);
+		autoControl.switchChanged(sensor1);
+
+		listener.assertActuatorUnchanged();
+		assertTrue(outputReceivedLatch.await(30, TimeUnit.SECONDS));
+		listener.assertActuatorChanged();
+	}
+
+	@Test
+	public void timeoutExtendedWhenSensorChanged() throws InterruptedException {
+		final CountDownLatch outputReceivedLatch = new CountDownLatch(2);
+		final TestListener listener = new TestListener(outputReceivedLatch);
+		final AutoControl autoControl = new AutoControl(listener);
+
+		autoControl.addSensor(sensor1);
+		autoControl.addActuator(actuator);
+		autoControl.setDelayedOff(1, TimeUnit.SECONDS);
+
+		sensor1.setState(OnOffState.OFF);
+		final long startTime = System.currentTimeMillis();
+		autoControl.switchChanged(sensor1);
+		listener.assertActuatorUnchanged();
+
+		Thread.sleep(500);
+
+		sensor1.setState(OnOffState.ON);
+		autoControl.switchChanged(sensor1); // should extend timeout
+		listener.assertActuatorChanged();
+
+		sensor1.setState(OnOffState.OFF);
+		autoControl.switchChanged(sensor1);
+		listener.assertActuatorUnchanged();
+
+		assertTrue(outputReceivedLatch.await(30, TimeUnit.SECONDS));
+		final long endTime = System.currentTimeMillis();
+		listener.assertActuatorChanged();
+		assertTrue(endTime - startTime >= 1500);
+	}
 }
