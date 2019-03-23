@@ -17,7 +17,6 @@ import nl.gingerbeard.automation.devices.DimmeableLight;
 import nl.gingerbeard.automation.devices.Switch;
 import nl.gingerbeard.automation.devices.ThermostatSetpointDevice;
 import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
-import nl.gingerbeard.automation.domoticz.helpers.TestWebServer;
 import nl.gingerbeard.automation.domoticz.transmitter.DomoticzUpdateTransmitter;
 import nl.gingerbeard.automation.domoticz.transmitter.IDomoticzUpdateTransmitter;
 import nl.gingerbeard.automation.logging.TestLogger;
@@ -27,6 +26,7 @@ import nl.gingerbeard.automation.state.OnOffState;
 import nl.gingerbeard.automation.state.Temperature;
 import nl.gingerbeard.automation.state.Temperature.Unit;
 import nl.gingerbeard.automation.testdevices.StringTestDevice;
+import nl.gingerbeard.automation.testutils.TestWebServer;
 
 public class DomoticzUpdateTransmitterTest {
 

@@ -7,4 +7,5 @@ dependencies {
 	compile project(':service')
 	compile project(':devices')
 	compile project(':logging')
+	testCompile project(':testutils')
 }

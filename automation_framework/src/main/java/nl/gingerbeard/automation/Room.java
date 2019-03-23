@@ -11,6 +11,7 @@ import nl.gingerbeard.automation.state.State;
 public class Room {
 
 	private final List<IDevice<?>> allDevices = new ArrayList<>();
+	private final List<AutoControl> allAutoControls = new ArrayList<>();
 
 	private final RoomBuilder builder = new RoomBuilder();
 
@@ -38,4 +39,13 @@ public class Room {
 	public final List<IDevice<?>> getDevices() {
 		return Collections.unmodifiableList(allDevices);
 	}
+
+	public void addAutoControl(final AutoControl autoControl) {
+		allAutoControls.add(autoControl);
+	}
+
+	public List<AutoControl> getAutoControls() {
+		return Collections.unmodifiableList(allAutoControls);
+	}
+
 }

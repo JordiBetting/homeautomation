@@ -1,0 +1,7 @@
+dependencies {
+	implementation project(':automation_framework')
+	implementation project(':devices')
+	implementation project(':logging')
+	implementation project(':automation_autocontrol')
+	testCompile project(':testutils')
+}

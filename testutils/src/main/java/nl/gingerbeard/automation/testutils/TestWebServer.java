@@ -1,9 +1,11 @@
-package nl.gingerbeard.automation.domoticz.helpers;
+package nl.gingerbeard.automation.testutils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.CountDownLatch;
 
 import fi.iki.elonen.NanoHTTPD;
 import fi.iki.elonen.NanoHTTPD.Response.Status;
@@ -39,6 +41,7 @@ public class TestWebServer extends NanoHTTPD {
 	}
 
 	private final Map<String, FixedResponse> responses = new HashMap<>();
+	private Optional<CountDownLatch> requestLatch = Optional.empty();
 
 	public TestWebServer() {
 		super(0);
@@ -53,7 +56,16 @@ public class TestWebServer extends NanoHTTPD {
 	public Response serve(final IHTTPSession session) {
 		recordRequest(session);
 		final FixedResponse response = determineResponse(session);
-		return createHttpResponse(response);
+		final Response out = createHttpResponse(response);
+		triggerLatch();
+		return out;
+	}
+
+	private void triggerLatch() {
+		if (requestLatch.isPresent()) {
+			requestLatch.get().countDown();
+			requestLatch = Optional.empty();
+		}
 	}
 
 	private Response createHttpResponse(final FixedResponse response) {
@@ -83,6 +95,10 @@ public class TestWebServer extends NanoHTTPD {
 
 	public void forgetRequest(final String request) {
 		requests.remove(request);
+	}
+
+	public void setRequestLatch(final CountDownLatch requestLatch) {
+		this.requestLatch = Optional.of(requestLatch);
 	}
 
 }

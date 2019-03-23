@@ -221,10 +221,10 @@ public class DomoticzThreadHandlerTest {
 		// ensure all started at the same time.
 		first.start();
 		second.start();
-		threadsAliveLatch.await(1, TimeUnit.MINUTES);
+		assertTrue(threadsAliveLatch.await(1, TimeUnit.MINUTES));
 		startLatch.countDown();
 		// wait until all done
-		finishLatch.await(1, TimeUnit.MINUTES);
+		assertTrue(finishLatch.await(1, TimeUnit.MINUTES));
 
 		if (failure.get() != null) {
 			throw failure.get();

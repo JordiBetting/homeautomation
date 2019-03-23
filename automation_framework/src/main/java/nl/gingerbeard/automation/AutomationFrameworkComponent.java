@@ -1,7 +1,9 @@
 package nl.gingerbeard.automation;
 
 import nl.gingerbeard.automation.deviceregistry.IDeviceRegistry;
+import nl.gingerbeard.automation.domoticz.transmitter.IDomoticzUpdateTransmitter;
 import nl.gingerbeard.automation.event.IEvents;
+import nl.gingerbeard.automation.logging.ILogger;
 import nl.gingerbeard.automation.service.annotation.Activate;
 import nl.gingerbeard.automation.service.annotation.Deactivate;
 import nl.gingerbeard.automation.service.annotation.Provides;
@@ -22,9 +24,16 @@ public class AutomationFrameworkComponent {
 	@Requires
 	public State state;
 
+	@Requires
+	public ILogger logger;
+
+	@Requires
+	public IDomoticzUpdateTransmitter transmitter;
+
 	@Activate
 	public void createFramework() {
-		framework = new AutomationFramework(events, deviceRegistry, state);
+		final AutoControlToDomoticz autoControlToDomoticz = new AutoControlToDomoticz(logger, transmitter);
+		framework = new AutomationFramework(events, deviceRegistry, state, autoControlToDomoticz);
 	}
 
 	@Deactivate
