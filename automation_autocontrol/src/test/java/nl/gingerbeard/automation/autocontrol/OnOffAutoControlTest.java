@@ -4,7 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
@@ -14,18 +15,20 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import nl.gingerbeard.automation.AutoControlListener;
+import nl.gingerbeard.automation.devices.DimmeableLight;
 import nl.gingerbeard.automation.devices.Switch;
 import nl.gingerbeard.automation.event.annotations.Subscribe;
+import nl.gingerbeard.automation.state.Level;
 import nl.gingerbeard.automation.state.NextState;
 import nl.gingerbeard.automation.state.OnOffState;
 
 public class OnOffAutoControlTest {
 
 	private Switch sensor1, sensor2, actuator;
-	private OnOffAutoControl autoControl;
+	private OnOffAutoControl<Switch, OnOffState, OnOffState> autoControl;
 	private TestListener listener;
 
-	private static class TestListener implements AutoControlListener {
+	private class TestListener implements AutoControlListener {
 
 		private Optional<List<NextState<OnOffState>>> output = Optional.empty();
 		private final Optional<CountDownLatch> triggerLatch;
@@ -39,9 +42,13 @@ public class OnOffAutoControlTest {
 
 		}
 
+		@SuppressWarnings("unchecked")
 		@Override
-		public void outputChanged(final List<NextState<OnOffState>> output) {
-			this.output = Optional.of(output);
+		public void outputChanged(final List<NextState<?>> output) {
+			final List<NextState<OnOffState>> onoffOut = new ArrayList<>();
+			output.stream().forEach((out) -> onoffOut.add((NextState<OnOffState>) out));
+			this.output = Optional.of(onoffOut);
+			applyNextState(onoffOut);
 			if (triggerLatch.isPresent()) {
 				triggerLatch.get().countDown();
 			}
@@ -76,7 +83,7 @@ public class OnOffAutoControlTest {
 	@BeforeEach
 	public void initSensorsActuators() {
 		listener = new TestListener();
-		autoControl = new OnOffAutoControl();
+		autoControl = new OnOffAutoControl<>(OnOffState.ON, OnOffState.ON, OnOffState.OFF);
 		autoControl.setListener(listener);
 		sensor1 = new Switch(1);
 		sensor2 = new Switch(2);
@@ -99,14 +106,17 @@ public class OnOffAutoControlTest {
 	}
 
 	private void triggerAutoControl(final Switch sensor) {
-		final List<NextState<OnOffState>> out = triggerAutoControlAndGetResult(sensor);
-		for (final NextState<OnOffState> next : out) {
+		triggerAutoControlAndGetResult(sensor);
+	}
+
+	<T> void applyNextState(final List<NextState<T>> out) {
+		for (final NextState<T> next : out) {
 			next.getDevice().setState(next.get());
 		}
 	}
 
 	private List<NextState<OnOffState>> triggerAutoControlAndGetResult(final Switch sensor) {
-		autoControl.switchChanged(sensor);
+		autoControl.sensorChanged(sensor);
 
 		final Optional<List<NextState<OnOffState>>> output = listener.getAndClearOutput();
 		assertTrue(output.isPresent());
@@ -127,10 +137,16 @@ public class OnOffAutoControlTest {
 
 	@Test
 	public void hasSubscribeMethod() throws NoSuchMethodException, SecurityException {
-		final Annotation[] declaredAnnotations = OnOffAutoControl.class.getDeclaredMethod("switchChanged", Switch.class).getDeclaredAnnotations();
+		boolean found = false;
+		final Method[] methods = OnOffAutoControl.class.getDeclaredMethods();
+		for (final Method method : methods) {
+			if ("sensorChanged".equals(method.getName()) && method.isAnnotationPresent(Subscribe.class)) {
+				found = true;
+				break;
+			}
+		}
 
-		assertEquals(1, declaredAnnotations.length);
-		assertEquals(Subscribe.class, declaredAnnotations[0].annotationType());
+		assertTrue(found);
 	}
 
 	@Test
@@ -163,7 +179,7 @@ public class OnOffAutoControlTest {
 	public void unknownDeviceUpdated_noOutput() {
 		autoControl.addSensor(sensor1);
 
-		autoControl.switchChanged(new Switch(666));
+		autoControl.sensorChanged(new Switch(666));
 
 		listener.assertActuatorUnchanged();
 	}
@@ -172,7 +188,7 @@ public class OnOffAutoControlTest {
 	public void delayedExecution() throws InterruptedException {
 		final CountDownLatch outputReceivedLatch = new CountDownLatch(1);
 		final TestListener listener = new TestListener(outputReceivedLatch);
-		final OnOffAutoControl autoControl = new OnOffAutoControl();
+		final OnOffAutoControl<Switch, OnOffState, OnOffState> autoControl = new OnOffAutoControl<>(OnOffState.ON, OnOffState.ON, OnOffState.OFF);
 		autoControl.setListener(listener);
 
 		autoControl.addSensor(sensor1);
@@ -180,7 +196,7 @@ public class OnOffAutoControlTest {
 		autoControl.setDelayedOff(1, TimeUnit.SECONDS);
 
 		sensor1.setState(OnOffState.OFF);
-		autoControl.switchChanged(sensor1);
+		autoControl.sensorChanged(sensor1);
 
 		listener.assertActuatorUnchanged();
 		assertTrue(outputReceivedLatch.await(30, TimeUnit.SECONDS));
@@ -191,7 +207,7 @@ public class OnOffAutoControlTest {
 	public void timeoutExtendedWhenSensorChanged() throws InterruptedException {
 		final CountDownLatch outputReceivedLatch = new CountDownLatch(2);
 		final TestListener listener = new TestListener(outputReceivedLatch);
-		final OnOffAutoControl autoControl = new OnOffAutoControl();
+		final OnOffAutoControl<Switch, OnOffState, OnOffState> autoControl = new OnOffAutoControl<>(OnOffState.ON, OnOffState.ON, OnOffState.OFF);
 		autoControl.setListener(listener);
 
 		autoControl.addSensor(sensor1);
@@ -200,22 +216,42 @@ public class OnOffAutoControlTest {
 
 		sensor1.setState(OnOffState.OFF);
 		final long startTime = System.currentTimeMillis();
-		autoControl.switchChanged(sensor1);
+		autoControl.sensorChanged(sensor1);
 		listener.assertActuatorUnchanged();
 
 		Thread.sleep(500);
 
 		sensor1.setState(OnOffState.ON);
-		autoControl.switchChanged(sensor1); // should extend timeout
+		autoControl.sensorChanged(sensor1); // should extend timeout
 		listener.assertActuatorChanged();
 
 		sensor1.setState(OnOffState.OFF);
-		autoControl.switchChanged(sensor1);
+		autoControl.sensorChanged(sensor1);
 		listener.assertActuatorUnchanged();
 
 		assertTrue(outputReceivedLatch.await(30, TimeUnit.SECONDS));
 		final long endTime = System.currentTimeMillis();
 		listener.assertActuatorChanged();
 		assertTrue(endTime - startTime >= 1500);
+	}
+
+	@Test
+	public void differentInputOutputTypes() {
+		final CountDownLatch outputReceivedLatch = new CountDownLatch(2);
+		final TestListener listener = new TestListener(outputReceivedLatch);
+		final OnOffAutoControl<DimmeableLight, Level, OnOffState> autoControl = new OnOffAutoControl<>(new Level(40), OnOffState.ON, OnOffState.OFF);
+		autoControl.setListener(listener);
+
+		final DimmeableLight dimLight = new DimmeableLight(42);
+		autoControl.addSensor(dimLight);
+		autoControl.addActuator(actuator);
+
+		dimLight.setState(new Level(1));
+		autoControl.sensorChanged(dimLight);
+		assertEquals(OnOffState.OFF, actuator.getState());
+
+		dimLight.setState(new Level(40));
+		autoControl.sensorChanged(dimLight);
+		assertEquals(OnOffState.ON, actuator.getState());
 	}
 }

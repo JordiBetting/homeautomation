@@ -395,6 +395,11 @@ public class AutomationFrameworkTest {
 		public void setState(final Void newState) {
 		}
 
+		@Override
+		public int getIdx() {
+			return 0;
+		}
+
 	}
 
 	private static class RoomWithFakeDevice extends Room {

@@ -96,4 +96,36 @@ public final class Temperature {
 		return "Temperature [value=" + value + ", unit=" + unit + "]";
 	}
 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + (unit == null ? 0 : unit.hashCode());
+		long temp;
+		temp = Double.doubleToLongBits(value);
+		result = prime * result + (int) (temp ^ temp >>> 32);
+		return result;
+	}
+
+	@Override
+	public boolean equals(final Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		final Temperature other = (Temperature) obj;
+		final double otherC = other.unit.toCelcius(other.value);
+		final double thisC = unit.toCelcius(value);
+
+		if (Double.doubleToLongBits(thisC) != Double.doubleToLongBits(otherC)) {
+			return false;
+		}
+		return true;
+	}
+
 }

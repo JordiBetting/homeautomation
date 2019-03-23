@@ -58,4 +58,46 @@ public final class TimeOfDayValues {
 		return "TimeOfDayValues [curtime=" + curtime + ", sunrise=" + sunrise + ", sunset=" + sunset + ", civilTwilightStart=" + civilTwilightStart + ", civilTwilightEnd=" + civilTwilightEnd + "]";
 	}
 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + civilTwilightEnd;
+		result = prime * result + civilTwilightStart;
+		result = prime * result + curtime;
+		result = prime * result + sunrise;
+		result = prime * result + sunset;
+		return result;
+	}
+
+	@Override
+	public boolean equals(final Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		final TimeOfDayValues other = (TimeOfDayValues) obj;
+		if (civilTwilightEnd != other.civilTwilightEnd) {
+			return false;
+		}
+		if (civilTwilightStart != other.civilTwilightStart) {
+			return false;
+		}
+		if (curtime != other.curtime) {
+			return false;
+		}
+		if (sunrise != other.sunrise) {
+			return false;
+		}
+		if (sunset != other.sunset) {
+			return false;
+		}
+		return true;
+	}
+
 }

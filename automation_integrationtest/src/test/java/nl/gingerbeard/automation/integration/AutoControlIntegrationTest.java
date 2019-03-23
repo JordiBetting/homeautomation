@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import nl.gingerbeard.automation.Room;
 import nl.gingerbeard.automation.autocontrol.OnOffAutoControl;
 import nl.gingerbeard.automation.devices.Switch;
+import nl.gingerbeard.automation.state.OnOffState;
 
 public class AutoControlIntegrationTest extends IntegrationTest {
 
@@ -24,14 +25,14 @@ public class AutoControlIntegrationTest extends IntegrationTest {
 
 		public TestRoom() {
 			addDevice(sensor).and(actuator);
-			final OnOffAutoControl autoControl = createAutoControl();
+			final OnOffAutoControl<Switch, OnOffState, OnOffState> autoControl = createAutoControl();
 			assertTrue(super.getAutoControls().isEmpty());
 			addAutoControl(autoControl);
 			assertFalse(super.getAutoControls().isEmpty());
 		}
 
-		private OnOffAutoControl createAutoControl() {
-			final OnOffAutoControl autoControl = new OnOffAutoControl();
+		private OnOffAutoControl<Switch, OnOffState, OnOffState> createAutoControl() {
+			final OnOffAutoControl<Switch, OnOffState, OnOffState> autoControl = new OnOffAutoControl<>(OnOffState.ON, OnOffState.ON, OnOffState.OFF);
 			autoControl.addActuator(actuator);
 			autoControl.addSensor(sensor);
 			autoControl.setDelayedOff(50, TimeUnit.MILLISECONDS);
