@@ -106,7 +106,7 @@ public class OnOffAutoControlTest {
 	}
 
 	private void triggerAutoControl(final Switch sensor) {
-		final List<NextState<OnOffState>> out = triggerAutoControlAndGetResult(sensor);
+		triggerAutoControlAndGetResult(sensor);
 	}
 
 	<T> void applyNextState(final List<NextState<T>> out) {
@@ -140,7 +140,7 @@ public class OnOffAutoControlTest {
 		boolean found = false;
 		final Method[] methods = OnOffAutoControl.class.getDeclaredMethods();
 		for (final Method method : methods) {
-			if (method.getName() == "sensorChanged" && method.isAnnotationPresent(Subscribe.class)) {
+			if ("sensorChanged".equals(method.getName()) && method.isAnnotationPresent(Subscribe.class)) {
 				found = true;
 				break;
 			}
