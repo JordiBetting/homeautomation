@@ -3,9 +3,8 @@ package nl.gingerbeard.automation;
 import java.util.List;
 import java.util.Optional;
 
-import nl.gingerbeard.automation.devices.Device;
+import nl.gingerbeard.automation.devices.IDevice;
 import nl.gingerbeard.automation.state.NextState;
-import nl.gingerbeard.automation.state.OnOffState;
 
 public abstract class AutoControl {
 
@@ -15,14 +14,14 @@ public abstract class AutoControl {
 		this.listener = Optional.of(listener);
 	}
 
-	protected final void updateActuators(final List<NextState<OnOffState>> updates) {
+	protected final void updateActuators(final List<NextState<?>> updates) {
 		listener.ifPresent((listener) -> listener.outputChanged(updates));
 	}
 
 	/**
 	 * Return all devices that are contained within the autoControl.
-	 * 
+	 *
 	 * @return
 	 */
-	protected abstract List<Device<?>> getDevices();
+	protected abstract List<IDevice<?>> getDevices();
 }

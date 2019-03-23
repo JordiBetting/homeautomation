@@ -6,4 +6,6 @@ public interface IDevice<T> {
 
 	void setState(final T newState);
 
+	int getIdx();
+
 }

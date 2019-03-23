@@ -11,8 +11,6 @@ public abstract class Device<T> extends StateDevice<T> {
 		return idx;
 	}
 
-	public abstract boolean updateState(final String newState);
-
 	@Override
 	public String toString() {
 		return "Device [idx=" + idx + "]";

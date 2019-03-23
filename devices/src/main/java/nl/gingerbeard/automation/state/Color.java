@@ -101,4 +101,50 @@ public class Color {
 		return "Color [mode=" + mode + ", brightness=" + brightness + ", whiteTemperature=" + whiteTemperature + "]";
 	}
 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + (brightness == null ? 0 : brightness.hashCode());
+		result = prime * result + (mode == null ? 0 : mode.hashCode());
+		result = prime * result + (rgbColor == null ? 0 : rgbColor.hashCode());
+		result = prime * result + whiteTemperature;
+		return result;
+	}
+
+	@Override
+	public boolean equals(final Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		final Color other = (Color) obj;
+		if (brightness == null) {
+			if (other.brightness != null) {
+				return false;
+			}
+		} else if (!brightness.equals(other.brightness)) {
+			return false;
+		}
+		if (mode != other.mode) {
+			return false;
+		}
+		if (rgbColor == null) {
+			if (other.rgbColor != null) {
+				return false;
+			}
+		} else if (!rgbColor.equals(other.rgbColor)) {
+			return false;
+		}
+		if (whiteTemperature != other.whiteTemperature) {
+			return false;
+		}
+		return true;
+	}
+
 }

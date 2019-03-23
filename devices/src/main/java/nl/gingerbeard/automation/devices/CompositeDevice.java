@@ -15,4 +15,14 @@ public abstract class CompositeDevice<T> extends StateDevice<T> {
 		return Collections.unmodifiableSet(devices);
 	}
 
+	@Override
+	public boolean updateState(final String newState) {
+		throw new UnsupportedOperationException("CompositeDevices cannot be updated. Update subdevices instead");
+	}
+
+	@Override
+	public int getIdx() {
+		throw new UnsupportedOperationException("CompositeDevices don't have an idx, use subdevices instead");
+	}
+
 }

@@ -9,6 +9,7 @@ import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 
 import nl.gingerbeard.automation.devices.Device;
+import nl.gingerbeard.automation.devices.StateDevice;
 import nl.gingerbeard.automation.state.NextState;
 
 //glue-ing the output of NextState to update device to improve test readability
@@ -27,7 +28,7 @@ final class ApplyNextStateToDeviceState implements IDeviceUpdate {
 
 	@Override
 	public void updateDevice(final NextState<?> nextState) {
-		final Device<?> changedDevice = nextState.getDevice();
+		final StateDevice<?> changedDevice = nextState.getDevice();
 		if (devices.containsKey(changedDevice.getIdx())) {
 			changedDevice.updateState(nextState.get().toString());
 			latch.ifPresent((latch) -> latch.countDown());

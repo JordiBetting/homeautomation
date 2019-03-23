@@ -6,7 +6,6 @@ import java.util.List;
 import nl.gingerbeard.automation.domoticz.transmitter.IDomoticzUpdateTransmitter;
 import nl.gingerbeard.automation.logging.ILogger;
 import nl.gingerbeard.automation.state.NextState;
-import nl.gingerbeard.automation.state.OnOffState;
 
 public class AutoControlToDomoticz implements AutoControlListener {
 
@@ -19,7 +18,7 @@ public class AutoControlToDomoticz implements AutoControlListener {
 	}
 
 	@Override
-	public void outputChanged(final List<NextState<OnOffState>> output) {
+	public void outputChanged(final List<NextState<?>> output) {
 		output.forEach((nextState) -> {
 			try {
 				transmitter.transmitDeviceUpdate(nextState);

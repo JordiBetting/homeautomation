@@ -51,4 +51,38 @@ public final class ThermostatState {
 		return "ThermostatState [mode=" + mode + ", setPoint=" + getSetPoint() + "]";
 	}
 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + (mode == null ? 0 : mode.hashCode());
+		result = prime * result + (setPoint == null ? 0 : setPoint.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(final Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		final ThermostatState other = (ThermostatState) obj;
+		if (mode != other.mode) {
+			return false;
+		}
+		if (setPoint == null) {
+			if (other.setPoint != null) {
+				return false;
+			}
+		} else if (!setPoint.equals(other.setPoint)) {
+			return false;
+		}
+		return true;
+	}
+
 }
