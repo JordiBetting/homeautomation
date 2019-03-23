@@ -1,9 +1,7 @@
 package nl.gingerbeard.automation.domoticz;
 
 import java.io.IOException;
-import java.util.Optional;
 
-import nl.gingerbeard.automation.deviceregistry.IDeviceRegistry;
 import nl.gingerbeard.automation.domoticz.clients.TimeOfDayClient;
 import nl.gingerbeard.automation.domoticz.receiver.DomoticzEventReceiverServer.EventReceived;
 import nl.gingerbeard.automation.logging.ILogger;
@@ -13,30 +11,21 @@ import nl.gingerbeard.automation.state.TimeOfDayValues;
 final class Domoticz implements EventReceived {
 
 	private final ILogger logger;
-	private final Optional<DomoticzThreadHandler> threadHandler;
+	private final DomoticzThreadHandler threadHandler;
 	private final TimeOfDayClient timeOfDayClient;
-
-	// for testing
-	Domoticz(final IDeviceRegistry registry) {
-		super();
-		logger = (t, level, message) -> {
-		};
-		threadHandler = Optional.empty();
-		timeOfDayClient = null;
-	}
 
 	public Domoticz(final ILogger logger, final DomoticzThreadHandler threadHandler, final TimeOfDayClient timeOfDayClient) {
 		this.logger = logger;
-		this.threadHandler = Optional.of(threadHandler);
+		this.threadHandler = threadHandler;
 		this.timeOfDayClient = timeOfDayClient;
 	}
 
 	@Override
 	public boolean deviceChanged(final int idx, final String newState) {
 		boolean success = false;
-		if (threadHandler.isPresent() && threadHandler.get().handlesDevice(idx)) {
+		if (threadHandler.handlesDevice(idx)) {
 			try {
-				threadHandler.get().deviceChanged(idx, newState);
+				threadHandler.deviceChanged(idx, newState);
 				success = true;
 			} catch (final InterruptedException e) {
 				logger.warning(e, "Interrupted while updating device");
@@ -50,10 +39,10 @@ final class Domoticz implements EventReceived {
 	@Override
 	public boolean timeChanged(final int curtime, final int sunrise, final int sunset) {
 		boolean success = false;
-		if (threadHandler.isPresent() && threadHandler.get().handlesTime()) {
+		if (threadHandler.handlesTime()) {
 			try {
 				final TimeOfDayValues timeOfDayValues = timeOfDayClient.createTimeOfDayValues(curtime, sunrise, sunset);
-				threadHandler.get().timeChanged(timeOfDayValues);
+				threadHandler.timeChanged(timeOfDayValues);
 				success = true;
 			} catch (final IOException | InterruptedException e) {
 				logger.warning(e, "Failed retrieving time of day values");
@@ -65,9 +54,9 @@ final class Domoticz implements EventReceived {
 	@Override
 	public boolean alarmChanged(final String alarmState) {
 		boolean success = false;
-		if (threadHandler.isPresent() && threadHandler.get().handlesAlarm()) {
+		if (threadHandler.handlesAlarm()) {
 			try {
-				threadHandler.get().alarmChanged(alarmState);
+				threadHandler.alarmChanged(alarmState);
 				success = true;
 			} catch (final InterruptedException e) {
 				logger.warning(e, "Interrupted while changing alarm state");

@@ -41,7 +41,9 @@ public class DomoticzTest {
 	@BeforeEach
 	public void initDomoticz() {
 		registry = new DeviceRegistry();
-		domoticz = new Domoticz(registry);
+		final ILogger logger = mock(ILogger.class);
+		final DomoticzThreadHandler domoticzThreadHandler = new DomoticzThreadHandler(logger, registry);
+		domoticz = new Domoticz(logger, domoticzThreadHandler, mock(TimeOfDayClient.class));
 	}
 
 	@Test
