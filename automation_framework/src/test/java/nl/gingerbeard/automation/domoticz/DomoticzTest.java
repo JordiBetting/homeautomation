@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -208,7 +209,45 @@ public class DomoticzTest {
 	}
 
 	@Test
-	public void updateMissingDevice() {
+	public void alarmChanged_interrupted_warningLogged() throws InterruptedException {
+		final TestLogger logger = new TestLogger();
+		final TimeOfDayClient todClient = mock(TimeOfDayClient.class);
+		final DomoticzThreadHandler threadHandler = mock(DomoticzThreadHandler.class);
+		doThrow(InterruptedException.class).when(threadHandler).alarmChanged(any());
+		when(threadHandler.handlesAlarm()).thenReturn(true);
+		final Domoticz domoticz = new Domoticz(logger, threadHandler, todClient);
 
+		domoticz.alarmChanged("disarmed");
+
+		logger.assertContains(LogLevel.WARNING, "Interrupted while changing alarm state");
 	}
+
+	@Test
+	public void timeChanged_interrupted_warningLogged() throws InterruptedException {
+		final TestLogger logger = new TestLogger();
+		final TimeOfDayClient todClient = mock(TimeOfDayClient.class);
+		final DomoticzThreadHandler threadHandler = mock(DomoticzThreadHandler.class);
+		doThrow(InterruptedException.class).when(threadHandler).timeChanged(any());
+		when(threadHandler.handlesTime()).thenReturn(true);
+		final Domoticz domoticz = new Domoticz(logger, threadHandler, todClient);
+
+		domoticz.timeChanged(1, 2, 3);
+
+		logger.assertContains(LogLevel.WARNING, "Failed retrieving time of day values");
+	}
+
+	@Test
+	public void deviceChanged_interrupted_warningLogged() throws InterruptedException {
+		final TestLogger logger = new TestLogger();
+		final TimeOfDayClient todClient = mock(TimeOfDayClient.class);
+		final DomoticzThreadHandler threadHandler = mock(DomoticzThreadHandler.class);
+		doThrow(InterruptedException.class).when(threadHandler).deviceChanged(anyInt(), any());
+		when(threadHandler.handlesDevice(anyInt())).thenReturn(true);
+		final Domoticz domoticz = new Domoticz(logger, threadHandler, todClient);
+
+		domoticz.deviceChanged(1, "on");
+
+		logger.assertContains(LogLevel.WARNING, "Interrupted while updating device");
+	}
+
 }
