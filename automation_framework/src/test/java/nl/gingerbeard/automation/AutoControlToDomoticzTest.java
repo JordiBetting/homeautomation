@@ -9,6 +9,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -29,11 +31,18 @@ public class AutoControlToDomoticzTest {
 		final IDomoticzUpdateTransmitter transmitter = mock(IDomoticzUpdateTransmitter.class);
 		final AutoControlToDomoticz sut = new AutoControlToDomoticz(mock(ILogger.class), transmitter);
 
-		sut.outputChanged(List.of(NEXT_STATE1, NEXT_STATE2));
+		sut.outputChanged(createList(NEXT_STATE1, NEXT_STATE2));
 
 		verify(transmitter, times(1)).transmitDeviceUpdate(NEXT_STATE1);
 		verify(transmitter, times(1)).transmitDeviceUpdate(NEXT_STATE2);
 		verifyNoMoreInteractions(transmitter);
+	}
+
+	private List<NextState<?>> createList(final NextState<?>... items) {
+		// TODO update to Java 9
+		final List<NextState<?>> list = new ArrayList<>();
+		Arrays.stream(items).forEach((item) -> list.add(item));
+		return list;
 	}
 
 	@Test
@@ -43,7 +52,7 @@ public class AutoControlToDomoticzTest {
 		final AutoControlToDomoticz sut = new AutoControlToDomoticz(log, transmitter);
 
 		doThrow(IOException.class).when(transmitter).transmitDeviceUpdate(any());
-		sut.outputChanged(List.of(NEXT_STATE1));
+		sut.outputChanged(createList(NEXT_STATE1));
 
 		verify(log, times(1)).warning(any(), eq("Could not transmit update"));
 	}
