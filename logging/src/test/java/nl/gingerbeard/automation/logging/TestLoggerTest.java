@@ -17,5 +17,6 @@ public class TestLoggerTest {
 		logger.exception(new NullPointerException(), "blaat");
 		logger.printAll();
 		logger.assertContains(LogLevel.DEBUG, "t");
+		logger.createContext("t");
 	}
 }

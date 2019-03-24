@@ -16,15 +16,17 @@ final class Subscriber {
 	}
 
 	EventResult call(final Object event) throws Exception {
+		EventResult result = EventResult.empty();
 		final Object returned = method.invoke(instance, event);
 		if (returned != null) {
 			if (EventResult.class.isAssignableFrom(returned.getClass())) {
-				return (EventResult) returned;
+				result = (EventResult) returned;
 			} else {
-				return EventResult.of(returned);
+				result = EventResult.of(returned);
 			}
+			result.setSubscriberName(instance.getClass().getName());
 		}
-		return EventResult.empty();
+		return result;
 	}
 
 	public EventState getEventState() {

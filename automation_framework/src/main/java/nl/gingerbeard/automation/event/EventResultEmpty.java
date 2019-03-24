@@ -32,4 +32,13 @@ public final class EventResultEmpty implements EventResult {
 		return Lists.newArrayList();
 	}
 
+	@Override
+	public void setSubscriberName(final String name) {
+	}
+
+	@Override
+	public Optional<String> getSubscriberName() {
+		return Optional.empty();
+	}
+
 }

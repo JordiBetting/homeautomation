@@ -10,6 +10,7 @@ import com.google.common.collect.ImmutableList;
 public final class EventResultList implements EventResult {
 
 	private final List<Object> results = new ArrayList<>();
+	private Optional<String> subscriberName = Optional.empty();
 
 	EventResultList() {
 	}
@@ -40,6 +41,16 @@ public final class EventResultList implements EventResult {
 
 	public void addResult(final Object newValue) {
 		results.add(newValue);
+	}
+
+	@Override
+	public void setSubscriberName(final String name) {
+		subscriberName = Optional.ofNullable(name);
+	}
+
+	@Override
+	public Optional<String> getSubscriberName() {
+		return subscriberName;
 	}
 
 }

@@ -19,15 +19,22 @@ public class TestLogger implements ILogger {
 
 	}
 
-	List<String> log = new ArrayList<>();
+	List<String> log;
 	private final String context;
+	private final TestLogger parent;
 
 	public TestLogger() {
-		this("root");
+		this("root", null);
 	}
 
-	private TestLogger(final String context) {
+	private TestLogger(final String context, final TestLogger parent) {
 		this.context = context;
+		this.parent = parent;
+		if (parent != null) {
+			log = parent.log;
+		} else {
+			log = new ArrayList<>();
+		}
 	}
 
 	@Override
@@ -55,7 +62,11 @@ public class TestLogger implements ILogger {
 	}
 
 	public void assertContains(final LogLevel level, final String message) {
-		assertContains(format(level, message));
+		if (message.startsWith("[")) {
+			assertContains(message);
+		} else {
+			assertContains(message);
+		}
 	}
 
 	private static class TestLoggerException extends RuntimeException {
@@ -64,6 +75,7 @@ public class TestLogger implements ILogger {
 		public TestLoggerException(final String message) {
 			super(message);
 		}
+
 	}
 
 	private void assertContains(final String expectation) {
@@ -86,6 +98,6 @@ public class TestLogger implements ILogger {
 
 	@Override
 	public ILogger createContext(final String context) {
-		return new TestLogger(context);
+		return new TestLogger(context, this);
 	}
 }

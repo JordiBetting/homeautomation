@@ -23,4 +23,7 @@ public interface EventResult {
 		return EventResultEmpty.emptyResult;
 	}
 
+	void setSubscriberName(String name);
+
+	Optional<String> getSubscriberName();
 }
