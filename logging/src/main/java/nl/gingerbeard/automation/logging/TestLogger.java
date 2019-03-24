@@ -13,13 +13,22 @@ public class TestLogger implements ILogger {
 		private static TestLogger testLogger = new TestLogger();
 
 		@Override
-		public void log(final LogLevel level, final String message) {
-			testLogger.log(Optional.empty(), level, message);
+		public void log(final LogLevel level, final String context, final String message) {
+			testLogger.log(Optional.empty(), level, "[" + context + "] " + message);
 		}
 
 	}
 
 	List<String> log = new ArrayList<>();
+	private final String context;
+
+	public TestLogger() {
+		this("root");
+	}
+
+	private TestLogger(final String context) {
+		this.context = context;
+	}
 
 	@Override
 	public void log(final Optional<Throwable> t, final LogLevel level, final String message) {
@@ -32,7 +41,7 @@ public class TestLogger implements ILogger {
 	}
 
 	private String format(final LogLevel level, final String message) {
-		return "[" + level.name() + "] " + message;
+		return "[" + level.name() + "] [" + context + "] " + message;
 	}
 
 	public void printAll() {
@@ -73,5 +82,10 @@ public class TestLogger implements ILogger {
 			}
 		}
 		return false;
+	}
+
+	@Override
+	public ILogger createContext(final String context) {
+		return new TestLogger(context);
 	}
 }

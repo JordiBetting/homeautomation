@@ -1,6 +1,7 @@
 package nl.gingerbeard.automation.logging;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
@@ -18,8 +19,8 @@ public class LoggingTest {
 		private final List<String> logs = new ArrayList<>();
 
 		@Override
-		public void log(final LogLevel level, final String message) {
-			logs.add(level.name() + " " + message);
+		public void log(final LogLevel level, final String context, final String message) {
+			logs.add(level.name() + " [" + context + "] " + message);
 		}
 
 	}
@@ -35,10 +36,10 @@ public class LoggingTest {
 		logging.warning("testwarning");
 
 		assertEquals(4, logOutput.logs.size());
-		assertEquals("DEBUG testdebug", logOutput.logs.get(0));
-		assertEquals("INFO testinfo", logOutput.logs.get(1));
-		assertEquals("ERROR testerror", logOutput.logs.get(2));
-		assertEquals("WARNING testwarning", logOutput.logs.get(3));
+		assertEquals("DEBUG [root] testdebug", logOutput.logs.get(0));
+		assertEquals("INFO [root] testinfo", logOutput.logs.get(1));
+		assertEquals("ERROR [root] testerror", logOutput.logs.get(2));
+		assertEquals("WARNING [root] testwarning", logOutput.logs.get(3));
 	}
 
 	@Test
@@ -59,11 +60,10 @@ public class LoggingTest {
 
 			System.out.flush();
 			final String output = baos.toString("UTF-8");
-			assertEquals("[DEBUG] testdebug" + System.lineSeparator() + //
-					"[INFO] testinfo" + System.lineSeparator() + //
-					"[ERROR] testerror" + System.lineSeparator() + //
-					"[WARNING] testwarning" + System.lineSeparator(), //
-
+			assertEquals("[DEBUG] [root] testdebug" + System.lineSeparator() + //
+					"[INFO] [root] testinfo" + System.lineSeparator() + //
+					"[ERROR] [root] testerror" + System.lineSeparator() + //
+					"[WARNING] [root] testwarning" + System.lineSeparator(), //
 					output);
 
 		} finally {
@@ -78,9 +78,10 @@ public class LoggingTest {
 
 		logging.exception(new NullPointerException("blaat"), "exception message");
 
-		assertEquals(2, logOutput.logs.size());
-		assertEquals("EXCEPTION exception message", logOutput.logs.get(0));
-		assertEquals("EXCEPTION blaat", logOutput.logs.get(1));
+		assertEquals(3, logOutput.logs.size());
+		assertEquals("EXCEPTION [root] exception message", logOutput.logs.get(0));
+		assertEquals("EXCEPTION [root] blaat", logOutput.logs.get(1));
+		assertTrue(logOutput.logs.get(2).contains("at " + this.getClass().getName() + ".logException(" + this.getClass().getSimpleName() + ".java:"));
 	}
 
 	@Test
@@ -90,8 +91,32 @@ public class LoggingTest {
 
 		logging.warning(new NullPointerException("blaat"), "exception message");
 
+		assertEquals(3, logOutput.logs.size());
+		assertEquals("WARNING [root] exception message", logOutput.logs.get(0));
+		assertEquals("WARNING [root] blaat", logOutput.logs.get(1));
+		assertTrue(logOutput.logs.get(2).contains("at " + this.getClass().getName() + ".logException_asWarning(" + this.getClass().getSimpleName() + ".java:"));
+	}
+
+	@Test
+	public void logContext_defaultRoot() {
+		final LogRecorder logOutput = new LogRecorder();
+		final ILogger logging = new Logging(Optional.of(logOutput));
+
+		logging.info("test");
+		assertEquals(1, logOutput.logs.size());
+		assertEquals("INFO [root] test", logOutput.logs.get(0));
+	}
+
+	@Test
+	public void logContext_switched() {
+		final LogRecorder logOutput = new LogRecorder();
+		final ILogger logging = new Logging(Optional.of(logOutput));
+
+		logging.warning("message1");
+		final ILogger newLogger = logging.createContext("test");
+		newLogger.warning("message2");
 		assertEquals(2, logOutput.logs.size());
-		assertEquals("WARNING exception message", logOutput.logs.get(0));
-		assertEquals("WARNING blaat", logOutput.logs.get(1));
+		assertEquals("WARNING [root] message1", logOutput.logs.get(0));
+		assertEquals("WARNING [test] message2", logOutput.logs.get(1));
 	}
 }
