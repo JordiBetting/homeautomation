@@ -32,14 +32,4 @@ public final class EventResultEmpty implements EventResult {
 		return Lists.newArrayList();
 	}
 
-	@Override
-	public void setSubscriberName(final String name) {
-		throw new UnsupportedOperationException("Cannot set subcriber name: empty event is immutable");
-	}
-
-	@Override
-	public Optional<String> getSubscriberName() {
-		return Optional.empty();
-	}
-
 }

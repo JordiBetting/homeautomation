@@ -1,7 +1,6 @@
 package nl.gingerbeard.automation.event;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.Optional;
@@ -45,19 +44,4 @@ public class EventResultEmptyTest {
 		assertEquals(Optional.empty(), empty.get(1));
 	}
 
-	@Test
-	public void empty_setSubscriberName_noException() {
-		final EventResult empty = EventResult.empty();
-		final UnsupportedOperationException e = assertThrows(UnsupportedOperationException.class, () -> {//
-			empty.setSubscriberName("something");
-		});
-		assertEquals("Cannot set subcriber name: empty event is immutable", e.getMessage());
-	}
-
-	@Test
-	public void empty_getSubscriberName_returnsEmpty() {
-		final EventResult empty = EventResult.empty();
-
-		assertEquals(Optional.empty(), empty.getSubscriberName());
-	}
 }

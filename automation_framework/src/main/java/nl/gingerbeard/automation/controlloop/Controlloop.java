@@ -48,7 +48,7 @@ class Controlloop implements IDomoticzDeviceStatusChanged, IDomoticzTimeOfDayCha
 	private void processEventResult(final EventResult results) {
 		for (final NextState<?> update : filter(results)) {
 			try {
-				tracelog.info(results.getSubscriberName().orElse("Unknown") + ": " + update);
+				tracelog.info(update.getTrigger() + ": " + update);
 				transmitter.transmitDeviceUpdate(update);
 			} catch (final IOException e) {
 				log.exception(e, "Failed to transmit device update: " + update);

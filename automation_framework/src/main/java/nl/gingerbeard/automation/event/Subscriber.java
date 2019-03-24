@@ -24,7 +24,6 @@ final class Subscriber {
 			} else {
 				result = EventResult.of(returned);
 			}
-			result.setSubscriberName(instance.getClass().getName());
 		}
 		return result;
 	}

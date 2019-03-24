@@ -86,7 +86,6 @@ public class ControlloopTest {
 		final Controlloop control = new Controlloop(events, transmitter, state, log);
 
 		final EventResult eventResult = EventResult.of(new NextState<>(mockDevice1, OnOffState.ON));
-		eventResult.setSubscriberName("test");
 		when(events.trigger(any())).thenReturn(eventResult);
 
 		control.statusChanged(changedDevice);
@@ -239,7 +238,7 @@ public class ControlloopTest {
 	}
 
 	@Test
-	public void transmitted_unknownroom_logOkay() {
+	public void transmitted_logContainsTrigger() {
 		final RecordingTransmitter transmitter = new RecordingTransmitter();
 		final IEvents events = mock(IEvents.class);
 		final TestLogger log = new TestLogger();
@@ -253,6 +252,6 @@ public class ControlloopTest {
 
 		assertEquals(1, transmitter.getTransmitted().size());
 		assertTransmitted(transmitter, 0, mockDevice1, OnOffState.ON);
-		log.assertContains(LogLevel.INFO, "[INFO] [trace] Unknown: NextState [device=Device [idx=0], nextState=ON]");
+		log.assertContains(LogLevel.INFO, "[INFO] [trace] " + getClass().getSimpleName() + ": NextState [device=Device [idx=0], nextState=ON]");
 	}
 }

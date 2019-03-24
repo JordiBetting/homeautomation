@@ -7,7 +7,7 @@ public interface EventResult {
 
 	/**
 	 * Records result.
-	 * 
+	 *
 	 * @param call
 	 *            The result
 	 */
@@ -15,14 +15,14 @@ public interface EventResult {
 
 	/**
 	 * Returns the amount of recorded results
-	 * 
+	 *
 	 * @return
 	 */
 	int size();
 
 	/**
 	 * Returns the result at specified index.
-	 * 
+	 *
 	 * @param index
 	 *            The index to return.
 	 * @return The result at index
@@ -31,7 +31,7 @@ public interface EventResult {
 
 	/**
 	 * Returns all recorded results
-	 * 
+	 *
 	 * @return all results.
 	 */
 	Collection<Object> getAll();
@@ -51,18 +51,4 @@ public interface EventResult {
 		return EventResultEmpty.emptyResult;
 	}
 
-	/**
-	 * Sets the name of the producer of the result. Used for tracing.
-	 * 
-	 * @param name
-	 *            Name of subscriber/producer of result.
-	 */
-	void setSubscriberName(String name);
-
-	/**
-	 * Returns, if set, the name of the producer of the result.
-	 * 
-	 * @return Name of subscriber/producer of result.
-	 */
-	Optional<String> getSubscriberName();
 }

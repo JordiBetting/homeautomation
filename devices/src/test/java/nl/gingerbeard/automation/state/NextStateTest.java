@@ -51,4 +51,16 @@ public class NextStateTest {
 		return mock;
 	}
 
+	@Test
+	public void getTrigger_returnsCaller() {
+		final NextState<String> sut = new NextState<>(createMockDevice(), "");
+		assertEquals(this.getClass().getSimpleName(), sut.getTrigger());
+	}
+
+	@Test
+	public void overrideTrigger_returnsOverridden() {
+		final NextState<String> sut = new NextState<>(createMockDevice(), "");
+		sut.setTrigger("blaat");
+		assertEquals("blaat", sut.getTrigger());
+	}
 }
