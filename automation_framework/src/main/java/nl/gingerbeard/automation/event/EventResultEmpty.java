@@ -34,6 +34,7 @@ public final class EventResultEmpty implements EventResult {
 
 	@Override
 	public void setSubscriberName(final String name) {
+		throw new UnsupportedOperationException("Cannot set subcriber name: empty event is immutable");
 	}
 
 	@Override

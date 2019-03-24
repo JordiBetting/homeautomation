@@ -5,12 +5,35 @@ import java.util.Optional;
 
 public interface EventResult {
 
-	void add(EventResult call);
+	/**
+	 * Records result.
+	 * 
+	 * @param call
+	 *            The result
+	 */
+	void add(EventResult result);
 
+	/**
+	 * Returns the amount of recorded results
+	 * 
+	 * @return
+	 */
 	int size();
 
+	/**
+	 * Returns the result at specified index.
+	 * 
+	 * @param index
+	 *            The index to return.
+	 * @return The result at index
+	 */
 	Optional<Object> get(int index);
 
+	/**
+	 * Returns all recorded results
+	 * 
+	 * @return all results.
+	 */
 	Collection<Object> getAll();
 
 	public static EventResult of(final Object newValue) {
@@ -19,11 +42,27 @@ public interface EventResult {
 		return result;
 	}
 
+	/**
+	 * Returns an empty, immutable EventResult.
+	 *
+	 * @return empty.
+	 */
 	public static EventResult empty() {
 		return EventResultEmpty.emptyResult;
 	}
 
+	/**
+	 * Sets the name of the producer of the result. Used for tracing.
+	 * 
+	 * @param name
+	 *            Name of subscriber/producer of result.
+	 */
 	void setSubscriberName(String name);
 
+	/**
+	 * Returns, if set, the name of the producer of the result.
+	 * 
+	 * @return Name of subscriber/producer of result.
+	 */
 	Optional<String> getSubscriberName();
 }
