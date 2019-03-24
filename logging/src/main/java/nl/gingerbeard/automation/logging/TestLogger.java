@@ -21,7 +21,6 @@ public class TestLogger implements ILogger {
 
 	List<String> log;
 	private final String context;
-	private final TestLogger parent;
 
 	public TestLogger() {
 		this("root", null);
@@ -29,7 +28,6 @@ public class TestLogger implements ILogger {
 
 	private TestLogger(final String context, final TestLogger parent) {
 		this.context = context;
-		this.parent = parent;
 		if (parent != null) {
 			log = parent.log;
 		} else {
@@ -65,7 +63,7 @@ public class TestLogger implements ILogger {
 		if (message.startsWith("[")) {
 			assertContains(message);
 		} else {
-			assertContains(message);
+			assertContains(format(level, message));
 		}
 	}
 
