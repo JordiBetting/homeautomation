@@ -29,4 +29,10 @@ public interface ILogger {
 	default void warning(final Throwable t, final String message) {
 		log(Optional.of(t), LogLevel.WARNING, message);
 	}
+
+	ILogger createContext(String string);
+
+	// default String getContext() {
+	// return "root";
+	// }
 }

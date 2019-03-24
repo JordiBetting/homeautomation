@@ -81,10 +81,13 @@ public class ControlloopTest {
 		final RecordingTransmitter transmitter = new RecordingTransmitter();
 		final IEvents events = mock(IEvents.class);
 		final ILogger log = mock(ILogger.class);
+		when(log.createContext(any())).thenReturn(log);
 		final State state = new State();
 		final Controlloop control = new Controlloop(events, transmitter, state, log);
 
-		when(events.trigger(any())).thenReturn(EventResult.of(new NextState<>(mockDevice1, OnOffState.ON)));
+		final EventResult eventResult = EventResult.of(new NextState<>(mockDevice1, OnOffState.ON));
+		eventResult.setSubscriberName("test");
+		when(events.trigger(any())).thenReturn(eventResult);
 
 		control.statusChanged(changedDevice);
 
@@ -97,6 +100,7 @@ public class ControlloopTest {
 		final RecordingTransmitter transmitter = new RecordingTransmitter();
 		final IEvents events = mock(IEvents.class);
 		final ILogger log = mock(ILogger.class);
+		when(log.createContext(any())).thenReturn(log);
 		final State state = new State();
 		final Controlloop control = new Controlloop(events, transmitter, state, log);
 		when(events.trigger(any())).thenReturn(EventResult.of(Lists.newArrayList(//
@@ -232,5 +236,23 @@ public class ControlloopTest {
 		control.statusChanged(device);
 
 		verify(transmitter, times(0)).transmitDeviceUpdate(nextState);
+	}
+
+	@Test
+	public void transmitted_unknownroom_logOkay() {
+		final RecordingTransmitter transmitter = new RecordingTransmitter();
+		final IEvents events = mock(IEvents.class);
+		final TestLogger log = new TestLogger();
+		final State state = new State();
+		final Controlloop control = new Controlloop(events, transmitter, state, log);
+
+		final EventResult eventResult = EventResult.of(new NextState<>(mockDevice1, OnOffState.ON));
+		when(events.trigger(any())).thenReturn(eventResult);
+
+		control.statusChanged(changedDevice);
+
+		assertEquals(1, transmitter.getTransmitted().size());
+		assertTransmitted(transmitter, 0, mockDevice1, OnOffState.ON);
+		log.assertContains(LogLevel.INFO, "[INFO] [trace] Unknown: NextState [device=Device [idx=0], nextState=ON]");
 	}
 }

@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
 
+import nl.jqno.equalsverifier.EqualsVerifier;
+
 public class LightIntensityTest {
 
 	@Test
@@ -23,6 +25,11 @@ public class LightIntensityTest {
 	public void lightIntensity_toString() {
 		final LightIntensity li = new LightIntensity(42);
 		assertEquals("LightIntensity [lux=42]", li.toString());
+	}
+
+	@Test
+	public void equalsContract() {
+		EqualsVerifier.forClass(LightIntensity.class).verify();
 	}
 
 }

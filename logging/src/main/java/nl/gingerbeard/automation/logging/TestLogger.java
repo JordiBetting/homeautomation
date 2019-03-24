@@ -13,13 +13,27 @@ public class TestLogger implements ILogger {
 		private static TestLogger testLogger = new TestLogger();
 
 		@Override
-		public void log(final LogLevel level, final String message) {
-			testLogger.log(Optional.empty(), level, message);
+		public void log(final LogLevel level, final String context, final String message) {
+			testLogger.log(Optional.empty(), level, "[" + context + "] " + message);
 		}
 
 	}
 
-	List<String> log = new ArrayList<>();
+	List<String> log;
+	private final String context;
+
+	public TestLogger() {
+		this("root", null);
+	}
+
+	private TestLogger(final String context, final TestLogger parent) {
+		this.context = context;
+		if (parent != null) {
+			log = parent.log;
+		} else {
+			log = new ArrayList<>();
+		}
+	}
 
 	@Override
 	public void log(final Optional<Throwable> t, final LogLevel level, final String message) {
@@ -32,7 +46,7 @@ public class TestLogger implements ILogger {
 	}
 
 	private String format(final LogLevel level, final String message) {
-		return "[" + level.name() + "] " + message;
+		return "[" + level.name() + "] [" + context + "] " + message;
 	}
 
 	public void printAll() {
@@ -46,7 +60,11 @@ public class TestLogger implements ILogger {
 	}
 
 	public void assertContains(final LogLevel level, final String message) {
-		assertContains(format(level, message));
+		if (message.startsWith("[")) {
+			assertContains(message);
+		} else {
+			assertContains(format(level, message));
+		}
 	}
 
 	private static class TestLoggerException extends RuntimeException {
@@ -55,6 +73,7 @@ public class TestLogger implements ILogger {
 		public TestLoggerException(final String message) {
 			super(message);
 		}
+
 	}
 
 	private void assertContains(final String expectation) {
@@ -73,5 +92,10 @@ public class TestLogger implements ILogger {
 			}
 		}
 		return false;
+	}
+
+	@Override
+	public ILogger createContext(final String context) {
+		return new TestLogger(context, this);
 	}
 }

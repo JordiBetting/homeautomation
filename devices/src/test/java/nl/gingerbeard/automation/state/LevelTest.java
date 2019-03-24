@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import org.junit.jupiter.api.Test;
 
+import nl.jqno.equalsverifier.EqualsVerifier;
+
 public class LevelTest {
 
 	@Test
@@ -45,4 +47,8 @@ public class LevelTest {
 		assertEquals("Level [level=42]", level.toString());
 	}
 
+	@Test
+	public void equalsContract() {
+		EqualsVerifier.forClass(Level.class).verify();
+	}
 }

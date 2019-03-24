@@ -434,7 +434,7 @@ public class AutomationFrameworkTest {
 		container.getAutomationFramework().addRoom(new TestRoom());
 		updateDevice(1, "on");
 		container.stop();
-		verify(logOut, atLeastOnce()).log(any(), anyString());
+		verify(logOut, atLeastOnce()).log(any(), any(), anyString());
 	}
 
 	@Test

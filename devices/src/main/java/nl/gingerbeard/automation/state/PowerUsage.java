@@ -2,7 +2,7 @@ package nl.gingerbeard.automation.state;
 
 import com.google.common.base.Preconditions;
 
-public class PowerUsage {
+public final class PowerUsage {
 
 	private final int usageWatt;
 
@@ -36,7 +36,7 @@ public class PowerUsage {
 		if (obj == null) {
 			return false;
 		}
-		if (getClass() != obj.getClass()) {
+		if (!(obj instanceof PowerUsage)) {
 			return false;
 		}
 		final PowerUsage other = (PowerUsage) obj;

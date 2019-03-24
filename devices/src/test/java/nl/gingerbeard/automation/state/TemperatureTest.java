@@ -1,11 +1,14 @@
 package nl.gingerbeard.automation.state;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import org.junit.jupiter.api.Test;
 
 import nl.gingerbeard.automation.state.Temperature.Unit;
+import nl.jqno.equalsverifier.EqualsVerifier;
+import nl.jqno.equalsverifier.Warning;
 
 public class TemperatureTest {
 
@@ -75,5 +78,17 @@ public class TemperatureTest {
 		assertEquals("Temperature [value=1.0, unit=CELSIUS]", Temperature.celcius(1).toString());
 		assertEquals("Temperature [value=1.0, unit=KELVIN]", Temperature.kelvin(1).toString());
 		assertEquals("Temperature [value=1.0, unit=FAHRENHEIT]", Temperature.fahrenheit(1).toString());
+	}
+
+	@Test
+	public void nullUnit_throwsException() {
+		assertThrows(IllegalArgumentException.class, () -> new Temperature(1, null));
+	}
+
+	@Test
+	public void equalsContract() {
+		EqualsVerifier.forClass(Temperature.class)//
+				.suppress(Warning.NULL_FIELDS)// it checks for unit to be null, but precondition is in place
+				.verify();
 	}
 }

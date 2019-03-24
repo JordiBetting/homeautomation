@@ -10,6 +10,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import nl.gingerbeard.automation.state.Color.ColorMode;
+import nl.gingerbeard.automation.state.Color.RGBColor;
+import nl.jqno.equalsverifier.EqualsVerifier;
 
 public class ColorTest {
 
@@ -129,4 +131,9 @@ public class ColorTest {
 		assertEquals("Color [mode=RGB, brightness=Level [level=4] rgbColor=RGBColor [r=1, g=2, b=3]]", color.toString());
 	}
 
+	@Test
+	public void equalsContract() {
+		EqualsVerifier.forClass(Color.class).verify();
+		EqualsVerifier.forClass(RGBColor.class).verify();
+	}
 }

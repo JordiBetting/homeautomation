@@ -4,7 +4,7 @@ import com.google.common.base.Preconditions;
 
 import nl.gingerbeard.automation.devices.StateDevice;
 
-public class NextState<StateType> {
+public final class NextState<StateType> {
 
 	private final StateDevice<StateType> device;
 	private final StateType nextState;

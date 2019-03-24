@@ -24,12 +24,14 @@ class Controlloop implements IDomoticzDeviceStatusChanged, IDomoticzTimeOfDayCha
 	private final IEvents events;
 	private final IDomoticzUpdateTransmitter transmitter;
 	private final ILogger log;
+	private final ILogger tracelog;
 	private final State state;
 
 	public Controlloop(final IEvents events, final IDomoticzUpdateTransmitter transmitter, final State state, final ILogger log) {
 		this.events = events;
 		this.transmitter = transmitter;
 		this.log = log;
+		tracelog = log.createContext("trace");
 		this.state = state;
 	}
 
@@ -46,6 +48,7 @@ class Controlloop implements IDomoticzDeviceStatusChanged, IDomoticzTimeOfDayCha
 	private void processEventResult(final EventResult results) {
 		for (final NextState<?> update : filter(results)) {
 			try {
+				tracelog.info(results.getSubscriberName().orElse("Unknown") + ": " + update);
 				transmitter.transmitDeviceUpdate(update);
 			} catch (final IOException e) {
 				log.exception(e, "Failed to transmit device update: " + update);

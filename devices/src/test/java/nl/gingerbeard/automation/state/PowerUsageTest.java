@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
 
+import nl.jqno.equalsverifier.EqualsVerifier;
+
 public class PowerUsageTest {
 
 	@Test
@@ -24,5 +26,10 @@ public class PowerUsageTest {
 		final PowerUsage pu = new PowerUsage(42);
 
 		assertEquals("PowerUsage [usageWatt=42]", pu.toString());
+	}
+
+	@Test
+	public void equalsContract() {
+		EqualsVerifier.forClass(PowerUsage.class).verify();
 	}
 }

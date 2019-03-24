@@ -2,7 +2,7 @@ package nl.gingerbeard.automation.state;
 
 import com.google.common.base.Preconditions;
 
-public class Color {
+public final class Color {
 
 	public static final int KELVIN_MAX = 6500;
 	public static final int KELVIN_MIN = 2700;
@@ -11,7 +11,7 @@ public class Color {
 		WhiteTemperature, RGB
 	}
 
-	public static class RGBColor {
+	public final static class RGBColor {
 		private final int r, g, b;
 
 		public RGBColor(final int r, final int g, final int b) {
@@ -44,35 +44,61 @@ public class Color {
 			return "RGBColor [r=" + r + ", g=" + g + ", b=" + b + "]";
 		}
 
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + b;
+			result = prime * result + g;
+			result = prime * result + r;
+			return result;
+		}
+
+		@Override
+		public boolean equals(final Object obj) {
+			if (this == obj) {
+				return true;
+			}
+			if (obj == null) {
+				return false;
+			}
+			if (getClass() != obj.getClass()) {
+				return false;
+			}
+			final RGBColor other = (RGBColor) obj;
+			if (b != other.b) {
+				return false;
+			}
+			if (g != other.g) {
+				return false;
+			}
+			if (r != other.r) {
+				return false;
+			}
+			return true;
+		}
+
 	}
 
 	private final ColorMode mode;
 	private final Level brightness;
-	private int whiteTemperature;
-	private RGBColor rgbColor;
+	private final int whiteTemperature;
+	private final RGBColor rgbColor;
 
-	private Color(final ColorMode mode, final Level brightness) {
+	private Color(final ColorMode mode, final RGBColor rgbColor, final Level brightness, final int whiteTemperature) {
 		this.mode = mode;
 		this.brightness = brightness;
-	}
-
-	private Color(final int whiteTemperature, final Level brightness) {
-		this(ColorMode.WhiteTemperature, brightness);
 		this.whiteTemperature = whiteTemperature;
-	}
-
-	public Color(final RGBColor rgbColor, final Level brightness) {
-		this(ColorMode.RGB, brightness);
 		this.rgbColor = rgbColor;
 	}
 
 	public static Color fromRgb(final int r, final int g, final int b, final int brightness) {
-		return new Color(new RGBColor(r, g, b), new Level(brightness));
+		return new Color(ColorMode.RGB, new RGBColor(r, g, b), new Level(brightness), 0);
 	}
 
 	public static Color fromWhiteColorTemperature(final int kelvin, final int brightness) {
 		Preconditions.checkArgument(kelvin >= KELVIN_MIN && kelvin <= KELVIN_MAX, "Supported values: [2700-6500] kelvin. Provided: " + kelvin);
-		return new Color(kelvin, new Level(brightness));
+		return new Color(ColorMode.WhiteTemperature, null, new Level(brightness), kelvin);
 	}
 
 	public int getWhiteTemperature() {

@@ -2,7 +2,7 @@ package nl.gingerbeard.automation.state;
 
 import com.google.common.base.Preconditions;
 
-public class Level {
+public final class Level {
 
 	private final int level;
 
@@ -36,7 +36,7 @@ public class Level {
 		if (obj == null) {
 			return false;
 		}
-		if (getClass() != obj.getClass()) {
+		if (!(obj instanceof Level)) {
 			return false;
 		}
 		final Level other = (Level) obj;
