@@ -8,6 +8,8 @@ import org.junit.jupiter.api.Test;
 
 import nl.gingerbeard.automation.state.Temperature.Unit;
 import nl.gingerbeard.automation.state.ThermostatState.ThermostatMode;
+import nl.jqno.equalsverifier.EqualsVerifier;
+import nl.jqno.equalsverifier.Warning;
 
 public class ThermostatStateTest {
 
@@ -62,8 +64,12 @@ public class ThermostatStateTest {
 	public void testToString_fullheat() {
 		final ThermostatState state = new ThermostatState();
 		state.setFullHeat();
-		;
 
 		assertEquals("ThermostatState [mode=FULL_HEAT, setPoint=Optional.empty]", state.toString());
+	}
+
+	@Test
+	public void equalsContract() {
+		EqualsVerifier.forClass(ThermostatState.class).suppress(Warning.NONFINAL_FIELDS).verify();
 	}
 }

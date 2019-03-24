@@ -5,9 +5,10 @@ import java.util.Optional;
 
 public final class Time {
 
-	private Optional<LocalDateTime> fixedTime = Optional.empty();
+	private final Optional<LocalDateTime> fixedTime;
 
 	public Time() {
+		fixedTime = Optional.empty();
 	}
 
 	public Time(final LocalDateTime fixedTime) {

@@ -1,5 +1,7 @@
 package nl.gingerbeard.automation.state;
 
+import com.google.common.base.Preconditions;
+
 public final class Temperature {
 
 	public static enum Unit {
@@ -63,6 +65,7 @@ public final class Temperature {
 	private final double value;
 
 	public Temperature(final double temperature, final Unit unit) {
+		Preconditions.checkArgument(unit != null, "Unit shall be provided");
 		value = temperature;
 		this.unit = unit;
 	}
@@ -100,7 +103,7 @@ public final class Temperature {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + (unit == null ? 0 : unit.hashCode());
+		result = prime * result + unit.hashCode();
 		long temp;
 		temp = Double.doubleToLongBits(value);
 		result = prime * result + (int) (temp ^ temp >>> 32);
@@ -115,10 +118,13 @@ public final class Temperature {
 		if (obj == null) {
 			return false;
 		}
-		if (getClass() != obj.getClass()) {
+		if (!(obj instanceof Temperature)) {
 			return false;
 		}
 		final Temperature other = (Temperature) obj;
+		if (unit != other.unit) {
+			return false;
+		}
 		final double otherC = other.unit.toCelcius(other.value);
 		final double thisC = unit.toCelcius(value);
 

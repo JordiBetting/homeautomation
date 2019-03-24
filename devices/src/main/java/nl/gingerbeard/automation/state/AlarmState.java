@@ -24,4 +24,5 @@ public enum AlarmState {
 	public boolean meets(final AlarmState other) {
 		return this == AlarmState.ALWAYS || equals(other) || other.equals(ALWAYS) || matches.isPresent() && matches.get().equals(other);
 	}
+
 }

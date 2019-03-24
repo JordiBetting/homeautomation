@@ -2,7 +2,7 @@ package nl.gingerbeard.automation.state;
 
 import com.google.common.base.Preconditions;
 
-public class LightIntensity {
+public final class LightIntensity {
 	private final int lux;
 
 	public LightIntensity(final int lux) {
@@ -35,7 +35,7 @@ public class LightIntensity {
 		if (obj == null) {
 			return false;
 		}
-		if (getClass() != obj.getClass()) {
+		if (!(obj instanceof LightIntensity)) {
 			return false;
 		}
 		final LightIntensity other = (LightIntensity) obj;

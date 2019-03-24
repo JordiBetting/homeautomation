@@ -8,6 +8,8 @@ import java.time.LocalDateTime;
 
 import org.junit.jupiter.api.Test;
 
+import nl.jqno.equalsverifier.EqualsVerifier;
+
 public class TimeOfDayTest {
 
 	@Test
@@ -108,5 +110,10 @@ public class TimeOfDayTest {
 		assertEquals(3, tod.getSunset());
 		assertEquals(4, tod.getCivilTwilightStart());
 		assertEquals(5, tod.getCivilTwilightEnd());
+	}
+
+	@Test
+	public void equalsContract() {
+		EqualsVerifier.forClass(TimeOfDayValues.class).verify();
 	}
 }

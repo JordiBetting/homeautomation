@@ -1,6 +1,7 @@
 package nl.gingerbeard.automation.devices;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.HashSet;
@@ -49,4 +50,23 @@ public class CompositeDeviceTest {
 		assertEquals(666, doorSensorId);
 	}
 
+	@Test
+	public void getIdx_unsupported() {
+		final Set<Device<?>> set = new HashSet<>();
+		set.add(new Switch(42));
+		final CompositeDevice<String> device = new TestCompositeDevice(set);
+
+		final UnsupportedOperationException e = assertThrows(UnsupportedOperationException.class, () -> device.getIdx());
+		assertEquals("CompositeDevices don't have an idx, use subdevices instead", e.getMessage());
+	}
+
+	@Test
+	public void updateState_unsupported() {
+		final Set<Device<?>> set = new HashSet<>();
+		set.add(new Switch(42));
+		final CompositeDevice<String> device = new TestCompositeDevice(set);
+
+		final UnsupportedOperationException e = assertThrows(UnsupportedOperationException.class, () -> device.updateState(""));
+		assertEquals("CompositeDevices cannot be updated. Update subdevices instead", e.getMessage());
+	}
 }
