@@ -44,7 +44,7 @@ public class OnOffAutoControlTest {
 
 		@SuppressWarnings("unchecked")
 		@Override
-		public void outputChanged(final List<NextState<?>> output) {
+		public void outputChanged(final String owner, final List<NextState<?>> output) {
 			final List<NextState<OnOffState>> onoffOut = new ArrayList<>();
 			output.stream().forEach((out) -> onoffOut.add((NextState<OnOffState>) out));
 			this.output = Optional.of(onoffOut);
