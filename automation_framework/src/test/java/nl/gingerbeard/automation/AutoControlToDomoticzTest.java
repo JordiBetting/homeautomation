@@ -4,6 +4,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -18,6 +19,8 @@ import org.junit.jupiter.api.Test;
 import nl.gingerbeard.automation.devices.Switch;
 import nl.gingerbeard.automation.domoticz.transmitter.IDomoticzUpdateTransmitter;
 import nl.gingerbeard.automation.logging.ILogger;
+import nl.gingerbeard.automation.logging.LogLevel;
+import nl.gingerbeard.automation.logging.TestLogger;
 import nl.gingerbeard.automation.state.NextState;
 import nl.gingerbeard.automation.state.OnOffState;
 
@@ -29,9 +32,9 @@ public class AutoControlToDomoticzTest {
 	@Test
 	public void forwarded() throws IOException {
 		final IDomoticzUpdateTransmitter transmitter = mock(IDomoticzUpdateTransmitter.class);
-		final AutoControlToDomoticz sut = new AutoControlToDomoticz(mock(ILogger.class), transmitter);
+		final AutoControlToDomoticz sut = new AutoControlToDomoticz(new TestLogger(), transmitter);
 
-		sut.outputChanged(createList(NEXT_STATE1, NEXT_STATE2));
+		sut.outputChanged("", createList(NEXT_STATE1, NEXT_STATE2));
 
 		verify(transmitter, times(1)).transmitDeviceUpdate(NEXT_STATE1);
 		verify(transmitter, times(1)).transmitDeviceUpdate(NEXT_STATE2);
@@ -47,13 +50,23 @@ public class AutoControlToDomoticzTest {
 
 	@Test
 	public void transmitterThrowsException_exceptionLogged() throws IOException {
-		final ILogger log = mock(ILogger.class);
+		final ILogger log = spy(new TestLogger());
 		final IDomoticzUpdateTransmitter transmitter = mock(IDomoticzUpdateTransmitter.class);
 		final AutoControlToDomoticz sut = new AutoControlToDomoticz(log, transmitter);
 
 		doThrow(IOException.class).when(transmitter).transmitDeviceUpdate(any());
-		sut.outputChanged(createList(NEXT_STATE1));
+		sut.outputChanged("", createList(NEXT_STATE1));
 
 		verify(log, times(1)).warning(any(), eq("Could not transmit update"));
+	}
+
+	@Test
+	public void forwarded_tracelogPresent() throws IOException {
+		final TestLogger log = new TestLogger();
+		final AutoControlToDomoticz sut = new AutoControlToDomoticz(log, mock(IDomoticzUpdateTransmitter.class));
+
+		sut.outputChanged(getClass().getSimpleName(), createList(NEXT_STATE1));
+
+		log.assertContains(LogLevel.INFO, "[trace] " + getClass().getSimpleName() + ": NextState [device=Device [idx=1], nextState=ON]");
 	}
 }
