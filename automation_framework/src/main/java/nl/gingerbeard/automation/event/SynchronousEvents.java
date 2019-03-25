@@ -15,7 +15,7 @@ import nl.gingerbeard.automation.logging.ILogger;
 import nl.gingerbeard.automation.state.IState;
 import nl.gingerbeard.automation.util.ReflectionUtil;
 
-final class SynchronousEvents implements IEvents {
+public final class SynchronousEvents implements IEvents {
 	private static final EventStateDefaults defaults = new EventStateDefaults();
 
 	private final ListMultimap<Class<?>, Subscriber> callback = ArrayListMultimap.create();

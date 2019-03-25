@@ -5,6 +5,8 @@ import java.util.Set;
 
 import com.google.common.base.Preconditions;
 
+import nl.gingerbeard.automation.autocontrol.AutoControl;
+import nl.gingerbeard.automation.autocontrol.AutoControlToDomoticz;
 import nl.gingerbeard.automation.deviceregistry.IDeviceRegistry;
 import nl.gingerbeard.automation.devices.CompositeDevice;
 import nl.gingerbeard.automation.devices.Device;

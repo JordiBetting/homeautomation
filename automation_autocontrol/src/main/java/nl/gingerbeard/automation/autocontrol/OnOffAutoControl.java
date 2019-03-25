@@ -8,7 +8,6 @@ import java.util.concurrent.TimeUnit;
 
 import com.google.common.collect.ImmutableList;
 
-import nl.gingerbeard.automation.AutoControl;
 import nl.gingerbeard.automation.autocontrol.timer.AutoControlTimer;
 import nl.gingerbeard.automation.devices.Device;
 import nl.gingerbeard.automation.devices.IDevice;

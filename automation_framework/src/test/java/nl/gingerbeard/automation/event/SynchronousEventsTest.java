@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Test;
 
 import com.google.common.collect.Lists;
 
-import nl.gingerbeard.automation.AutoControl;
+import nl.gingerbeard.automation.autocontrol.AutoControl;
 import nl.gingerbeard.automation.devices.Device;
 import nl.gingerbeard.automation.devices.IDevice;
 import nl.gingerbeard.automation.event.annotations.Subscribe;

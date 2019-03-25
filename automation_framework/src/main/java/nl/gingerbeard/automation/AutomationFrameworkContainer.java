@@ -1,12 +1,15 @@
 package nl.gingerbeard.automation;
 
+import nl.gingerbeard.automation.components.AutomationFrameworkComponent;
+import nl.gingerbeard.automation.components.EventsComponent;
+import nl.gingerbeard.automation.components.LoggingComponent;
+import nl.gingerbeard.automation.components.StateComponent;
 import nl.gingerbeard.automation.controlloop.ControlloopComponent;
 import nl.gingerbeard.automation.deviceregistry.DeviceRegistryComponent;
 import nl.gingerbeard.automation.domoticz.DomoticzComponent;
 import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
 import nl.gingerbeard.automation.domoticz.receiver.DomoticzEventReceiverComponent;
 import nl.gingerbeard.automation.domoticz.transmitter.DomoticzUpdateTransmitterComponent;
-import nl.gingerbeard.automation.event.EventsComponent;
 import nl.gingerbeard.automation.logging.ILogOutput;
 import nl.gingerbeard.automation.service.Container;
 

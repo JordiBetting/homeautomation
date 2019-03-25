@@ -1,5 +1,7 @@
-package nl.gingerbeard.automation.event;
+package nl.gingerbeard.automation.components;
 
+import nl.gingerbeard.automation.event.IEvents;
+import nl.gingerbeard.automation.event.SynchronousEvents;
 import nl.gingerbeard.automation.logging.ILogger;
 import nl.gingerbeard.automation.service.annotation.Activate;
 import nl.gingerbeard.automation.service.annotation.Deactivate;

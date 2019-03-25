@@ -1,8 +1,10 @@
-package nl.gingerbeard.automation;
+package nl.gingerbeard.automation.components;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import org.junit.jupiter.api.Test;
+
+import nl.gingerbeard.automation.components.LoggingComponent;
 
 public class LoggingComponentTest {
 	@Test

@@ -3,7 +3,7 @@ package nl.gingerbeard.automation.event;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import nl.gingerbeard.automation.AutoControl;
+import nl.gingerbeard.automation.autocontrol.AutoControl;
 import nl.gingerbeard.automation.event.annotations.EventState;
 
 final class Subscriber {

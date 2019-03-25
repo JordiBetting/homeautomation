@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import nl.gingerbeard.automation.autocontrol.AutoControl;
 import nl.gingerbeard.automation.devices.IDevice;
 import nl.gingerbeard.automation.state.IState;
 
