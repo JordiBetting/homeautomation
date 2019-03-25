@@ -6,7 +6,7 @@ import nl.gingerbeard.automation.logging.ILogOutput;
 
 public interface IAutomationFrameworkInterface {
 
-	void addRoom(Room room); // TODO: consider adding Class rather then instance
+	void addRoom(Room room);
 
 	void deviceChanged(Device<?> changedDevice);
 

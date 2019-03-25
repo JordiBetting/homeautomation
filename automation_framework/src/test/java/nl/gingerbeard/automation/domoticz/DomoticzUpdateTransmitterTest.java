@@ -184,4 +184,14 @@ public class DomoticzUpdateTransmitterTest {
 		final IOException e = assertThrows(IOException.class, () -> transmitter.transmitDeviceUpdate(new NextState<>(device, OnOffState.ON)));
 		assertTrue(e.getMessage().contains(body));
 	}
+
+	@Test
+	public void unexpectedErrorCode_emptyResponse_notInException() {
+		final IDomoticzUpdateTransmitter transmitter = new DomoticzUpdateTransmitter(domoticzConfig, new TestLogger());
+		final Switch device = new Switch(1);
+		webserver.setDefaultResponse(Status.NOT_FOUND, "");
+
+		final IOException e = assertThrows(IOException.class, () -> transmitter.transmitDeviceUpdate(new NextState<>(device, OnOffState.ON)));
+		assertEquals("http://localhost:" + webserver.getListeningPort() + "/json.htm?type=command&param=switchlight&idx=1&switchcmd=On Not Found", e.getMessage());
+	}
 }

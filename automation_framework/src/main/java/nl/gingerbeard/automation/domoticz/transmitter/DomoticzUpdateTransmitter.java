@@ -63,13 +63,13 @@ public final class DomoticzUpdateTransmitter implements IDomoticzUpdateTransmitt
 		}
 	}
 
-	private String readErrorBody(final HttpURLConnection con) {
-		try (InputStreamReader reader = new InputStreamReader(con.getErrorStream(), Charset.defaultCharset())) {
-			return CharStreams.toString(reader);
-		} catch (final IOException e) {
-			log.warning(e, "Failed extracting body from request.");
-			return "";
+	private String readErrorBody(final HttpURLConnection con) throws IOException {
+		if (con.getErrorStream() != null) {
+			try (InputStreamReader reader = new InputStreamReader(con.getErrorStream(), Charset.defaultCharset())) {
+				return CharStreams.toString(reader);
+			}
 		}
+		return "";
 	}
 
 	private HttpURLConnection createConnection(final URL url) throws IOException, ProtocolException {
