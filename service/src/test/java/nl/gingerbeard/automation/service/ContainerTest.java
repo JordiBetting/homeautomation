@@ -3,6 +3,7 @@ package nl.gingerbeard.automation.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -301,7 +302,6 @@ public class ContainerTest {
 	public static class ComponentWithOptionalString {
 		@Requires
 		public Optional<String> optionalString = Optional.empty();
-		// TODO: Determine if container shall set optional to empty.
 	}
 
 	@Test
@@ -314,6 +314,24 @@ public class ContainerTest {
 
 		assertTrue(component.isPresent());
 		assertTrue(component.get().optionalString.isPresent());
+	}
+
+	public static class ComponentWithUninitializedOptionalString {
+		@Requires
+		public Optional<String> optionalString;
+	}
+
+	@Test
+	public void optionalField_notFilled_setToEmpty() {
+		container = new Container();
+		container.register(ComponentWithUninitializedOptionalString.class);
+		container.start();
+
+		final Optional<ComponentWithUninitializedOptionalString> component = container.getComponent(ComponentWithUninitializedOptionalString.class);
+
+		assertTrue(component.isPresent());
+		assertNotNull(component.get().optionalString);
+		assertEquals(Optional.empty(), component.get().optionalString);
 	}
 
 	@Test

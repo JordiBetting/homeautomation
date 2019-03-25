@@ -45,8 +45,9 @@ public class AutomationFramework implements IAutomationFrameworkInterface {
 		try {
 			return roomClass.getConstructor().newInstance();
 		} catch (final InvocationTargetException e) {
-			if (e.getCause() instanceof RuntimeException) {
-				throw (RuntimeException) e.getCause();
+			final Throwable cause = e.getCause();
+			if (cause instanceof RuntimeException) {
+				throw (RuntimeException) cause;
 			} else {
 				throw new RuntimeException(e);
 			}
