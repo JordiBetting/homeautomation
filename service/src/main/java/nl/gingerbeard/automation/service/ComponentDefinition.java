@@ -86,7 +86,7 @@ public final class ComponentDefinition {
 				if (field.get(componentInstance) == null) {
 					field.set(componentInstance, Optional.empty());
 				}
-			} catch (IllegalArgumentException | IllegalAccessException e) {
+			} catch (final IllegalAccessException e) {
 				return false;
 			}
 			return true;

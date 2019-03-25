@@ -614,4 +614,24 @@ public class ContainerTest {
 		assertDoesNotThrow(() -> container.start());
 	}
 
+	public static class FinalRequiresComponent {
+		@Requires
+		final Optional<String> itsTheFinalCountdown;
+
+		public FinalRequiresComponent() {
+			itsTheFinalCountdown = Optional.empty();
+		}
+	}
+
+	@Test
+	public void finalField_throwsException() {
+		container = new Container();
+		container.register(FinalRequiresComponent.class);
+
+		container.register(String.class, "Test");
+
+		final ComponentException e = assertThrows(ComponentException.class, () -> container.start());
+		assertEquals("Service itsTheFinalCountdown of nl.gingerbeard.automation.service.ContainerTest$FinalRequiresComponent cannot be set", e.getMessage());
+
+	}
 }
