@@ -55,7 +55,7 @@ public final class DomoticzUpdateTransmitter implements IDomoticzUpdateTransmitt
 
 	private void validateResponseCode(final URL url, final HttpURLConnection con, final int responseCode) throws IOException {
 		if (responseCode != HttpURLConnection.HTTP_OK) {
-			String body = readBody(con);
+			String body = readErrorBody(con);
 			if (body.length() > 0) {
 				body = System.lineSeparator() + body;
 			}
@@ -63,8 +63,8 @@ public final class DomoticzUpdateTransmitter implements IDomoticzUpdateTransmitt
 		}
 	}
 
-	private String readBody(final HttpURLConnection con) {
-		try (InputStreamReader reader = new InputStreamReader(con.getInputStream(), Charset.defaultCharset())) {
+	private String readErrorBody(final HttpURLConnection con) {
+		try (InputStreamReader reader = new InputStreamReader(con.getErrorStream(), Charset.defaultCharset())) {
 			return CharStreams.toString(reader);
 		} catch (final IOException e) {
 			log.warning(e, "Failed extracting body from request.");
