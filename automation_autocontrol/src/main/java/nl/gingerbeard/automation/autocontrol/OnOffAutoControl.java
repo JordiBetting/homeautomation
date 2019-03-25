@@ -40,14 +40,10 @@ public final class OnOffAutoControl<DeviceType extends Device<StateType>, StateT
 
 	@Subscribe
 	public void sensorChanged(final Device<?> changedDevice) {
-		try {
-			@SuppressWarnings("unchecked")
-			final DeviceType changedSwitch = (DeviceType) changedDevice;
-			if (sensorExists(changedSwitch)) {
-				sensorChanged();
-			}
-		} catch (final ClassCastException e) {
-			// apparently not supported
+		@SuppressWarnings("unchecked")
+		final DeviceType changedSwitch = (DeviceType) changedDevice;
+		if (sensorExists(changedSwitch)) {
+			sensorChanged();
 		}
 	}
 
