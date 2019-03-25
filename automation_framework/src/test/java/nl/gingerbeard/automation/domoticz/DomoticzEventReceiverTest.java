@@ -108,8 +108,6 @@ public class DomoticzEventReceiverTest {
 		con.setRequestMethod("GET");
 
 		assertEquals(200, con.getResponseCode());
-		// log.assertContains(LogLevel.DEBUG, "GET /device/1234/hello/ from 127.0.0.1");
-		log.assertContains(LogLevel.DEBUG, "Success");
 	}
 
 	@Test
