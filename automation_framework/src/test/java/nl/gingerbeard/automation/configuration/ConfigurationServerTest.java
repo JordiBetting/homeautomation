@@ -26,6 +26,12 @@ public class ConfigurationServerTest {
 	private IConfigurationProvider providerMock;
 	private int port;
 
+	public ConfigurationServerTest() throws IOException {
+		// I'm getting sick of FindBugs. It complains that providerMock might be null.
+		// FindBugs doesn't understand @BeforeEach apparently
+		create();
+	}
+
 	@BeforeEach
 	public void create() throws IOException {
 		final ConfigurationServerSettings settings = new ConfigurationServerSettings(0);
