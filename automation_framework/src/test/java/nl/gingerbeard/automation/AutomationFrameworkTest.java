@@ -6,11 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -415,14 +411,13 @@ public class AutomationFrameworkTest {
 	}
 
 	@Test
-	public void automationFrameworkWithLogOutput() throws MalformedURLException, ProtocolException, IOException {
+	public void automationFramework() throws MalformedURLException, ProtocolException, IOException {
 		final ILogOutput logOut = mock(ILogOutput.class);
 		container = IAutomationFrameworkInterface.createFrameworkContainer(new DomoticzConfiguration(0, createMockUrl()), logOut);
 		container.start();
 		container.getAutomationFramework().addRoom(TestRoom.class);
 		updateDevice(1, "on");
 		container.stop();
-		verify(logOut, atLeastOnce()).log(any(), any(), anyString());
 	}
 
 	public static class StateRoom extends Room {

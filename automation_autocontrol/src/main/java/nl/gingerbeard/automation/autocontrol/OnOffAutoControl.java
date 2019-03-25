@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import com.google.common.collect.ImmutableList;
+
 import nl.gingerbeard.automation.AutoControl;
 import nl.gingerbeard.automation.autocontrol.timer.AutoControlTimer;
 import nl.gingerbeard.automation.devices.Device;
@@ -90,11 +92,11 @@ public final class OnOffAutoControl<DeviceType extends Device<StateType>, StateT
 	}
 
 	@Override
-	protected List<IDevice<?>> getDevices() {
+	public List<IDevice<?>> getDevices() {
 		final List<IDevice<?>> devices = new ArrayList<>();
 		devices.addAll(sensors.values());
 		devices.addAll(actuators);
-		return devices;
+		return ImmutableList.copyOf(devices);
 	}
 
 }
