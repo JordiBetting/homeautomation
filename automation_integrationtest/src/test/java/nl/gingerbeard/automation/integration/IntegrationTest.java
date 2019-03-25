@@ -4,12 +4,19 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.Charset;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+
+import com.google.common.io.CharStreams;
 
 import fi.iki.elonen.NanoHTTPD.Response.Status;
 import nl.gingerbeard.automation.AutomationFrameworkContainer;
@@ -135,4 +142,23 @@ public abstract class IntegrationTest {
 		changeRoom(room, "enable");
 	}
 
+	public List<String> getRooms() throws IOException {
+		final URL url = new URL("http://localhost:" + configPort + "/room");
+		final HttpURLConnection con = (HttpURLConnection) url.openConnection();
+		con.setRequestMethod("GET");
+
+		assertEquals(200, con.getResponseCode(), "Status expected: " + 200 + " but was: " + con.getResponseCode());
+
+		final String body = read(con.getInputStream());
+		return Arrays.asList(body.split(","));
+	}
+
+	private String read(final InputStream is) throws IOException {
+		if (is != null) {
+			try (InputStreamReader reader = new InputStreamReader(is, Charset.defaultCharset())) {
+				return CharStreams.toString(reader);
+			}
+		}
+		return "";
+	}
 }

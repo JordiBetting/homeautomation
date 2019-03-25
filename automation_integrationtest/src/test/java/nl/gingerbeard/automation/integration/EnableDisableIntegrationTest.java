@@ -31,10 +31,18 @@ public class EnableDisableIntegrationTest extends IntegrationTest {
 		}
 	}
 
+	public static class MyRoom2 extends Room {
+
+		@Subscribe
+		public void whatever(final Object ignore) {
+		}
+	}
+
 	@Test
 	public void enableDisableIntegrationTest() throws IOException {
 		final List<String> requests = webserver.getRequests();
 		automation.addRoom(MyRoom.class);
+		automation.addRoom(MyRoom2.class);
 
 		deviceChanged(2, "on");
 		assertEquals(1, requests.size());
@@ -46,5 +54,10 @@ public class EnableDisableIntegrationTest extends IntegrationTest {
 		enableRoom("MyRoom");
 		deviceChanged(2, "on");
 		assertEquals(2, requests.size());
+
+		final List<String> rooms = getRooms();
+		assertEquals(2, rooms.size(), "Actual: " + rooms.toString());
+		rooms.contains("MyRoom");
+		rooms.contains("MyRoom2");
 	}
 }
