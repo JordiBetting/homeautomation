@@ -1,5 +1,6 @@
 package nl.gingerbeard.automation.service;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -560,6 +561,16 @@ public class ContainerTest {
 	public static class PrivateRequiresComponent {
 		@Requires
 		private String privateString;
+
+		// following 2 methods are to satisfy static code checkers on the fact that the field is never used
+		public String getPrivateString() {
+			return privateString;
+		}
+
+		public void setPrivateString(final String privateString) {
+			this.privateString = privateString;
+		}
+
 	}
 
 	@Test
@@ -580,6 +591,23 @@ public class ContainerTest {
 		container = new Container();
 		container.register(EmptyComponent.class);
 		container.start();
+	}
+
+	@Test
+	public void registerServiceOfWrongType() {
+		container = new Container();
+		final IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> container.register(String.class, new Object(), 1, 1));
+		assertEquals("Service does not implement specified class", e.getMessage());
+	}
+
+	@Test
+	public void registerSimple_resolves() {
+		container = new Container();
+		container.register(RequiringComponent.class);
+
+		container.register(String.class, "Test");
+
+		assertDoesNotThrow(() -> container.start());
 	}
 
 }
