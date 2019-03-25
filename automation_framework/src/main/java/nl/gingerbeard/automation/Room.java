@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Optional;
 
 import nl.gingerbeard.automation.devices.IDevice;
-import nl.gingerbeard.automation.state.State;
+import nl.gingerbeard.automation.state.IState;
 
 public class Room {
 
@@ -15,7 +15,7 @@ public class Room {
 
 	private final RoomBuilder builder = new RoomBuilder();
 
-	private Optional<State> state = Optional.empty();
+	private Optional<IState> state = Optional.empty();
 
 	protected class RoomBuilder {
 		public RoomBuilder and(final IDevice<?> device) {
@@ -24,11 +24,11 @@ public class Room {
 		}
 	}
 
-	void setState(final State state) {
+	void setState(final IState state) {
 		this.state = Optional.of(state);
 	}
 
-	protected final State getState() {
+	protected final IState getState() {
 		return state.orElseThrow(() -> new IllegalStateException("State is not available when room has not been added to the automation framework."));
 	}
 

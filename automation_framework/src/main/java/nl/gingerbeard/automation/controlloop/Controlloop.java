@@ -15,8 +15,8 @@ import nl.gingerbeard.automation.event.EventResult;
 import nl.gingerbeard.automation.event.IEvents;
 import nl.gingerbeard.automation.logging.ILogger;
 import nl.gingerbeard.automation.state.AlarmState;
+import nl.gingerbeard.automation.state.IState;
 import nl.gingerbeard.automation.state.NextState;
-import nl.gingerbeard.automation.state.State;
 import nl.gingerbeard.automation.state.TimeOfDay;
 import nl.gingerbeard.automation.state.TimeOfDayValues;
 
@@ -25,9 +25,9 @@ class Controlloop implements IDomoticzDeviceStatusChanged, IDomoticzTimeOfDayCha
 	private final IDomoticzUpdateTransmitter transmitter;
 	private final ILogger log;
 	private final ILogger tracelog;
-	private final State state;
+	private final IState state;
 
-	public Controlloop(final IEvents events, final IDomoticzUpdateTransmitter transmitter, final State state, final ILogger log) {
+	public Controlloop(final IEvents events, final IDomoticzUpdateTransmitter transmitter, final IState state, final ILogger log) {
 		this.events = events;
 		this.transmitter = transmitter;
 		this.log = log;

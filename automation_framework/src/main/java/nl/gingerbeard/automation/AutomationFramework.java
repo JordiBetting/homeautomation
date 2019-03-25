@@ -10,16 +10,16 @@ import nl.gingerbeard.automation.devices.CompositeDevice;
 import nl.gingerbeard.automation.devices.Device;
 import nl.gingerbeard.automation.devices.IDevice;
 import nl.gingerbeard.automation.event.IEvents;
-import nl.gingerbeard.automation.state.State;
+import nl.gingerbeard.automation.state.IState;
 
 public class AutomationFramework implements IAutomationFrameworkInterface {
 
 	private final IEvents events;
 	private final IDeviceRegistry deviceRegistry;
 	private final AutoControlToDomoticz autoControlToDomoticz;
-	private final State state;
+	private final IState state;
 
-	public AutomationFramework(final IEvents events, final IDeviceRegistry deviceRegistry, final State state, final AutoControlToDomoticz autoControlToDomoticz) {
+	public AutomationFramework(final IEvents events, final IDeviceRegistry deviceRegistry, final IState state, final AutoControlToDomoticz autoControlToDomoticz) {
 		this.events = events;
 		this.deviceRegistry = deviceRegistry;
 		this.state = state;
@@ -41,7 +41,7 @@ public class AutomationFramework implements IAutomationFrameworkInterface {
 		return room;
 	}
 
-	private <T extends Room> T createRoom(final Class<T> roomClass) {
+	final <T extends Room> T createRoom(final Class<T> roomClass) {
 		try {
 			return roomClass.getConstructor().newInstance();
 		} catch (final InvocationTargetException e) {
@@ -49,8 +49,10 @@ public class AutomationFramework implements IAutomationFrameworkInterface {
 			if (cause instanceof RuntimeException) {
 				throw (RuntimeException) cause;
 			} else {
-				throw new RuntimeException(e);
+				throw new RuntimeException(cause);
 			}
+			// } catch (final InvocationTargetException e) {
+			// throw new RuntimeException(e.getCause());
 		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | NoSuchMethodException | SecurityException e) {
 			final RuntimeException rte = new RuntimeException("Is the room and its default constructor public?");
 			rte.initCause(e);

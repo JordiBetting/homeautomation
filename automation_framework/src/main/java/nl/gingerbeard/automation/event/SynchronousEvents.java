@@ -11,7 +11,7 @@ import com.google.common.collect.ListMultimap;
 import nl.gingerbeard.automation.event.annotations.EventState;
 import nl.gingerbeard.automation.event.annotations.Subscribe;
 import nl.gingerbeard.automation.logging.ILogger;
-import nl.gingerbeard.automation.state.State;
+import nl.gingerbeard.automation.state.IState;
 import nl.gingerbeard.automation.util.ReflectionUtil;
 
 final class SynchronousEvents implements IEvents {
@@ -19,7 +19,7 @@ final class SynchronousEvents implements IEvents {
 
 	private final ListMultimap<Class<?>, Subscriber> callback = ArrayListMultimap.create();
 	private final List<Object> subscribers = new ArrayList<>();
-	private final State state;
+	private final IState state;
 
 	private final ILogger log;
 
@@ -28,7 +28,7 @@ final class SynchronousEvents implements IEvents {
 
 	}
 
-	public SynchronousEvents(final State state, final ILogger log) {
+	public SynchronousEvents(final IState state, final ILogger log) {
 		this.state = state;
 		this.log = log;
 	}

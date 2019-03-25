@@ -43,8 +43,8 @@ import nl.gingerbeard.automation.logging.TestLogger.LogOutputToTestLogger;
 import nl.gingerbeard.automation.service.Container;
 import nl.gingerbeard.automation.state.AlarmState;
 import nl.gingerbeard.automation.state.HomeAway;
+import nl.gingerbeard.automation.state.IState;
 import nl.gingerbeard.automation.state.OnOffState;
-import nl.gingerbeard.automation.state.State;
 import nl.gingerbeard.automation.state.TimeOfDay;
 import nl.gingerbeard.automation.testdevices.TestDevice;
 
@@ -111,8 +111,8 @@ public class AutomationFrameworkTest {
 		}
 	}
 
-	private State getState() {
-		final Optional<State> service = container.getRuntime().getService(State.class);
+	private IState getState() {
+		final Optional<IState> service = container.getRuntime().getService(IState.class);
 		assertTrue(service.isPresent());
 		return service.get();
 	}
@@ -348,7 +348,7 @@ public class AutomationFrameworkTest {
 	@Test
 	public void compositeTest_allDevicesAdded() {
 		final DeviceRegistry registry = new DeviceRegistry();
-		final IAutomationFrameworkInterface framework = new AutomationFramework(mock(IEvents.class), registry, new State(), mock(AutoControlToDomoticz.class));
+		final IAutomationFrameworkInterface framework = new AutomationFramework(mock(IEvents.class), registry, mock(IState.class), mock(AutoControlToDomoticz.class));
 
 		framework.addRoom(ThermostatRoom.class);
 
@@ -398,7 +398,7 @@ public class AutomationFrameworkTest {
 
 	@Test
 	public void addUnsupportedDevice_throwsException() {
-		final IAutomationFrameworkInterface framework = new AutomationFramework(mock(IEvents.class), mock(IDeviceRegistry.class), new State(), mock(AutoControlToDomoticz.class));
+		final IAutomationFrameworkInterface framework = new AutomationFramework(mock(IEvents.class), mock(IDeviceRegistry.class), mock(IState.class), mock(AutoControlToDomoticz.class));
 		assertThrows(UnsupportedOperationException.class, () -> framework.addRoom(RoomWithFakeDevice.class));
 	}
 
@@ -427,7 +427,7 @@ public class AutomationFrameworkTest {
 
 	public static class StateRoom extends Room {
 
-		public State exposeState() {
+		public IState exposeState() {
 			return getState();
 		}
 
@@ -445,9 +445,9 @@ public class AutomationFrameworkTest {
 	public void roomState_isSystemState() {
 
 		final IAutomationFrameworkInterface framework = createIntegration();
-		final Optional<State> optionalState = container.getRuntime().getService(State.class);
+		final Optional<IState> optionalState = container.getRuntime().getService(IState.class);
 		assertTrue(optionalState.isPresent());
-		final State state = optionalState.get();
+		final IState state = optionalState.get();
 		state.setTimeOfDay(TimeOfDay.DAYTIME);
 
 		final StateRoom stateroom = framework.addRoom(StateRoom.class);
@@ -456,5 +456,63 @@ public class AutomationFrameworkTest {
 		assertEquals(TimeOfDay.DAYTIME, stateroom.getState().getTimeOfDay());
 		state.setTimeOfDay(TimeOfDay.NIGHTTIME);
 		assertEquals(TimeOfDay.NIGHTTIME, stateroom.getState().getTimeOfDay());
+	}
+
+	public static class WorkingRoom extends Room {
+
+	}
+
+	@Test
+	public void createRoom() {
+		final AutomationFramework automation = new AutomationFramework(mock(IEvents.class), mock(IDeviceRegistry.class), mock(IState.class), mock(AutoControlToDomoticz.class));
+
+		final WorkingRoom room = automation.createRoom(WorkingRoom.class);
+
+		assertNotNull(room);
+	}
+
+	public static class ThrowingNPEConstructorRoom extends Room {
+		public ThrowingNPEConstructorRoom() {
+			throw new NullPointerException("Test NPE");
+		}
+	}
+
+	@Test
+	public void createRoom_constructorThrowsNPE_exceptionThrown() {
+		final AutomationFramework automation = new AutomationFramework(mock(IEvents.class), mock(IDeviceRegistry.class), mock(IState.class), mock(AutoControlToDomoticz.class));
+
+		final NullPointerException e = assertThrows(NullPointerException.class, () -> automation.createRoom(ThrowingNPEConstructorRoom.class));
+		assertEquals("Test NPE", e.getMessage());
+	}
+
+	public static class ThrowingCheckedExceptionConstructorRoom extends Room {
+		public ThrowingCheckedExceptionConstructorRoom() throws IOException {
+			throw new IOException("TEST IOE");
+		}
+	}
+
+	@Test
+	public void createRoom_constructorThrowsChecked_exceptionWrappedInRTE() {
+		final AutomationFramework automation = new AutomationFramework(mock(IEvents.class), mock(IDeviceRegistry.class), mock(IState.class), mock(AutoControlToDomoticz.class));
+
+		final RuntimeException e = assertThrows(RuntimeException.class, () -> automation.createRoom(ThrowingCheckedExceptionConstructorRoom.class));
+
+		assertNotNull(e.getCause());
+		assertEquals(IOException.class, e.getCause().getClass());
+		assertEquals("TEST IOE", e.getCause().getMessage());
+	}
+
+	public static class PrivateConstructorRoom extends Room {
+		private PrivateConstructorRoom() {
+		}
+	}
+
+	@Test
+	public void createRoom_privateConstructor_throwsException() {
+		final AutomationFramework automation = new AutomationFramework(mock(IEvents.class), mock(IDeviceRegistry.class), mock(IState.class), mock(AutoControlToDomoticz.class));
+
+		final RuntimeException e = assertThrows(RuntimeException.class, () -> automation.createRoom(PrivateConstructorRoom.class));
+		assertEquals("Is the room and its default constructor public?", e.getMessage());
+		assertEquals(NoSuchMethodException.class, e.getCause().getClass());
 	}
 }
