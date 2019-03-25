@@ -5,7 +5,7 @@ import nl.gingerbeard.automation.devices.Device;
 public class StringTestDevice extends Device<String> {
 
 	public StringTestDevice() {
-		super(0);
+		super(42);
 	}
 
 	@Override

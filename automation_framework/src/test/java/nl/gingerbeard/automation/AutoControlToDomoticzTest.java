@@ -67,6 +67,6 @@ public class AutoControlToDomoticzTest {
 
 		sut.outputChanged(getClass().getSimpleName(), createList(NEXT_STATE1));
 
-		log.assertContains(LogLevel.INFO, "[trace] " + getClass().getSimpleName() + ": NextState [device=Device [idx=1], nextState=ON]");
+		log.assertContains(LogLevel.INFO, "[trace] " + getClass().getSimpleName() + ": NextState [device=Device [idx=1, name=Optional.empty, state=null], nextState=ON]");
 	}
 }

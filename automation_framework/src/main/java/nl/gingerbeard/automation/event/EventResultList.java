@@ -10,7 +10,6 @@ import com.google.common.collect.ImmutableList;
 public final class EventResultList implements EventResult {
 
 	private final List<Object> results = new ArrayList<>();
-	private final Optional<String> subscriberName = Optional.empty();
 
 	EventResultList() {
 	}

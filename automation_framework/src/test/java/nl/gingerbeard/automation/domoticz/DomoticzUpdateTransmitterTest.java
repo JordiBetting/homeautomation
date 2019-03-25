@@ -165,7 +165,7 @@ public class DomoticzUpdateTransmitterTest {
 	@Test
 	public void testFailedConnection() throws IOException {
 		final IDomoticzUpdateTransmitter transmitter = new DomoticzUpdateTransmitter(new DomoticzConfiguration(0, new URL("http://doesnotexist")), new TestLogger());
-		final NextState<OnOffState> newState = new NextState<>(new Switch(0), OnOffState.OFF);
+		final NextState<OnOffState> newState = new NextState<>(new Switch(42), OnOffState.OFF);
 
 		assertThrows(IOException.class, () -> transmitter.transmitDeviceUpdate(newState));
 	}

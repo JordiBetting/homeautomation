@@ -11,7 +11,7 @@ public class LightSensorTest {
 
 	@Test
 	public void updateState_validInput() {
-		final LightSensor device = new LightSensor(0);
+		final LightSensor device = new LightSensor(1);
 
 		final boolean result = device.updateState("1");
 
@@ -21,13 +21,13 @@ public class LightSensorTest {
 
 	@Test
 	public void updateState_negativeInput_throwsException() {
-		final LightSensor device = new LightSensor(0);
+		final LightSensor device = new LightSensor(1);
 		assertThrows(IllegalArgumentException.class, () -> device.updateState("-1"));
 	}
 
 	@Test
 	public void updateState_invalidInput() {
-		final LightSensor device = new LightSensor(0);
+		final LightSensor device = new LightSensor(1);
 
 		final boolean result = device.updateState("#invalid#");
 
