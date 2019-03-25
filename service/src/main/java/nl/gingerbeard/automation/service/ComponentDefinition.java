@@ -50,9 +50,6 @@ public final class ComponentDefinition {
 	}
 
 	void resolve(final ServiceRegistry serviceRegistry) {
-		if (isResolved()) {
-			return;
-		}
 		if (!isAllFieldsResolved(serviceRegistry)) {
 			return;
 		}

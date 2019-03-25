@@ -116,14 +116,8 @@ public final class ServiceRegistry {
 	}
 
 	private ServiceInstance findServiceInstance(final Collection<ServiceInstance> services, final String fieldName) {
-		ServiceInstance found = null;
-		for (final ServiceInstance instance : services) {
-			if (instance.getName().equals(fieldName)) {
-				found = instance;
-				break;
-			}
-		}
-		return found;
+		final Optional<ServiceInstance> found = services.stream().filter((instance) -> instance.getName().equals(fieldName)).findFirst();
+		return found.orElse(null);
 	}
 
 	public static class InactiveServiceException extends RuntimeException {
