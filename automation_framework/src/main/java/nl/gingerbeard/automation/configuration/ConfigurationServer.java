@@ -35,12 +35,12 @@ public final class ConfigurationServer extends NanoHTTPD {
 	}
 
 	private Response processEnableRoom(final Request request) {
-		provider.enable(request.getUriParameters()[0]);
+		provider.enable(request.getUriParameters().get(0));
 		return success();
 	}
 
 	private Response processDisableRoom(final Request request) {
-		provider.disable(request.getUriParameters()[0]);
+		provider.disable(request.getUriParameters().get(0));
 		return success();
 	}
 

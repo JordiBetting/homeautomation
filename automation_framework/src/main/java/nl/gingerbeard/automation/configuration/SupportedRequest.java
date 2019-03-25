@@ -1,5 +1,7 @@
 package nl.gingerbeard.automation.configuration;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -33,14 +35,14 @@ public final class SupportedRequest {
 
 	public Response execute(final IHTTPSession session) {
 		final Matcher matcher = uriPattern.matcher(session.getUri());
-		return executor.apply(new Request(createParameterArray(matcher)));
+		return executor.apply(new Request(createParameters(matcher)));
 	}
 
-	private String[] createParameterArray(final Matcher matcher) {
+	private List<String> createParameters(final Matcher matcher) {
 		matcher.matches();
-		final String[] parameters = new String[matcher.groupCount()];
+		final List<String> parameters = new ArrayList<>();
 		for (int i = 0; i < matcher.groupCount(); i++) {
-			parameters[i] = matcher.group(i + 1);
+			parameters.add(matcher.group(i + 1));
 		}
 		return parameters;
 	}
