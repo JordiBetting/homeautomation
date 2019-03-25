@@ -44,7 +44,7 @@ public class ConfigurationServerTest {
 
 	@Test
 	public void listAllRooms() throws IOException {
-		final HttpURLConnection con = openGETConnection("/rooms");
+		final HttpURLConnection con = openGETConnection("/room");
 		when(providerMock.getRooms()).thenReturn(Lists.newArrayList("one", "two", "three"));
 
 		assertEquals(200, con.getResponseCode());
@@ -60,14 +60,14 @@ public class ConfigurationServerTest {
 
 	@Test
 	public void list_otherMethod_405() throws IOException {
-		final HttpURLConnection con = openPOSTConnection("/rooms");
+		final HttpURLConnection con = openPOSTConnection("/room");
 
 		assertEquals(405, con.getResponseCode());
 	}
 
 	@Test
 	public void disableWorks() throws IOException {
-		final HttpURLConnection con = openPOSTConnection("/rooms/living/disable");
+		final HttpURLConnection con = openPOSTConnection("/room/living/disable");
 
 		assertEquals(200, con.getResponseCode());
 		verify(providerMock, times(1)).disable("living");
@@ -75,14 +75,14 @@ public class ConfigurationServerTest {
 
 	@Test
 	public void disable_otherMethod_405() throws IOException {
-		final HttpURLConnection con = openGETConnection("/rooms/living/disable");
+		final HttpURLConnection con = openGETConnection("/room/living/disable");
 
 		assertEquals(405, con.getResponseCode());
 	}
 
 	@Test
 	public void enableWorks() throws IOException {
-		final HttpURLConnection con = openPOSTConnection("/rooms/living/enable");
+		final HttpURLConnection con = openPOSTConnection("/room/living/enable");
 
 		assertEquals(200, con.getResponseCode());
 		verify(providerMock, times(1)).enable("living");
@@ -90,7 +90,7 @@ public class ConfigurationServerTest {
 
 	@Test
 	public void enable_otherMethod_405() throws IOException {
-		final HttpURLConnection con = openGETConnection("/rooms/living/enable");
+		final HttpURLConnection con = openGETConnection("/room/living/enable");
 
 		assertEquals(405, con.getResponseCode());
 	}
