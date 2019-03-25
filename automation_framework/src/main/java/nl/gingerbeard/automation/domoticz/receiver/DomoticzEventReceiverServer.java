@@ -155,7 +155,7 @@ public final class DomoticzEventReceiverServer extends NanoHTTPD implements IDom
 		if (result) {
 			log.debug("Successfully updated device with id " + device.getIdx());
 		} else {
-			log.warning("Device is not handled by this instance " + device);
+			// log.warning("Device is not handled by this instance " + device);
 			response = Optional.of(newFixedLengthResponse(Status.NOT_FOUND, NanoHTTPD.MIME_PLAINTEXT, "Could not process request."));
 		}
 		return response;
