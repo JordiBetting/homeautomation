@@ -12,7 +12,7 @@ public class AutoControlExample extends AutoControl {
 	}
 
 	@Override
-	protected List<IDevice<?>> getDevices() {
+	public List<IDevice<?>> getDevices() {
 		return null;
 	}
 }

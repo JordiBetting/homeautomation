@@ -40,10 +40,10 @@ public final class DomoticzUpdateTransmitter implements IDomoticzUpdateTransmitt
 	private void executeRequest(final URL url) throws IOException, ProtocolException {
 		HttpURLConnection con = null;
 		try {
-			log.debug("Creating request: " + url.toString());
+			// log.debug("Creating request: " + url.toString());
 			con = createConnection(url);
 			final int responseCode = con.getResponseCode();
-			log.debug("Response on " + url.toString() + " - " + responseCode);
+			log.debug("Domoticz call " + responseCode + " on " + url.toString());
 			validateResponseCode(url, con, responseCode);
 			validateOutput(con);
 		} finally {

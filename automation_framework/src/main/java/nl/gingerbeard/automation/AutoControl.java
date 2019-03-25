@@ -37,14 +37,15 @@ public abstract class AutoControl {
 	 *
 	 * @return
 	 */
-	protected abstract List<IDevice<?>> getDevices();
+	public abstract List<IDevice<?>> getDevices();
 
 	/**
 	 * Returns the owner (creator) of the AutoControl instance
 	 *
 	 * @return
 	 */
-	public String getOwner() {
+	public final String getOwner() {
 		return owner;
 	}
+
 }
