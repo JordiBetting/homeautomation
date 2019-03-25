@@ -9,9 +9,6 @@ import java.util.Optional;
 
 import com.google.common.collect.Lists;
 
-//TODO: it is cleaner if this class' access modifier can be removed.
-//		However, UnresolvedDependencyException depends on it and is in another package.
-//		Fix this so that both are cleanly separated.
 public final class ServiceRegistry {
 	private final Map<ComponentDefinition, List<ServiceInstance>> componentServices;
 

@@ -25,7 +25,7 @@ public final class DomoticzUrls {
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private ChainOfResponsibility<Parameter, URL> createChainOfCommand() {
-		final String deviceTypesPackageName = ChainOfCommandType.class.getPackageName();
+		final String deviceTypesPackageName = ChainOfCommandType.class.getPackage().getName();
 		final Set<ChainOfCommandType> types = ReflectionUtil.createInstancesBySubtype(deviceTypesPackageName, ChainOfCommandType.class);
 		final ChainOfResponsibility.Builder<Parameter, URL> builder = ChainOfResponsibility.builder();
 		types.stream().forEach((type) -> builder.add(type));
