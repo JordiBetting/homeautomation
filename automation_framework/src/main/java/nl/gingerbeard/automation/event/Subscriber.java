@@ -3,6 +3,7 @@ package nl.gingerbeard.automation.event;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+import nl.gingerbeard.automation.AutoControl;
 import nl.gingerbeard.automation.event.annotations.EventState;
 
 final class Subscriber {
@@ -51,6 +52,15 @@ final class Subscriber {
 	}
 
 	boolean hasSimpleName(final String classSimpleName) {
-		return classSimpleName.equals(instance.getClass().getSimpleName());
+		if (classSimpleName.equals(instance.getClass().getSimpleName())) {
+			return true;
+		}
+		if (instance instanceof AutoControl) {
+			final AutoControl control = (AutoControl) instance;
+			if (classSimpleName.equals(control.getOwner().replaceAll(".*\\$", ""))) {
+				return true;
+			}
+		}
+		return false;
 	}
 }

@@ -8,12 +8,17 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import com.google.common.collect.Lists;
+
+import nl.gingerbeard.automation.AutoControl;
 import nl.gingerbeard.automation.devices.Device;
+import nl.gingerbeard.automation.devices.IDevice;
 import nl.gingerbeard.automation.event.annotations.Subscribe;
 import nl.gingerbeard.automation.logging.ILogger;
 import nl.gingerbeard.automation.logging.LogLevel;
@@ -412,5 +417,65 @@ public class SynchronousEventsTest {
 		final IEvents events = new SynchronousEvents(new State(), logMock);
 
 		assertThrows(IllegalArgumentException.class, () -> events.enable("nothingpresent"));
+	}
+
+	public static class AutoControlSubscriber {
+
+		public static class BlaatControl extends AutoControl {
+			private int count;
+
+			@Override
+			public List<IDevice<?>> getDevices() {
+				return Lists.newArrayList();
+			}
+
+			@Subscribe
+			public void receiveStrings(final String event) {
+				count++;
+			}
+
+			public int getCount() {
+				return count;
+			}
+		}
+
+		private final BlaatControl control;
+
+		public AutoControlSubscriber() {
+			control = new BlaatControl();
+		}
+
+		public int getCount() {
+			return control.getCount();
+		}
+
+		public BlaatControl getControl() {
+			return control;
+		}
+
+	}
+
+	@Test
+	public void disableAutoControlOwnerUsed() {
+		final IEvents events = new SynchronousEvents(new State(), logMock);
+		final AutoControlSubscriber subscriber = new AutoControlSubscriber();
+		events.subscribe(subscriber.getControl());
+
+		events.disable(AutoControlSubscriber.class.getSimpleName());
+		events.trigger("hi");
+
+		assertEquals(0, subscriber.getCount());
+	}
+
+	@Test
+	public void enableAutoControlOwnerUsed() {
+		final IEvents events = new SynchronousEvents(new State(), logMock);
+		final AutoControlSubscriber subscriber = new AutoControlSubscriber();
+		events.subscribe(subscriber.getControl());
+
+		events.disable(AutoControlSubscriber.class.getSimpleName());
+		events.enable(AutoControlSubscriber.class.getSimpleName());
+		events.trigger("goedendag");
+		assertEquals(1, subscriber.getCount());
 	}
 }
