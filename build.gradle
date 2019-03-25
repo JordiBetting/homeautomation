@@ -14,7 +14,7 @@ subprojects {
 	apply plugin: 'findbugs'
 	apply plugin: 'maven-publish'
 	
-	version = "0.0.30"
+	version = "0.0.31"
 	group = "nl.gingerbeard"
 
 	dependencies {
