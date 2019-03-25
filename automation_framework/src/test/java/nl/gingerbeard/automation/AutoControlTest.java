@@ -9,30 +9,14 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-import nl.gingerbeard.automation.devices.IDevice;
-import nl.gingerbeard.automation.state.NextState;
-
 public class AutoControlTest {
-
-	private static class TestAutoControl extends AutoControl {
-
-		void triggerListener(final List<NextState<?>> updates) {
-			super.updateActuators(updates);
-		}
-
-		@Override
-		protected List<IDevice<?>> getDevices() {
-			return null;
-		}
-	}
 
 	@Test
 	public void updateListener_listenerCalled() {
-		final TestAutoControl control = new TestAutoControl();
+		final AutoControlExample control = new AutoControlExample();
 		final AutoControlListener listener = mock(AutoControlListener.class);
 		control.setListener(listener);
 
@@ -43,7 +27,7 @@ public class AutoControlTest {
 
 	@Test
 	public void noListener_noException() {
-		final TestAutoControl control = new TestAutoControl();
+		final AutoControlExample control = new AutoControlExample();
 
 		assertDoesNotThrow(() -> //
 		control.triggerListener(new ArrayList<>())//
@@ -52,7 +36,7 @@ public class AutoControlTest {
 
 	@Test
 	public void updateListener_ownerIsTestClass() {
-		final TestAutoControl control = new TestAutoControl();
+		final AutoControlExample control = new AutoControlExample();
 		final AutoControlListener listener = mock(AutoControlListener.class);
 		control.setListener(listener);
 
@@ -63,7 +47,7 @@ public class AutoControlTest {
 
 	@Test
 	public void owner() {
-		final TestAutoControl control = new TestAutoControl();
+		final AutoControlExample control = new AutoControlExample();
 		assertEquals(getClass().getSimpleName(), control.getOwner());
 	}
 }

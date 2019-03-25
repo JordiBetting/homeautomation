@@ -20,9 +20,8 @@ public abstract class AutoControl {
 		// 1 This method
 		// 2 Constructor of AutoControl
 		// 3 Derived AutoControl class
-		// 4 Derived AutoControl class constructor
-		// 5 Creator of the derived AutoControl
-		return Thread.currentThread().getStackTrace()[5].getClassName().replaceAll(".*\\.", "");
+		// 4 Creator of the derived AutoControl
+		return Thread.currentThread().getStackTrace()[4].getClassName().replaceAll(".*\\.", "");
 	}
 
 	public final void setListener(final AutoControlListener listener) {
