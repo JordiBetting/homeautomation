@@ -478,4 +478,56 @@ public class SynchronousEventsTest {
 		events.trigger("goedendag");
 		assertEquals(1, subscriber.getCount());
 	}
+
+	public static class AutoControlSubscriber2 {
+
+		public static class BlaatControl2 extends AutoControl {
+			private int count;
+
+			@Override
+			public List<IDevice<?>> getDevices() {
+				return Lists.newArrayList();
+			}
+
+			@Subscribe
+			public void receiveStrings(final String event) {
+				count++;
+			}
+
+			public int getCount() {
+				return count;
+			}
+		}
+
+		private final BlaatControl2 control;
+
+		public AutoControlSubscriber2() {
+			control = new BlaatControl2();
+		}
+
+		public int getCount() {
+			return control.getCount();
+		}
+
+		public BlaatControl2 getControl() {
+			return control;
+		}
+
+	}
+
+	@Test
+	public void disableAutoControlOwnerUsed_multipleAutoControls() {
+		final IEvents events = new SynchronousEvents(new State(), logMock);
+		final AutoControlSubscriber subscriber = new AutoControlSubscriber();
+		final AutoControlSubscriber2 subscriber2 = new AutoControlSubscriber2();
+		events.subscribe(subscriber.getControl());
+		events.subscribe(subscriber2.getControl());
+
+		events.disable(AutoControlSubscriber2.class.getSimpleName());
+		events.trigger("hi");
+
+		assertEquals(1, subscriber.getCount());
+		assertEquals(0, subscriber2.getCount());
+	}
+
 }

@@ -50,6 +50,10 @@ subprojects {
 		reportLevel = "low"
 	}
 	
+	tasks.withType(Test) {
+        maxParallelForks = Runtime.runtime.availableProcessors()
+    }
+	
 	publishing {
 		publications {
 			mavenJava(MavenPublication) {
