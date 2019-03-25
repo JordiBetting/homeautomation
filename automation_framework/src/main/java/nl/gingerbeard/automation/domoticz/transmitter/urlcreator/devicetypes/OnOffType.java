@@ -1,6 +1,5 @@
 package nl.gingerbeard.automation.domoticz.transmitter.urlcreator.devicetypes;
 
-import nl.gingerbeard.automation.domoticz.transmitter.urlcreator.ChainOfCommandType;
 import nl.gingerbeard.automation.domoticz.transmitter.urlcreator.URLBuilder;
 import nl.gingerbeard.automation.domoticz.transmitter.urlcreator.domoticzapi.Keys;
 import nl.gingerbeard.automation.domoticz.transmitter.urlcreator.domoticzapi.Param;

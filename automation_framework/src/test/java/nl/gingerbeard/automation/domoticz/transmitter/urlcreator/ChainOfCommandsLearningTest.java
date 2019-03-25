@@ -7,6 +7,7 @@ import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.reflections.Reflections;
 
+import nl.gingerbeard.automation.domoticz.transmitter.urlcreator.devicetypes.ChainOfCommandType;
 import nl.gingerbeard.automation.domoticz.transmitter.urlcreator.devicetypes.ThermostatModeType;
 
 public class ChainOfCommandsLearningTest {

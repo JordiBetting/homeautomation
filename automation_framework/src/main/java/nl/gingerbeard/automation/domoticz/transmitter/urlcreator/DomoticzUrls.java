@@ -6,6 +6,8 @@ import java.util.Optional;
 import java.util.Set;
 
 import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
+import nl.gingerbeard.automation.domoticz.transmitter.urlcreator.devicetypes.ChainOfCommandType;
+import nl.gingerbeard.automation.domoticz.transmitter.urlcreator.devicetypes.Parameter;
 import nl.gingerbeard.automation.state.NextState;
 import nl.gingerbeard.automation.util.ChainOfResponsibility;
 import nl.gingerbeard.automation.util.ReflectionUtil;
@@ -23,7 +25,7 @@ public final class DomoticzUrls {
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private ChainOfResponsibility<Parameter, URL> createChainOfCommand() {
-		final String deviceTypesPackageName = "nl.gingerbeard.automation.domoticz.transmitter.urlcreator.devicetypes";
+		final String deviceTypesPackageName = ChainOfCommandType.class.getPackageName();
 		final Set<ChainOfCommandType> types = ReflectionUtil.createInstancesBySubtype(deviceTypesPackageName, ChainOfCommandType.class);
 		final ChainOfResponsibility.Builder<Parameter, URL> builder = ChainOfResponsibility.builder();
 		types.stream().forEach((type) -> builder.add(type));

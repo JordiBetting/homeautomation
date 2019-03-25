@@ -1,7 +1,8 @@
-package nl.gingerbeard.automation.domoticz.transmitter.urlcreator;
+package nl.gingerbeard.automation.domoticz.transmitter.urlcreator.devicetypes;
 
 import java.net.URL;
 
+import nl.gingerbeard.automation.domoticz.transmitter.urlcreator.URLBuilder;
 import nl.gingerbeard.automation.state.NextState;
 import nl.gingerbeard.automation.util.ChainOfResponsibility;
 

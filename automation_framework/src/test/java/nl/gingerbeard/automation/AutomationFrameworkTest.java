@@ -515,4 +515,11 @@ public class AutomationFrameworkTest {
 		assertEquals("Is the room and its default constructor public?", e.getMessage());
 		assertEquals(NoSuchMethodException.class, e.getCause().getClass());
 	}
+
+	@Test
+	public void addRoom_roomIsNull_throwsException() {
+		final AutomationFramework automation = new AutomationFramework(mock(IEvents.class), mock(IDeviceRegistry.class), mock(IState.class), mock(AutoControlToDomoticz.class));
+
+		assertThrows(IllegalArgumentException.class, () -> automation.addRoom(null));
+	}
 }
