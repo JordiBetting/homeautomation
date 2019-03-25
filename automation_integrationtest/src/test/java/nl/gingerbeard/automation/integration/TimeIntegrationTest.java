@@ -21,7 +21,7 @@ public class TimeIntegrationTest extends IntegrationTest {
 	@EventState(timeOfDay = TimeOfDay.DAYTIME)
 	public static class DayTimeSwitchRoom extends Room {
 
-		private static final Switch SENSOR = new Switch(0);
+		private static final Switch SENSOR = new Switch(2);
 		private static final Switch ACTUATOR = new Switch(1);
 		private int callCount = 0;
 
@@ -54,7 +54,7 @@ public class TimeIntegrationTest extends IntegrationTest {
 		assertEquals(0, room.getCallCount());
 
 		// it is daytime, switch changed, expect to receive event
-		deviceChanged(0, "on");
+		deviceChanged(2, "on");
 		assertEquals(1, room.getCallCount());
 
 		// switch to nighttime, should not be triggered in room
@@ -62,7 +62,7 @@ public class TimeIntegrationTest extends IntegrationTest {
 		assertEquals(1, room.getCallCount());
 
 		// it is nighttime, switch changed, expect no event
-		deviceChanged(0, "off");
+		deviceChanged(2, "off");
 		assertEquals(1, room.getCallCount());
 	}
 

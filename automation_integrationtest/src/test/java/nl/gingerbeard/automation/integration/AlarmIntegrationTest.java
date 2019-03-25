@@ -86,7 +86,7 @@ public class AlarmIntegrationTest extends IntegrationTest {
 	@EventState(alarmState = AlarmState.ARM_HOME)
 	public static class AlarmSwitchRoom extends Room {
 
-		private static final Switch SENSOR = new Switch(0);
+		private static final Switch SENSOR = new Switch(1);
 		private int callCount = 0;
 
 		AlarmSwitchRoom() {
@@ -110,23 +110,23 @@ public class AlarmIntegrationTest extends IntegrationTest {
 		automation.addRoom(room);
 
 		// intial state = disarmed. No receiving stuff
-		deviceChanged(0, "on");
+		deviceChanged(1, "on");
 		assertEquals(0, room.getCallCount());
 
 		updateAlarm("arm_home");
-		deviceChanged(0, "on");
+		deviceChanged(1, "on");
 		assertEquals(1, room.getCallCount());
 
 		updateAlarm("arm_away");
-		deviceChanged(0, "on");
+		deviceChanged(1, "on");
 		assertEquals(1, room.getCallCount());
 
 		updateAlarm("disarmed");
-		deviceChanged(0, "on");
+		deviceChanged(1, "on");
 		assertEquals(1, room.getCallCount());
 
 		updateAlarm("arm_home");
-		deviceChanged(0, "on");
+		deviceChanged(1, "on");
 		assertEquals(2, room.getCallCount());
 	}
 

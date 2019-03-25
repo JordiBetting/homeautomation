@@ -17,7 +17,7 @@ public class ActuatorSensorIntegrationTest extends IntegrationTest {
 	public static class MyRoom extends Room {
 
 		private static final Switch ACTUATOR = new Switch(1);
-		private static final Switch SENSOR = new Switch(0);
+		private static final Switch SENSOR = new Switch(2);
 
 		public MyRoom() {
 			super();
@@ -40,7 +40,7 @@ public class ActuatorSensorIntegrationTest extends IntegrationTest {
 	public void actuatorUpdatedBySensorUpdate() throws IOException {
 		automation.addRoom(new MyRoom());
 
-		deviceChanged(0, "on");
+		deviceChanged(2, "on");
 
 		List<String> requests = webserver.getRequests();
 		assertEquals(1, requests.size());
