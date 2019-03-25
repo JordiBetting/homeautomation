@@ -39,7 +39,9 @@ public final class OnOffAutoControl<DeviceType extends Device<StateType>, StateT
 	}
 
 	@Subscribe
-	public void sensorChanged(final DeviceType changedSwitch) {
+	public void sensorChanged(final Device<?> changedDevice) {
+		@SuppressWarnings("unchecked")
+		final DeviceType changedSwitch = (DeviceType) changedDevice;
 		if (sensorExists(changedSwitch)) {
 			sensorChanged();
 		}
