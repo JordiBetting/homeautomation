@@ -92,7 +92,7 @@ public class DomoticzTest {
 
 	@Test
 	public void update_devicelistenerCalled() {
-		final TestListener listener = new TestListener(); // TODO
+		final TestListener listener = new TestListener();
 		final ILogger log = mock(ILogger.class);
 		final DomoticzThreadHandler threadHandler = new DomoticzThreadHandler(log, registry);
 		threadHandler.setSynchronous();

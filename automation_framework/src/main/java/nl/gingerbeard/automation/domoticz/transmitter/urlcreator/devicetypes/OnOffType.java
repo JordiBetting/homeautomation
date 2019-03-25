@@ -19,7 +19,7 @@ public class OnOffType extends ChainOfCommandType<OnOffState> {
 		builder//
 				.add(Keys.TYPE, Type.COMMAND) //
 				.add(Keys.PARAM, Param.SWITCHLIGHT)//
-				.addIdx(nextState) // TODO consider IDX to be generic
+				.addIdx(nextState)//
 				.add(Keys.SWITCHCMD, getValue(nextState));
 	}
 
