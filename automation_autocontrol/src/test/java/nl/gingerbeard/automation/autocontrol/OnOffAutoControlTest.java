@@ -1,5 +1,6 @@
 package nl.gingerbeard.automation.autocontrol;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -17,6 +18,7 @@ import org.junit.jupiter.api.Test;
 import nl.gingerbeard.automation.AutoControlListener;
 import nl.gingerbeard.automation.devices.DimmeableLight;
 import nl.gingerbeard.automation.devices.Switch;
+import nl.gingerbeard.automation.devices.ThermostatModeDevice;
 import nl.gingerbeard.automation.event.annotations.Subscribe;
 import nl.gingerbeard.automation.state.Level;
 import nl.gingerbeard.automation.state.NextState;
@@ -147,6 +149,11 @@ public class OnOffAutoControlTest {
 		}
 
 		assertTrue(found);
+	}
+
+	@Test
+	public void subscriberCalledWithWrongType_noException() {
+		assertDoesNotThrow(() -> autoControl.sensorChanged(new ThermostatModeDevice(666)));
 	}
 
 	@Test
