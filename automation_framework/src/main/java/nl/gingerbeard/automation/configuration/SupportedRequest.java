@@ -19,10 +19,6 @@ public final class SupportedRequest {
 		this.executor = executor;
 	}
 
-	public boolean matches(final IHTTPSession session) {
-		return matchesUri(session) && matchesMethod(session);
-	}
-
 	public boolean matchesUri(final IHTTPSession session) {
 		return uriMatches(session.getUri());
 	}
@@ -37,17 +33,15 @@ public final class SupportedRequest {
 
 	public Response execute(final IHTTPSession session) {
 		final Matcher matcher = uriPattern.matcher(session.getUri());
-		return executor.apply(new Request(createParameterArray(matcher), session));
+		return executor.apply(new Request(createParameterArray(matcher)));
 	}
 
 	private String[] createParameterArray(final Matcher matcher) {
-		if (matcher.matches()) {
-			final String[] parameters = new String[matcher.groupCount()];
-			for (int i = 0; i < matcher.groupCount(); i++) {
-				parameters[i] = matcher.group(i + 1);
-			}
-			return parameters;
+		matcher.matches();
+		final String[] parameters = new String[matcher.groupCount()];
+		for (int i = 0; i < matcher.groupCount(); i++) {
+			parameters[i] = matcher.group(i + 1);
 		}
-		return new String[0];
+		return parameters;
 	}
 }
