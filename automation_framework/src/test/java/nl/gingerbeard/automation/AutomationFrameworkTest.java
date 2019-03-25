@@ -21,6 +21,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import nl.gingerbeard.automation.autocontrol.AutoControlToDomoticz;
+import nl.gingerbeard.automation.configuration.ConfigurationServerSettings;
 import nl.gingerbeard.automation.deviceregistry.DeviceRegistry;
 import nl.gingerbeard.automation.deviceregistry.IDeviceRegistry;
 import nl.gingerbeard.automation.devices.Device;
@@ -87,7 +88,7 @@ public class AutomationFrameworkTest {
 	}
 
 	private IAutomationFrameworkInterface createIntegration() {
-		container = IAutomationFrameworkInterface.createFrameworkContainer(new DomoticzConfiguration(0, createMockUrl()), log);
+		container = IAutomationFrameworkInterface.createFrameworkContainer(new DomoticzConfiguration(0, createMockUrl()), log, new ConfigurationServerSettings(0));
 		container.start();
 
 		final Optional<IAutomationFrameworkInterface> framework = container.getRuntime().getService(IAutomationFrameworkInterface.class);
@@ -401,7 +402,7 @@ public class AutomationFrameworkTest {
 
 	@Test
 	public void automationFrameworkContainerTest() {
-		final AutomationFrameworkContainer container = IAutomationFrameworkInterface.createFrameworkContainer(new DomoticzConfiguration(0, createMockUrl()));
+		final AutomationFrameworkContainer container = IAutomationFrameworkInterface.createFrameworkContainer(new DomoticzConfiguration(0, createMockUrl()), new ConfigurationServerSettings(0));
 		container.start();
 		final IAutomationFrameworkInterface framework = container.getAutomationFramework();
 		final Container runtime = container.getRuntime();
@@ -414,7 +415,7 @@ public class AutomationFrameworkTest {
 	@Test
 	public void automationFramework() throws MalformedURLException, ProtocolException, IOException {
 		final ILogOutput logOut = mock(ILogOutput.class);
-		container = IAutomationFrameworkInterface.createFrameworkContainer(new DomoticzConfiguration(0, createMockUrl()), logOut);
+		container = IAutomationFrameworkInterface.createFrameworkContainer(new DomoticzConfiguration(0, createMockUrl()), logOut, new ConfigurationServerSettings(0));
 		container.start();
 		container.getAutomationFramework().addRoom(TestRoom.class);
 		updateDevice(1, "on");

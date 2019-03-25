@@ -530,4 +530,20 @@ public class SynchronousEventsTest {
 		assertEquals(0, subscriber2.getCount());
 	}
 
+	@Test
+	public void getSubscribers_listComplete() {
+		final IEvents events = new SynchronousEvents(new State(), logMock);
+		final AutoControlSubscriber subscriber = new AutoControlSubscriber();
+		final AutoControlSubscriber2 subscriber2 = new AutoControlSubscriber2();
+		events.subscribe(subscriber.getControl());
+		events.subscribe(subscriber2.getControl());
+		events.subscribe(new TestSubscriber());
+
+		final List<String> subscribers = events.getSubscribers();
+
+		assertEquals(3, subscribers.size());
+		assertTrue(subscribers.contains("AutoControlSubscriber"));
+		assertTrue(subscribers.contains("AutoControlSubscriber2"));
+		assertTrue(subscribers.contains("TestSubscriber"));
+	}
 }

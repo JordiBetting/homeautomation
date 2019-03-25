@@ -52,15 +52,14 @@ final class Subscriber {
 	}
 
 	boolean hasSimpleName(final String classSimpleName) {
-		if (classSimpleName.equals(instance.getClass().getSimpleName())) {
-			return true;
-		}
+		return getSimpleName().equals(classSimpleName);
+	}
+
+	String getSimpleName() {
 		if (instance instanceof AutoControl) {
 			final AutoControl control = (AutoControl) instance;
-			if (classSimpleName.equals(control.getOwner().replaceAll(".*\\$", ""))) {
-				return true;
-			}
+			return control.getOwner().replaceAll(".*\\$", "");
 		}
-		return false;
+		return instance.getClass().getSimpleName();
 	}
 }

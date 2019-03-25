@@ -1,5 +1,7 @@
 package nl.gingerbeard.automation.event;
 
+import java.util.List;
+
 public interface IEvents {
 
 	void subscribe(Object subscriber);
@@ -9,5 +11,7 @@ public interface IEvents {
 	void disable(String subscriberSimpleClassName);
 
 	void enable(String subscriberSimpleClassName);
+
+	List<String> getSubscribers();
 
 }

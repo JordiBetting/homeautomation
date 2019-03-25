@@ -14,6 +14,7 @@ import org.junit.jupiter.api.BeforeEach;
 import fi.iki.elonen.NanoHTTPD.Response.Status;
 import nl.gingerbeard.automation.AutomationFrameworkContainer;
 import nl.gingerbeard.automation.IAutomationFrameworkInterface;
+import nl.gingerbeard.automation.configuration.ConfigurationServerSettings;
 import nl.gingerbeard.automation.domoticz.DomoticzThreadHandler;
 import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
 import nl.gingerbeard.automation.logging.TestLogger.LogOutputToTestLogger;
@@ -26,6 +27,7 @@ public abstract class IntegrationTest {
 	private AutomationFrameworkContainer container;
 	protected TestWebServer webserver;
 	protected IAutomationFrameworkInterface automation;
+	private int configPort;
 
 	@BeforeEach
 	public void start() throws IOException {
@@ -33,10 +35,12 @@ public abstract class IntegrationTest {
 		webserver.start();
 
 		config = new DomoticzConfiguration(0, new URL("http://localhost:" + webserver.getListeningPort()));
-		container = IAutomationFrameworkInterface.createFrameworkContainer(config, new LogOutputToTestLogger());
+		final ConfigurationServerSettings configSettings = new ConfigurationServerSettings(0);
+		container = IAutomationFrameworkInterface.createFrameworkContainer(config, new LogOutputToTestLogger(), configSettings);
 		container.start();
 
 		port = config.getListenPort();
+		configPort = configSettings.getListenPort();
 		automation = container.getRuntime().getService(IAutomationFrameworkInterface.class).get();
 		final Optional<DomoticzThreadHandler> threadHandler = container.getRuntime().getService(DomoticzThreadHandler.class);
 		assertTrue(threadHandler.isPresent());
@@ -114,6 +118,21 @@ public abstract class IntegrationTest {
 		final HttpURLConnection con = (HttpURLConnection) url.openConnection();
 		con.setRequestMethod("GET");
 		assertEquals(expectedHttpStatus, con.getResponseCode(), "Status expected: " + expectedHttpStatus + " but was: " + con.getResponseCode());
+	}
+
+	public void disableRoom(final String room) throws IOException {
+		changeRoom(room, "disable");
+	}
+
+	private void changeRoom(final String room, final String enableString) throws IOException {
+		final URL url = new URL("http://localhost:" + configPort + "/room/" + room + "/" + enableString);
+		final HttpURLConnection con = (HttpURLConnection) url.openConnection();
+		con.setRequestMethod("POST");
+		assertEquals(200, con.getResponseCode(), "Status expected: " + 200 + " but was: " + con.getResponseCode());
+	}
+
+	public void enableRoom(final String room) throws IOException {
+		changeRoom(room, "enable");
 	}
 
 }

@@ -4,6 +4,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ArrayListMultimap;
@@ -123,6 +124,11 @@ public final class SynchronousEvents implements IEvents {
 		if (counter.get() == 0) {
 			throw new IllegalArgumentException("provided simple classname not present");
 		}
+	}
+
+	@Override
+	public List<String> getSubscribers() {
+		return callback.values().stream().map((subscriber) -> subscriber.getSimpleName()).collect(Collectors.toList());
 	}
 
 }
