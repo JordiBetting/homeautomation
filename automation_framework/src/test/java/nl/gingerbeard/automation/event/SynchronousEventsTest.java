@@ -546,4 +546,18 @@ public class SynchronousEventsTest {
 		assertTrue(subscribers.contains("AutoControlSubscriber2"));
 		assertTrue(subscribers.contains("TestSubscriber"));
 	}
+
+	@Test
+	public void isEnabled() {
+		final IEvents events = new SynchronousEvents(new State(), logMock);
+		final AutoControlSubscriber subscriber = new AutoControlSubscriber();
+		final AutoControlSubscriber2 subscriber2 = new AutoControlSubscriber2();
+		events.subscribe(subscriber.getControl());
+		events.subscribe(subscriber2.getControl());
+
+		events.disable(AutoControlSubscriber2.class.getSimpleName());
+
+		assertTrue(events.isEnabled(AutoControlSubscriber.class.getSimpleName()));
+		assertFalse(events.isEnabled(AutoControlSubscriber2.class.getSimpleName()));
+	}
 }

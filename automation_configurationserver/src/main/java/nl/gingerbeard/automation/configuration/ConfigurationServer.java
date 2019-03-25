@@ -27,6 +27,7 @@ public final class ConfigurationServer extends NanoHTTPD {
 		addRequest("^/room/?$", Method.GET, this::processGetAllRooms);
 		addRequest("^/room/([0-9a-zA-Z_]+)/enable/?$", Method.POST, this::processEnableRoom);
 		addRequest("^/room/([0-9a-zA-Z_]+)/disable/?$", Method.POST, this::processDisableRoom);
+		addRequest("^/room/([0-9a-zA-Z_]+)/isenabled/?$", Method.GET, this::processRoomIsEnabled);
 		addRequest("^/static/([0-9a-zA-Z_/.]+)$", Method.GET, this::processStatic);
 	}
 
@@ -47,6 +48,11 @@ public final class ConfigurationServer extends NanoHTTPD {
 	private Response processDisableRoom(final Request request) {
 		provider.disable(request.getUriParameters().get(0));
 		return success();
+	}
+
+	private Response processRoomIsEnabled(final Request request) {
+		final boolean enabled = provider.isEnabled(request.getUriParameters().get(0));
+		return newFixedLengthResponse("" + enabled);
 	}
 
 	private Response processStatic(final Request request) {

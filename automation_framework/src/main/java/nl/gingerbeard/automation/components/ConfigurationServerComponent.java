@@ -54,6 +54,11 @@ public class ConfigurationServerComponent {
 			return events.getSubscribers();
 		}
 
+		@Override
+		public boolean isEnabled(final String room) {
+			return events.isEnabled(room);
+		}
+
 	}
 
 }

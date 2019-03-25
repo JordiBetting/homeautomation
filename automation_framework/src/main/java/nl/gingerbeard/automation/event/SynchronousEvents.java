@@ -131,4 +131,14 @@ public final class SynchronousEvents implements IEvents {
 		return callback.values().stream().map((subscriber) -> subscriber.getSimpleName()).collect(Collectors.toList());
 	}
 
+	@Override
+	public boolean isEnabled(final String room) {
+		for (final Subscriber subscriber : callback.values()) {
+			if (subscriber.hasSimpleName(room)) {
+				return subscriber.enabled;
+			}
+		}
+		return false;
+	}
+
 }

@@ -10,7 +10,7 @@ final class Subscriber {
 	private final Object instance;
 	private final Method method;
 	private final EventState eventState;
-	public boolean enabled = true;
+	boolean enabled = true;
 
 	Subscriber(final Object instance, final Method method, final EventState eventState) {
 		this.instance = instance;

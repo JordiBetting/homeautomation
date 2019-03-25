@@ -161,4 +161,14 @@ public abstract class IntegrationTest {
 		}
 		return "";
 	}
+
+	public boolean isEnabled(final String room) throws IOException {
+		final URL url = new URL("http://localhost:" + configPort + "/room/" + room + "/isenabled");
+		final HttpURLConnection con = (HttpURLConnection) url.openConnection();
+		con.setRequestMethod("GET");
+
+		assertEquals(200, con.getResponseCode(), "Status expected: " + 200 + " but was: " + con.getResponseCode());
+
+		return "true".equals(read(con.getInputStream()));
+	}
 }

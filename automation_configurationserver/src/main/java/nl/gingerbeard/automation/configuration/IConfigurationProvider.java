@@ -10,4 +10,5 @@ public interface IConfigurationProvider {
 
 	List<String> getRooms();
 
+	boolean isEnabled(String room);
 }

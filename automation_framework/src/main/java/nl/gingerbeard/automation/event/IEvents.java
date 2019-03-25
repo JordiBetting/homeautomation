@@ -14,4 +14,6 @@ public interface IEvents {
 
 	List<String> getSubscribers();
 
+	boolean isEnabled(String room);
+
 }
