@@ -1,6 +1,7 @@
 package nl.gingerbeard.automation.integration;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.util.List;
@@ -57,7 +58,7 @@ public class EnableDisableIntegrationTest extends IntegrationTest {
 
 		final List<String> rooms = getRooms();
 		assertEquals(2, rooms.size(), "Actual: " + rooms.toString());
-		rooms.contains("MyRoom");
-		rooms.contains("MyRoom2");
+		assertTrue(rooms.contains("MyRoom"));
+		assertTrue(rooms.contains("MyRoom2"));
 	}
 }
