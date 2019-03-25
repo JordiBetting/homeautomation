@@ -28,6 +28,10 @@ public class ContainerTest {
 
 	private Container container;
 
+	public ContainerTest() {
+		container = null;
+	}
+
 	@AfterEach
 	public void shutdownContainer() {
 		if (container != null) {
@@ -608,6 +612,17 @@ public class ContainerTest {
 		container.register(String.class, "Test");
 
 		assertDoesNotThrow(() -> container.start());
+	}
+
+	@Test
+	public void shutdownAfterFailedStart() {
+		container = new Container();
+		container.register(EmptyComponent.class);
+		container.register(RequiringComponent.class);
+
+		assertThrows(UnresolvedDependencyException.class, () -> container.start());
+
+		container.shutDown();
 	}
 
 }

@@ -183,11 +183,7 @@ public final class ComponentDefinition {
 
 	private void injectService(final Field field, final Optional<Object> service) {
 		try {
-			if (service.isPresent() && field.getType() == Optional.class) {
-				field.set(componentInstance, service);
-			} else {
-				field.set(componentInstance, service.orElse(null));
-			}
+			field.set(componentInstance, service.orElse(null));
 		} catch (final IllegalAccessException e) {
 			throw new ComponentException("Service " + field.getName() + " of " + this + " cannot be set", e);
 		}
