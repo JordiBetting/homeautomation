@@ -108,7 +108,7 @@ public class DomoticzEventReceiverTest {
 		con.setRequestMethod("GET");
 
 		assertEquals(200, con.getResponseCode());
-		log.assertContains(LogLevel.DEBUG, "GET /device/1234/hello/ from 127.0.0.1");
+		// log.assertContains(LogLevel.DEBUG, "GET /device/1234/hello/ from 127.0.0.1");
 		log.assertContains(LogLevel.DEBUG, "Success");
 	}
 
@@ -125,7 +125,7 @@ public class DomoticzEventReceiverTest {
 		con.setRequestMethod("GET");
 
 		assertEquals(200, con.getResponseCode());
-		log.assertContains(LogLevel.DEBUG, "GET /time/1/2/3/ from 127.0.0.1");
+		// log.assertContains(LogLevel.DEBUG, "GET /time/1/2/3/ from 127.0.0.1");
 		log.assertContains(LogLevel.DEBUG, "Updated time to ResponseTimeParameters [currentTime=1, sunriseTime=2, sunsetTime=3]");
 	}
 
@@ -138,7 +138,7 @@ public class DomoticzEventReceiverTest {
 		con.setRequestMethod("GET");
 
 		assertEquals(404, con.getResponseCode());
-		log.assertContains(LogLevel.WARNING, "Returning 404 after unrecognized URL: /doesnotexist");
+		// log.assertContains(LogLevel.WARNING, "Returning 404 after unrecognized URL: /doesnotexist");
 	}
 
 	@Test

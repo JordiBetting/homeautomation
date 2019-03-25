@@ -31,7 +31,7 @@ final class Domoticz implements EventReceived {
 				logger.warning(e, "Interrupted while updating device");
 			}
 		} else {
-			logger.debug("Received update for unknown device with idx: " + idx);
+			// logger.debug("Received update for unknown device with idx: " + idx);
 		}
 		return success;
 	}

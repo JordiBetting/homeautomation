@@ -67,7 +67,7 @@ public final class DomoticzEventReceiverServer extends NanoHTTPD implements IDom
 	@Override
 	public Response serve(final IHTTPSession session) {
 		Response response;
-		log.debug(session.getMethod() + " " + session.getUri() + " from " + session.getRemoteIpAddress());
+		// log.debug(session.getMethod() + " " + session.getUri() + " from " + session.getRemoteIpAddress());
 		if (session.getMethod() == Method.GET) {
 			response = processGetRequest(session.getUri());
 		} else {
@@ -85,7 +85,7 @@ public final class DomoticzEventReceiverServer extends NanoHTTPD implements IDom
 			final Optional<Response> listenerResponse = triggerListener(responseParams.get());
 			response = listenerResponse.orElse(newFixedLengthResponse(Status.OK, NanoHTTPD.MIME_PLAINTEXT, "OKIDOKI"));
 		} else {
-			log.warning("Returning 404 after unrecognized URL: " + uri);
+			// log.warning("Returning 404 after unrecognized URL: " + uri);
 			response = newFixedLengthResponse(Status.NOT_FOUND, NanoHTTPD.MIME_PLAINTEXT, "URL not in supported format");
 		}
 		return response;
