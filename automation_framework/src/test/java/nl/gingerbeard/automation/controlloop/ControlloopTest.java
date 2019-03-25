@@ -72,8 +72,8 @@ public class ControlloopTest {
 
 	}
 
-	private static final Switch mockDevice1 = new Switch(0);
-	private static final Switch mockDevice2 = new Switch(1);
+	private static final Switch mockDevice1 = new Switch(1);
+	private static final Switch mockDevice2 = new Switch(2);
 	private static final Switch changedDevice = new Switch(666);
 
 	@Test
@@ -252,6 +252,6 @@ public class ControlloopTest {
 
 		assertEquals(1, transmitter.getTransmitted().size());
 		assertTransmitted(transmitter, 0, mockDevice1, OnOffState.ON);
-		log.assertContains(LogLevel.INFO, "[INFO] [trace] " + getClass().getSimpleName() + ": NextState [device=Device [idx=0], nextState=ON]");
+		log.assertContains(LogLevel.INFO, "[INFO] [trace] " + getClass().getSimpleName() + ": NextState [device=Device [idx=1, name=Optional.empty, state=null], nextState=ON]");
 	}
 }

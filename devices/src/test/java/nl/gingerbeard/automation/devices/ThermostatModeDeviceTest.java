@@ -12,7 +12,7 @@ public class ThermostatModeDeviceTest {
 
 	@Test
 	public void updateState_setpoint() {
-		final ThermostatModeDevice device = new ThermostatModeDevice(0);
+		final ThermostatModeDevice device = new ThermostatModeDevice(1);
 
 		final boolean result = device.updateState("setpoint");
 
@@ -22,7 +22,7 @@ public class ThermostatModeDeviceTest {
 
 	@Test
 	public void updateState_fullheat() {
-		final ThermostatModeDevice device = new ThermostatModeDevice(0);
+		final ThermostatModeDevice device = new ThermostatModeDevice(1);
 
 		final boolean result = device.updateState("full_heat");
 
@@ -32,7 +32,7 @@ public class ThermostatModeDeviceTest {
 
 	@Test
 	public void updateState_off() {
-		final ThermostatModeDevice device = new ThermostatModeDevice(0);
+		final ThermostatModeDevice device = new ThermostatModeDevice(1);
 
 		final boolean result = device.updateState("off");
 
@@ -42,7 +42,7 @@ public class ThermostatModeDeviceTest {
 
 	@Test
 	public void updateState_invalid() {
-		final ThermostatModeDevice device = new ThermostatModeDevice(0);
+		final ThermostatModeDevice device = new ThermostatModeDevice(1);
 
 		final boolean result = device.updateState("invalid");
 

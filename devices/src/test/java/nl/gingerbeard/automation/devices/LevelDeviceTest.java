@@ -12,7 +12,7 @@ public class LevelDeviceTest {
 	private static class MyLevelDevice extends LevelDevice {
 
 		public MyLevelDevice() {
-			super(0);
+			super(1);
 		}
 
 	}

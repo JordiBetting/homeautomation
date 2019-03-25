@@ -12,7 +12,7 @@ public class ThermostatSetpointDeviceTest {
 
 	@Test
 	public void thermostatSetPoint_updateWorks() {
-		final ThermostatSetpointDevice device = new ThermostatSetpointDevice(0);
+		final ThermostatSetpointDevice device = new ThermostatSetpointDevice(1);
 
 		final boolean result = device.updateState("1");
 
@@ -22,7 +22,7 @@ public class ThermostatSetpointDeviceTest {
 
 	@Test
 	public void thermostatSetpoint_updateInvalid_returnsFalse() {
-		final ThermostatSetpointDevice device = new ThermostatSetpointDevice(0);
+		final ThermostatSetpointDevice device = new ThermostatSetpointDevice(1);
 
 		final boolean result = device.updateState("invalid");
 

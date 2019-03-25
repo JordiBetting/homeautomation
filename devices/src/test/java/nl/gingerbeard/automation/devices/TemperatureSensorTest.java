@@ -12,7 +12,7 @@ public class TemperatureSensorTest {
 
 	@Test
 	public void thermostatSetPoint_updateWorks() {
-		final TemperatureSensor device = new TemperatureSensor(0);
+		final TemperatureSensor device = new TemperatureSensor(1);
 
 		final boolean result = device.updateState("1");
 
@@ -22,7 +22,7 @@ public class TemperatureSensorTest {
 
 	@Test
 	public void thermostatSetpoint_updateInvalid_returnsFalse() {
-		final TemperatureSensor device = new TemperatureSensor(0);
+		final TemperatureSensor device = new TemperatureSensor(1);
 
 		final boolean result = device.updateState("invalid");
 

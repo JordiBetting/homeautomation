@@ -12,7 +12,7 @@ public class OpenCloseDeviceTest {
 	private static class MyOpenCloseDevice extends OpenCloseDevice {
 
 		public MyOpenCloseDevice() {
-			super(0);
+			super(1);
 		}
 
 	}
