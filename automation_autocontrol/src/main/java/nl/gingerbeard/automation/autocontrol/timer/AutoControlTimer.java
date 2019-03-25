@@ -67,6 +67,7 @@ public class AutoControlTimer {
 	 */
 	public void stop() {
 		synchronized (taskLock) {
+			cancelTask();
 			timer.cancel();
 			activeTask = null;
 			running = false;
