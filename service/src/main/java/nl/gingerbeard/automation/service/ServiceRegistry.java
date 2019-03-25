@@ -115,13 +115,15 @@ public final class ServiceRegistry {
 		instance.setService(service);
 	}
 
-	private ServiceInstance findServiceInstance(final java.util.Collection<ServiceInstance> services, final String fieldName) {
+	private ServiceInstance findServiceInstance(final Collection<ServiceInstance> services, final String fieldName) {
+		ServiceInstance found = null;
 		for (final ServiceInstance instance : services) {
 			if (instance.getName().equals(fieldName)) {
-				return instance;
+				found = instance;
+				break;
 			}
 		}
-		return null;
+		return found;
 	}
 
 	public static class InactiveServiceException extends RuntimeException {

@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -554,6 +555,31 @@ public class ContainerTest {
 
 		assertTrue(component.isPresent());
 		assertEquals("11", component.get().myStringRequire);
+	}
+
+	public static class PrivateRequiresComponent {
+		@Requires
+		private String privateString;
+	}
+
+	@Test
+	public void privateRequiresRejected() {
+		container = new Container();
+		container.register(PrivateRequiresComponent.class);
+		container.register(ProvidingComponent2.class);
+
+		final ComponentException e = assertThrows(ComponentException.class, () -> container.start());
+		assertEquals("Service privateString of nl.gingerbeard.automation.service.ContainerTest$PrivateRequiresComponent cannot be set", e.getMessage());
+	}
+
+	public static class EmptyComponent {
+	}
+
+	@Test
+	public void emptyComponent() {
+		container = new Container();
+		container.register(EmptyComponent.class);
+		container.start();
 	}
 
 }
