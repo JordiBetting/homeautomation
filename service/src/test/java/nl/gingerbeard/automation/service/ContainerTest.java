@@ -614,15 +614,4 @@ public class ContainerTest {
 		assertDoesNotThrow(() -> container.start());
 	}
 
-	@Test
-	public void shutdownAfterFailedStart() {
-		container = new Container();
-		container.register(EmptyComponent.class);
-		container.register(RequiringComponent.class);
-
-		assertThrows(UnresolvedDependencyException.class, () -> container.start());
-
-		container.shutDown();
-	}
-
 }

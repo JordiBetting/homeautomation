@@ -199,9 +199,7 @@ public final class ComponentDefinition {
 	}
 
 	public void deactivate() {
-		if (isActive()) {
-			invokeAnnotatedMethods(Deactivate.class);
-		}
+		invokeAnnotatedMethods(Deactivate.class);
 		state = State.RESOLVED;
 	}
 
