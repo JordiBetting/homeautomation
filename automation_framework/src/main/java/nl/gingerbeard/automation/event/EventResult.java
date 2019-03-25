@@ -50,5 +50,4 @@ public interface EventResult {
 	public static EventResult empty() {
 		return EventResultEmpty.emptyResult;
 	}
-
 }

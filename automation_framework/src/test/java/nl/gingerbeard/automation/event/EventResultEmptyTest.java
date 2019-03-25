@@ -1,6 +1,7 @@
 package nl.gingerbeard.automation.event;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.Optional;
@@ -43,5 +44,4 @@ public class EventResultEmptyTest {
 		assertEquals(Optional.empty(), empty.get(0));
 		assertEquals(Optional.empty(), empty.get(1));
 	}
-
 }
