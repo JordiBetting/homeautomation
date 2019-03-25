@@ -1,6 +1,6 @@
 package nl.gingerbeard.automation;
 
-import java.util.Arrays;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Set;
 
 import com.google.common.base.Preconditions;
@@ -10,16 +10,16 @@ import nl.gingerbeard.automation.devices.CompositeDevice;
 import nl.gingerbeard.automation.devices.Device;
 import nl.gingerbeard.automation.devices.IDevice;
 import nl.gingerbeard.automation.event.IEvents;
-import nl.gingerbeard.automation.state.State;
+import nl.gingerbeard.automation.state.IState;
 
 public class AutomationFramework implements IAutomationFrameworkInterface {
 
 	private final IEvents events;
 	private final IDeviceRegistry deviceRegistry;
 	private final AutoControlToDomoticz autoControlToDomoticz;
-	private final State state;
+	private final IState state;
 
-	public AutomationFramework(final IEvents events, final IDeviceRegistry deviceRegistry, final State state, final AutoControlToDomoticz autoControlToDomoticz) {
+	public AutomationFramework(final IEvents events, final IDeviceRegistry deviceRegistry, final IState state, final AutoControlToDomoticz autoControlToDomoticz) {
 		this.events = events;
 		this.deviceRegistry = deviceRegistry;
 		this.state = state;
@@ -27,8 +27,9 @@ public class AutomationFramework implements IAutomationFrameworkInterface {
 	}
 
 	@Override
-	public void addRoom(final Room room) {
-		Preconditions.checkArgument(room != null, "Please provide a non-null room");
+	public <T extends Room> T addRoom(final Class<T> roomClass) {
+		Preconditions.checkArgument(roomClass != null, "Please provide a non-null room");
+		final T room = createRoom(roomClass);
 		room.setState(state);
 		room.getDevices().stream().forEach((device) -> addDevice(device));
 		room.getAutoControls().stream().forEach((autoControl) -> {
@@ -37,7 +38,26 @@ public class AutomationFramework implements IAutomationFrameworkInterface {
 			events.subscribe(autoControl);
 		});
 		events.subscribe(room);
+		return room;
+	}
 
+	final <T extends Room> T createRoom(final Class<T> roomClass) {
+		try {
+			return roomClass.getConstructor().newInstance();
+		} catch (final InvocationTargetException e) {
+			final Throwable cause = e.getCause();
+			if (cause instanceof RuntimeException) {
+				throw (RuntimeException) cause;
+			} else {
+				throw new RuntimeException(cause);
+			}
+			// } catch (final InvocationTargetException e) {
+			// throw new RuntimeException(e.getCause());
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | NoSuchMethodException | SecurityException e) {
+			final RuntimeException rte = new RuntimeException("Is the room and its default constructor public?");
+			rte.initCause(e);
+			throw rte;
+		}
 	}
 
 	private void addAutoControl(final AutoControl autoControl) {
@@ -66,12 +86,6 @@ public class AutomationFramework implements IAutomationFrameworkInterface {
 	@Override
 	public void deviceChanged(final Device<?> changedDevice) {
 		events.trigger(changedDevice);
-	}
-
-	@Override
-	public void addRooms(final Room... rooms) {
-		Preconditions.checkArgument(rooms != null, "addRooms() shall be passed a non-null array");
-		Arrays.stream(rooms).forEach((room) -> addRoom(room));
 	}
 
 }

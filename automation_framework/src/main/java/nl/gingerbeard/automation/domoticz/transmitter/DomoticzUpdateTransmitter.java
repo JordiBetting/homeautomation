@@ -5,12 +5,14 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.ProtocolException;
 import java.net.URL;
+import java.nio.charset.Charset;
 
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import com.google.common.base.Charsets;
+import com.google.common.io.CharStreams;
 
 import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
 import nl.gingerbeard.automation.domoticz.transmitter.urlcreator.DomoticzUrls;
@@ -21,10 +23,12 @@ public final class DomoticzUpdateTransmitter implements IDomoticzUpdateTransmitt
 
 	private final DomoticzUrls urlCreator;
 	private final ILogger log;
+	private final int timeoutMS;
 
 	public DomoticzUpdateTransmitter(final DomoticzConfiguration configuration, final ILogger log) {
 		this.log = log;
 		urlCreator = new DomoticzUrls(configuration);
+		timeoutMS = configuration.getConnectTimeoutMS();
 	}
 
 	@Override
@@ -51,12 +55,27 @@ public final class DomoticzUpdateTransmitter implements IDomoticzUpdateTransmitt
 
 	private void validateResponseCode(final URL url, final HttpURLConnection con, final int responseCode) throws IOException {
 		if (responseCode != HttpURLConnection.HTTP_OK) {
-			throw new IOException(url.toString() + " " + con.getResponseMessage()); // TODO: add response body;
+			String body = readErrorBody(con);
+			if (body.length() > 0) {
+				body = System.lineSeparator() + body;
+			}
+			throw new IOException(url.toString() + " " + con.getResponseMessage() + body);
 		}
+	}
+
+	private String readErrorBody(final HttpURLConnection con) throws IOException {
+		if (con.getErrorStream() != null) {
+			try (InputStreamReader reader = new InputStreamReader(con.getErrorStream(), Charset.defaultCharset())) {
+				return CharStreams.toString(reader);
+			}
+		}
+		return "";
 	}
 
 	private HttpURLConnection createConnection(final URL url) throws IOException, ProtocolException {
 		final HttpURLConnection con = (HttpURLConnection) url.openConnection();
+		con.setConnectTimeout(timeoutMS);
+		con.setReadTimeout(timeoutMS);
 		con.setRequestMethod("GET");
 		con.connect();
 		return con;

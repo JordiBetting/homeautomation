@@ -2,6 +2,7 @@ package nl.gingerbeard.automation.domoticz;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
@@ -130,7 +131,8 @@ public class DomoticzUpdateTransmitterTest {
 			transmitter.transmitDeviceUpdate(new NextState<>(device, OnOffState.ON));
 			fail("Expected exception");
 		} catch (final IOException e) {
-			assertEquals("http://localhost:" + webserver.getListeningPort() + "/json.htm?type=command&param=switchlight&idx=1&switchcmd=On Not Found", e.getMessage());
+			assertEquals("http://localhost:" + webserver.getListeningPort() + "/json.htm?type=command&param=switchlight&idx=1&switchcmd=On Not Found" + System.lineSeparator()
+					+ "{ \"status\" : \"error\" }", e.getMessage());
 		}
 	}
 
@@ -164,9 +166,32 @@ public class DomoticzUpdateTransmitterTest {
 
 	@Test
 	public void testFailedConnection() throws IOException {
-		final IDomoticzUpdateTransmitter transmitter = new DomoticzUpdateTransmitter(new DomoticzConfiguration(0, new URL("http://doesnotexist")), new TestLogger());
+		final DomoticzConfiguration domoticzConfiguration = new DomoticzConfiguration(0, new URL("http://doesnotexist"));
+		domoticzConfiguration.setConnectTimeoutMS(5000);
+		final IDomoticzUpdateTransmitter transmitter = new DomoticzUpdateTransmitter(domoticzConfiguration, new TestLogger());
 		final NextState<OnOffState> newState = new NextState<>(new Switch(42), OnOffState.OFF);
 
 		assertThrows(IOException.class, () -> transmitter.transmitDeviceUpdate(newState));
+	}
+
+	@Test
+	public void unexpectedErrorCode_bodyInException() {
+		final IDomoticzUpdateTransmitter transmitter = new DomoticzUpdateTransmitter(domoticzConfig, new TestLogger());
+		final Switch device = new Switch(1);
+		final String body = "I Expect this in the exception";
+		webserver.setDefaultResponse(Status.NOT_FOUND, body);
+
+		final IOException e = assertThrows(IOException.class, () -> transmitter.transmitDeviceUpdate(new NextState<>(device, OnOffState.ON)));
+		assertTrue(e.getMessage().contains(body));
+	}
+
+	@Test
+	public void unexpectedErrorCode_emptyResponse_notInException() {
+		final IDomoticzUpdateTransmitter transmitter = new DomoticzUpdateTransmitter(domoticzConfig, new TestLogger());
+		final Switch device = new Switch(1);
+		webserver.setDefaultResponse(Status.NOT_FOUND, "");
+
+		final IOException e = assertThrows(IOException.class, () -> transmitter.transmitDeviceUpdate(new NextState<>(device, OnOffState.ON)));
+		assertEquals("http://localhost:" + webserver.getListeningPort() + "/json.htm?type=command&param=switchlight&idx=1&switchcmd=On Not Found", e.getMessage());
 	}
 }

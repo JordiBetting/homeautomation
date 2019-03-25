@@ -17,9 +17,6 @@ import nl.gingerbeard.automation.service.annotation.Provides;
 import nl.gingerbeard.automation.service.annotation.Requires;
 import nl.gingerbeard.automation.service.exception.ComponentException;
 
-//TODO: it is cleaner if this class' access modifier can be removed.
-// 		However, UnresolvedDependencyException depends on it and is in another package.
-// 		Fix this so that both are cleanly separated.
 public final class ComponentDefinition {
 	private static enum State {
 		NEW, //
@@ -53,9 +50,6 @@ public final class ComponentDefinition {
 	}
 
 	void resolve(final ServiceRegistry serviceRegistry) {
-		if (isResolved()) {
-			return;
-		}
 		if (!isAllFieldsResolved(serviceRegistry)) {
 			return;
 		}
@@ -92,7 +86,7 @@ public final class ComponentDefinition {
 				if (field.get(componentInstance) == null) {
 					field.set(componentInstance, Optional.empty());
 				}
-			} catch (IllegalArgumentException | IllegalAccessException e) {
+			} catch (final IllegalAccessException e) {
 				return false;
 			}
 			return true;
@@ -186,11 +180,7 @@ public final class ComponentDefinition {
 
 	private void injectService(final Field field, final Optional<Object> service) {
 		try {
-			if (service.isPresent() && field.getType() == Optional.class) {
-				field.set(componentInstance, service);
-			} else {
-				field.set(componentInstance, service.orElse(null));
-			}
+			field.set(componentInstance, service.orElse(null));
 		} catch (final IllegalAccessException e) {
 			throw new ComponentException("Service " + field.getName() + " of " + this + " cannot be set", e);
 		}
@@ -206,9 +196,7 @@ public final class ComponentDefinition {
 	}
 
 	public void deactivate() {
-		if (isActive()) {
-			invokeAnnotatedMethods(Deactivate.class);
-		}
+		invokeAnnotatedMethods(Deactivate.class);
 		state = State.RESOLVED;
 	}
 

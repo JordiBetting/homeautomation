@@ -1,4 +1,4 @@
-package nl.gingerbeard.automation.domoticz.transmitter.urlcreator;
+package nl.gingerbeard.automation.domoticz.transmitter.urlcreator.devicetypes;
 
 import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
 import nl.gingerbeard.automation.state.NextState;

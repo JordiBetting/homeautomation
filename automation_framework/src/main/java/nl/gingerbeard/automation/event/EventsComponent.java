@@ -5,7 +5,7 @@ import nl.gingerbeard.automation.service.annotation.Activate;
 import nl.gingerbeard.automation.service.annotation.Deactivate;
 import nl.gingerbeard.automation.service.annotation.Provides;
 import nl.gingerbeard.automation.service.annotation.Requires;
-import nl.gingerbeard.automation.state.State;
+import nl.gingerbeard.automation.state.IState;
 
 public final class EventsComponent {
 
@@ -13,7 +13,7 @@ public final class EventsComponent {
 	public IEvents events;
 
 	@Requires
-	public State state;
+	public IState state;
 
 	@Requires
 	public ILogger log;

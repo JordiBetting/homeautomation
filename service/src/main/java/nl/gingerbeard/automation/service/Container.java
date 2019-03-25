@@ -158,7 +158,7 @@ public final class Container {
 		return Optional.empty();
 	}
 
-	public <T> void register(final Class<T> class1, final T config) {
-		register(class1, config, 1);
+	public <T> void register(final Class<T> clazz, final T service) {
+		register(clazz, service, 1);
 	}
 }

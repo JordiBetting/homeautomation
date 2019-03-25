@@ -23,10 +23,6 @@ public class AlarmIntegrationTest extends IntegrationTest {
 		private int home_count = 0;
 		private int disarmed_count = 0;
 
-		AlarmRoom() {
-			super();
-		}
-
 		@Subscribe
 		public void receiveTime(final AlarmState alarm) {
 			switch (alarm) {
@@ -59,8 +55,7 @@ public class AlarmIntegrationTest extends IntegrationTest {
 
 	@Test
 	public void sendAlarm() throws IOException {
-		final AlarmRoom room = new AlarmRoom();
-		automation.addRoom(room);
+		final AlarmRoom room = automation.addRoom(AlarmRoom.class);
 
 		assertEquals(0, room.getAway_count());
 		assertEquals(0, room.getHome_count());
@@ -89,7 +84,7 @@ public class AlarmIntegrationTest extends IntegrationTest {
 		private static final Switch SENSOR = new Switch(1);
 		private int callCount = 0;
 
-		AlarmSwitchRoom() {
+		public AlarmSwitchRoom() {
 			super();
 			addDevice(SENSOR);
 		}
@@ -106,8 +101,7 @@ public class AlarmIntegrationTest extends IntegrationTest {
 
 	@Test
 	public void switch_alarmstate_received() throws IOException {
-		final AlarmSwitchRoom room = new AlarmSwitchRoom();
-		automation.addRoom(room);
+		final AlarmSwitchRoom room = automation.addRoom(AlarmSwitchRoom.class);
 
 		// intial state = disarmed. No receiving stuff
 		deviceChanged(1, "on");
@@ -150,8 +144,7 @@ public class AlarmIntegrationTest extends IntegrationTest {
 
 	@Test
 	public void alarmChange_triggersOutput() throws IOException {
-		final AlarmWithDeviceOutput room = new AlarmWithDeviceOutput();
-		automation.addRoom(room);
+		automation.addRoom(AlarmWithDeviceOutput.class);
 
 		updateAlarm("arm_away");
 

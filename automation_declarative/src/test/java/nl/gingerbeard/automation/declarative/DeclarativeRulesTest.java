@@ -3,6 +3,7 @@ package nl.gingerbeard.automation.declarative;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
 
 import java.time.Duration;
 import java.util.concurrent.CountDownLatch;
@@ -223,5 +224,13 @@ public class DeclarativeRulesTest {
 				.orElse(switchOutput1, OnOffState.OFF);
 
 		rules.updateDevice(new Switch(666));
+	}
+
+	@Test
+	public void declarativeRulesAction() {
+		final DeclarativeRuleActions actions = new DeclarativeRuleActions(mock(IDeviceUpdate.class));
+		// actions.when(new Action<>(new Switch(1), OnOffState.ON));
+		actions.orElse(new Switch(1), OnOffState.ON);
+		assertTrue(actions.hasActions());
 	}
 }

@@ -4,5 +4,4 @@ public enum OpenCloseState {
 	OPEN, //
 	CLOSE, //
 	;
-	// TODO: Deal with partially open.
 }

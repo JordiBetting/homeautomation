@@ -28,13 +28,16 @@ public class ThermostatIntegrationTest extends IntegrationTest {
 
 		private final Thermostat thermostat;
 		private static final Switch SENSOR = new Switch(IDX_SENSOR);
-		private final ThermostatState nextState;
+		private ThermostatState nextState;
 		private int thermostatChanges;
 
-		public RoomWithThermostat(final ThermostatState nextState) {
-			this.nextState = nextState;
+		public RoomWithThermostat() {
 			thermostat = new Thermostat(IDX_SETPOINT, IDX_MODE);
 			addDevice(thermostat).and(SENSOR);
+		}
+
+		public void setNextState(final ThermostatState nextState) {
+			this.nextState = nextState;
 		}
 
 		@Subscribe
@@ -62,7 +65,8 @@ public class ThermostatIntegrationTest extends IntegrationTest {
 		final ThermostatState thermostatState = new ThermostatState();
 		thermostatState.setTemperature(Temperature.celcius(15));
 
-		automation.addRoom(new RoomWithThermostat(thermostatState));
+		final RoomWithThermostat room = automation.addRoom(RoomWithThermostat.class);
+		room.setNextState(thermostatState);
 
 		deviceChanged(RoomWithThermostat.IDX_SENSOR, "on");
 
@@ -77,7 +81,8 @@ public class ThermostatIntegrationTest extends IntegrationTest {
 	public void thermostatModeOff_bySensorUpdate() throws IOException {
 		final ThermostatState thermostatState = new ThermostatState();
 		thermostatState.setOff();
-		automation.addRoom(new RoomWithThermostat(thermostatState));
+		final RoomWithThermostat room = automation.addRoom(RoomWithThermostat.class);
+		room.setNextState(thermostatState);
 
 		deviceChanged(RoomWithThermostat.IDX_SENSOR, "on");
 
@@ -91,7 +96,8 @@ public class ThermostatIntegrationTest extends IntegrationTest {
 	public void thermostatModeFull_bySensorUpdate() throws IOException {
 		final ThermostatState thermostatState = new ThermostatState();
 		thermostatState.setFullHeat();
-		automation.addRoom(new RoomWithThermostat(thermostatState));
+		final RoomWithThermostat room = automation.addRoom(RoomWithThermostat.class);
+		room.setNextState(thermostatState);
 
 		deviceChanged(RoomWithThermostat.IDX_SENSOR, "on");
 
@@ -105,8 +111,8 @@ public class ThermostatIntegrationTest extends IntegrationTest {
 	public void thermostatUpdateReceived_compositeTriggered() throws IOException {
 		final ThermostatState thermostatState = new ThermostatState();
 		thermostatState.setFullHeat();
-		final RoomWithThermostat room = new RoomWithThermostat(thermostatState);
-		automation.addRoom(room);
+		final RoomWithThermostat room = automation.addRoom(RoomWithThermostat.class);
+		room.setNextState(thermostatState);
 
 		deviceChanged(RoomWithThermostat.IDX_MODE, "off");
 		assertEquals(1, room.getThermostatChangeCount());

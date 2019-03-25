@@ -1,8 +1,11 @@
 package nl.gingerbeard.automation.service;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -24,6 +27,10 @@ import nl.gingerbeard.automation.service.exception.UnresolvedDependencyException
 public class ContainerTest {
 
 	private Container container;
+
+	public ContainerTest() {
+		container = null;
+	}
 
 	@AfterEach
 	public void shutdownContainer() {
@@ -301,7 +308,6 @@ public class ContainerTest {
 	public static class ComponentWithOptionalString {
 		@Requires
 		public Optional<String> optionalString = Optional.empty();
-		// TODO: Determine if container shall set optional to empty.
 	}
 
 	@Test
@@ -314,6 +320,24 @@ public class ContainerTest {
 
 		assertTrue(component.isPresent());
 		assertTrue(component.get().optionalString.isPresent());
+	}
+
+	public static class ComponentWithUninitializedOptionalString {
+		@Requires
+		public Optional<String> optionalString;
+	}
+
+	@Test
+	public void optionalField_notFilled_setToEmpty() {
+		container = new Container();
+		container.register(ComponentWithUninitializedOptionalString.class);
+		container.start();
+
+		final Optional<ComponentWithUninitializedOptionalString> component = container.getComponent(ComponentWithUninitializedOptionalString.class);
+
+		assertTrue(component.isPresent());
+		assertNotNull(component.get().optionalString);
+		assertEquals(Optional.empty(), component.get().optionalString);
 	}
 
 	@Test
@@ -538,4 +562,76 @@ public class ContainerTest {
 		assertEquals("11", component.get().myStringRequire);
 	}
 
+	public static class PrivateRequiresComponent {
+		@Requires
+		private String privateString;
+
+		// following 2 methods are to satisfy static code checkers on the fact that the field is never used
+		public String getPrivateString() {
+			return privateString;
+		}
+
+		public void setPrivateString(final String privateString) {
+			this.privateString = privateString;
+		}
+
+	}
+
+	@Test
+	public void privateRequiresRejected() {
+		container = new Container();
+		container.register(PrivateRequiresComponent.class);
+		container.register(ProvidingComponent2.class);
+
+		final ComponentException e = assertThrows(ComponentException.class, () -> container.start());
+		assertEquals("Service privateString of nl.gingerbeard.automation.service.ContainerTest$PrivateRequiresComponent cannot be set", e.getMessage());
+	}
+
+	public static class EmptyComponent {
+	}
+
+	@Test
+	public void emptyComponent() {
+		container = new Container();
+		container.register(EmptyComponent.class);
+		container.start();
+	}
+
+	@Test
+	public void registerServiceOfWrongType() {
+		container = new Container();
+		final IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> container.register(String.class, new Object(), 1, 1));
+		assertEquals("Service does not implement specified class", e.getMessage());
+	}
+
+	@Test
+	public void registerSimple_resolves() {
+		container = new Container();
+		container.register(RequiringComponent.class);
+
+		container.register(String.class, "Test");
+
+		assertDoesNotThrow(() -> container.start());
+	}
+
+	public static class FinalRequiresComponent {
+		@Requires
+		final Optional<String> itsTheFinalCountdown;
+
+		public FinalRequiresComponent() {
+			itsTheFinalCountdown = Optional.empty();
+		}
+	}
+
+	@Test
+	public void finalField_throwsException() {
+		container = new Container();
+		container.register(FinalRequiresComponent.class);
+
+		container.register(String.class, "Test");
+
+		final ComponentException e = assertThrows(ComponentException.class, () -> container.start());
+		assertEquals("Service itsTheFinalCountdown of nl.gingerbeard.automation.service.ContainerTest$FinalRequiresComponent cannot be set", e.getMessage());
+
+	}
 }

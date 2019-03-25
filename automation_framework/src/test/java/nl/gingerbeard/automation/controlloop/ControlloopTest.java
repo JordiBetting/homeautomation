@@ -27,6 +27,7 @@ import nl.gingerbeard.automation.logging.ILogger;
 import nl.gingerbeard.automation.logging.LogLevel;
 import nl.gingerbeard.automation.logging.TestLogger;
 import nl.gingerbeard.automation.state.AlarmState;
+import nl.gingerbeard.automation.state.IState;
 import nl.gingerbeard.automation.state.NextState;
 import nl.gingerbeard.automation.state.OnOffState;
 import nl.gingerbeard.automation.state.State;
@@ -40,7 +41,7 @@ public class ControlloopTest {
 	public void testStateChanged() {
 		final IEvents events = mock(IEvents.class);
 		final ILogger log = mock(ILogger.class);
-		final State state = new State();
+		final IState state = mock(IState.class);
 		final IDomoticzUpdateTransmitter transmitter = mock(IDomoticzUpdateTransmitter.class);
 		when(events.trigger(any())).thenReturn(EventResult.empty());
 		final Controlloop control = new Controlloop(events, transmitter, state, log);
@@ -82,7 +83,7 @@ public class ControlloopTest {
 		final IEvents events = mock(IEvents.class);
 		final ILogger log = mock(ILogger.class);
 		when(log.createContext(any())).thenReturn(log);
-		final State state = new State();
+		final IState state = new State();
 		final Controlloop control = new Controlloop(events, transmitter, state, log);
 
 		final EventResult eventResult = EventResult.of(new NextState<>(mockDevice1, OnOffState.ON));
@@ -100,7 +101,7 @@ public class ControlloopTest {
 		final IEvents events = mock(IEvents.class);
 		final ILogger log = mock(ILogger.class);
 		when(log.createContext(any())).thenReturn(log);
-		final State state = new State();
+		final IState state = mock(IState.class);
 		final Controlloop control = new Controlloop(events, transmitter, state, log);
 		when(events.trigger(any())).thenReturn(EventResult.of(Lists.newArrayList(//
 				new NextState<>(mockDevice1, OnOffState.ON), //
@@ -120,13 +121,15 @@ public class ControlloopTest {
 		assertEquals(expectedState, message.get());
 	}
 
+	// TODO: many intializations that are just different. Create something better for this.
+
 	@Test
 	public void eventResultOtherType_ignored() {
 		// TODO: Should this somehow be handled/explictely tested? Like an error list, test logging or even throw an exception?
 		final RecordingTransmitter transmitter = new RecordingTransmitter();
 		final IEvents events = mock(IEvents.class);
 		final ILogger log = mock(ILogger.class);
-		final State state = new State();
+		final IState state = mock(IState.class);
 		final Controlloop control = new Controlloop(events, transmitter, state, log);
 		when(events.trigger(any())).thenReturn(EventResult.of("StringIsNotNextState"));
 
@@ -153,7 +156,7 @@ public class ControlloopTest {
 		final ThrowExceptionOnFirstTransmit_Transmitter transmitter = new ThrowExceptionOnFirstTransmit_Transmitter();
 		final IEvents events = mock(IEvents.class);
 		final TestLogger log = new TestLogger();
-		final State state = new State();
+		final IState state = mock(IState.class);
 		final Controlloop control = new Controlloop(events, transmitter, state, log);
 		when(events.trigger(any())).thenReturn(EventResult.of(Lists.newArrayList(//
 				new NextState<>(mockDevice1, OnOffState.ON), //
@@ -172,7 +175,7 @@ public class ControlloopTest {
 		final IDomoticzUpdateTransmitter transmitter = mock(IDomoticzUpdateTransmitter.class);
 		final IEvents events = mock(IEvents.class);
 		final TestLogger log = new TestLogger();
-		final State state = new State();
+		final IState state = new State();
 		state.setTimeOfDay(TimeOfDay.NIGHTTIME);
 		final Controlloop control = new Controlloop(events, transmitter, state, log);
 
@@ -189,7 +192,7 @@ public class ControlloopTest {
 		final IDomoticzUpdateTransmitter transmitter = mock(IDomoticzUpdateTransmitter.class);
 		final IEvents events = mock(IEvents.class);
 		final TestLogger log = new TestLogger();
-		final State state = new State();
+		final IState state = new State();
 		state.setAlarmState(AlarmState.DISARMED);
 
 		when(events.trigger(any())).thenReturn(EventResult.empty());
@@ -207,7 +210,7 @@ public class ControlloopTest {
 		final IDomoticzUpdateTransmitter transmitter = mock(IDomoticzUpdateTransmitter.class);
 		final IEvents events = mock(IEvents.class);
 		final TestLogger log = new TestLogger();
-		final State state = new State();
+		final IState state = new State();
 		state.setAlarmState(AlarmState.DISARMED);
 
 		when(events.trigger(any())).thenReturn(EventResult.empty());
@@ -229,7 +232,7 @@ public class ControlloopTest {
 		when(events.trigger(any(Device.class))).thenReturn(EventResult.of(nextState));
 
 		final IDomoticzUpdateTransmitter transmitter = mock(IDomoticzUpdateTransmitter.class);
-		final Controlloop control = new Controlloop(events, transmitter, new State(), mock(ILogger.class));
+		final Controlloop control = new Controlloop(events, transmitter, mock(IState.class), mock(ILogger.class));
 
 		device.setState(OnOffState.ON);
 		control.statusChanged(device);
@@ -242,7 +245,7 @@ public class ControlloopTest {
 		final RecordingTransmitter transmitter = new RecordingTransmitter();
 		final IEvents events = mock(IEvents.class);
 		final TestLogger log = new TestLogger();
-		final State state = new State();
+		final IState state = mock(IState.class);
 		final Controlloop control = new Controlloop(events, transmitter, state, log);
 
 		final EventResult eventResult = EventResult.of(new NextState<>(mockDevice1, OnOffState.ON));

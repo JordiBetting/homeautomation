@@ -82,11 +82,6 @@ final class ResponseParameters {
 			return state;
 		}
 
-		@Override
-		public String toString() {
-			return "ResponseDeviceParameters [idx=" + idx + ", state=" + state + "]";
-		}
-
 	}
 
 	static class ResponseTimeParameters {

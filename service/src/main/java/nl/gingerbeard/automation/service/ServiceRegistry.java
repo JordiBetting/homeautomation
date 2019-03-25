@@ -9,9 +9,6 @@ import java.util.Optional;
 
 import com.google.common.collect.Lists;
 
-//TODO: it is cleaner if this class' access modifier can be removed.
-//		However, UnresolvedDependencyException depends on it and is in another package.
-//		Fix this so that both are cleanly separated.
 public final class ServiceRegistry {
 	private final Map<ComponentDefinition, List<ServiceInstance>> componentServices;
 
@@ -118,13 +115,9 @@ public final class ServiceRegistry {
 		instance.setService(service);
 	}
 
-	private ServiceInstance findServiceInstance(final java.util.Collection<ServiceInstance> services, final String fieldName) {
-		for (final ServiceInstance instance : services) {
-			if (instance.getName().equals(fieldName)) {
-				return instance;
-			}
-		}
-		return null;
+	private ServiceInstance findServiceInstance(final Collection<ServiceInstance> services, final String fieldName) {
+		final Optional<ServiceInstance> found = services.stream().filter((instance) -> instance.getName().equals(fieldName)).findFirst();
+		return found.orElse(null);
 	}
 
 	public static class InactiveServiceException extends RuntimeException {

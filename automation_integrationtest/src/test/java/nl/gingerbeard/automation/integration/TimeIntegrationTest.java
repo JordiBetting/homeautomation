@@ -25,8 +25,7 @@ public class TimeIntegrationTest extends IntegrationTest {
 		private static final Switch ACTUATOR = new Switch(1);
 		private int callCount = 0;
 
-		DayTimeSwitchRoom() {
-			super();
+		public DayTimeSwitchRoom() {
 			addDevice(SENSOR);
 			addDevice(ACTUATOR);
 		}
@@ -43,8 +42,7 @@ public class TimeIntegrationTest extends IntegrationTest {
 
 	@Test
 	public void switch_daytime_received() throws IOException {
-		final DayTimeSwitchRoom room = new DayTimeSwitchRoom();
-		automation.addRoom(room);
+		final DayTimeSwitchRoom room = automation.addRoom(DayTimeSwitchRoom.class);
 
 		// initial, no calls
 		assertEquals(0, room.getCallCount());
@@ -72,7 +70,7 @@ public class TimeIntegrationTest extends IntegrationTest {
 		private int nighttime_count = 0;
 		private int daytime_count;
 
-		TimeRoom() {
+		public TimeRoom() {
 			super();
 			addDevice(ACTUATOR);
 		}
@@ -102,8 +100,7 @@ public class TimeIntegrationTest extends IntegrationTest {
 
 	@Test
 	public void updateTime_eventReceived() throws IOException {
-		final TimeRoom room = new TimeRoom();
-		automation.addRoom(room);
+		final TimeRoom room = automation.addRoom(TimeRoom.class);
 
 		assertEquals(0, room.getDaytime_count());
 		assertEquals(0, room.getNighttime_count());
@@ -147,9 +144,8 @@ public class TimeIntegrationTest extends IntegrationTest {
 
 	@Test
 	public void eventStateTimeOfDay_triggeredCorrectly() throws IOException {
-		final MyNightRoom night = new MyNightRoom();
-		final MyDayRoom day = new MyDayRoom();
-		automation.addRooms(day, night);
+		final MyNightRoom night = automation.addRoom(MyNightRoom.class);
+		final MyDayRoom day = automation.addRoom(MyDayRoom.class);
 
 		assertEquals(0, day.count);
 		assertEquals(0, night.count);
@@ -165,9 +161,8 @@ public class TimeIntegrationTest extends IntegrationTest {
 
 	@Test
 	public void timeEvent_updatesDevice() throws IOException {
-		final MyNightRoom night = new MyNightRoom();
-		final MyDayRoom day = new MyDayRoom();
-		automation.addRooms(day, night);
+		automation.addRoom(MyNightRoom.class);
+		automation.addRoom(MyDayRoom.class);
 
 		setNightTime();
 		final List<String> requests = webserver.getRequests();

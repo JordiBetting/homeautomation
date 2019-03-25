@@ -33,7 +33,7 @@ public class ShuttersIntegrationTest extends IntegrationTest {
 
 	@Test
 	public void shutters_integration() throws IOException {
-		automation.addRoom(new ShuttersRoom());
+		automation.addRoom(ShuttersRoom.class);
 
 		deviceChanged(2, "off");
 
