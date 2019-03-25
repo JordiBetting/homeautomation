@@ -10,6 +10,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.Charset;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -27,6 +28,14 @@ public class StaticContentTest {
 		providerMock = mock(IConfigurationProvider.class);
 		server = new ConfigurationServer(settings, providerMock);
 		port = settings.getListenPort();
+	}
+
+	@AfterEach
+	public void stopServer() {
+		if (server != null) {
+			server.stop();
+			server = null;
+		}
 	}
 
 	@Test

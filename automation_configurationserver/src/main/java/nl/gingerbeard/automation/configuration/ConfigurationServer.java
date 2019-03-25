@@ -3,6 +3,7 @@ package nl.gingerbeard.automation.configuration;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
@@ -63,7 +64,7 @@ public final class ConfigurationServer extends NanoHTTPD {
 
 	private String readFile(final URL resource) throws IOException {
 		final File file = new File(resource.getFile());
-		final String content = new String(Files.readAllBytes(file.toPath()));
+		final String content = new String(Files.readAllBytes(file.toPath()), Charset.defaultCharset());
 		return content;
 	}
 
