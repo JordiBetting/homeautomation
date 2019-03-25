@@ -73,11 +73,9 @@ public class MultiRoomIntegrationTest extends IntegrationTest {
 	@Test
 	public void multiroom() throws IOException {
 		final List<String> requests = webserver.getRequests();
-		final Room1Daytime room1day = new Room1Daytime();
-		final Room1Nighttime room1night = new Room1Nighttime();
-		final Room2 room2 = new Room2();
-
-		automation.addRooms(room1day, room1night, room2);
+		automation.addRoom(Room1Daytime.class);
+		automation.addRoom(Room1Nighttime.class);
+		automation.addRoom(Room2.class);
 
 		setDaytime();
 		deviceChanged(1, "ON");
@@ -96,10 +94,8 @@ public class MultiRoomIntegrationTest extends IntegrationTest {
 
 	@Test
 	public void multiroom_deviceSync() throws IOException {
-		final Room1Daytime room1day = new Room1Daytime();
-		final Room1Nighttime room1night = new Room1Nighttime();
-
-		automation.addRooms(room1day, room1night);
+		final Room1Daytime room1day = automation.addRoom(Room1Daytime.class);
+		final Room1Nighttime room1night = automation.addRoom(Room1Nighttime.class);
 
 		setDaytime();
 		deviceChanged(1, "ON");

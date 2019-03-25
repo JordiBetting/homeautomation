@@ -6,11 +6,9 @@ import nl.gingerbeard.automation.logging.ILogOutput;
 
 public interface IAutomationFrameworkInterface {
 
-	void addRoom(Room room);
+	<T extends Room> T addRoom(Class<T> room);
 
 	void deviceChanged(Device<?> changedDevice);
-
-	void addRooms(Room... rooms);
 
 	public static AutomationFrameworkContainer createFrameworkContainer(final DomoticzConfiguration domoticzConfig) {
 		return new AutomationFrameworkContainer(domoticzConfig);

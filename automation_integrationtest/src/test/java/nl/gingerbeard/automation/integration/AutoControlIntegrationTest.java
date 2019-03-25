@@ -18,7 +18,7 @@ import nl.gingerbeard.automation.state.OnOffState;
 
 public class AutoControlIntegrationTest extends IntegrationTest {
 
-	private static class TestRoom extends Room {
+	public static class TestRoom extends Room {
 
 		private final Switch sensor = new Switch(1);
 		public final Switch actuator = new Switch(2);
@@ -42,9 +42,7 @@ public class AutoControlIntegrationTest extends IntegrationTest {
 
 	@Test
 	public void theTest() throws IOException, InterruptedException {
-
-		final TestRoom room = new TestRoom();
-		automation.addRoom(room);
+		automation.addRoom(TestRoom.class);
 		CountDownLatch requestLatch;
 
 		requestLatch = resetLatch();

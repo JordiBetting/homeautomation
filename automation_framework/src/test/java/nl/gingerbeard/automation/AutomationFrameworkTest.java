@@ -121,8 +121,7 @@ public class AutomationFrameworkTest {
 	public void timeOfDay_correctState_eventReceived() throws IOException {
 		final IAutomationFrameworkInterface framework = createIntegration();
 		getState().setTimeOfDay(TimeOfDay.DAYTIME);
-		final TimeOfDaySubscriber subscriber = new TimeOfDaySubscriber();
-		framework.addRoom(subscriber);
+		final TimeOfDaySubscriber subscriber = framework.addRoom(TimeOfDaySubscriber.class);
 
 		framework.deviceChanged(new TestDevice());
 
@@ -134,8 +133,7 @@ public class AutomationFrameworkTest {
 		final IAutomationFrameworkInterface framework = createIntegration();
 		getState().setTimeOfDay(TimeOfDay.NIGHTTIME);
 
-		final TimeOfDaySubscriber subscriber = new TimeOfDaySubscriber();
-		framework.addRoom(subscriber);
+		final TimeOfDaySubscriber subscriber = framework.addRoom(TimeOfDaySubscriber.class);
 		framework.deviceChanged(new TestDevice());
 
 		assertEquals(0, subscriber.counter);
@@ -145,9 +143,7 @@ public class AutomationFrameworkTest {
 	public void timeOfDay_allday_received() throws IOException {
 		final IAutomationFrameworkInterface framework = createIntegration();
 		getState().setTimeOfDay(TimeOfDay.DAYTIME);
-		final TimeOfDaySubscriber subscriber = new TimeOfDaySubscriber();
-
-		framework.addRoom(subscriber);
+		final TimeOfDaySubscriber subscriber = framework.addRoom(TimeOfDaySubscriber.class);
 
 		framework.deviceChanged(new TestDevice());
 
@@ -192,8 +188,7 @@ public class AutomationFrameworkTest {
 		final IAutomationFrameworkInterface framework = createIntegration();
 		getState().setAlarmState(AlarmState.ARM_HOME);
 
-		final AlarmSubscriber subscriber = new AlarmSubscriber();
-		framework.addRoom(subscriber);
+		final TimeOfDaySubscriber subscriber = framework.addRoom(TimeOfDaySubscriber.class);
 		framework.deviceChanged(new TestDevice());
 
 		assertEquals(1, subscriber.counter);
@@ -204,8 +199,7 @@ public class AutomationFrameworkTest {
 		final IAutomationFrameworkInterface framework = createIntegration();
 		getState().setAlarmState(AlarmState.DISARMED);
 
-		final AlarmSubscriber subscriber = new AlarmSubscriber();
-		framework.addRoom(subscriber);
+		final AlarmSubscriber subscriber = framework.addRoom(AlarmSubscriber.class);
 		framework.deviceChanged(new TestDevice());
 
 		assertEquals(0, subscriber.counter);
@@ -216,8 +210,7 @@ public class AutomationFrameworkTest {
 		final IAutomationFrameworkInterface framework = createIntegration();
 		getState().setAlarmState(AlarmState.ARM_AWAY);
 
-		final AllAlarmSubscriber subscriber = new AllAlarmSubscriber();
-		framework.addRoom(subscriber);
+		final AllAlarmSubscriber subscriber = framework.addRoom(AllAlarmSubscriber.class);
 		framework.deviceChanged(new TestDevice());
 
 		assertEquals(1, subscriber.counter);
@@ -228,8 +221,7 @@ public class AutomationFrameworkTest {
 		final IAutomationFrameworkInterface framework = createIntegration();
 		getState().setAlarmState(AlarmState.ARM_AWAY);
 
-		final ArmAlarmSubscriber subscriber = new ArmAlarmSubscriber();
-		framework.addRoom(subscriber);
+		final ArmAlarmSubscriber subscriber = framework.addRoom(ArmAlarmSubscriber.class);
 		framework.deviceChanged(new TestDevice());
 
 		assertEquals(1, subscriber.counter);
@@ -262,8 +254,7 @@ public class AutomationFrameworkTest {
 		final IAutomationFrameworkInterface framework = createIntegration();
 		getState().setHomeAway(HomeAway.HOME);
 
-		final HomeSubscriber subscriber = new HomeSubscriber();
-		framework.addRoom(subscriber);
+		final HomeSubscriber subscriber = framework.addRoom(HomeSubscriber.class);
 		framework.deviceChanged(new TestDevice());
 
 		assertEquals(1, subscriber.counter);
@@ -274,8 +265,7 @@ public class AutomationFrameworkTest {
 		final IAutomationFrameworkInterface framework = createIntegration();
 		getState().setHomeAway(HomeAway.AWAY);
 
-		final HomeSubscriber subscriber = new HomeSubscriber();
-		framework.addRoom(subscriber);
+		final HomeSubscriber subscriber = framework.addRoom(HomeSubscriber.class);
 		framework.deviceChanged(new TestDevice());
 
 		assertEquals(0, subscriber.counter);
@@ -286,8 +276,7 @@ public class AutomationFrameworkTest {
 		final IAutomationFrameworkInterface framework = createIntegration();
 		getState().setHomeAway(HomeAway.AWAY);
 
-		final AlwaysHomeAwaySubscriber subscriber = new AlwaysHomeAwaySubscriber();
-		framework.addRoom(subscriber);
+		final AlwaysHomeAwaySubscriber subscriber = framework.addRoom(AlwaysHomeAwaySubscriber.class);
 		framework.deviceChanged(new TestDevice());
 
 		assertEquals(1, subscriber.counter);
@@ -320,9 +309,8 @@ public class AutomationFrameworkTest {
 
 	@Test
 	public void integration_updateEventWebserverReceived_deviceUpdated() throws IOException {
-		final TestRoom testRoom = new TestRoom();
 		final IAutomationFrameworkInterface framework = createIntegration();
-		framework.addRoom(testRoom);
+		final TestRoom testRoom = framework.addRoom(TestRoom.class);
 
 		updateDevice(1, "on");
 		assertEquals(OnOffState.ON, testRoom.testSwitch.getState());
@@ -350,7 +338,7 @@ public class AutomationFrameworkTest {
 		return port;
 	}
 
-	private static class ThermostatRoom extends Room {
+	public static class ThermostatRoom extends Room {
 		public ThermostatRoom() {
 			final Thermostat thermostat = new Thermostat(1, 2);
 			addDevice(thermostat);
@@ -362,7 +350,7 @@ public class AutomationFrameworkTest {
 		final DeviceRegistry registry = new DeviceRegistry();
 		final IAutomationFrameworkInterface framework = new AutomationFramework(mock(IEvents.class), registry, new State(), mock(AutoControlToDomoticz.class));
 
-		framework.addRoom(new ThermostatRoom());
+		framework.addRoom(ThermostatRoom.class);
 
 		final List<Device<?>> devices = registry.getAllDevices();
 		assertEquals(2, devices.size());
@@ -384,7 +372,7 @@ public class AutomationFrameworkTest {
 		assertEquals(2, mode.get().getIdx());
 	}
 
-	private static class FakeDevice implements IDevice<Void> {
+	public static class FakeDevice implements IDevice<Void> {
 
 		@Override
 		public Void getState() {
@@ -402,8 +390,8 @@ public class AutomationFrameworkTest {
 
 	}
 
-	private static class RoomWithFakeDevice extends Room {
-		RoomWithFakeDevice() {
+	public static class RoomWithFakeDevice extends Room {
+		public RoomWithFakeDevice() {
 			addDevice(new FakeDevice());
 		}
 	}
@@ -411,7 +399,7 @@ public class AutomationFrameworkTest {
 	@Test
 	public void addUnsupportedDevice_throwsException() {
 		final IAutomationFrameworkInterface framework = new AutomationFramework(mock(IEvents.class), mock(IDeviceRegistry.class), new State(), mock(AutoControlToDomoticz.class));
-		assertThrows(UnsupportedOperationException.class, () -> framework.addRoom(new RoomWithFakeDevice()));
+		assertThrows(UnsupportedOperationException.class, () -> framework.addRoom(RoomWithFakeDevice.class));
 	}
 
 	@Test
@@ -431,30 +419,10 @@ public class AutomationFrameworkTest {
 		final ILogOutput logOut = mock(ILogOutput.class);
 		container = IAutomationFrameworkInterface.createFrameworkContainer(new DomoticzConfiguration(0, createMockUrl()), logOut);
 		container.start();
-		container.getAutomationFramework().addRoom(new TestRoom());
+		container.getAutomationFramework().addRoom(TestRoom.class);
 		updateDevice(1, "on");
 		container.stop();
 		verify(logOut, atLeastOnce()).log(any(), any(), anyString());
-	}
-
-	@Test
-	public void addRooms_nullArgument_noException() {
-		container = IAutomationFrameworkInterface.createFrameworkContainer(new DomoticzConfiguration(0, createMockUrl()), mock(ILogOutput.class));
-		container.start();
-
-		assertThrows(IllegalArgumentException.class, () -> container.getAutomationFramework().addRooms((Room[]) null));
-
-		container.stop();
-	}
-
-	@Test
-	public void addRooms_oneRoomNull_noException() {
-		container = IAutomationFrameworkInterface.createFrameworkContainer(new DomoticzConfiguration(0, createMockUrl()), mock(ILogOutput.class));
-		container.start();
-
-		assertThrows(IllegalArgumentException.class, () -> container.getAutomationFramework().addRooms(new Room[] { null }));
-
-		container.stop();
 	}
 
 	public static class StateRoom extends Room {
@@ -475,7 +443,6 @@ public class AutomationFrameworkTest {
 
 	@Test
 	public void roomState_isSystemState() {
-		final StateRoom stateroom = new StateRoom();
 
 		final IAutomationFrameworkInterface framework = createIntegration();
 		final Optional<State> optionalState = container.getRuntime().getService(State.class);
@@ -483,7 +450,7 @@ public class AutomationFrameworkTest {
 		final State state = optionalState.get();
 		state.setTimeOfDay(TimeOfDay.DAYTIME);
 
-		framework.addRoom(stateroom);
+		final StateRoom stateroom = framework.addRoom(StateRoom.class);
 
 		assertDoesNotThrow(() -> stateroom.getState());
 		assertEquals(TimeOfDay.DAYTIME, stateroom.getState().getTimeOfDay());
