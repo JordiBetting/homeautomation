@@ -13,7 +13,7 @@ import nl.gingerbeard.automation.domoticz.receiver.ResponseParameters.ResponseTi
 import nl.gingerbeard.automation.logging.ILogger;
 
 public final class DomoticzEventReceiverServer extends NanoHTTPD implements IDomoticzEventReceiver {
-
+	// TODO: Refactor to be similar with configurationServer. Consider making a generic component out of configurationServer.
 	public static interface EventReceived {
 		/**
 		 * Indicate that a device state has changed in domoticz. Exceptions result in internal server error (500).
