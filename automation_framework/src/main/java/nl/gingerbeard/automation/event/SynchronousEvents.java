@@ -3,6 +3,7 @@ package nl.gingerbeard.automation.event;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ArrayListMultimap;
@@ -100,6 +101,28 @@ final class SynchronousEvents implements IEvents {
 	public void clear() {
 		callback.clear();
 		subscribers.clear();
+	}
+
+	@Override
+	public void disable(final String subscriberSimpleClassName) {
+		setSubscribersEnabled(subscriberSimpleClassName, false);
+	}
+
+	@Override
+	public void enable(final String subscriberSimpleClassName) {
+		setSubscribersEnabled(subscriberSimpleClassName, true);
+	}
+
+	private void setSubscribersEnabled(final String subscriberSimpleClassName, final boolean enabled) {
+		Preconditions.checkArgument(subscriberSimpleClassName != null);
+		final AtomicInteger counter = new AtomicInteger();
+		callback.values().stream().filter((subscriber) -> subscriber.hasSimpleName(subscriberSimpleClassName)).forEach((subscriber) -> {
+			subscriber.setEnabled(enabled);
+			counter.incrementAndGet();
+		});
+		if (counter.get() == 0) {
+			throw new IllegalArgumentException("provided simple classname not present");
+		}
 	}
 
 }

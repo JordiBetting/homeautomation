@@ -6,4 +6,8 @@ public interface IEvents {
 
 	EventResult trigger(Object event);
 
+	void disable(String subscriberSimpleClassName);
+
+	void enable(String subscriberSimpleClassName);
+
 }

@@ -3,6 +3,7 @@ package nl.gingerbeard.automation.event;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
@@ -331,4 +332,85 @@ public class SynchronousEventsTest {
 		assertEquals(subscriber, trigger.get(0).get());
 	}
 
+	@Test
+	public void disableClass() {
+		final IEvents events = new SynchronousEvents(new State(), logMock);
+		final TestSubscriber testSubscriber = new TestSubscriber();
+		events.subscribe(testSubscriber);
+		events.subscribe(new MultipleSubscribe());
+
+		events.disable(TestSubscriber.class.getSimpleName());
+		events.trigger("hi");
+
+		assertEquals(0, testSubscriber.count);
+	}
+
+	@Test
+	public void disableEnableClass() {
+		final IEvents events = new SynchronousEvents(new State(), logMock);
+		final TestSubscriber testSubscriber = new TestSubscriber();
+		events.subscribe(testSubscriber);
+		events.subscribe(new MultipleSubscribe());
+
+		events.disable(TestSubscriber.class.getSimpleName());
+		events.enable(TestSubscriber.class.getSimpleName());
+		events.trigger("hi");
+
+		assertEquals(1, testSubscriber.count);
+	}
+
+	@Test
+	public void disableIdempotent() {
+		final IEvents events = new SynchronousEvents(new State(), logMock);
+		final TestSubscriber testSubscriber = new TestSubscriber();
+		events.subscribe(testSubscriber);
+
+		events.disable(TestSubscriber.class.getSimpleName());
+		events.disable(TestSubscriber.class.getSimpleName());
+		events.trigger("hi");
+
+		assertEquals(0, testSubscriber.count);
+	}
+
+	@Test
+	public void enableIdempotent() {
+		final IEvents events = new SynchronousEvents(new State(), logMock);
+		final TestSubscriber testSubscriber = new TestSubscriber();
+		events.subscribe(testSubscriber);
+
+		events.disable(TestSubscriber.class.getSimpleName());
+		events.enable(TestSubscriber.class.getSimpleName());
+		events.enable(TestSubscriber.class.getSimpleName());
+		events.trigger("hi");
+
+		assertEquals(1, testSubscriber.count);
+	}
+
+	@Test
+	public void enableNull_throwsException() {
+		final IEvents events = new SynchronousEvents(new State(), logMock);
+
+		assertThrows(IllegalArgumentException.class, () -> events.enable(null));
+	}
+
+	@Test
+	public void disableNull_throwsException() {
+		final IEvents events = new SynchronousEvents(new State(), logMock);
+
+		assertThrows(IllegalArgumentException.class, () -> events.disable(null));
+	}
+
+	@Test
+	public void disableNonExisting_throwsException() {
+		final IEvents events = new SynchronousEvents(new State(), logMock);
+
+		assertThrows(IllegalArgumentException.class, () -> events.disable("nothingpresent"));
+	}
+
+	@Test
+	public void enableNonExisting_throwsException() {
+		final IEvents events = new SynchronousEvents(new State(), logMock);
+
+		assertThrows(IllegalArgumentException.class, () -> events.enable("nothingpresent"));
+	}
 }
