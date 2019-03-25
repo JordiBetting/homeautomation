@@ -95,6 +95,13 @@ public class ConfigurationServerTest {
 		assertEquals(405, con.getResponseCode());
 	}
 
+	@Test
+	public void unsupportedRoomCommand_404() throws IOException {
+		final HttpURLConnection con = openPOSTConnection("/rooms/living/notsupported");
+
+		assertEquals(404, con.getResponseCode());
+	}
+
 	private HttpURLConnection openGETConnection(final String path) throws IOException {
 		return openConnection(path, "GET");
 	}
