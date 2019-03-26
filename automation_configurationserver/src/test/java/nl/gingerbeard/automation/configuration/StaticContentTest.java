@@ -71,13 +71,13 @@ public class StaticContentTest {
 
 	@Test
 	public void forcedIOError() throws IOException {
-		ConfigurationServer.throwIOException = true;
+		ConfigurationServer.setThrowIOExceptionOnReadFile(true);
 		try {
 			final HttpURLConnection con = openConnection("configuration.html");
 
 			assertEquals(500, con.getResponseCode());
 		} finally {
-			ConfigurationServer.throwIOException = false;
+			ConfigurationServer.setThrowIOExceptionOnReadFile(false);
 		}
 	}
 

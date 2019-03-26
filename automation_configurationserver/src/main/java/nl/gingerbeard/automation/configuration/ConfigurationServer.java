@@ -88,7 +88,11 @@ public final class ConfigurationServer extends NanoHTTPD {
 	}
 
 	// test interface
-	static boolean throwIOException = false;
+	private static boolean throwIOException = false;
+
+	static void setThrowIOExceptionOnReadFile(final boolean enabled) {
+		throwIOException = enabled;
+	}
 
 	private String readFile(final URL resource) throws IOException {
 		if (throwIOException) {
