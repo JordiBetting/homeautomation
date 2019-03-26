@@ -104,7 +104,7 @@ public final class ConfigurationServer extends NanoHTTPD {
 	}
 
 	private Optional<URL> locateFile(final Request request) {
-		final String path = "web/" + request.getUriParameters().get(0);
+		final String path = "/web/" + request.getUriParameters().get(0);
 		final URL resource = ClassLoader.getSystemClassLoader().getResource(path);
 		return Optional.ofNullable(resource);
 	}
