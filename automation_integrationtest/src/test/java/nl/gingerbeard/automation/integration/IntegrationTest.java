@@ -35,7 +35,7 @@ public abstract class IntegrationTest {
 	private AutomationFrameworkContainer container;
 	protected TestWebServer webserver;
 	protected IAutomationFrameworkInterface automation;
-	private int configPort;
+	protected int configPort;
 
 	@BeforeEach
 	public void start() throws IOException {

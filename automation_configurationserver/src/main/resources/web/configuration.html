@@ -6,7 +6,6 @@
 			$(document).ready(loadTable);
 			
 			function loadTable() {
-				alert('loadTable');
 				$.get("/room", function(data) {
 					var entries = data.split("\n");
 
