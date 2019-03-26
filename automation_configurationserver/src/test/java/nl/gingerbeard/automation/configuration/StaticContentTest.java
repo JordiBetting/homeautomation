@@ -1,6 +1,7 @@
 package nl.gingerbeard.automation.configuration;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
 import java.io.IOException;
@@ -59,6 +60,13 @@ public class StaticContentTest {
 		final HttpURLConnection test = openConnection("../bin/main/nl/gingerbeard/automation/configuration/IConfigurationProvider.class");
 
 		assertEquals(404, test.getResponseCode());
+	}
+
+	@Test
+	public void configurationPageServed() throws IOException {
+		final HttpURLConnection con = openConnection("configuration.html");
+
+		assertTrue(read(con.getInputStream()).startsWith("<html>"));
 	}
 
 	private HttpURLConnection openConnection(final String path) throws IOException {

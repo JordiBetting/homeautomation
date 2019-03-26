@@ -8,7 +8,6 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import fi.iki.elonen.NanoHTTPD;
 import fi.iki.elonen.NanoHTTPD.Response.Status;
@@ -36,8 +35,20 @@ public final class ConfigurationServer extends NanoHTTPD {
 	}
 
 	private Response processGetAllRooms(final Request request) {
-		final String response = provider.getRooms().stream().collect(Collectors.joining(","));
-		return newFixedLengthResponse(response);
+		final String csv = createRoomsCsv();
+		return newFixedLengthResponse(csv);
+	}
+
+	private String createRoomsCsv() {
+		final StringBuilder response = new StringBuilder();
+		provider.getRooms().stream().forEach((room) -> //
+		response.append(room)//
+				.append(",")//
+				.append(provider.isEnabled(room))//
+				.append("\n")//
+		);
+		final String csv = response.toString();
+		return csv;
 	}
 
 	private Response processEnableRoom(final Request request) {

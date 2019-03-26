@@ -1,0 +1,60 @@
+<html>
+	<head>
+		<title>Domotica configuration</title>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+		<script>
+			$(document).ready(loadTable);
+			
+			function loadTable() {
+				alert('loadTable');
+				$.get("/room", function(data) {
+					var entries = data.split("\n");
+
+					let table = document.createElement('table');
+					let row = document.createElement('tr');
+					row.appendChild(createTextCell('th','room'));
+					row.appendChild(createTextCell('th','enabled'));
+					row.appendChild(createTextCell('th','action'));
+					table.appendChild(row);
+
+					for (var i = 0; i < entries.length-1; i++) {
+						let values = entries[i].split(",");
+
+						let row = document.createElement('tr');
+
+						row.appendChild(createTextCell('th',values[0]));	
+						row.appendChild(createTextCell('td',values[1]));	
+
+						let cell3 = document.createElement('td');
+						let button = document.createElement('button');
+						button.id='button_' + values[0];
+						button.appendChild(document.createTextNode(values[1]=='true' ? 'disable' : 'enable'));
+						button.addEventListener("click", function() {
+							$.post('/room/'+values[0]+'/'+(values[1]=='true' ? 'disable' : 'enable'), loadTable).fail(function() { alert('Failed to change enabled state');});
+						});
+						cell3.appendChild(button);
+						row.appendChild(cell3);
+
+						table.appendChild(row);
+					}
+					document.getElementById('content').innerHTML = '';
+					document.getElementById('content').appendChild(table);
+				})
+				.fail(function() { alert('LoadTable failed to retrieve data'); })
+				;
+				
+				function createTextCell(elementType, text) {
+					let cell = document.createElement(elementType);
+					cell.appendChild(document.createTextNode(text));
+					return cell;
+				}
+			}
+		</script>
+	</head>
+	<body>
+		<h1>Domotica configuration</h1>
+		<div id="content">
+			<p>Loading...</p>
+		</div>
+	</body>
+</html>

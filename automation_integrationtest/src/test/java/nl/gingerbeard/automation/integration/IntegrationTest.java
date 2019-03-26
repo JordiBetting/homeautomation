@@ -12,6 +12,7 @@ import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -150,7 +151,8 @@ public abstract class IntegrationTest {
 		assertEquals(200, con.getResponseCode(), "Status expected: " + 200 + " but was: " + con.getResponseCode());
 
 		final String body = read(con.getInputStream());
-		return Arrays.asList(body.split(","));
+		final String[] rooms = body.split("\n");
+		return Arrays.stream(rooms).filter((roomLine) -> roomLine.length() > 1).map((roomLine) -> roomLine.split(",")[0]).collect(Collectors.toList());
 	}
 
 	private String read(final InputStream is) throws IOException {

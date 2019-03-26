@@ -52,9 +52,12 @@ public class ConfigurationServerTest {
 	public void listAllRooms() throws IOException {
 		final HttpURLConnection con = openGETConnection("/room");
 		when(providerMock.getRooms()).thenReturn(Lists.newArrayList("one", "two", "three"));
+		when(providerMock.isEnabled("one")).thenReturn(false);
+		when(providerMock.isEnabled("two")).thenReturn(true);
+		when(providerMock.isEnabled("three")).thenReturn(true);
 
 		assertEquals(200, con.getResponseCode());
-		assertEquals("one,two,three", read(con.getInputStream()));
+		assertEquals("one,false\ntwo,true\nthree,true\n", read(con.getInputStream()));
 	}
 
 	@Test
