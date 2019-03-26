@@ -4,16 +4,25 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.Charset;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 
+import com.google.common.io.CharStreams;
+
 import fi.iki.elonen.NanoHTTPD.Response.Status;
 import nl.gingerbeard.automation.AutomationFrameworkContainer;
 import nl.gingerbeard.automation.IAutomationFrameworkInterface;
+import nl.gingerbeard.automation.configuration.ConfigurationServerSettings;
 import nl.gingerbeard.automation.domoticz.DomoticzThreadHandler;
 import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
 import nl.gingerbeard.automation.logging.TestLogger.LogOutputToTestLogger;
@@ -26,6 +35,7 @@ public abstract class IntegrationTest {
 	private AutomationFrameworkContainer container;
 	protected TestWebServer webserver;
 	protected IAutomationFrameworkInterface automation;
+	protected int configPort;
 
 	@BeforeEach
 	public void start() throws IOException {
@@ -33,10 +43,12 @@ public abstract class IntegrationTest {
 		webserver.start();
 
 		config = new DomoticzConfiguration(0, new URL("http://localhost:" + webserver.getListeningPort()));
-		container = IAutomationFrameworkInterface.createFrameworkContainer(config, new LogOutputToTestLogger());
+		final ConfigurationServerSettings configSettings = new ConfigurationServerSettings(0);
+		container = IAutomationFrameworkInterface.createFrameworkContainer(config, new LogOutputToTestLogger(), configSettings);
 		container.start();
 
 		port = config.getListenPort();
+		configPort = configSettings.getListenPort();
 		automation = container.getRuntime().getService(IAutomationFrameworkInterface.class).get();
 		final Optional<DomoticzThreadHandler> threadHandler = container.getRuntime().getService(DomoticzThreadHandler.class);
 		assertTrue(threadHandler.isPresent());
@@ -116,4 +128,49 @@ public abstract class IntegrationTest {
 		assertEquals(expectedHttpStatus, con.getResponseCode(), "Status expected: " + expectedHttpStatus + " but was: " + con.getResponseCode());
 	}
 
+	public void disableRoom(final String room) throws IOException {
+		changeRoom(room, "disable");
+	}
+
+	private void changeRoom(final String room, final String enableString) throws IOException {
+		final URL url = new URL("http://localhost:" + configPort + "/room/" + room + "/" + enableString);
+		final HttpURLConnection con = (HttpURLConnection) url.openConnection();
+		con.setRequestMethod("POST");
+		assertEquals(200, con.getResponseCode(), "Status expected: " + 200 + " but was: " + con.getResponseCode());
+	}
+
+	public void enableRoom(final String room) throws IOException {
+		changeRoom(room, "enable");
+	}
+
+	public List<String> getRooms() throws IOException {
+		final URL url = new URL("http://localhost:" + configPort + "/room");
+		final HttpURLConnection con = (HttpURLConnection) url.openConnection();
+		con.setRequestMethod("GET");
+
+		assertEquals(200, con.getResponseCode(), "Status expected: " + 200 + " but was: " + con.getResponseCode());
+
+		final String body = read(con.getInputStream());
+		final String[] rooms = body.split("\n");
+		return Arrays.stream(rooms).filter((roomLine) -> roomLine.length() > 1).map((roomLine) -> roomLine.split(",")[0]).collect(Collectors.toList());
+	}
+
+	private String read(final InputStream is) throws IOException {
+		if (is != null) {
+			try (InputStreamReader reader = new InputStreamReader(is, Charset.defaultCharset())) {
+				return CharStreams.toString(reader);
+			}
+		}
+		return "";
+	}
+
+	public boolean isEnabled(final String room) throws IOException {
+		final URL url = new URL("http://localhost:" + configPort + "/room/" + room + "/isenabled");
+		final HttpURLConnection con = (HttpURLConnection) url.openConnection();
+		con.setRequestMethod("GET");
+
+		assertEquals(200, con.getResponseCode(), "Status expected: " + 200 + " but was: " + con.getResponseCode());
+
+		return "true".equals(read(con.getInputStream()));
+	}
 }

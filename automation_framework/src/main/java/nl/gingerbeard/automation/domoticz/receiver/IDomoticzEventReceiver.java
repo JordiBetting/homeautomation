@@ -8,4 +8,6 @@ public interface IDomoticzEventReceiver {
 
 	int getListeningPort();
 
+	void stop();
+
 }

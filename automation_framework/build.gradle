@@ -8,4 +8,5 @@ dependencies {
 	compile project(':devices')
 	compile project(':logging')
 	testCompile project(':testutils')
+	compile project(':automation_configurationserver')
 }

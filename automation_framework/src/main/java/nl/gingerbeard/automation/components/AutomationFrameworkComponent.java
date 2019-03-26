@@ -1,5 +1,8 @@
-package nl.gingerbeard.automation;
+package nl.gingerbeard.automation.components;
 
+import nl.gingerbeard.automation.AutomationFramework;
+import nl.gingerbeard.automation.IAutomationFrameworkInterface;
+import nl.gingerbeard.automation.autocontrol.AutoControlToDomoticz;
 import nl.gingerbeard.automation.deviceregistry.IDeviceRegistry;
 import nl.gingerbeard.automation.domoticz.transmitter.IDomoticzUpdateTransmitter;
 import nl.gingerbeard.automation.event.IEvents;

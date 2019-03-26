@@ -1,4 +1,4 @@
-package nl.gingerbeard.automation;
+package nl.gingerbeard.automation.components;
 
 import nl.gingerbeard.automation.service.annotation.Activate;
 import nl.gingerbeard.automation.service.annotation.Deactivate;

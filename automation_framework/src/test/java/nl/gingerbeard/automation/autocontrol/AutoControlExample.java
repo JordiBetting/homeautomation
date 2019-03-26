@@ -1,7 +1,8 @@
-package nl.gingerbeard.automation;
+package nl.gingerbeard.automation.autocontrol;
 
 import java.util.List;
 
+import nl.gingerbeard.automation.autocontrol.AutoControl;
 import nl.gingerbeard.automation.devices.IDevice;
 import nl.gingerbeard.automation.state.NextState;
 

@@ -1,4 +1,4 @@
-package nl.gingerbeard.automation;
+package nl.gingerbeard.automation.autocontrol;
 
 import java.io.IOException;
 import java.util.List;

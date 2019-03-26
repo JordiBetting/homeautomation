@@ -1,4 +1,4 @@
-package nl.gingerbeard.automation;
+package nl.gingerbeard.automation.autocontrol;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -11,6 +11,8 @@ import static org.mockito.Mockito.verify;
 import java.util.ArrayList;
 
 import org.junit.jupiter.api.Test;
+
+import nl.gingerbeard.automation.autocontrol.AutoControlListener;
 
 public class AutoControlTest {
 
