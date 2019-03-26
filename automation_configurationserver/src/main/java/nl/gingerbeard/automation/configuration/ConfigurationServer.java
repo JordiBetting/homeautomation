@@ -1,15 +1,15 @@
 package nl.gingerbeard.automation.configuration;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.URL;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.charset.Charset;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Function;
+
+import com.google.common.io.CharStreams;
 
 import fi.iki.elonen.NanoHTTPD;
 import fi.iki.elonen.NanoHTTPD.Response.Status;
@@ -75,16 +75,9 @@ public final class ConfigurationServer extends NanoHTTPD {
 		} catch (final FileNotFoundException e) {
 			return newFixedLengthResponse(Status.NOT_FOUND, NanoHTTPD.MIME_PLAINTEXT, "File not found");
 		} catch (final IOException e) {
+			e.printStackTrace();
 			return newFixedLengthResponse(Status.INTERNAL_ERROR, NanoHTTPD.MIME_PLAINTEXT, "Failed retrieving file: " + e.getMessage());
 		}
-	}
-
-	String readFile(final Request request) throws IOException {
-		final Optional<URL> fileLocation = locateFile(request);
-		if (!fileLocation.isPresent()) {
-			throw new FileNotFoundException(request.getUriParameters().get(0));
-		}
-		return readFile(fileLocation.get());
 	}
 
 	// test interface
@@ -94,23 +87,30 @@ public final class ConfigurationServer extends NanoHTTPD {
 		throwIOException = enabled;
 	}
 
-	private String readFile(final URL resource) throws IOException {
+	private String readFile(final Request request) throws IOException {
+		satisfyTestInterface();
+		final InputStream in = openFile(request);
+		return readToString(in);
+	}
+
+	private String readToString(final InputStream in) throws IOException {
+		try (InputStreamReader reader = new InputStreamReader(in, Charset.defaultCharset())) {
+			return CharStreams.toString(reader);
+		}
+	}
+
+	private void satisfyTestInterface() throws IOException {
 		if (throwIOException) {
 			throw new IOException("Test exception");
 		}
-		final File file = new File(resource.getFile());
-		final String content = new String(Files.readAllBytes(file.toPath()), Charset.defaultCharset());
-		return content;
 	}
 
-	private Optional<URL> locateFile(final Request request) {
-		String path = "/web/" + request.getUriParameters().get(0);
-		URL resource = ClassLoader.getSystemClassLoader().getResource(path);
-		if (resource == null) {
-			path = "web/" + request.getUriParameters().get(0);
-			resource = ClassLoader.getSystemClassLoader().getResource(path);
+	private InputStream openFile(final Request request) throws FileNotFoundException {
+		final InputStream in = getClass().getResourceAsStream("/web/" + request.getUriParameters().get(0));
+		if (in == null) {
+			throw new FileNotFoundException();
 		}
-		return Optional.ofNullable(resource);
+		return in;
 	}
 
 	@Override
