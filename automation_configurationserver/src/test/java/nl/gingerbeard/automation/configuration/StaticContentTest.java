@@ -69,6 +69,18 @@ public class StaticContentTest {
 		assertTrue(read(con.getInputStream()).startsWith("<html>"));
 	}
 
+	@Test
+	public void forcedIOError() throws IOException {
+		ConfigurationServer.throwIOException = true;
+		try {
+			final HttpURLConnection con = openConnection("configuration.html");
+
+			assertEquals(500, con.getResponseCode());
+		} finally {
+			ConfigurationServer.throwIOException = false;
+		}
+	}
+
 	private HttpURLConnection openConnection(final String path) throws IOException {
 		final URL url = new URL("http://localhost:" + port + "/static/" + path);
 		final HttpURLConnection con = (HttpURLConnection) url.openConnection();

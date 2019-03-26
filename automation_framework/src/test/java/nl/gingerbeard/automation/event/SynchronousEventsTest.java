@@ -560,4 +560,17 @@ public class SynchronousEventsTest {
 		assertTrue(events.isEnabled(AutoControlSubscriber.class.getSimpleName()));
 		assertFalse(events.isEnabled(AutoControlSubscriber2.class.getSimpleName()));
 	}
+
+	@Test
+	public void isEnabled_notExisting_returnsFalse() {
+		final IEvents events = new SynchronousEvents(new State(), logMock);
+		final AutoControlSubscriber subscriber = new AutoControlSubscriber();
+		final AutoControlSubscriber2 subscriber2 = new AutoControlSubscriber2();
+		events.subscribe(subscriber.getControl());
+		events.subscribe(subscriber2.getControl());
+
+		final boolean result = events.isEnabled("space");
+
+		assertFalse(result);
+	}
 }

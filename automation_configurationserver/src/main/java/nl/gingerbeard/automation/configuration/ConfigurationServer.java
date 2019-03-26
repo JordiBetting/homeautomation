@@ -1,12 +1,14 @@
 package nl.gingerbeard.automation.configuration;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 
 import fi.iki.elonen.NanoHTTPD;
@@ -68,27 +70,39 @@ public final class ConfigurationServer extends NanoHTTPD {
 
 	private Response processStatic(final Request request) {
 		try {
-			final URL resource = locateFile(request);
-			if (resource != null) {
-				return newFixedLengthResponse(readFile(resource));
-			} else {
-				return newFixedLengthResponse(Status.NOT_FOUND, NanoHTTPD.MIME_PLAINTEXT, "File not found");
-			}
+			final String fileContent = readFile(request);
+			return newFixedLengthResponse(fileContent);
+		} catch (final FileNotFoundException e) {
+			return newFixedLengthResponse(Status.NOT_FOUND, NanoHTTPD.MIME_PLAINTEXT, "File not found");
 		} catch (final IOException e) {
 			return newFixedLengthResponse(Status.INTERNAL_ERROR, NanoHTTPD.MIME_PLAINTEXT, "Failed retrieving file: " + e.getMessage());
 		}
 	}
 
+	String readFile(final Request request) throws IOException {
+		final Optional<URL> fileLocation = locateFile(request);
+		if (!fileLocation.isPresent()) {
+			throw new FileNotFoundException(request.getUriParameters().get(0));
+		}
+		return readFile(fileLocation.get());
+	}
+
+	// test interface
+	static boolean throwIOException = false;
+
 	private String readFile(final URL resource) throws IOException {
+		if (throwIOException) {
+			throw new IOException("Test exception");
+		}
 		final File file = new File(resource.getFile());
 		final String content = new String(Files.readAllBytes(file.toPath()), Charset.defaultCharset());
 		return content;
 	}
 
-	private URL locateFile(final Request request) {
+	private Optional<URL> locateFile(final Request request) {
 		final String path = "web/" + request.getUriParameters().get(0);
 		final URL resource = ClassLoader.getSystemClassLoader().getResource(path);
-		return resource;
+		return Optional.ofNullable(resource);
 	}
 
 	@Override
