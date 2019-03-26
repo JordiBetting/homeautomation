@@ -7,6 +7,7 @@ import nl.gingerbeard.automation.configuration.ConfigurationServer;
 import nl.gingerbeard.automation.configuration.ConfigurationServerSettings;
 import nl.gingerbeard.automation.configuration.IConfigurationProvider;
 import nl.gingerbeard.automation.event.IEvents;
+import nl.gingerbeard.automation.logging.ILogger;
 import nl.gingerbeard.automation.service.annotation.Activate;
 import nl.gingerbeard.automation.service.annotation.Deactivate;
 import nl.gingerbeard.automation.service.annotation.Requires;
@@ -18,6 +19,9 @@ public class ConfigurationServerComponent {
 
 	@Requires
 	public IEvents events;
+
+	@Requires
+	public ILogger log;
 
 	private ConfigurationServer server;
 	private Provider provider;
@@ -41,11 +45,13 @@ public class ConfigurationServerComponent {
 
 		@Override
 		public void disable(final String room) {
+			log.info("Disabling " + room);
 			events.disable(room);
 		}
 
 		@Override
 		public void enable(final String room) {
+			log.info("Enabling " + room);
 			events.enable(room);
 		}
 

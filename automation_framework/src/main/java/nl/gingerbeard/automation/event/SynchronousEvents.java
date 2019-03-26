@@ -128,7 +128,7 @@ public final class SynchronousEvents implements IEvents {
 
 	@Override
 	public List<String> getSubscribers() {
-		return callback.values().stream().map((subscriber) -> subscriber.getSimpleName()).collect(Collectors.toList());
+		return callback.values().stream().map((subscriber) -> subscriber.getSimpleName()).distinct().collect(Collectors.toList());
 	}
 
 	@Override
