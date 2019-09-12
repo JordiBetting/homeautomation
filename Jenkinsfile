@@ -8,11 +8,9 @@ pipeline {
 
 	stages {
 		stage("Test") {
-			tools {
-				gradle 'gradle5.1.1'
-			}
 			steps {
-				sh 'gradle -b build.gradle test check jacocoRootReport'
+				sh 'chmod +x gradlew'
+				sh './gradlew -b build.gradle test check jacocoRootReport'
 			}
 			post {
 				always {
@@ -32,11 +30,8 @@ pipeline {
 			}
 		}
 		stage("Build") {
-			tools {
-				gradle 'gradle5.1.1'
-			}
 			steps {
-				sh 'gradle -b build.gradle clean assemble'
+				sh './gradlew -b build.gradle clean assemble'
 			}	
 		}
 
@@ -49,12 +44,9 @@ pipeline {
 		}
 			
 		stage("Publish") {
-			tools {
-				gradle 'gradle5.1.1'
-			}
 			when { branch 'master' }
 			steps {
-				sh 'gradle -b build.gradle assemble publishToMavenLocal'
+				sh './gradlew -b build.gradle assemble publishToMavenLocal'
 			}
 
 			post {
