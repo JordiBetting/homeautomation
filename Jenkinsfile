@@ -31,7 +31,7 @@ pipeline {
 		}
 		stage("Build") {
 			steps {
-				sh '/gradlew -b build.gradle clean assemble'
+				sh './gradlew -b build.gradle clean assemble'
 			}	
 		}
 
@@ -46,7 +46,7 @@ pipeline {
 		stage("Publish") {
 			when { branch 'master' }
 			steps {
-				sh '/gradlew -b build.gradle assemble publishToMavenLocal'
+				sh './gradlew -b build.gradle assemble publishToMavenLocal'
 			}
 
 			post {
