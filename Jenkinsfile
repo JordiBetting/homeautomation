@@ -9,7 +9,7 @@ pipeline {
 	stages {
 		stage("Test") {
 			steps {
-				sh 'chmod +X gradlew'
+				sh 'chmod +x gradlew'
 				sh './gradlew -b build.gradle test check jacocoRootReport'
 			}
 			post {
