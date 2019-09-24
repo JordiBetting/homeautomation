@@ -1,1 +1,1 @@
-FROM openjdk:14-jdk-alpine3.10
+FROM openjdk:13-jdk-alpine3.10
