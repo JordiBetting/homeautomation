@@ -33,8 +33,8 @@ pipeline {
 
 		stage("Analysis") {
 			steps {
-				sh 'sloccount --duplicates --wide --details ./ > sloccount.sc'
-				sloccountPublish encoding: '', pattern: ''
+				//sh 'sloccount --duplicates --wide --details ./ > sloccount.sc'
+				//sloccountPublish encoding: '', pattern: ''
 				archiveArtifacts artifacts: '**/*.jar', excludes: '**/jacocoagent.jar', onlyIfSuccessful: true
 			}
 		}
