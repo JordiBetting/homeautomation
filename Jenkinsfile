@@ -6,7 +6,7 @@ pipeline {
 	stages {
 		stage("Test") {
 			steps {
-				sh './gradlew -b build.gradle test check jacocoRootReport'
+				sh './gradlew --no-daemon -b build.gradle test check jacocoRootReport'
 			}
 			post {
 				always {
@@ -27,7 +27,7 @@ pipeline {
 		}
 		stage("Build") {
 			steps {
-				sh './gradlew -b build.gradle clean assemble'
+				sh './gradlew --no-daemon -b build.gradle clean assemble'
 			}	
 		}
 
@@ -40,7 +40,7 @@ pipeline {
 		stage("Publish") {
 			when { branch 'master' }
 			steps {
-				sh './gradlew -b build.gradle assemble publishToMavenLocal'
+				sh './gradlew --no-daemon -b build.gradle assemble publishToMavenLocal'
 			}
 
 			post {
