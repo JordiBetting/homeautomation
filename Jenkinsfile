@@ -16,9 +16,15 @@ pipeline {
 		}
 
 		stage("Publish") {
-			steps {
-				sh './publish.sh'
-			}
+			withCredentials([usernamePassword( credentialsId: 'dockerhub', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+
+				docker.withRegistry('', 'dockerhub') {
+					sh "docker login -u ${USERNAME} -p ${PASSWORD}"
+					steps {
+						sh './publish.sh'
+					}
+				}
+			}			
 		}
 	}
 	post {
