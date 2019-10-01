@@ -30,12 +30,11 @@ pipeline {
 		stage("Build") {
 			steps {
 				gradleBuild 'clean assemble'
-			}	
-		}
-		
-		stage("Archive jar") {
-			steps {
-				archiveArtifacts artifacts: '**/*.jar', excludes: '**/jacocoagent.jar, **/.gradle/**', onlyIfSuccessful: true
+			}
+			post {
+				success {
+					archiveArtifacts artifacts: '**/*.jar', excludes: '**/jacocoagent.jar, **/.gradle/**', onlyIfSuccessful: true
+				}
 			}
 		}
 		
