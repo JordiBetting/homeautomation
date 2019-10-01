@@ -39,7 +39,7 @@ public class AutomationFramework implements IAutomationFrameworkInterface {
 			autoControl.getDevices().forEach((device) -> addDevice(device));
 			events.subscribe(autoControl);
 		});
-		events.subscribe(room);
+		events.subscribe(room);		
 		return room;
 	}
 

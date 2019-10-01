@@ -9,12 +9,23 @@ allprojects {
 	}	
 }
 
+buildscript {
+  repositories {
+    maven {
+      url "https://plugins.gradle.org/m2/"
+    }
+  }
+  dependencies {
+    classpath "gradle.plugin.com.github.spotbugs:spotbugs-gradle-plugin:2.0.0"
+  }
+}
+
 subprojects {
 	apply plugin: 'eclipse'
-	apply plugin: 'findbugs'
+	apply plugin: 'com.github.spotbugs'
 	apply plugin: 'maven-publish'
 	
-	version = "0.0.34"
+	version = "0.0.35"
 	group = "nl.gingerbeard"
 
 	dependencies {
@@ -44,11 +55,6 @@ subprojects {
 		useJUnitPlatform()
 	}
 
-	findbugs {
-		ignoreFailures = true
-		effort = "max"
-		reportLevel = "low"
-	}
 	
 	tasks.withType(Test) {
         maxParallelForks = Runtime.runtime.availableProcessors()

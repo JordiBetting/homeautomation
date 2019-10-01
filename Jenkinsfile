@@ -1,22 +1,20 @@
 pipeline {
-	agent { label 'java'
-	}
-
-	environment {
-		JENKINS_NODE_COOKIE = 'dontKillMe' // this is necessary for the Gradle daemon to be kept alive
+	agent { 
+		docker {
+			image 'jordibetting/jordibetting:java8build-13' // published by buildagent branch
+		}
 	}
 
 	stages {
 		stage("Test") {
 			steps {
-				sh 'chmod +x gradlew'
-				sh './gradlew -b build.gradle test check jacocoRootReport'
+				gradleBuild 'test jacocoRootReport'
 			}
 			post {
 				always {
 					sh 'touch automation_framework/build/test-results/test/*.xml'
+					
 					junit allowEmptyResults: true, testResults: '**/build/test-results/test/*.xml'
-					findbugs canComputeNew: false, defaultEncoding: '', excludePattern: '', healthy: '', includePattern: '', pattern: '**/build/reports/findbugs/*.xml', unHealthy: ''
 					jacoco sourceExclusionPattern: '*/test/**'
 					publishHTML (target: [
 						allowMissing: false,
@@ -31,22 +29,38 @@ pipeline {
 		}
 		stage("Build") {
 			steps {
-				sh './gradlew -b build.gradle clean assemble'
+				gradleBuild 'clean assemble'
 			}	
 		}
-
-		stage("Analysis") {
+		
+		stage("Archive jar") {
 			steps {
-				sh 'sloccount --duplicates --wide --details ./ > sloccount.sc'
-				sloccountPublish encoding: '', pattern: ''
-				archiveArtifacts artifacts: '**/*.jar', excludes: '**/jacocoagent.jar', onlyIfSuccessful: true
+				archiveArtifacts artifacts: '**/*.jar', excludes: '**/jacocoagent.jar, **/.gradle/**', onlyIfSuccessful: true
 			}
 		}
-			
+		
+		stage("Static code analysis")
+		{
+			when { 
+				anyOf{
+					expression{ env.BRANCNAME == 'master' }
+					changeRequest()
+				}
+			}
+			steps {
+				gradleBuild 'check'
+			}
+			post {
+				always {
+					findbugs canComputeNew: false, canRunOnFailed: true, defaultEncoding: '', excludePattern: '', healthy: '', includePattern: '', pattern: '**/build/reports/spotbugs/*.xml', unHealthy: ''
+				}
+			}
+		}
+
 		stage("Publish") {
 			when { branch 'master' }
 			steps {
-				sh './gradlew -b build.gradle assemble publishToMavenLocal'
+				gradleBuild 'assemble publishToMavenLocal'
 			}
 
 			post {
@@ -56,4 +70,8 @@ pipeline {
 			}
 		}
 	}
+}
+
+def gradleBuild(String tasks) {
+	sh "./gradlew --no-daemon -b build.gradle ${tasks}"
 }
