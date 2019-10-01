@@ -1,7 +1,7 @@
 pipeline {
 	agent { 
 		dockerfile {
-			image 'jordibetting/jordibetting:java8build-13' #published by buildagent branch
+			image 'jordibetting/jordibetting:java8build-13' // published by buildagent branch
 		}
 	}
 
