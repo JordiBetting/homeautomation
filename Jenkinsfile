@@ -39,11 +39,10 @@ pipeline {
 			}
 		}
 		
-		stage("Static code analysis")
-		{
+		stage("Static code analysis") {
 			when { 
 				anyOf{
-					expression{ env.BRANCNAME == 'master' }
+					expression{ env.BRANCHNAME == 'master' }
 					changeRequest()
 				}
 			}

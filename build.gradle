@@ -25,7 +25,7 @@ subprojects {
 	apply plugin: 'com.github.spotbugs'
 	apply plugin: 'maven-publish'
 	
-	version = "0.0.35"
+	version = "0.0.36"
 	group = "nl.gingerbeard"
 
 	dependencies {
