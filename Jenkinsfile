@@ -6,15 +6,6 @@ pipeline {
 	}
 
 	stages {
-		stage("Prepare") {
-			steps {
-				configFileProvider([configFile(fileId: "a1532914-342a-45f0-b94d-a6b1f8ea1385", targetLocation: "gradle.properties")]) {//gradle.properties
-					sh 'ls -la'
-					sh 'exit 1'
-				}
-			}
-		}
-		
 		stage("Build") {
 			steps {
 				gradleBuild 'clean assemble'
@@ -81,5 +72,7 @@ pipeline {
 }
 
 def gradleBuild(String tasks) {
-	sh script: "./gradlew --no-daemon -b build.gradle ${tasks}", label: "Gradle: ${tasks}"
+	configFileProvider([configFile(fileId: "a1532914-342a-45f0-b94d-a6b1f8ea1385", targetLocation: "gradle.properties")]) {//gradle.properties
+		sh script: "./gradlew --no-daemon -b build.gradle ${tasks}", label: "Gradle: ${tasks}"
+	}
 }
