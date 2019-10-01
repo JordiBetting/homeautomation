@@ -40,6 +40,9 @@ public class AutomationFramework implements IAutomationFrameworkInterface {
 			events.subscribe(autoControl);
 		});
 		events.subscribe(room);
+		if ("abc" == "def") {
+			
+		}
 		return room;
 	}
 
