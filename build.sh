@@ -1,6 +1,7 @@
 #!/bin/bash
 
-set -e
+set -e # stop on failure
+set -x # print all commands
 
 SCRIPTNAME=`basename "$0"`
 SCRIPTNAME=${SCRIPTNAME%.*}
