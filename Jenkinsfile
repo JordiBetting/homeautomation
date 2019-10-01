@@ -59,7 +59,7 @@ pipeline {
 		stage("Publish") {
 			// when { branch 'master' }
 			steps {
-				gradleBuild 'assemble publishToMavenRepository'
+				gradleBuild 'assemble publish'
 			}
 
 			post {

@@ -20,12 +20,12 @@ buildscript {
   }
 }
 
-subprojects {
+allprojects {
 	apply plugin: 'eclipse'
 	apply plugin: 'com.github.spotbugs'
 	apply plugin: 'maven-publish'
 	
-	version = "0.0.38"
+	version = "0.0.39"
 	group = "nl.gingerbeard"
 	
 	dependencies {
@@ -35,6 +35,27 @@ subprojects {
 		testCompile('junit:junit:4.12')
 		testCompile('org.mockito:mockito-core:2.25.1')
 		compile group: 'com.google.guava', name: 'guava', version: '23.5-jre'
+	}
+
+
+	publishing {
+		publishing {
+			publications {
+				maven(MavenPublication) {
+					from components.java
+				}
+			}
+			repositories {
+				maven {
+					name 'nexus'
+					url "http://docker.home:8083/repository/homeautomation/"
+					credentials {
+						username project.repoUser
+						password project.repoPassword
+					}
+				}
+			}
+		}
 	}
 
 	test {
@@ -59,29 +80,8 @@ subprojects {
 	tasks.withType(Test) {
         maxParallelForks = Runtime.runtime.availableProcessors()
     }
-	
-	publishing {
-		publishing {
-			publications {
-				maven(MavenPublication) {
-					artifact("build/libs/homeautomation_root.jar") {
-						extension 'jar'
-					}
-				}
-			}
-			repositories {
-				maven {
-					name 'nexus'
-					url "http://docker.home:8083/repository/homeautomation/"
-					credentials {
-						username project.repoUser
-						password project.repoPassword
-					}
-				}
-			}
-		}
-	}
 }
+
 
 task jacocoRootReport(type: org.gradle.testing.jacoco.tasks.JacocoReport) {
     dependsOn = subprojects.test
