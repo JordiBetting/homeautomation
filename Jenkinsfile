@@ -14,7 +14,7 @@ pipeline {
 				always {
 					sh 'touch automation_framework/build/test-results/test/*.xml'
 					junit allowEmptyResults: true, testResults: '**/build/test-results/test/*.xml'
-					findbugs canComputeNew: false, defaultEncoding: '', excludePattern: '', healthy: '', includePattern: '', pattern: '**/build/reports/findbugs/*.xml', unHealthy: ''
+					findbugs canComputeNew: false, defaultEncoding: '', excludePattern: '', healthy: '', includePattern: '', pattern: '**/build/reports/spotbugs/*.xml', unHealthy: ''
 					jacoco sourceExclusionPattern: '*/test/**'
 					publishHTML (target: [
 						allowMissing: false,
