@@ -2,6 +2,7 @@ pipeline {
 	agent { 
 		docker {
 			image 'jordibetting/jordibetting:java8build-13' // published by buildagent branch
+			args '--network jenkins-network'
 		}
 	}
 

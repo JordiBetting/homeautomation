@@ -48,7 +48,7 @@ allprojects {
 			repositories {
 				maven {
 					name 'nexus'
-					url "http://172.16.3.2:8083/repository/homeautomation/"
+					url "http://192.168.16.2:8083/repository/homeautomation/"
 					credentials {
 						username project.repoUser
 						password project.repoPassword
