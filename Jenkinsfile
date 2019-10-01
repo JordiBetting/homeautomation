@@ -17,11 +17,13 @@ pipeline {
 
 		stage("Publish") {
 			steps {
-				withCredentials([usernamePassword( credentialsId: 'dockerhub', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+				script }
+					withCredentials([usernamePassword( credentialsId: 'dockerhub', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
 
-					docker.withRegistry('', 'dockerhub') {
-						sh "docker login -u ${USERNAME} -p ${PASSWORD}"
-						sh './publish.sh'
+						docker.withRegistry('', 'dockerhub') {
+							sh "docker login -u ${USERNAME} -p ${PASSWORD}"
+							sh './publish.sh'
+						}
 					}
 				}
 			}			
