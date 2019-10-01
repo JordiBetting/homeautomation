@@ -42,7 +42,7 @@ pipeline {
 		stage("Static code analysis") {
 			when { 
 				anyOf{
-					expression{ env.BRANCHNAME == 'master' }
+					branch 'master'
 					changeRequest()
 				}
 			}
