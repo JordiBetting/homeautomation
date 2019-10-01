@@ -19,6 +19,7 @@ pipeline {
 		}
 		
 		stage("Test") {
+			when { branch 'master' } // Line added to improve test cycle time. remove before PR.
 			steps {
 				gradleBuild 'test jacocoRootReport'
 			}
@@ -58,7 +59,7 @@ pipeline {
 		}
 
 		stage("Publish") {
-			// when { branch 'master' }
+			// when { branch 'master' } Uncomment before PR
 			steps {
 				gradleBuild 'assemble publish'
 			}
