@@ -1,6 +1,8 @@
 pipeline {
 	agent { 
-		dockerfile true
+		dockerfile {
+			image 'jordibetting/jordibetting:java8build-13' #published by buildagent branch
+		}
 	}
 
 	stages {
