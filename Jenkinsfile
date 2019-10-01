@@ -32,6 +32,13 @@ pipeline {
 				sh './gradlew --no-daemon -b build.gradle clean assemble'
 			}	
 		}
+		
+		stage("Archive jar") {
+			steps {
+				archiveArtifacts artifacts: '**/*.jar', excludes: '**/jacocoagent.jar', onlyIfSuccessful: true
+			}
+		}
+		
 		stage("Static code analysis")
 		{
 			steps {
@@ -43,12 +50,7 @@ pipeline {
 				}
 			}
 		}
-		stage("Archive") {
-			steps {
-				archiveArtifacts artifacts: '**/*.jar', excludes: '**/jacocoagent.jar', onlyIfSuccessful: true
-			}
-		}
-			
+
 		stage("Publish") {
 			when { branch 'master' }
 			steps {
