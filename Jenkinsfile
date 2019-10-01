@@ -35,7 +35,7 @@ pipeline {
 		
 		stage("Archive jar") {
 			steps {
-				archiveArtifacts artifacts: '**/*.jar', excludes: '**/jacocoagent.jar', onlyIfSuccessful: true
+				archiveArtifacts artifacts: '**/*.jar', excludes: '**/jacocoagent.jar, **/.gradle/**', onlyIfSuccessful: true
 			}
 		}
 		
