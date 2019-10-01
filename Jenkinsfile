@@ -43,7 +43,7 @@ pipeline {
 		{
 			when { 
 				anyOf{
-					expression{ env.BRANCNAME == 'master'{
+					expression{ env.BRANCNAME == 'master' }
 					changeRequest()
 				}
 			}
