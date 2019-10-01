@@ -6,6 +6,17 @@ pipeline {
 	}
 
 	stages {
+		stage("Build") {
+			steps {
+				gradleBuild 'clean assemble'
+			}
+			post {
+				success {
+					archiveArtifacts artifacts: '**/*.jar', excludes: '**/jacocoagent.jar, **/.gradle/**', onlyIfSuccessful: true
+				}
+			}
+		}
+		
 		stage("Test") {
 			steps {
 				gradleBuild 'test jacocoRootReport'
@@ -24,16 +35,6 @@ pipeline {
 						reportFiles: 'index.html',
 						reportName: "Coverage Report (Excl. tests)"
 						])
-				}
-			}
-		}
-		stage("Build") {
-			steps {
-				gradleBuild 'clean assemble'
-			}
-			post {
-				success {
-					archiveArtifacts artifacts: '**/*.jar', excludes: '**/jacocoagent.jar, **/.gradle/**', onlyIfSuccessful: true
 				}
 			}
 		}
