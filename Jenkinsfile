@@ -12,7 +12,7 @@ pipeline {
 			}
 			post {
 				always {
-					sh 'touch automation_framework/build/test-results/test/*.xml'
+					sh 'touch automation_framework/build/test-results/test/*.xml', label: "Ensure always publishing junit test results"
 					
 					junit allowEmptyResults: true, testResults: '**/build/test-results/test/*.xml'
 					jacoco sourceExclusionPattern: '*/test/**'
@@ -71,5 +71,5 @@ pipeline {
 }
 
 def gradleBuild(String tasks) {
-	sh "./gradlew --no-daemon -b build.gradle ${tasks}"
+	sh "./gradlew --no-daemon -b build.gradle ${tasks}", label: "Gradle: ${tasks}"
 }
