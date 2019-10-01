@@ -39,11 +39,15 @@ public class AutomationFramework implements IAutomationFrameworkInterface {
 			autoControl.getDevices().forEach((device) -> addDevice(device));
 			events.subscribe(autoControl);
 		});
-		events.subscribe(room);
-		if ("abc" == "def") {
-			
-		}
+		events.subscribe(room);		
 		return room;
+	}
+	
+	public void failSpotbugs() throws Throwable {
+		if ("abc" == "def") {
+			System.out.println("Ja, dit hoort niet zo");
+		}
+		this.finalize();
 	}
 
 	final <T extends Room> T createRoom(final Class<T> roomClass) {
