@@ -64,15 +64,15 @@ subprojects {
 		publishing {
 			publications {
 				maven(MavenPublication) {
-					artifact(“build/libs/homeautomation_root.jar”) {
-						extension ‘jar’
+					artifact("build/libs/homeautomation_root.jar") {
+						extension 'jar'
 					}
 				}
 			}
 			repositories {
 				maven {
-					name ‘nexus’
-					url “http://docker.home:8083/repository/homeautomation/"
+					name 'nexus'
+					url "http://docker.home:8083/repository/homeautomation/"
 					credentials {
 						username project.repoUser
 						password project.repoPassword
