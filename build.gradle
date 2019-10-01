@@ -27,7 +27,7 @@ subprojects {
 	
 	version = "0.0.38"
 	group = "nl.gingerbeard"
-
+	
 	dependencies {
 		testCompile('org.junit.jupiter:junit-jupiter-api:5.3.2')
 		testCompile('org.junit.jupiter:junit-jupiter-params:5.3.2')
@@ -61,13 +61,27 @@ subprojects {
     }
 	
 	publishing {
-		publications {
-			mavenJava(MavenPublication) {
-				from components.java
+		publishing {
+			publications {
+				maven(MavenPublication) {
+					artifact(“build/libs/homeautomation_root.jar”) {
+						extension ‘jar’
+					}
+				}
+			}
+			repositories {
+				maven {
+					name ‘nexus’
+					url “http://docker.home:8083/repository/homeautomation/"
+					credentials {
+						username project.repoUser
+						password project.repoPassword
+					}
+				}
 			}
 		}
 	}
-}	
+}
 
 task jacocoRootReport(type: org.gradle.testing.jacoco.tasks.JacocoReport) {
     dependsOn = subprojects.test
