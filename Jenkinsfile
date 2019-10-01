@@ -2,6 +2,7 @@ pipeline {
 	agent { 
 		docker {
 			image 'jordibetting/jordibetting:java8build-13' // published by buildagent branch
+			args '--network jenkins-network'
 		}
 	}
 
@@ -59,7 +60,7 @@ pipeline {
 		stage("Publish") {
 			when { branch 'master' }
 			steps {
-				gradleBuild 'assemble publishToMavenLocal'
+				gradleBuild 'assemble publish'
 			}
 
 			post {
@@ -72,5 +73,7 @@ pipeline {
 }
 
 def gradleBuild(String tasks) {
-	sh script: "./gradlew --no-daemon -b build.gradle ${tasks}", label: "Gradle: ${tasks}"
+	configFileProvider([configFile(fileId: "a1532914-342a-45f0-b94d-a6b1f8ea1385", targetLocation: "gradle.properties")]) {//gradle.properties
+		sh script: "./gradlew --no-daemon -b build.gradle ${tasks}", label: "Gradle: ${tasks}"
+	}
 }
