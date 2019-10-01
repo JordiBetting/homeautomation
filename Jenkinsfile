@@ -6,13 +6,24 @@ pipeline {
 	}
 
 	stages {
+		stage("Build") {
+			steps {
+				gradleBuild 'clean assemble'
+			}
+			post {
+				success {
+					archiveArtifacts artifacts: '**/*.jar', excludes: '**/jacocoagent.jar, **/.gradle/**', onlyIfSuccessful: true
+				}
+			}
+		}
+		
 		stage("Test") {
 			steps {
 				gradleBuild 'test jacocoRootReport'
 			}
 			post {
 				always {
-					sh 'touch automation_framework/build/test-results/test/*.xml'
+					sh script: 'touch automation_framework/build/test-results/test/*.xml', label: "Ensure always publishing junit test results"
 					
 					junit allowEmptyResults: true, testResults: '**/build/test-results/test/*.xml'
 					jacoco sourceExclusionPattern: '*/test/**'
@@ -25,17 +36,6 @@ pipeline {
 						reportName: "Coverage Report (Excl. tests)"
 						])
 				}
-			}
-		}
-		stage("Build") {
-			steps {
-				gradleBuild 'clean assemble'
-			}	
-		}
-		
-		stage("Archive jar") {
-			steps {
-				archiveArtifacts artifacts: '**/*.jar', excludes: '**/jacocoagent.jar, **/.gradle/**', onlyIfSuccessful: true
 			}
 		}
 		
@@ -72,5 +72,5 @@ pipeline {
 }
 
 def gradleBuild(String tasks) {
-	sh "./gradlew --no-daemon -b build.gradle ${tasks}"
+	sh script: "./gradlew --no-daemon -b build.gradle ${tasks}", label: "Gradle: ${tasks}"
 }
