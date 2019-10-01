@@ -8,13 +8,13 @@ pipeline {
 	stages {
 		stage("Test") {
 			steps {
-				sh './gradlew --no-daemon -b build.gradle test check jacocoRootReport'
+				sh './gradlew --no-daemon -b build.gradle test jacocoRootReport'
 			}
 			post {
 				always {
 					sh 'touch automation_framework/build/test-results/test/*.xml'
+					
 					junit allowEmptyResults: true, testResults: '**/build/test-results/test/*.xml'
-					findbugs canComputeNew: false, defaultEncoding: '', excludePattern: '', healthy: '', includePattern: '', pattern: '**/build/reports/spotbugs/*.xml', unHealthy: ''
 					jacoco sourceExclusionPattern: '*/test/**'
 					publishHTML (target: [
 						allowMissing: false,
@@ -32,7 +32,17 @@ pipeline {
 				sh './gradlew --no-daemon -b build.gradle clean assemble'
 			}	
 		}
-
+		stage("Static code analysis")
+		{
+			steps {
+				sh './gradlew --no-daemon -b build.gradle check'
+			}
+			post {
+				always {
+					findbugs canComputeNew: false, defaultEncoding: '', excludePattern: '', healthy: '', includePattern: '', pattern: '**/build/reports/spotbugs/*.xml', unHealthy: ''
+				}
+			}
+		}
 		stage("Archive") {
 			steps {
 				archiveArtifacts artifacts: '**/*.jar', excludes: '**/jacocoagent.jar', onlyIfSuccessful: true
