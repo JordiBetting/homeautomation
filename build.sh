@@ -9,7 +9,7 @@ SCRIPTNAME=${SCRIPTNAME%.*}
 WORKSPACE="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 # Create version
-COMMITCOUNT=$(git -C ${WORKSPACE} rev-list --count)
+COMMITCOUNT=$(git -C ${WORKSPACE} rev-list --count HEAD)
 BRANCH=$(git -C ${WORKSPACE} rev-parse --abbrev-ref HEAD)
 VERSION="${COMMITCOUNT}-${BRANCH}"
 
