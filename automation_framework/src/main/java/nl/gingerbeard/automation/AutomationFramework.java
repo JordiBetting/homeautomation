@@ -42,13 +42,6 @@ public class AutomationFramework implements IAutomationFrameworkInterface {
 		events.subscribe(room);		
 		return room;
 	}
-	
-	public void failSpotbugs() throws Throwable {
-		if ("abc" == "def") {
-			System.out.println("Ja, dit hoort niet zo");
-		}
-		this.finalize();
-	}
 
 	final <T extends Room> T createRoom(final Class<T> roomClass) {
 		try {

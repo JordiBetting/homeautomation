@@ -41,6 +41,12 @@ pipeline {
 		
 		stage("Static code analysis")
 		{
+			when { 
+				anyOf{
+					expression{ env.BRANCNAME == 'master'{
+					changeRequest()
+				}
+			}
 			steps {
 				sh './gradlew --no-daemon -b build.gradle check'
 			}
