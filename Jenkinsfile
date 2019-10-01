@@ -72,6 +72,6 @@ pipeline {
 	}
 }
 
-void gradle(String tasks) {
+def gradle(String tasks) {
 	sh "./gradlew --no-daemon -b build.gradle ${tasks}"
 }
