@@ -10,6 +10,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
+import nl.gingerbeard.automation.logging.LogLevel;
+import nl.gingerbeard.automation.logging.TestLogger;
+
 public class StateTest {
 
 	@ParameterizedTest
@@ -104,5 +107,41 @@ public class StateTest {
 		final LocalDateTime now = state.getTime().getNow();
 
 		assertEquals(LocalDateTime.of(2019, 3, 2, 9, 5, 42), now);
+	}
+	
+	@Test
+	public void getTimeOfDay_logs() {
+		TestLogger logger = new TestLogger();
+		IState state = new State(logger);
+		state.setTimeOfDay(TimeOfDay.DAYTIME);
+		logger.assertEmpty();
+		
+		state.getTimeOfDay();
+		
+		logger.assertContains(LogLevel.DEBUG, "getTimeOfDay() : DAYTIME");
+	}
+	
+	@Test
+	public void getAlarm_logs() {
+		TestLogger logger = new TestLogger();
+		IState state = new State(logger);
+		state.setAlarmState(AlarmState.ARM_AWAY);
+		logger.assertEmpty();
+		
+		state.getAlarmState();
+		
+		logger.assertContains(LogLevel.DEBUG, "getAlarmState() : ARM_AWAY");
+	}
+	
+	@Test
+	public void getHomeAway_logs() {
+		TestLogger logger = new TestLogger();
+		IState state = new State(logger);
+		state.setHomeAway(HomeAway.AWAY);
+		logger.assertEmpty();
+		
+		state.getHomeAway();
+		
+		logger.assertContains(LogLevel.DEBUG, "getHomeAway() : AWAY");
 	}
 }

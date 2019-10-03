@@ -1,6 +1,10 @@
 package nl.gingerbeard.automation.state;
 
+import java.util.Optional;
+
 import com.google.common.base.Preconditions;
+
+import nl.gingerbeard.automation.logging.ILogger;
 
 public final class State implements IState {
 
@@ -8,16 +12,26 @@ public final class State implements IState {
 	// state in domoticz is always leading
 	public AlarmState alarm;
 	public HomeAway home;
-	private TimeOfDay timeOfDay;
+	private TimeOfDay timeOfDay; 
 	private Time time;
+	private final Optional<ILogger> log;
+
+	public State(ILogger logger) {
+		this(Optional.of(logger));
+	}
 
 	public State() {
+		this(Optional.empty());
+	}
+	
+	private State(Optional<ILogger> logger) {
 		time = new Time();
 		timeOfDay = TimeOfDay.DAYTIME;
 		home = HomeAway.HOME;
 		alarm = AlarmState.DISARMED;
+		log = logger;
 	}
-
+	
 	@Override
 	public void setTimeOfDay(final TimeOfDay newTimeOfDay) {
 		Preconditions.checkArgument(newTimeOfDay != null && newTimeOfDay != TimeOfDay.ALLDAY);
@@ -26,7 +40,12 @@ public final class State implements IState {
 
 	@Override
 	public TimeOfDay getTimeOfDay() {
+		log("getTimeOfDay() : " + timeOfDay);
 		return timeOfDay;
+	}
+
+	private void log(String message) {
+		log.ifPresent((log) -> log.debug(message));
 	}
 
 	@Override
@@ -43,11 +62,13 @@ public final class State implements IState {
 
 	@Override
 	public AlarmState getAlarmState() {
+		log("getAlarmState() : " + alarm);
 		return alarm;
 	}
 
 	@Override
 	public HomeAway getHomeAway() {
+		log("getHomeAway() : " + home);
 		return home;
 	}
 

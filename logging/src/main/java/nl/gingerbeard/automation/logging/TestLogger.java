@@ -10,7 +10,7 @@ public class TestLogger implements ILogger {
 
 	public static class LogOutputToTestLogger implements ILogOutput {
 
-		private static TestLogger testLogger = new TestLogger();
+		public static final TestLogger testLogger = new TestLogger();
 
 		@Override
 		public void log(final LogLevel level, final String context, final String message) {
@@ -97,5 +97,11 @@ public class TestLogger implements ILogger {
 	@Override
 	public ILogger createContext(final String context) {
 		return new TestLogger(context, this);
+	}
+
+	public void assertEmpty() {
+		if (!log.isEmpty()) {
+			throw new TestLoggerException("Log was expected to be empty, but contains: " + System.lineSeparator() + getFullLog());
+		}
 	}
 }
