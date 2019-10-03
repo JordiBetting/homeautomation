@@ -9,6 +9,7 @@ public class TestLoggerTest {
 	@Test
 	public void doTest() {
 		final TestLogger logger = new TestLogger();
+		logger.assertEmpty();
 		logger.debug("test");
 		logger.assertContains(LogLevel.DEBUG, "test");
 
@@ -18,5 +19,7 @@ public class TestLoggerTest {
 		logger.printAll();
 		logger.assertContains(LogLevel.DEBUG, "t");
 		logger.createContext("t").info("test");
+		
+		assertThrows(RuntimeException.class, () -> logger.assertEmpty());
 	}
 }

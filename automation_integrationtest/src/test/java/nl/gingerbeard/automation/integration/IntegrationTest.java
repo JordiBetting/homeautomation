@@ -25,6 +25,7 @@ import nl.gingerbeard.automation.IAutomationFrameworkInterface;
 import nl.gingerbeard.automation.configuration.ConfigurationServerSettings;
 import nl.gingerbeard.automation.domoticz.DomoticzThreadHandler;
 import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
+import nl.gingerbeard.automation.logging.TestLogger;
 import nl.gingerbeard.automation.logging.TestLogger.LogOutputToTestLogger;
 import nl.gingerbeard.automation.testutils.TestWebServer;
 
@@ -36,6 +37,7 @@ public abstract class IntegrationTest {
 	protected TestWebServer webserver;
 	protected IAutomationFrameworkInterface automation;
 	protected int configPort;
+	protected TestLogger logOutput;
 
 	@BeforeEach
 	public void start() throws IOException {
@@ -50,6 +52,7 @@ public abstract class IntegrationTest {
 		port = config.getListenPort();
 		configPort = configSettings.getListenPort();
 		automation = container.getRuntime().getService(IAutomationFrameworkInterface.class).get();
+		logOutput = LogOutputToTestLogger.testLogger;
 		final Optional<DomoticzThreadHandler> threadHandler = container.getRuntime().getService(DomoticzThreadHandler.class);
 		assertTrue(threadHandler.isPresent());
 		threadHandler.get().setSynchronous();
@@ -66,6 +69,7 @@ public abstract class IntegrationTest {
 		automation = null;
 		port = 0;
 		config = null;
+		logOutput = null;
 	}
 
 	protected void deviceChanged(final int idx, final String state) throws IOException {

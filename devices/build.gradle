@@ -1,3 +1,4 @@
 dependencies {
 	testCompile group: 'nl.jqno.equalsverifier', name: 'equalsverifier', version: '3.1.7'
+	compile project(':logging')
 }

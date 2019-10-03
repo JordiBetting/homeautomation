@@ -17,6 +17,7 @@ import nl.gingerbeard.automation.logging.ILogger;
 import nl.gingerbeard.automation.state.AlarmState;
 import nl.gingerbeard.automation.state.IState;
 import nl.gingerbeard.automation.state.NextState;
+import nl.gingerbeard.automation.state.Time;
 import nl.gingerbeard.automation.state.TimeOfDay;
 import nl.gingerbeard.automation.state.TimeOfDayValues;
 
