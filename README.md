@@ -29,7 +29,8 @@ repoUser=myUser
 repoPassword=myPassword
 repoURL=https://mavenrepo.mydomain/repository/myRepo/
 ```
-** Branches **
+**Branches**
+
 The branch strategy is:
 - master is used for publication and release. 
 - development is not in use. Once the framework is 'fit for release', this will be introduced.
