@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import nl.gingerbeard.automation.devices.Scene;
 import nl.gingerbeard.automation.devices.StateDevice;
 import nl.gingerbeard.automation.devices.Subdevice;
 import nl.gingerbeard.automation.domoticz.IDomoticzAlarmChanged;
@@ -65,13 +66,21 @@ class Controlloop implements IDomoticzDeviceStatusChanged, IDomoticzTimeOfDayCha
 
 	private List<NextState<?>> filter(final Object input) {
 		final List<NextState<?>> filtered = new ArrayList<>();
-		if (isNextState(input) && isDifferentState((NextState<?>) input)) {
+		if (isNextState(input) && mustReportNextState((NextState<?>) input)) {
 			filtered.add((NextState<?>) input);
 		} else if (isCollection(input)) {
 			((Collection<?>) input).stream().forEach((item) -> filtered.addAll(filter(item)));
 		}
 		return filtered;
 	}
+
+	private boolean mustReportNextState(final NextState<?> nextState) {
+		return isDifferentState(nextState) || isAlwaysReported(nextState);
+	}
+	
+	private boolean isAlwaysReported(final NextState<?> nextState) {
+		return !nextState.getDevice().reportOnUpdateOnly();
+	} 
 
 	private boolean isDifferentState(final NextState<?> nextState) {
 		return !nextState.get().equals(nextState.getDevice().getState());

@@ -15,5 +15,9 @@ public abstract class StateDevice<T> implements IDevice<T> {
 	}
 
 	public abstract boolean updateState(final String newState);
+	
+	public boolean reportOnUpdateOnly() {
+		return true;
+	}
 
 }
