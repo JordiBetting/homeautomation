@@ -77,24 +77,6 @@ pipeline {
 			}
 		}
 		
-		//test the stage
-		stage("Publish docker") {
-			agent {
-				label 'docker'
-			}
-			steps {
-				dir("docker") {
-					script {
-						withCredentials([usernamePassword( credentialsId: 'dockerhub', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-							docker.withRegistry('', 'dockerhub') {
-								sh './publishDockerImage.sh $(git -C ${WORKSPACE} rev-list --count HEAD)'
-							}
-						}
-					}
-				}
-			}
-		}
-
 		stage("Publish") {
 			when { branch 'master' }
 			parallel {
