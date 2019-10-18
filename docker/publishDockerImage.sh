@@ -2,4 +2,4 @@
 
 set -ex
 
-docker push jordibetting/jordibetting:gingerbeard-domotica-framework-$1 .
+docker push jordibetting/jordibetting:gingerbeard-domotica-framework-$1
