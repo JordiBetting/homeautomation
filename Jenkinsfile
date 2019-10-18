@@ -7,8 +7,8 @@ pipeline {
 	}
 
 	stages {
-		stage("Build") {
-			parallel {
+//		stage("Build") {
+//			parallel {
 				stage("Build Java") {
 					steps {
 						gradleBuild 'clean assemble'
@@ -27,8 +27,8 @@ pipeline {
 						sh './buildDockerImage.sh $(git rev-parse HEAD)'
 					}
 				}
-			}
-		}
+//			}
+//		}
 		
 		stage("Test") {
 			steps {
