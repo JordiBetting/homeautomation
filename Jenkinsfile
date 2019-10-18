@@ -21,7 +21,9 @@ pipeline {
 						label 'docker'
 					}
 					steps {
-						sh './buildDockerImage.sh $(git rev-parse HEAD)'
+						dir("docker") {
+							sh './buildDockerImage.sh $(git -C ${WORKSPACE} rev-list --count HEAD)'
+						}
 					}
 				}
 			}
@@ -75,22 +77,48 @@ pipeline {
 				}
 			}
 		}
+		
+		//test the stage
+		stage("Publish docker") {
+			agent {
+				label 'docker'
+			}
+			steps {
+				dir("docker") {
+					sh './publishDockerImage.sh $(git -C ${WORKSPACE} rev-list --count HEAD)'
+				}
+			}
+		}
 
 		stage("Publish") {
 			when { branch 'master' }
-			agent { 
-				docker {
-					image 'jordibetting/jordibetting:java8build-13' // published by buildagent branch
-					args '--network jenkins-network'
-				}
-			}
-			steps {
-				gradleBuild 'assemble publish'
-			}
+			parallel {
+				stage("Publish jar") {
+					agent { 
+						docker {
+							image 'jordibetting/jordibetting:java8build-13' // published by buildagent branch
+							args '--network jenkins-network'
+						}
+					}
+					steps {
+						gradleBuild 'assemble publish'
+					}
 
-			post {
-				always {
-					cleanWs()
+					post {
+						always {
+							cleanWs()
+						}
+					}
+				}
+				stage("Publish docker") {
+					agent {
+						label 'docker'
+					}
+					steps {
+						dir("docker") {
+							sh './publishDockerImage.sh $(git -C ${WORKSPACE} rev-list --count HEAD)'
+						}
+					}
 				}
 			}
 		}
