@@ -11,7 +11,7 @@ pipeline {
 			}
 			steps {
 				gradleBuild 'clean assemble'
-				stash includes '**/automation_framework-*.jar,**/automation_autocontrol-*.jar', name: 'jars'
+				stash includes: '**/automation_framework-*.jar,**/automation_autocontrol-*.jar', name: 'jars'
 				archiveArtifacts artifacts: '**/*.jar', excludes: '**/jacocoagent.jar, **/.gradle/**, gradle/', onlyIfSuccessful: true
 			}
 		}
