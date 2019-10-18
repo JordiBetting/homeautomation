@@ -8,12 +8,24 @@ pipeline {
 
 	stages {
 		stage("Build") {
-			steps {
-				gradleBuild 'clean assemble'
-			}
-			post {
-				success {
-					archiveArtifacts artifacts: '**/*.jar', excludes: '**/jacocoagent.jar, **/.gradle/**, gradle/', onlyIfSuccessful: true
+			parallel {
+				stage("Build Java") {
+					steps {
+						gradleBuild 'clean assemble'
+					}
+					post {
+						success {
+							archiveArtifacts artifacts: '**/*.jar', excludes: '**/jacocoagent.jar, **/.gradle/**, gradle/', onlyIfSuccessful: true
+						}
+					}
+				}
+				stage("Build docker") {
+					agent {
+						label 'docker'
+					}
+					steps {
+						sh './buildDockerImage.sh $(git rev-parse HEAD)'
+					}
 				}
 			}
 		}
