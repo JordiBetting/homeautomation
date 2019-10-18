@@ -10,3 +10,10 @@ dependencies {
 	testCompile project(':testutils')
 	compile project(':automation_configurationserver')
 }
+
+jar {
+    from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
+

@@ -1,24 +1,27 @@
 pipeline {
-	agent { 
-		docker {
-			image 'jordibetting/jordibetting:java8build-13' // published by buildagent branch
-			args '--network jenkins-network'
-		}
-	}
+	
+	agent none
 
 	stages {
-		stage("Build") {
+		stage("Build Java") {
+			agent { 
+				docker {
+					image 'jordibetting/jordibetting:java8build-13' // published by buildagent branch
+				}
+			}
 			steps {
 				gradleBuild 'clean assemble'
-			}
-			post {
-				success {
-					archiveArtifacts artifacts: '**/*.jar', excludes: '**/jacocoagent.jar, **/.gradle/**, gradle/', onlyIfSuccessful: true
-				}
+				stash includes: '**/automation_framework-*.jar,**/automation_autocontrol-*.jar', name: 'jars'
+				archiveArtifacts artifacts: '**/*.jar', excludes: '**/jacocoagent.jar, **/.gradle/**, gradle/', onlyIfSuccessful: true
 			}
 		}
 		
 		stage("Test") {
+			agent { 
+				docker {
+					image 'jordibetting/jordibetting:java8build-13' // published by buildagent branch
+				}
+			}
 			steps {
 				gradleBuild 'test jacocoRootReport'
 			}
@@ -39,12 +42,29 @@ pipeline {
 				}
 			}
 		}
+				
+		stage("Build docker") {
+			agent {
+				label 'docker'
+			}
+			steps {
+				dir("docker") {
+					unstash 'jars'
+					sh './buildDockerImage.sh $(git -C ${WORKSPACE} rev-list --count HEAD)'
+				}
+			}
+		}
 		
 		stage("Static code analysis") {
 			when { 
 				anyOf{
 					branch 'master'
 					changeRequest()
+				}
+			}
+			agent { 
+				docker {
+					image 'jordibetting/jordibetting:java8build-13' // published by buildagent branch
 				}
 			}
 			steps {
@@ -56,16 +76,42 @@ pipeline {
 				}
 			}
 		}
-
+		
 		stage("Publish") {
 			when { branch 'master' }
-			steps {
-				gradleBuild 'assemble publish'
-			}
+			parallel {
+				stage("Publish jar") {
+					agent { 
+						docker {
+							image 'jordibetting/jordibetting:java8build-13' // published by buildagent branch
+							args '--network jenkins-network'
+						}
+					}
+					steps {
+						gradleBuild 'assemble publish'
+					}
 
-			post {
-				always {
-					cleanWs()
+					post {
+						always {
+							cleanWs()
+						}
+					}
+				}
+				stage("Publish docker") {
+					agent {
+						label 'docker'
+					}
+					steps {
+						dir("docker") {
+							script {
+								withCredentials([usernamePassword( credentialsId: 'dockerhub', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+									docker.withRegistry('', 'dockerhub') {
+										sh './publishDockerImage.sh $(git -C ${WORKSPACE} rev-list --count HEAD)'
+									}
+								}
+							}
+						}
+					}
 				}
 			}
 		}
