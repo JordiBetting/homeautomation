@@ -17,6 +17,7 @@ buildscript {
   }
   dependencies {
     classpath "gradle.plugin.com.github.spotbugs:spotbugs-gradle-plugin:2.0.0"
+	classpath "com.adarshr:gradle-test-logger-plugin:2.0.0"
   }
 }
 
@@ -24,6 +25,7 @@ allprojects {
 	apply plugin: 'eclipse'
 	apply plugin: 'com.github.spotbugs'
 	apply plugin: 'maven-publish'
+	apply plugin: 'com.adarshr.test-logger'
 	
 	version = "0.0.42"
 	group = "nl.gingerbeard"
@@ -80,6 +82,10 @@ allprojects {
 	tasks.withType(Test) {
         maxParallelForks = Runtime.runtime.availableProcessors()
     }
+	
+	testlogger {
+		theme 'mocha-parallel'
+	}
 }
 
 
