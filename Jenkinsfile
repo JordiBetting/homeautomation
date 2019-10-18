@@ -84,9 +84,11 @@ pipeline {
 			}
 			steps {
 				dir("docker") {
-					withCredentials([usernamePassword( credentialsId: 'dockerhub', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-						docker.withRegistry('', 'dockerhub') {
-							sh './publishDockerImage.sh $(git -C ${WORKSPACE} rev-list --count HEAD)'
+					script {
+						withCredentials([usernamePassword( credentialsId: 'dockerhub', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+							docker.withRegistry('', 'dockerhub') {
+								sh './publishDockerImage.sh $(git -C ${WORKSPACE} rev-list --count HEAD)'
+							}
 						}
 					}
 				}
@@ -119,9 +121,11 @@ pipeline {
 					}
 					steps {
 						dir("docker") {
-							withCredentials([usernamePassword( credentialsId: 'dockerhub', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-								docker.withRegistry('', 'dockerhub') {
-									sh './publishDockerImage.sh $(git -C ${WORKSPACE} rev-list --count HEAD)'
+							script {
+								withCredentials([usernamePassword( credentialsId: 'dockerhub', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+									docker.withRegistry('', 'dockerhub') {
+										sh './publishDockerImage.sh $(git -C ${WORKSPACE} rev-list --count HEAD)'
+									}
 								}
 							}
 						}
