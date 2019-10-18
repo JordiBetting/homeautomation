@@ -3,29 +3,15 @@ pipeline {
 	agent none
 
 	stages {
-		stage("Build") {
-			parallel {
-				stage("Build Java") {
-					agent { 
-						docker {
-							image 'jordibetting/jordibetting:java8build-13' // published by buildagent branch
-						}
-					}
-					steps {
-						gradleBuild 'clean assemble'
-						archiveArtifacts artifacts: '**/*.jar', excludes: '**/jacocoagent.jar, **/.gradle/**, gradle/', onlyIfSuccessful: true
-					}
+		stage("Build Java") {
+			agent { 
+				docker {
+					image 'jordibetting/jordibetting:java8build-13' // published by buildagent branch
 				}
-				stage("Build docker") {
-					agent {
-						label 'docker'
-					}
-					steps {
-						dir("docker") {
-							sh './buildDockerImage.sh $(git -C ${WORKSPACE} rev-list --count HEAD)'
-						}
-					}
-				}
+			}
+			steps {
+				gradleBuild 'clean assemble'
+				archiveArtifacts artifacts: '**/*.jar', excludes: '**/jacocoagent.jar, **/.gradle/**, gradle/', onlyIfSuccessful: true
 			}
 		}
 		
@@ -52,6 +38,17 @@ pipeline {
 						reportFiles: 'index.html',
 						reportName: "Coverage Report (Excl. tests)"
 						])
+				}
+			}
+		}
+				
+		stage("Build docker") {
+			agent {
+				label 'docker'
+			}
+			steps {
+				dir("docker") {
+					sh './buildDockerImage.sh $(git -C ${WORKSPACE} rev-list --count HEAD)'
 				}
 			}
 		}
