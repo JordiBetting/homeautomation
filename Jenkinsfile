@@ -1,22 +1,19 @@
 pipeline {
-	agent { 
-		docker {
-			image 'jordibetting/jordibetting:java8build-13' // published by buildagent branch
-			args '--network jenkins-network'
-		}
-	}
+	
+	agent none
 
 	stages {
-//		stage("Build") {
-//			parallel {
+		stage("Build") {
+			parallel {
 				stage("Build Java") {
+					agent { 
+						docker {
+							image 'jordibetting/jordibetting:java8build-13' // published by buildagent branch
+						}
+					}
 					steps {
 						gradleBuild 'clean assemble'
-					}
-					post {
-						success {
-							archiveArtifacts artifacts: '**/*.jar', excludes: '**/jacocoagent.jar, **/.gradle/**, gradle/', onlyIfSuccessful: true
-						}
+						archiveArtifacts artifacts: '**/*.jar', excludes: '**/jacocoagent.jar, **/.gradle/**, gradle/', onlyIfSuccessful: true
 					}
 				}
 				stage("Build docker") {
@@ -27,10 +24,15 @@ pipeline {
 						sh './buildDockerImage.sh $(git rev-parse HEAD)'
 					}
 				}
-//			}
-//		}
+			}
+		}
 		
 		stage("Test") {
+			agent { 
+				docker {
+					image 'jordibetting/jordibetting:java8build-13' // published by buildagent branch
+				}
+			}
 			steps {
 				gradleBuild 'test jacocoRootReport'
 			}
@@ -59,6 +61,11 @@ pipeline {
 					changeRequest()
 				}
 			}
+			agent { 
+				docker {
+					image 'jordibetting/jordibetting:java8build-13' // published by buildagent branch
+				}
+			}
 			steps {
 				gradleBuild 'check'
 			}
@@ -71,6 +78,12 @@ pipeline {
 
 		stage("Publish") {
 			when { branch 'master' }
+			agent { 
+				docker {
+					image 'jordibetting/jordibetting:java8build-13' // published by buildagent branch
+					args '--network jenkins-network'
+				}
+			}
 			steps {
 				gradleBuild 'assemble publish'
 			}
