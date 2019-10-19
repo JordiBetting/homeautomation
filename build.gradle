@@ -27,7 +27,7 @@ allprojects {
 	apply plugin: 'maven-publish'
 	apply plugin: 'com.adarshr.test-logger'
 	
-	version = "0.0.42"
+	version = "0.0.43"
 	group = "nl.gingerbeard"
 	
 	dependencies {
