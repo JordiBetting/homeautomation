@@ -73,7 +73,7 @@ pipeline {
 				stage("Publish docker") {
 					steps {
 						dir("docker") {
-							dockerSh './publishDockerImage.sh $(git -C ${WORKSPACE} rev-list --count HEAD)'
+							dockerSh './publishDockerImage.sh $(git -C ${WORKSPACE} rev-list --count HEAD) $(git -C ${WORKSPACE} rev-parse HEAD)'
 						}
 					}
 				}

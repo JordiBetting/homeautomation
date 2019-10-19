@@ -1,5 +1,8 @@
 FROM centos:8
 
+ARG git_version
+LABEL version=$git_version
+
 RUN yum install -y java-11-openjdk \
                    python3 \
                    python3-setuptools && \
