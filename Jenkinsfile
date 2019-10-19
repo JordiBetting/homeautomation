@@ -16,11 +16,6 @@ pipeline {
 		}
 		
 		stage("Test") {
-			agent { 
-				docker {
-					image 'jordibetting/jordibetting:java8build-13' // published by buildagent branch
-				}
-			}
 			steps {
 				gradleBuild 'test jacocoRootReport'
 			}
@@ -47,11 +42,6 @@ pipeline {
 				anyOf{
 					branch 'master'
 					changeRequest()
-				}
-			}
-			agent { 
-				docker {
-					image 'jordibetting/jordibetting:java8build-13' // published by buildagent branch
 				}
 			}
 			steps {
