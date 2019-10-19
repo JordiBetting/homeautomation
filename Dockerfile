@@ -10,7 +10,7 @@ RUN yum install -y \
        java-1.8.0-openjdk-devel \
        git \
 	   which && \
-    yum clean all \
+    yum clean all && \
     groupadd -g ${groupid} ${groupname} && \
 	useradd -u ${userid} -g ${groupid} ${username}
 	
