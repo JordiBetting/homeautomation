@@ -37,23 +37,11 @@ pipeline {
 		stage("Build docker") {
 			steps {
 				dir("docker") {
-					sh './buildDockerImage.sh $(git -C ${WORKSPACE} rev-list --count HEAD)'
+					dockerSh "./buildDockerImage.sh $(git -C ${WORKSPACE} rev-list --count HEAD)"
 				}
 			}
 		}
 				
-		stage("Build docker") {
-			agent {
-				label 'docker'
-			}
-			steps {
-				dir("docker") {
-					unstash 'jars'
-					sh './buildDockerImage.sh $(git -C ${WORKSPACE} rev-list --count HEAD)'
-				}
-			}
-		}
-		
 		stage("Static code analysis") {
 			when { 
 				anyOf{
