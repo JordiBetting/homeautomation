@@ -11,7 +11,6 @@ pipeline {
 		stage("Build Java") {
 			steps {
 				gradleBuild 'clean assemble'
-//				stash includes: '**/automation_framework-*.jar,**/automation_autocontrol-*.jar', name: 'jars'
 				archiveArtifacts artifacts: '**/*.jar', excludes: '**/jacocoagent.jar, **/.gradle/**, gradle/', onlyIfSuccessful: true
 			}
 		}
@@ -33,7 +32,6 @@ pipeline {
 		stage("Build docker") {
 			steps {
 				dir("docker") {
-//					unstash 'jars'
 					sh './buildDockerImage.sh $(git -C ${WORKSPACE} rev-list --count HEAD)'
 				}
 			}
