@@ -2,7 +2,7 @@ pipeline {
 	
 	agent { 
 		docker {
-			image 'jordibetting/jordibetting:java8build-13' // published by buildagent branch
+			image 'jordibetting/jordibetting:java8build-14' // published by buildagent branch
 			args '--network jenkins-network -v /usr/bin/docker:/usr/bin/docker -v /var/run/docker.sock:/var/run/docker.sock'
 		}
 	}
