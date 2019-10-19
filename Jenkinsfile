@@ -37,7 +37,7 @@ pipeline {
 		stage("Build docker") {
 			steps {
 				dir("docker") {
-					dockerSh './buildDockerImage.sh $(git -C ${WORKSPACE} rev-list --count HEAD)'
+					sh './buildDockerImage.sh $(git -C ${WORKSPACE} rev-list --count HEAD)'
 				}
 			}
 		}
