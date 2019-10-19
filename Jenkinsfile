@@ -16,6 +16,11 @@ pipeline {
 		}
 		
 		stage("Test") {
+			agent { 
+				docker {
+					image 'jordibetting/jordibetting:java8build-13' // published by buildagent branch
+				}
+			}
 			steps {
 				gradleBuild 'test jacocoRootReport'
 			}
@@ -36,12 +41,29 @@ pipeline {
 				}
 			}
 		}
+				
+		stage("Build docker") {
+			agent {
+				label 'docker'
+			}
+			steps {
+				dir("docker") {
+					unstash 'jars'
+					sh './buildDockerImage.sh $(git -C ${WORKSPACE} rev-list --count HEAD)'
+				}
+			}
+		}
 		
 		stage("Static code analysis") {
 			when { 
 				anyOf{
 					branch 'master'
 					changeRequest()
+				}
+			}
+			agent { 
+				docker {
+					image 'jordibetting/jordibetting:java8build-13' // published by buildagent branch
 				}
 			}
 			steps {
