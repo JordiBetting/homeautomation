@@ -50,9 +50,7 @@ public class OnOffAutoControlTest {
 			output.stream().forEach((out) -> onoffOut.add((NextState<OnOffState>) out));
 			this.output = Optional.of(onoffOut);
 			applyNextState(onoffOut);
-			if (triggerLatch.isPresent()) {
-				triggerLatch.get().countDown();
-			}
+			triggerLatch.ifPresent((latch) -> latch.countDown());
 		}
 
 		public Optional<List<NextState<OnOffState>>> getAndClearOutput() {
