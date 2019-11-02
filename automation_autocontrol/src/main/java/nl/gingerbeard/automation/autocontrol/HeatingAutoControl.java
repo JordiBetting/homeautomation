@@ -151,11 +151,11 @@ public final class HeatingAutoControl extends AutoControl {
 	}
 
 	public void setDelayOnMinutes(int delayOnMinutes) {
-		context.delayOnMillis = delayOnMinutes * 60 * 1000;
+		context.delayOnMillis = 60L * 1000L * delayOnMinutes;
 	}
 
 	public void setDelayPauseSeconds(int delayPauseSeconds) {
-		context.delayPauseMillis = delayPauseSeconds * 1000;
+		context.delayPauseMillis = 1000L * delayPauseSeconds;
 	}
 
 	// test interfaces
