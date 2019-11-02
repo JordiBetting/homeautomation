@@ -169,11 +169,11 @@ public class HeatingAutoControlTest {
 		List<NextState<?>> result = updateAlarm(AlarmState.DISARMED);
 		assertTemperature(HeatingAutoControl.DEFAULT_TEMP_C_OFF, result); 
 		
-		awaitDelayedOnAssertingSuccess(listener);
+		awaitDelayedOnAssertingSuccess();
 		listener.assertTemperature(HeatingAutoControl.DEFAULT_TEMP_C_DAY);
 	}
 
-	private void awaitDelayedOnAssertingSuccess(TestListener listener) throws InterruptedException {
+	private void awaitDelayedOnAssertingSuccess() throws InterruptedException {
 		boolean notified = listener.notifyLatch.await(30, TimeUnit.SECONDS);
 		assertTrue(notified);
 		if (state.getTimeOfDay() == TimeOfDay.DAYTIME) {
@@ -181,9 +181,13 @@ public class HeatingAutoControlTest {
 		} else {
 			assertEquals(StateHeatingOnNighttime.class, sut.getState());
 		}
-		
 	}
-	
+
+	private void assertDelayedOnNotTriggered() throws InterruptedException {
+		boolean notified = listener.notifyLatch.await(1, TimeUnit.SECONDS);
+		assertFalse(notified);
+	}
+
 	@Test
 	public void daytimeDisarmed_Night_heatingUp() throws InterruptedException {
 		initSut(TimeOfDay.DAYTIME, AlarmState.DISARMED);
@@ -201,7 +205,7 @@ public class HeatingAutoControlTest {
 		
 		List<NextState<?>> result = updateAlarm(AlarmState.DISARMED);
 		assertTemperature(HeatingAutoControl.DEFAULT_TEMP_C_OFF, result);
-		awaitDelayedOnAssertingSuccess(listener);
+		awaitDelayedOnAssertingSuccess();
 		listener.assertTemperature(HeatingAutoControl.DEFAULT_TEMP_C_NIGHT);
 		
 		result = updateTimeOfDay(TimeOfDay.DAYTIME);
@@ -212,7 +216,7 @@ public class HeatingAutoControlTest {
 		
 		result = updateAlarm(AlarmState.DISARMED);
 		assertTemperature(HeatingAutoControl.DEFAULT_TEMP_C_OFF, result);
-		awaitDelayedOnAssertingSuccess(listener);
+		awaitDelayedOnAssertingSuccess();
 		listener.assertTemperature(HeatingAutoControl.DEFAULT_TEMP_C_DAY);
 		
 		result = updateTimeOfDay(TimeOfDay.NIGHTTIME);
@@ -220,6 +224,37 @@ public class HeatingAutoControlTest {
 		
 		result = updateAlarm(AlarmState.ARM_AWAY);
 		assertTemperature(HeatingAutoControl.DEFAULT_TEMP_C_OFF, result);
+	}
+	
+	@Test
+	public void nightDisarmed_disarm_noEffect() {
+		initSut(TimeOfDay.NIGHTTIME, AlarmState.DISARMED);
+		
+		List<NextState<?>> result = updateAlarm(AlarmState.DISARMED);
+		
+		assertEquals(0, result.size());
+	}
+	
+	@Test
+	public void onDelay_arm_onCancelled() throws InterruptedException {
+		initSut(TimeOfDay.NIGHTTIME, AlarmState.ARM_AWAY);
+		sut.setDelayOnMillis(500);
+
+		updateAlarm(AlarmState.DISARMED);
+		updateAlarm(AlarmState.ARM_AWAY);
+
+		assertDelayedOnNotTriggered();
+	}
+	
+	@Test
+	public void onDelay_disarmAgain_noEffect() throws InterruptedException {
+		initSut(TimeOfDay.NIGHTTIME, AlarmState.ARM_AWAY);
+		sut.setDelayOnMillis(500);
+
+		updateAlarm(AlarmState.DISARMED);
+		updateAlarm(AlarmState.DISARMED);
+		
+		awaitDelayedOnAssertingSuccess();
 	}
 
 	private List<NextState<?>> updateAlarm(AlarmState alarmState) {

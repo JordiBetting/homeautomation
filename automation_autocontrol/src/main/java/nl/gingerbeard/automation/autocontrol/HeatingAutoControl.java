@@ -24,7 +24,7 @@ public class HeatingAutoControl extends AutoControl {
 	static final double DEFAULT_TEMP_C_DAY = 18;
 	static final double DEFAULT_TEMP_C_OFF = 15;
 
-	private HeatingState currentState = new StateHeatingOff(); // how would this work? TODO: Give this some thoughts
+	private HeatingState currentState = new StateHeatingOff();
 	private final List<Thermostat> thermostats = Lists.newArrayList();
 	private State frameworkState;
 
