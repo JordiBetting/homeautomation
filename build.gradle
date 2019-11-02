@@ -27,7 +27,11 @@ allprojects {
 	apply plugin: 'maven-publish'
 	apply plugin: 'com.adarshr.test-logger'
 	
-	version = "0.0." + "git rev-list HEAD --count".execute().text.trim()
+	def branch = "git rev-parse --abbrev-ref HEAD".execute().text.trim()
+	def revCount = "git rev-list HEAD --count".execute().text.trim()
+	def branchIndicator = ((branch == "master") ? "" : "-" + branch)
+	
+	version = "0.0." + revCount + branchIndicator
 	group = "nl.gingerbeard"
 	
 	dependencies {
