@@ -1,6 +1,7 @@
 package nl.gingerbeard.automation.autocontrol;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -14,8 +15,8 @@ import nl.gingerbeard.automation.state.NextState;
 import nl.gingerbeard.automation.state.State;
 import nl.gingerbeard.automation.state.Temperature;
 import nl.gingerbeard.automation.state.ThermostatState;
-import nl.gingerbeard.automation.state.ThermostatState.ThermostatMode;
 import nl.gingerbeard.automation.state.TimeOfDay;
+import nl.gingerbeard.automation.state.ThermostatState.ThermostatMode;
 
 public class HeatingAutoControl extends AutoControl {
 
@@ -23,29 +24,199 @@ public class HeatingAutoControl extends AutoControl {
 	static final double DEFAULT_TEMP_C_DAY = 18;
 	static final double DEFAULT_TEMP_C_OFF = 15;
 
-	static enum HeatingAutoControlState {
-		OFF, DELAY_BEFORE_ON, ON_DAYTIME, ON_EVENING
-	}
-
-	// internals
-	private volatile HeatingAutoControlState state = HeatingAutoControlState.OFF;
-	private final Object timerLock = new Object();
-	private volatile Timer timer;
-	private final State frameworkState;
-
-	// user settings
+	private HeatingState currentState = new StateHeatingOff(); // how would this work? TODO: Give this some thoughts
 	private final List<Thermostat> thermostats = Lists.newArrayList();
+	private State frameworkState;
+
 	private Temperature offTemperature = Temperature.celcius(DEFAULT_TEMP_C_OFF);
 	private Temperature daytimeTemperature = Temperature.celcius(DEFAULT_TEMP_C_DAY);
 	private Temperature nighttimeTemperature = Temperature.celcius(DEFAULT_TEMP_C_NIGHT);
 	private long delayOnMillis = 0;
 
+	abstract class HeatingState {
+		public Optional<HeatingState> alarmChanged() {
+			return Optional.empty();
+		}
+
+		public Optional<HeatingState> timeOfDayChanged() {
+			return Optional.empty();
+		}
+
+		public List<NextState<?>> stateEntryResult() {
+			return Lists.newArrayList();
+		}
+
+		public Optional<HeatingState> stateEntryNextState() {
+			return Optional.empty();
+		}
+	}
+
+	class StateHeatingOff extends HeatingState {
+
+		@Override
+		public List<NextState<?>> stateEntryResult() {
+			return createNextState(offTemperature);
+		}
+
+		@Override
+		public Optional<HeatingState> alarmChanged() {
+			if (frameworkState.getAlarmState().meets(AlarmState.DISARMED)) {
+				return Optional.of(new StateHeatingOnDelay());
+			} else {
+				return Optional.empty();
+			}
+		}
+
+	}
+
+	class StateHeatingOnDelay extends HeatingState {
+		private final Timer timer = new Timer();
+
+		private class TimerTick extends TimerTask {
+			@Override
+			public void run() {
+				synchronized (StateHeatingOnDelay.this) {
+					updateActuators(changeState(determineNextState()));
+				}
+			}
+		}
+
+		public StateHeatingOnDelay() {
+			if (delayOnMillis > 0) {
+				timer.schedule(new TimerTick(), delayOnMillis);
+			}
+		}
+
+		@Override
+		public List<NextState<?>> stateEntryResult() {
+			if (delayOnMillis > 0) {
+				return createNextState(offTemperature);
+			}
+			return super.stateEntryResult();
+		}
+		
+		@Override
+		public synchronized Optional<HeatingState> alarmChanged() {
+			if (!frameworkState.getAlarmState().meets(AlarmState.DISARMED)) {
+				timer.cancel();
+				return Optional.of(new StateHeatingOff());
+			}
+			return super.alarmChanged();
+		}
+
+		@Override
+		public Optional<HeatingState> stateEntryNextState() {
+			if (delayOnMillis == 0) {
+				return determineNextState();
+			}
+			return super.stateEntryNextState();
+		}
+
+		private Optional<HeatingState> determineNextState() {
+			if (frameworkState.getTimeOfDay() == TimeOfDay.DAYTIME) {
+				return Optional.of(new StateHeatingOnDaytime());
+			} else {
+				return Optional.of(new StateHeatingOnNighttime());
+			}
+		}
+	}
+
+	class StateHeatingOnDaytime extends HeatingState {
+		@Override
+		public List<NextState<?>> stateEntryResult() {
+			return createNextState(daytimeTemperature);
+		}
+		@Override
+		public Optional<HeatingState> timeOfDayChanged() {
+			return Optional.of(new StateHeatingOnNighttime());
+		}
+		@Override
+		public Optional<HeatingState> alarmChanged() {
+			if (!frameworkState.getAlarmState().meets(AlarmState.DISARMED)) {
+				return Optional.of(new StateHeatingOff());
+			}
+			return super.alarmChanged();
+		}
+	}
+
+	class StateHeatingOnNighttime extends HeatingState {
+		@Override
+		public List<NextState<?>> stateEntryResult() {
+			return createNextState(nighttimeTemperature);
+		}
+		@Override
+		public Optional<HeatingState> timeOfDayChanged() {
+			return Optional.of(new StateHeatingOnDaytime());
+		}
+		@Override
+		public Optional<HeatingState> alarmChanged() { 
+			if (!frameworkState.getAlarmState().meets(AlarmState.DISARMED)) {
+				return Optional.of(new StateHeatingOff());
+			}
+			return super.alarmChanged();
+		}
+	}
+
 	public HeatingAutoControl(State state) {
 		this.frameworkState = state;
 	}
 
+	@Subscribe
+	public List<NextState<?>> alarmChanged(AlarmState _void) {
+		Optional<HeatingState> nextState = currentState.alarmChanged();
+		return changeState(nextState);
+	}
+
+	private List<NextState<?>> changeState(Optional<HeatingState> nextState) {
+		List<NextState<?>> result = Lists.newArrayList();
+
+		if (nextState.isPresent()) {
+			currentState = nextState.get();
+			result.addAll(currentState.stateEntryResult());
+
+			Optional<HeatingState> onEntryNextState = currentState.stateEntryNextState();
+			result.addAll(changeState(onEntryNextState));
+		}
+
+		return result;
+	}
+
+	@Subscribe
+	public List<NextState<?>> timeOfDayChanged(TimeOfDay _void) {
+		Optional<HeatingState> nextState = currentState.timeOfDayChanged();
+		return changeState(nextState);
+	}
+
 	public final void addThermostat(Thermostat thermostat) {
 		thermostats.add(thermostat);
+	}
+
+	private List<NextState<?>> createNextState(Temperature temperature) {
+		List<NextState<?>> result = Lists.newArrayList();
+		for (Thermostat thermostat : thermostats) {
+			result.addAll(createNewStateCollection(temperature, thermostat));
+		}
+		return result;
+	}
+
+	private List<NextState<?>> createNewStateCollection(Temperature temperature, Thermostat thermostat) {
+		ThermostatState newState = createNewState(temperature);
+		List<NextState<?>> thermostatUpdates = thermostat.createNextState(newState);
+		return thermostatUpdates;
+	}
+
+	private ThermostatState createNewState(Temperature temperature) {
+		ThermostatState newState = new ThermostatState();
+		newState.setMode(ThermostatMode.SETPOINT);
+		newState.setTemperature(temperature);
+		return newState;
+	}
+
+	@Override
+	public List<IDevice<?>> getDevices() {
+		List<IDevice<?>> out = Lists.newArrayList();
+		thermostats.stream().forEach(t -> out.add(t));
+		return out;
 	}
 
 	public void setOffTemperature(Temperature offTemperature) {
@@ -68,130 +239,13 @@ public class HeatingAutoControl extends AutoControl {
 		this.delayOnMillis = delayOnMillis;
 	}
 
-	@Override
-	public List<IDevice<?>> getDevices() {
-		List<IDevice<?>> out = Lists.newArrayList();
-		thermostats.stream().forEach(t -> out.add(t));
-		return out;
-	}
-
-	@Subscribe
-	public List<NextState<?>> alarmChanged(AlarmState _void) {
-		if (state == HeatingAutoControlState.OFF && frameworkState.getAlarmState().meets(AlarmState.DISARMED)) {
-			if (delayOnMillis == 0) {
-				return timeOfDayChanged(null);
-			} else {
-				state = HeatingAutoControlState.DELAY_BEFORE_ON;
-				startTimer();
-			}
-		} else {
-			stopTimer();
-			state = HeatingAutoControlState.OFF;
-		}
-		return execute();
-
-	}
-
-	private void startTimer() {
-		synchronized (timerLock) {
-			timer = new Timer();
-			timer.schedule(new TimerTask() { // TODO: refactor/cleanup
-				@Override
-				public void run() {
-					// reset timer
-					stopTimer();
-
-					// update state
-					if (frameworkState.getTimeOfDay() == TimeOfDay.DAYTIME) {
-						state = HeatingAutoControlState.ON_DAYTIME;
-					} else {
-						state = HeatingAutoControlState.ON_EVENING;
-					}
-
-					// calculate devices
-					HeatingAutoControl.super.updateActuators(execute());
-				}
-			}, delayOnMillis);
-		}
-	}
-
-	private void stopTimer() {
-		synchronized (timerLock) {
-			if (timer != null) {
-				timer.cancel();
-				timer = null;
-			}
-		}
-	}
-
-	@Subscribe
-	public List<NextState<?>> timeOfDayChanged(TimeOfDay _void) {
-		if (state == HeatingAutoControlState.ON_DAYTIME) {
-			state = HeatingAutoControlState.ON_EVENING;
-			return execute();
-		} else if (state == HeatingAutoControlState.ON_EVENING) {
-			state = HeatingAutoControlState.ON_DAYTIME;
-			return execute();
-		} else if (state == HeatingAutoControlState.OFF) {
-			if (frameworkState.getTimeOfDay() == TimeOfDay.DAYTIME) {
-				state = HeatingAutoControlState.ON_DAYTIME;
-			} else {
-				state = HeatingAutoControlState.ON_EVENING;
-			}
-			return execute();
-		}
-		return null;
-	}
-
-	private List<NextState<?>> execute() {
-		List<NextState<?>> result = null;
-		switch (state) {
-		case OFF:
-		case DELAY_BEFORE_ON:
-			result = createNextState(offTemperature);
-			break;
-		case ON_DAYTIME:
-			result = createNextState(daytimeTemperature);
-			break;
-		case ON_EVENING:
-			result = createNextState(nighttimeTemperature);
-			break;
-		}
-		return result;
-	}
-
-	private List<NextState<?>> createNextState(Temperature temperature) {
-		return createNextState(ThermostatMode.SETPOINT, temperature);
-	}
-
-	private List<NextState<?>> createNextState(ThermostatMode mode, Temperature temperature) {
-		List<NextState<?>> result = Lists.newArrayList();
-		for (Thermostat thermostat : thermostats) {
-			result.addAll(createNewStateCollection(temperature, thermostat));
-		}
-		return result;
-	}
-
-	private List<NextState<?>> createNewStateCollection(Temperature temperature, Thermostat thermostat) {
-		ThermostatState newState = createNewState(temperature);
-		List<NextState<?>> thermostatUpdates = thermostat.createNextState(newState);
-		return thermostatUpdates;
-	}
-
-	private ThermostatState createNewState(Temperature temperature) {
-		ThermostatState newState = new ThermostatState();
-		newState.setMode(ThermostatMode.SETPOINT);
-		newState.setTemperature(temperature);
-		return newState;
-	}
-
 	// test interfaces
 	long getDelayOnMillis() {
 		return delayOnMillis;
 	}
-	
-	HeatingAutoControlState getState() {
-		return state;
+
+	Class<? extends HeatingState> getState() {
+		return currentState.getClass();
 	}
 
 }

@@ -10,7 +10,8 @@ import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.Test;
 
-import nl.gingerbeard.automation.autocontrol.HeatingAutoControl.HeatingAutoControlState;
+import nl.gingerbeard.automation.autocontrol.HeatingAutoControl.StateHeatingOnDaytime;
+import nl.gingerbeard.automation.autocontrol.HeatingAutoControl.StateHeatingOnNighttime;
 import nl.gingerbeard.automation.devices.IDevice;
 import nl.gingerbeard.automation.devices.Thermostat;
 import nl.gingerbeard.automation.state.AlarmState;
@@ -176,9 +177,9 @@ public class HeatingAutoControlTest {
 		boolean notified = listener.notifyLatch.await(30, TimeUnit.SECONDS);
 		assertTrue(notified);
 		if (state.getTimeOfDay() == TimeOfDay.DAYTIME) {
-			assertEquals(HeatingAutoControlState.ON_DAYTIME, sut.getState());
+			assertEquals(StateHeatingOnDaytime.class, sut.getState());
 		} else {
-			assertEquals(HeatingAutoControlState.ON_EVENING, sut.getState());
+			assertEquals(StateHeatingOnNighttime.class, sut.getState());
 		}
 		
 	}
