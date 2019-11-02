@@ -21,6 +21,18 @@ import nl.gingerbeard.automation.state.ThermostatState;
 import nl.gingerbeard.automation.state.ThermostatState.ThermostatMode;
 import nl.gingerbeard.automation.state.TimeOfDay;
 
+/**
+ * AutoControl to have simple means to control heating thermostats.
+ * 
+ * Has 3 temperature settings:
+ * <ol>
+ *   <li>OFF temperature, when alarm is set to an armed state
+ *   <li>DAY temperature, when alarm is set to disarmed and TimeOfDay is DAYTIME
+ *   <li>NIGHT temperature, when alarm is set to disarmed and TimeOfDay is NIGHTTIME
+ * </ol>
+ * Turning heating on after disarm can be delayed with setting to avoid short on/off times (e.g. coming home, directly go to bed).
+ * PauseDevices can be added. When these OnOffDevices will turn ON (e.g. door open), the heating will be set to OFF temperature. This can also be delayed (e.g. door must be open for at least 2 minutes) to avoid battery drain of thermostats.
+ */
 public final class HeatingAutoControl extends AutoControl {
 
 	public static final double DEFAULT_TEMP_C_NIGHT = 20;
