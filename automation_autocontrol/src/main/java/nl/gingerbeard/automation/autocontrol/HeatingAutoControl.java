@@ -78,6 +78,14 @@ public final class HeatingAutoControl extends AutoControl {
 	
 	@Subscribe
 	public List<NextState<?>> deviceChanged(OnOffDevice _void) {
+		return deviceChanged();
+	}
+
+	public List<NextState<?>> deviceChanged(OpenCloseDevice _void) {
+		return deviceChanged();
+	}
+
+	private List<NextState<?>> deviceChanged() {
 		Optional<HeatingState> nextState;
 		if (isAllPauseDevicesOff()) {
 			nextState = currentState.allPauseDevicesOff();

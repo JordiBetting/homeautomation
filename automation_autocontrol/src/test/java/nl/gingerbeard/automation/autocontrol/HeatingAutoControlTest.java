@@ -15,11 +15,13 @@ import nl.gingerbeard.automation.autocontrol.heatingstates.StateHeatingOnNightti
 import nl.gingerbeard.automation.devices.DoorSensor;
 import nl.gingerbeard.automation.devices.IDevice;
 import nl.gingerbeard.automation.devices.OnOffDevice;
+import nl.gingerbeard.automation.devices.OpenCloseDevice;
 import nl.gingerbeard.automation.devices.Switch;
 import nl.gingerbeard.automation.devices.Thermostat;
 import nl.gingerbeard.automation.state.AlarmState;
 import nl.gingerbeard.automation.state.NextState;
 import nl.gingerbeard.automation.state.OnOffState;
+import nl.gingerbeard.automation.state.OpenCloseState;
 import nl.gingerbeard.automation.state.State;
 import nl.gingerbeard.automation.state.Temperature;
 import nl.gingerbeard.automation.state.ThermostatState.ThermostatMode;
@@ -82,13 +84,16 @@ public class HeatingAutoControlTest {
 	@Test
 	public void implementsAutoControlInterface() {
 		initSut(); // adds a thermostat
-		DoorSensor testDevice2 = new DoorSensor(4);
+		Switch testDevice2 = new Switch(5);
+		DoorSensor testDevice3 = new DoorSensor(4);
+		sut.addPauseDevice(testDevice3);
 		sut.addPauseDevice(testDevice2);
 		List<IDevice<?>> devices = sut.getDevices();
 		
-		assertEquals(2, devices.size());
+		assertEquals(3, devices.size());
 		assertEquals(testDevice, devices.get(0));
 		assertEquals(testDevice2, devices.get(1));
+		assertEquals(testDevice3, devices.get(2));
 	}
 
 	@Test
@@ -298,7 +303,7 @@ public class HeatingAutoControlTest {
 	public void daytime_pauseDevices_delayApplied() throws InterruptedException {
 		initSut(TimeOfDay.DAYTIME, AlarmState.DISARMED);
 		sut.setDelayPauseMillis(500);
-		Switch pauseDevice = addPauseDevice();
+		DoorSensor pauseDevice = addPauseDeviceDoorSensor();
 		
 		switchOn(pauseDevice);
 		listener.assertNoUpdate();
@@ -328,8 +333,13 @@ public class HeatingAutoControlTest {
 	private Switch addPauseDevice() {
 		Switch pauseDevice = new Switch(3);
 		sut.addPauseDevice(pauseDevice);
-		
 		return pauseDevice;
+	}
+	
+	private DoorSensor addPauseDeviceDoorSensor() {
+		DoorSensor doorSensor = new DoorSensor(4);
+		sut.addPauseDevice(doorSensor);
+		return doorSensor;
 	}
 	
 	@Test
@@ -376,9 +386,19 @@ public class HeatingAutoControlTest {
 		return switchDevice(pauseDevice, OnOffState.OFF);
 	}
 	
+	private List<NextState<?>> switchOff(OpenCloseDevice pauseDevice) {
+		pauseDevice.setState(OpenCloseState.CLOSE);
+		return sut.deviceChanged(pauseDevice);
+	}
+	
+	private List<NextState<?>> switchOn(OpenCloseDevice pauseDevice) {
+		pauseDevice.setState(OpenCloseState.OPEN);
+		return sut.deviceChanged(pauseDevice);
+	}
+
 	private List<NextState<?>> switchDevice(OnOffDevice pauseDevice, OnOffState newState) {
 		pauseDevice.setState(newState);
-		return sut.deviceChanged(null);
+		return sut.deviceChanged(pauseDevice);
 	}
 
 	private List<NextState<?>> updateAlarm(AlarmState alarmState) {
