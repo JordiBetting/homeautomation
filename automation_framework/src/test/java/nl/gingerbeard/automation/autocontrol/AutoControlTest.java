@@ -12,7 +12,8 @@ import java.util.ArrayList;
 
 import org.junit.jupiter.api.Test;
 
-import nl.gingerbeard.automation.autocontrol.AutoControlListener;
+import nl.gingerbeard.automation.state.IState;
+import nl.gingerbeard.automation.state.State;
 
 public class AutoControlTest {
 
@@ -51,5 +52,15 @@ public class AutoControlTest {
 	public void owner() {
 		final AutoControlExample control = new AutoControlExample();
 		assertEquals(getClass().getSimpleName(), control.getOwner());
+	}
+	
+	@Test
+	public void getState() {
+		IState state = new State();
+		final AutoControlExample control = new AutoControlExample();
+		
+		control.setState(state);
+		
+		assertEquals(state, control.getState());
 	}
 }

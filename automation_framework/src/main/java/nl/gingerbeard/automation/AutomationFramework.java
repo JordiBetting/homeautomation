@@ -64,6 +64,7 @@ public class AutomationFramework implements IAutomationFrameworkInterface {
 
 	private void addAutoControl(final AutoControl autoControl) {
 		autoControl.setListener(autoControlToDomoticz);
+		autoControl.setState(state);
 	}
 
 	private void addDevice(final IDevice<?> device) {

@@ -16,6 +16,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import nl.gingerbeard.automation.devices.DimmeableLight;
+import nl.gingerbeard.automation.devices.IDevice;
 import nl.gingerbeard.automation.devices.Switch;
 import nl.gingerbeard.automation.devices.ThermostatModeDevice;
 import nl.gingerbeard.automation.event.annotations.Subscribe;
@@ -50,9 +51,7 @@ public class OnOffAutoControlTest {
 			output.stream().forEach((out) -> onoffOut.add((NextState<OnOffState>) out));
 			this.output = Optional.of(onoffOut);
 			applyNextState(onoffOut);
-			if (triggerLatch.isPresent()) {
-				triggerLatch.get().countDown();
-			}
+			triggerLatch.ifPresent((latch) -> latch.countDown());
 		}
 
 		public Optional<List<NextState<OnOffState>>> getAndClearOutput() {
@@ -89,6 +88,19 @@ public class OnOffAutoControlTest {
 		sensor1 = new Switch(1);
 		sensor2 = new Switch(2);
 		actuator = new Switch(3);
+	}
+	
+	@Test
+	public void implementsAutoControlInterface() {
+		autoControl.addActuator(actuator);
+		autoControl.addSensor(sensor1);
+		autoControl.addSensor(sensor2);
+		
+		List<IDevice<?>> devices = autoControl.getDevices();
+		assertEquals(3, devices.size());
+		assertTrue(devices.contains(actuator));
+		assertTrue(devices.contains(sensor1));
+		assertTrue(devices.contains(sensor2));
 	}
 
 	@Test

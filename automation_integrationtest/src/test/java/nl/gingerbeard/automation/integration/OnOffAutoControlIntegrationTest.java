@@ -16,7 +16,7 @@ import nl.gingerbeard.automation.autocontrol.OnOffAutoControl;
 import nl.gingerbeard.automation.devices.Switch;
 import nl.gingerbeard.automation.state.OnOffState;
 
-public class AutoControlIntegrationTest extends IntegrationTest {
+public class OnOffAutoControlIntegrationTest extends IntegrationTest {
 
 	public static class TestRoom extends Room {
 
