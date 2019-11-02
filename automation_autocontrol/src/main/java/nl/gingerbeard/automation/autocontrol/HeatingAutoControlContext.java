@@ -8,7 +8,7 @@ import nl.gingerbeard.automation.state.NextState;
 import nl.gingerbeard.automation.state.State;
 import nl.gingerbeard.automation.state.Temperature;
 
-public class HeatingAutoControlContext {
+public final class HeatingAutoControlContext {
 	public State frameworkState;
 	public Temperature offTemperature = Temperature.celcius(HeatingAutoControl.DEFAULT_TEMP_C_OFF);
 	public Temperature daytimeTemperature = Temperature.celcius(HeatingAutoControl.DEFAULT_TEMP_C_DAY);
