@@ -23,22 +23,22 @@ public class HeatingAutoControl extends AutoControl {
 	static final double DEFAULT_TEMP_C_DAY = 18;
 	static final double DEFAULT_TEMP_C_OFF = 15;
 
-	private static enum HeatingAutoControlState {
+	static enum HeatingAutoControlState {
 		OFF, DELAY_BEFORE_ON, ON_DAYTIME, ON_EVENING
 	}
 
 	// internals
 	private volatile HeatingAutoControlState state = HeatingAutoControlState.OFF;
 	private final Object timerLock = new Object();
-	private volatile Timer timer = new Timer();
+	private volatile Timer timer;
 	private final State frameworkState;
 
 	// user settings
 	private final List<Thermostat> thermostats = Lists.newArrayList();
 	private Temperature offTemperature = Temperature.celcius(DEFAULT_TEMP_C_OFF);
-	private Temperature daytimeTemperature= Temperature.celcius(DEFAULT_TEMP_C_DAY);
-	private Temperature nighttimeTemperature= Temperature.celcius(DEFAULT_TEMP_C_NIGHT);
-	private int delayOnMillis = 0;
+	private Temperature daytimeTemperature = Temperature.celcius(DEFAULT_TEMP_C_DAY);
+	private Temperature nighttimeTemperature = Temperature.celcius(DEFAULT_TEMP_C_NIGHT);
+	private long delayOnMillis = 0;
 
 	public HeatingAutoControl(State state) {
 		this.frameworkState = state;
@@ -63,8 +63,8 @@ public class HeatingAutoControl extends AutoControl {
 	public void setDelayOnMinutes(int delayOnMinutes) {
 		this.delayOnMillis = delayOnMinutes * 60 * 1000;
 	}
-	
-	void setDelayOnMillis(int delayOnMillis) {
+
+	void setDelayOnMillis(long delayOnMillis) {
 		this.delayOnMillis = delayOnMillis;
 	}
 
@@ -76,8 +76,8 @@ public class HeatingAutoControl extends AutoControl {
 	}
 
 	@Subscribe
-	public List<NextState<?>> alarmChanged(AlarmState newState) {
-		if (state == HeatingAutoControlState.OFF && newState.meets(AlarmState.DISARMED)) {
+	public List<NextState<?>> alarmChanged(AlarmState _void) {
+		if (state == HeatingAutoControlState.OFF && frameworkState.getAlarmState().meets(AlarmState.DISARMED)) {
 			if (delayOnMillis == 0) {
 				return timeOfDayChanged(null);
 			} else {
@@ -93,23 +93,26 @@ public class HeatingAutoControl extends AutoControl {
 	}
 
 	private void startTimer() {
-		timer.schedule(new TimerTask() { // TODO: refactor/cleanup
-			@Override
-			public void run() {
-				// reset timer
-				stopTimer();
+		synchronized (timerLock) {
+			timer = new Timer();
+			timer.schedule(new TimerTask() { // TODO: refactor/cleanup
+				@Override
+				public void run() {
+					// reset timer
+					stopTimer();
 
-				// update state
-				if (frameworkState.getTimeOfDay() == TimeOfDay.DAYTIME) {
-					state = HeatingAutoControlState.ON_DAYTIME;
-				} else {
-					state = HeatingAutoControlState.ON_EVENING;
+					// update state
+					if (frameworkState.getTimeOfDay() == TimeOfDay.DAYTIME) {
+						state = HeatingAutoControlState.ON_DAYTIME;
+					} else {
+						state = HeatingAutoControlState.ON_EVENING;
+					}
+
+					// calculate devices
+					HeatingAutoControl.super.updateActuators(execute());
 				}
-				
-				// calculate devices
-			    HeatingAutoControl.super.updateActuators(execute());
-			}
-		}, delayOnMillis);
+			}, delayOnMillis);
+		}
 	}
 
 	private void stopTimer() {
@@ -122,7 +125,7 @@ public class HeatingAutoControl extends AutoControl {
 	}
 
 	@Subscribe
-	public List<NextState<?>> timeOfDayChanged(TimeOfDay timeofday) {
+	public List<NextState<?>> timeOfDayChanged(TimeOfDay _void) {
 		if (state == HeatingAutoControlState.ON_DAYTIME) {
 			state = HeatingAutoControlState.ON_EVENING;
 			return execute();
@@ -181,4 +184,14 @@ public class HeatingAutoControl extends AutoControl {
 		newState.setTemperature(temperature);
 		return newState;
 	}
+
+	// test interfaces
+	long getDelayOnMillis() {
+		return delayOnMillis;
+	}
+	
+	HeatingAutoControlState getState() {
+		return state;
+	}
+
 }
