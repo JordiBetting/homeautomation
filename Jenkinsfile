@@ -61,12 +61,6 @@ pipeline {
 					steps {
 						gradleBuild 'assemble publish'
 					}
-
-					post {
-						always {
-							cleanWs()
-						}
-					}
 				}
 				stage("Publish docker") {
 					steps {
@@ -74,6 +68,11 @@ pipeline {
 							dockerSh './publishDockerImage.sh $(git -C ${WORKSPACE} rev-list --count HEAD) $(git -C ${WORKSPACE} rev-parse HEAD)'
 						}
 					}
+				}
+			}
+			post {
+				always {
+					cleanWs()
 				}
 			}
 		}
