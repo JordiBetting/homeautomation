@@ -190,11 +190,11 @@ public class HeatingAutoControlTest {
 	}
 
 	private void awaitDelayedOutput() throws InterruptedException {
-		boolean notified = listener.notifyLatch.await(30, TimeUnit.SECONDS);
+		boolean notified = listener.notifyLatch.await(90, TimeUnit.SECONDS);
 		assertTrue(notified);
 	}
 
-	private void assertDelayedOnNotTriggered() throws InterruptedException {
+	private void assertDelayedNotTriggered() throws InterruptedException {
 		boolean notified = listener.notifyLatch.await(1, TimeUnit.SECONDS);
 		assertFalse(notified);
 	}
@@ -254,7 +254,7 @@ public class HeatingAutoControlTest {
 		updateAlarm(AlarmState.DISARMED);
 		updateAlarm(AlarmState.ARM_AWAY);
 
-		assertDelayedOnNotTriggered();
+		assertDelayedNotTriggered();
 	}
 	
 	@Test
@@ -271,8 +271,7 @@ public class HeatingAutoControlTest {
 	@Test
 	public void pauseDevices_onAndResume_heatingOff() {
 		initSut(TimeOfDay.DAYTIME, AlarmState.DISARMED);
-		Switch pauseDevice = new Switch(3);
-		sut.addPauseDevice(pauseDevice);
+		Switch pauseDevice = addPauseDevice();
 		
 		List<NextState<?>> result = switchOn(pauseDevice);
 		assertTemperature(HeatingAutoControl.DEFAULT_TEMP_C_OFF, result);
@@ -291,19 +290,79 @@ public class HeatingAutoControlTest {
 	}
 	
 	@Test
-	public void pauseDevices_delayApplied() throws InterruptedException {
+	public void daytime_pauseDevices_delayApplied() throws InterruptedException {
 		initSut(TimeOfDay.DAYTIME, AlarmState.DISARMED);
-		Switch pauseDevice = new Switch(3);
-		sut.addPauseDevice(pauseDevice);
 		sut.setDelayPauseMillis(500);
+		Switch pauseDevice = addPauseDevice();
+		
+		switchOn(pauseDevice);
+		listener.assertNoUpdate();
+		awaitDelayedOutput();
+		listener.assertTemperature(HeatingAutoControl.DEFAULT_TEMP_C_OFF);
+		
+		List<NextState<?>> result = switchOff(pauseDevice);
+		assertTemperature(HeatingAutoControl.DEFAULT_TEMP_C_DAY, result);
+	}
+	
+	@Test
+	public void nighttime_pauseDevices_delayApplied() throws InterruptedException {
+		initSut(TimeOfDay.NIGHTTIME, AlarmState.DISARMED);
+		sut.setDelayPauseMillis(500);
+		Switch pauseDevice = addPauseDevice();
 		
 		switchOn(pauseDevice);
 		listener.assertNoUpdate();
 		
 		awaitDelayedOutput();
 		listener.assertTemperature(HeatingAutoControl.DEFAULT_TEMP_C_OFF);
+		
+		List<NextState<?>> result = switchOff(pauseDevice);
+		assertTemperature(HeatingAutoControl.DEFAULT_TEMP_C_NIGHT, result);
 	}
 
+	private Switch addPauseDevice() {
+		Switch pauseDevice = new Switch(3);
+		sut.addPauseDevice(pauseDevice);
+		
+		return pauseDevice;
+	}
+	
+	@Test
+	public void armed_pauseDeviceOnOff_ignored() throws InterruptedException {
+		initSut(TimeOfDay.DAYTIME, AlarmState.ARM_AWAY);
+		Switch pauseDevice = addPauseDevice();
+		
+		switchOn(pauseDevice);
+		assertDelayedNotTriggered();
+		
+		switchOff(pauseDevice);
+		assertDelayedNotTriggered();
+	}
+
+	@Test
+	public void onPauseDelay_armed_delayIgnored() throws InterruptedException {
+		initSut(TimeOfDay.NIGHTTIME, AlarmState.DISARMED);
+		Switch pauseDevice = addPauseDevice();
+		sut.setDelayPauseMillis(500);
+
+		switchOn(pauseDevice);
+		updateAlarm(AlarmState.ARM_AWAY);
+
+		assertDelayedNotTriggered();
+	}
+	
+	@Test
+	public void onPauseDelay_pauseDeviceOffWithinTimeout_delayIgnored() throws InterruptedException {
+		initSut(TimeOfDay.NIGHTTIME, AlarmState.DISARMED);
+		Switch pauseDevice = addPauseDevice();
+		sut.setDelayPauseMillis(500);
+
+		switchOn(pauseDevice);
+		switchOff(pauseDevice);
+
+		assertDelayedNotTriggered();
+	}
+	
 	private List<NextState<?>> switchOn(OnOffDevice pauseDevice) {
 		return switchDevice(pauseDevice, OnOffState.ON);
 	}

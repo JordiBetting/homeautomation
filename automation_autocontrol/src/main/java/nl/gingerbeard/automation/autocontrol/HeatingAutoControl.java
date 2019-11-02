@@ -58,15 +58,6 @@ public class HeatingAutoControl extends AutoControl {
 		Optional<HeatingState> nextState = currentState.timeOfDayChanged();
 		return changeState(nextState);
 	}
-
-	
-	protected Optional<HeatingState> pauseDeviceOn() {
-		return Optional.empty();
-	}
-	
-	protected Optional<HeatingState> allPauseDevicesOff() {
-		return Optional.empty();
-	}
 	
 	private boolean isAllPauseDevicesOff() {
 		for (OnOffDevice pauseDevice : pauseDevices) {
