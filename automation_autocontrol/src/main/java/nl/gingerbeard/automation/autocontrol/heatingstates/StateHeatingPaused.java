@@ -6,7 +6,7 @@ import nl.gingerbeard.automation.autocontrol.HeatingAutoControlContext;
 import nl.gingerbeard.automation.state.Temperature;
 import nl.gingerbeard.automation.state.TimeOfDay;
 
-public class StateHeatingPaused extends StateHeatingOn {
+public final class StateHeatingPaused extends StateHeatingOn {
 	
 	public StateHeatingPaused(HeatingAutoControlContext context) {
 		super(context);

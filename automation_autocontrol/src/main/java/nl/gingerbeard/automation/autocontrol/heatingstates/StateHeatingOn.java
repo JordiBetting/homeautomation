@@ -5,7 +5,7 @@ import java.util.Optional;
 import nl.gingerbeard.automation.autocontrol.HeatingAutoControlContext;
 import nl.gingerbeard.automation.state.AlarmState;
 
-public class StateHeatingOn extends HeatingState {
+public abstract class StateHeatingOn extends HeatingState {
 	HeatingAutoControlContext context;
 
 	public StateHeatingOn(HeatingAutoControlContext context) {

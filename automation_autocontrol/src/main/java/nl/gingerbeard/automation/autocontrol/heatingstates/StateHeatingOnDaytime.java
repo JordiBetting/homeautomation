@@ -5,7 +5,7 @@ import java.util.Optional;
 import nl.gingerbeard.automation.autocontrol.HeatingAutoControlContext;
 import nl.gingerbeard.automation.state.Temperature;
 
-public class StateHeatingOnDaytime extends StateHeatingOn {
+public final class StateHeatingOnDaytime extends StateHeatingOn {
 	
 	public StateHeatingOnDaytime(HeatingAutoControlContext context) {
 		super(context);

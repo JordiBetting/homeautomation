@@ -6,7 +6,7 @@ import nl.gingerbeard.automation.autocontrol.HeatingAutoControlContext;
 import nl.gingerbeard.automation.state.AlarmState;
 import nl.gingerbeard.automation.state.Temperature;
 
-public class StateHeatingOff extends HeatingState {
+public final class StateHeatingOff extends HeatingState {
 
 	private HeatingAutoControlContext context;
 

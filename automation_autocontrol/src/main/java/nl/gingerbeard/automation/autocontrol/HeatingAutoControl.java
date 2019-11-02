@@ -21,7 +21,7 @@ import nl.gingerbeard.automation.state.ThermostatState;
 import nl.gingerbeard.automation.state.ThermostatState.ThermostatMode;
 import nl.gingerbeard.automation.state.TimeOfDay;
 
-public class HeatingAutoControl extends AutoControl {
+public final class HeatingAutoControl extends AutoControl {
 
 	public static final double DEFAULT_TEMP_C_NIGHT = 20;
 	public static final double DEFAULT_TEMP_C_DAY = 18;
@@ -39,7 +39,7 @@ public class HeatingAutoControl extends AutoControl {
 		currentState = new StateHeatingOff(context);
 	}
 
-	public final void addThermostat(Thermostat thermostat) {
+	public void addThermostat(Thermostat thermostat) {
 		thermostats.add(thermostat);
 	}
 

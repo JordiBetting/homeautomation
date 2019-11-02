@@ -8,7 +8,7 @@ import nl.gingerbeard.automation.autocontrol.HeatingAutoControlContext;
 import nl.gingerbeard.automation.state.AlarmState;
 import nl.gingerbeard.automation.state.Temperature;
 
-public class StateHeatingOnDelay extends HeatingState {
+public final class StateHeatingOnDelay extends HeatingState {
 	private final Timer timer = new Timer();
 	private HeatingAutoControlContext context;
 

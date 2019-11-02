@@ -7,7 +7,7 @@ import nl.gingerbeard.automation.state.TimeOfDay;
 
 final class Util {
 	private Util() {
-		
+		//avoid instantiation
 	}
 	
 	static Optional<HeatingState> createNextOnStateBasedOnDaytime(HeatingAutoControlContext context) {

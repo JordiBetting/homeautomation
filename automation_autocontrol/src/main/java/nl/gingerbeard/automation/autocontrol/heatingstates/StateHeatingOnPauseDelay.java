@@ -6,7 +6,7 @@ import java.util.TimerTask;
 
 import nl.gingerbeard.automation.autocontrol.HeatingAutoControlContext;
 
-public class StateHeatingOnPauseDelay extends StateHeatingOn {
+public final class StateHeatingOnPauseDelay extends StateHeatingOn {
 	private final Timer timer = new Timer();
 	
 	StateHeatingOnPauseDelay(HeatingAutoControlContext context){
