@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 
 import nl.gingerbeard.automation.autocontrol.heatingstates.StateHeatingOnDaytime;
 import nl.gingerbeard.automation.autocontrol.heatingstates.StateHeatingOnNighttime;
+import nl.gingerbeard.automation.devices.DoorSensor;
 import nl.gingerbeard.automation.devices.IDevice;
 import nl.gingerbeard.automation.devices.OnOffDevice;
 import nl.gingerbeard.automation.devices.Switch;
@@ -68,7 +69,8 @@ public class HeatingAutoControlTest {
 	
 	private void initSut(TimeOfDay initialTimeOfDay, AlarmState initialAlarmState) {
 		state = new State();
-		sut = new HeatingAutoControl(state);
+		sut = new HeatingAutoControl();
+		sut.setState(state);
 		listener = new TestListener();
 		testDevice = new Thermostat(1, 2);
 		sut.addThermostat(testDevice);
@@ -79,11 +81,14 @@ public class HeatingAutoControlTest {
 	
 	@Test
 	public void implementsAutoControlInterface() {
-		initSut(); // adds a single testDevice
+		initSut(); // adds a thermostat
+		DoorSensor testDevice2 = new DoorSensor(4);
+		sut.addPauseDevice(testDevice2);
 		List<IDevice<?>> devices = sut.getDevices();
 		
-		assertEquals(1, devices.size());
+		assertEquals(2, devices.size());
 		assertEquals(testDevice, devices.get(0));
+		assertEquals(testDevice2, devices.get(1));
 	}
 
 	@Test
@@ -183,14 +188,14 @@ public class HeatingAutoControlTest {
 	private void awaitDelayedOnAssertingSuccess() throws InterruptedException {
 		awaitDelayedOutput();
 		if (state.getTimeOfDay() == TimeOfDay.DAYTIME) {
-			assertEquals(StateHeatingOnDaytime.class, sut.getState());
+			assertEquals(StateHeatingOnDaytime.class, sut.getControlState());
 		} else {
-			assertEquals(StateHeatingOnNighttime.class, sut.getState());
+			assertEquals(StateHeatingOnNighttime.class, sut.getControlState());
 		}
 	}
 
 	private void awaitDelayedOutput() throws InterruptedException {
-		boolean notified = listener.notifyLatch.await(90, TimeUnit.SECONDS);
+		boolean notified = listener.notifyLatch.await(10, TimeUnit.SECONDS);
 		assertTrue(notified);
 	}
 
@@ -373,7 +378,7 @@ public class HeatingAutoControlTest {
 	
 	private List<NextState<?>> switchDevice(OnOffDevice pauseDevice, OnOffState newState) {
 		pauseDevice.setState(newState);
-		return sut.deviceUpdated(null);
+		return sut.deviceChanged(null);
 	}
 
 	private List<NextState<?>> updateAlarm(AlarmState alarmState) {

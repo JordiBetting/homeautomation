@@ -4,12 +4,14 @@ import java.util.List;
 import java.util.Optional;
 
 import nl.gingerbeard.automation.devices.IDevice;
+import nl.gingerbeard.automation.state.IState;
 import nl.gingerbeard.automation.state.NextState;
 
 public abstract class AutoControl {
 
 	private Optional<AutoControlListener> listener = Optional.empty();
 	private final String owner;
+	private IState state;
 
 	protected AutoControl() {
 		owner = determineOwner();
@@ -47,5 +49,12 @@ public abstract class AutoControl {
 	public final String getOwner() {
 		return owner;
 	}
+	
+	public void setState(IState state)  {
+		this.state = state;
+	}
 
+	public final IState getState() {
+		return state;
+	}
 }

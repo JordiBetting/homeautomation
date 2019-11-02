@@ -9,13 +9,14 @@ import nl.gingerbeard.automation.autocontrol.heatingstates.HeatingState;
 import nl.gingerbeard.automation.autocontrol.heatingstates.StateHeatingOff;
 import nl.gingerbeard.automation.devices.IDevice;
 import nl.gingerbeard.automation.devices.OnOffDevice;
-import nl.gingerbeard.automation.devices.Switch;
+import nl.gingerbeard.automation.devices.OpenCloseDevice;
 import nl.gingerbeard.automation.devices.Thermostat;
 import nl.gingerbeard.automation.event.annotations.Subscribe;
 import nl.gingerbeard.automation.state.AlarmState;
+import nl.gingerbeard.automation.state.IState;
 import nl.gingerbeard.automation.state.NextState;
 import nl.gingerbeard.automation.state.OnOffState;
-import nl.gingerbeard.automation.state.State;
+import nl.gingerbeard.automation.state.OpenCloseState;
 import nl.gingerbeard.automation.state.Temperature;
 import nl.gingerbeard.automation.state.ThermostatState;
 import nl.gingerbeard.automation.state.ThermostatState.ThermostatMode;
@@ -41,13 +42,13 @@ public final class HeatingAutoControl extends AutoControl {
 
 	private HeatingState currentState;
 	private final List<Thermostat> thermostats = Lists.newArrayList();
-	private final List<OnOffDevice> pauseDevices = Lists.newArrayList();
+	private final List<OnOffDevice> pauseOnOffDevices = Lists.newArrayList();
+	private final List<OpenCloseDevice> pauseOpenCloseDevices = Lists.newArrayList();
 
 	private final HeatingAutoControlContext context;
 
-	public HeatingAutoControl(State state) {
+	public HeatingAutoControl() {
 		context = new HeatingAutoControlContext(this);
-		context.frameworkState = state;
 		currentState = new StateHeatingOff(context);
 	}
 
@@ -55,8 +56,12 @@ public final class HeatingAutoControl extends AutoControl {
 		thermostats.add(thermostat);
 	}
 
-	public void addPauseDevice(Switch pauseDevice) {
-		pauseDevices.add(pauseDevice);
+	public void addPauseDevice(OnOffDevice pauseDevice) {
+		pauseOnOffDevices.add(pauseDevice);
+	}
+	
+	public void addPauseDevice(OpenCloseDevice pauseDevice) {
+		pauseOpenCloseDevices.add(pauseDevice);
 	}
 
 	@Subscribe
@@ -71,17 +76,8 @@ public final class HeatingAutoControl extends AutoControl {
 		return changeState(nextState);
 	}
 	
-	private boolean isAllPauseDevicesOff() {
-		for (OnOffDevice pauseDevice : pauseDevices) {
-			if (pauseDevice.getState() == OnOffState.ON) {
-				return false;
-			}
-		}
-		return true;
-	}
-	
 	@Subscribe
-	public List<NextState<?>> deviceUpdated(OnOffDevice _void) {
+	public List<NextState<?>> deviceChanged(OnOffDevice _void) {
 		Optional<HeatingState> nextState;
 		if (isAllPauseDevicesOff()) {
 			nextState = currentState.allPauseDevicesOff();
@@ -91,6 +87,19 @@ public final class HeatingAutoControl extends AutoControl {
 		return changeState(nextState);
 	}
 
+	private boolean isAllPauseDevicesOff() {
+		return isAllPauseDevicesOff(pauseOnOffDevices, OnOffState.OFF) && isAllPauseDevicesOff(pauseOpenCloseDevices, OpenCloseState.CLOSE);
+	}
+	
+	private boolean isAllPauseDevicesOff(List<? extends IDevice<?>> devices, Object state) {
+		for (IDevice<?> pauseDevice : devices) {
+			if (pauseDevice.getState() != state) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
 	List<NextState<?>> changeState(Optional<HeatingState> nextState) {
 		List<NextState<?>> result = Lists.newArrayList();
 
@@ -135,6 +144,8 @@ public final class HeatingAutoControl extends AutoControl {
 	public List<IDevice<?>> getDevices() {
 		List<IDevice<?>> out = Lists.newArrayList();
 		thermostats.stream().forEach(t -> out.add(t));
+		pauseOnOffDevices.stream().forEach(t -> out.add(t));
+		pauseOpenCloseDevices.stream().forEach(t -> out.add(t));
 		return out;
 	}
 
@@ -158,6 +169,12 @@ public final class HeatingAutoControl extends AutoControl {
 		context.delayPauseMillis = 1000L * delayPauseSeconds;
 	}
 
+	@Override
+	public void setState(IState state) {
+		context.frameworkState = state;
+		super.setState(state);
+	}
+	
 	// test interfaces
 	void setDelayOnMillis(long delayOnMillis) {
 		context.delayOnMillis = delayOnMillis;
@@ -171,7 +188,7 @@ public final class HeatingAutoControl extends AutoControl {
 		context.delayPauseMillis = delayPauseMillis;
 	}
 
-	Class<? extends HeatingState> getState() {
+	Class<? extends HeatingState> getControlState() {
 		return currentState.getClass();
 	}
 
