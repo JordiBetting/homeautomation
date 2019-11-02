@@ -6,6 +6,9 @@ pipeline {
 			args '-v /usr/bin/docker:/usr/bin/docker -v /var/run/docker.sock:/var/run/docker.sock -u jenkins:docker --network="jenkins-network"'
 		}
 	}
+	options { 
+		timestamps() 
+	}
 
 	stages {
 		stage("Build Java") {
