@@ -20,14 +20,4 @@ public class StateHeatingOn extends HeatingState {
 		return super.alarmChanged();
 	}
 
-	@Override
-	public Optional<HeatingState> pauseDeviceOn() {
-		return Optional.empty();
-	}
-
-	@Override
-	public Optional<HeatingState> allPauseDevicesOff() {
-		return Optional.empty();
-	}
-
 }

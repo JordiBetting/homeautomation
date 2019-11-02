@@ -2,8 +2,6 @@ package nl.gingerbeard.automation.autocontrol;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import com.google.common.collect.Lists;
 
@@ -20,8 +18,8 @@ import nl.gingerbeard.automation.state.OnOffState;
 import nl.gingerbeard.automation.state.State;
 import nl.gingerbeard.automation.state.Temperature;
 import nl.gingerbeard.automation.state.ThermostatState;
-import nl.gingerbeard.automation.state.TimeOfDay;
 import nl.gingerbeard.automation.state.ThermostatState.ThermostatMode;
+import nl.gingerbeard.automation.state.TimeOfDay;
 
 public class HeatingAutoControl extends AutoControl {
 

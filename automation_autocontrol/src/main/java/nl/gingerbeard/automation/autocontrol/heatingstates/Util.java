@@ -3,7 +3,6 @@ package nl.gingerbeard.automation.autocontrol.heatingstates;
 import java.util.Optional;
 
 import nl.gingerbeard.automation.autocontrol.HeatingAutoControlContext;
-import nl.gingerbeard.automation.state.State;
 import nl.gingerbeard.automation.state.TimeOfDay;
 
 final class Util {
