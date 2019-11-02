@@ -10,12 +10,15 @@ import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.Test;
 
-import nl.gingerbeard.automation.autocontrol.HeatingAutoControl.StateHeatingOnDaytime;
-import nl.gingerbeard.automation.autocontrol.HeatingAutoControl.StateHeatingOnNighttime;
+import nl.gingerbeard.automation.autocontrol.heatingstates.StateHeatingOnDaytime;
+import nl.gingerbeard.automation.autocontrol.heatingstates.StateHeatingOnNighttime;
 import nl.gingerbeard.automation.devices.IDevice;
+import nl.gingerbeard.automation.devices.OnOffDevice;
+import nl.gingerbeard.automation.devices.Switch;
 import nl.gingerbeard.automation.devices.Thermostat;
 import nl.gingerbeard.automation.state.AlarmState;
 import nl.gingerbeard.automation.state.NextState;
+import nl.gingerbeard.automation.state.OnOffState;
 import nl.gingerbeard.automation.state.State;
 import nl.gingerbeard.automation.state.Temperature;
 import nl.gingerbeard.automation.state.ThermostatState.ThermostatMode;
@@ -46,6 +49,10 @@ public class HeatingAutoControlTest {
 		private void reset() {
 			output = null;
 			notifyLatch = new CountDownLatch(1);
+		}
+
+		public void assertNoUpdate() {
+			assertTrue(output == null || output.size() == 0);
 		}
 
 	}
@@ -140,7 +147,7 @@ public class HeatingAutoControlTest {
 	public void defaultDelaySetting_zero() {
 		initSut();
 		
-		assertEquals(0, sut.getDelayOnMillis());
+		assertEquals(0, sut.getContext().delayOnMillis);
 	}
 	
 	@Test
@@ -149,7 +156,7 @@ public class HeatingAutoControlTest {
 		
 		sut.setDelayOnMillis(42);
 		
-		assertEquals(42, sut.getDelayOnMillis());
+		assertEquals(42, sut.getContext().delayOnMillis);
 	}
 	
 	@Test
@@ -158,7 +165,7 @@ public class HeatingAutoControlTest {
 		
 		sut.setDelayOnMinutes(2);
 		
-		assertEquals(2 * 60 * 1000, sut.getDelayOnMillis());
+		assertEquals(2 * 60 * 1000, sut.getContext().delayOnMillis);
 	}
 
 	@Test
@@ -174,13 +181,17 @@ public class HeatingAutoControlTest {
 	}
 
 	private void awaitDelayedOnAssertingSuccess() throws InterruptedException {
-		boolean notified = listener.notifyLatch.await(30, TimeUnit.SECONDS);
-		assertTrue(notified);
+		awaitDelayedOutput();
 		if (state.getTimeOfDay() == TimeOfDay.DAYTIME) {
 			assertEquals(StateHeatingOnDaytime.class, sut.getState());
 		} else {
 			assertEquals(StateHeatingOnNighttime.class, sut.getState());
 		}
+	}
+
+	private void awaitDelayedOutput() throws InterruptedException {
+		boolean notified = listener.notifyLatch.await(30, TimeUnit.SECONDS);
+		assertTrue(notified);
 	}
 
 	private void assertDelayedOnNotTriggered() throws InterruptedException {
@@ -255,6 +266,55 @@ public class HeatingAutoControlTest {
 		updateAlarm(AlarmState.DISARMED);
 		
 		awaitDelayedOnAssertingSuccess();
+	}
+	
+	@Test
+	public void pauseDevices_onAndResume_heatingOff() {
+		initSut(TimeOfDay.DAYTIME, AlarmState.DISARMED);
+		Switch pauseDevice = new Switch(3);
+		sut.addPauseDevice(pauseDevice);
+		
+		List<NextState<?>> result = switchOn(pauseDevice);
+		assertTemperature(HeatingAutoControl.DEFAULT_TEMP_C_OFF, result);
+		
+		result = switchOff(pauseDevice);
+		assertTemperature(HeatingAutoControl.DEFAULT_TEMP_C_DAY, result);
+	}
+	
+	@Test
+	public void setDelayPauseSecondsToMillis() {
+		initSut();
+		
+		sut.setDelayPauseSeconds(5);
+		
+		assertEquals(5000, sut.getContext().delayPauseMillis);
+	}
+	
+	@Test
+	public void pauseDevices_delayApplied() throws InterruptedException {
+		initSut(TimeOfDay.DAYTIME, AlarmState.DISARMED);
+		Switch pauseDevice = new Switch(3);
+		sut.addPauseDevice(pauseDevice);
+		sut.setDelayPauseMillis(500);
+		
+		switchOn(pauseDevice);
+		listener.assertNoUpdate();
+		
+		awaitDelayedOutput();
+		listener.assertTemperature(HeatingAutoControl.DEFAULT_TEMP_C_OFF);
+	}
+
+	private List<NextState<?>> switchOn(OnOffDevice pauseDevice) {
+		return switchDevice(pauseDevice, OnOffState.ON);
+	}
+	
+	private List<NextState<?>> switchOff(OnOffDevice pauseDevice) {
+		return switchDevice(pauseDevice, OnOffState.OFF);
+	}
+	
+	private List<NextState<?>> switchDevice(OnOffDevice pauseDevice, OnOffState newState) {
+		pauseDevice.setState(newState);
+		return sut.deviceUpdated(null);
 	}
 
 	private List<NextState<?>> updateAlarm(AlarmState alarmState) {
