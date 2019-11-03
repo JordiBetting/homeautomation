@@ -26,5 +26,16 @@ public class OnkyoReceiverTest {
 
 		assertEquals("onkyoHostName.domain", onkyo.getHost());
 	}
-
+	
+	@Test
+	public void main_update_notSupported() {
+		OnkyoZoneMain main = new OnkyoZoneMain();
+		assertThrows(UnsupportedOperationException.class, () -> main.updateState("anything"));
+	}
+	
+	@Test
+	public void zone2_update_notSupported() {
+		OnkyoZone2 zone2 = new OnkyoZone2();
+		assertThrows(UnsupportedOperationException.class, () -> zone2.updateState("anything"));
+	}
 }

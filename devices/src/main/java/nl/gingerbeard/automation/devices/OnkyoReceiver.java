@@ -1,7 +1,6 @@
 package nl.gingerbeard.automation.devices;
 
 import java.util.List;
-import java.util.Locale;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -15,13 +14,7 @@ public class OnkyoReceiver extends CompositeDevice<OnkyoReceiverState> {
 	public static abstract class OnkyoSubdevice extends Subdevice<OnkyoReceiver, OnOffState> {
 		@Override
 		public final boolean updateState(String newStateString) {
-			try {
-				final OnOffState newState = OnOffState.valueOf(newStateString.toUpperCase(Locale.US));
-				setState(newState);
-				return true;
-			} catch (final IllegalArgumentException e) {
-				return false;
-			}
+			throw new UnsupportedOperationException("Onkyo receiving/polling state is not implemented yet.");
 		}
 	}
 	
