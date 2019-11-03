@@ -1,7 +1,9 @@
 package nl.gingerbeard.automation.devices;
 
 import java.util.List;
-import java.util.Set;
+
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 import nl.gingerbeard.automation.state.NextState;
 import nl.gingerbeard.automation.state.OnOffState;
@@ -17,7 +19,7 @@ public class OnkyoReceiver extends CompositeDevice<OnkyoReceiverState> {
 	private OnkyoZone2 zone2;
 
 	public OnkyoReceiver(String host) {
-		super(Set.of(new OnkyoZoneMain(), new OnkyoZone2()));
+		super(Sets.newHashSet(new OnkyoZoneMain(), new OnkyoZone2()));
 		this.host = host;
 		setState(new OnkyoReceiverState(OnOffState.OFF, OnOffState.OFF));
 
@@ -46,7 +48,7 @@ public class OnkyoReceiver extends CompositeDevice<OnkyoReceiverState> {
 	}
 
 	public List<NextState<OnOffState>> createNextStateMainAndZone2(OnOffState requestedState) {
-		return List.of( //
+		return Lists.newArrayList( //
 				createNextStateMain(requestedState), //
 				createNextStateZone2(requestedState) //
 		);
