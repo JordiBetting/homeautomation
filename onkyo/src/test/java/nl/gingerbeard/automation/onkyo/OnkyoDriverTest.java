@@ -82,8 +82,8 @@ public class OnkyoDriverTest {
 	public void zone2Off() throws IOException, InterruptedException {
 		onkyo.setZone2Off();
 
-		assertCommandsExecuted(exec, "/usr/local/bin/onkyo --host 1.2.3.4 zone2.power=off");
-		log.assertContains(LogLevel.INFO, "Onkyo[1.2.3.4] Switching zone2 off.");
+		assertCommandsExecuted(exec, "/usr/local/bin/onkyo --host 1.2.3.4 zone2.power=standby");
+		log.assertContains(LogLevel.INFO, "Onkyo[1.2.3.4] Switching zone2 standby.");
 
 	}
 
@@ -92,9 +92,9 @@ public class OnkyoDriverTest {
 		onkyo.setAllOff();
 
 		assertCommandsExecuted(exec, "/usr/local/bin/onkyo --host 1.2.3.4 system-power=off",
-				"/usr/local/bin/onkyo --host 1.2.3.4 zone2.power=off");
+				"/usr/local/bin/onkyo --host 1.2.3.4 zone2.power=standby");
 		
-		log.assertContains(LogLevel.INFO, "Onkyo[1.2.3.4] Switching zone2 off.");
+		log.assertContains(LogLevel.INFO, "Onkyo[1.2.3.4] Switching zone2 standby.");
 		log.assertContains(LogLevel.INFO, "Onkyo[1.2.3.4] Switching main off.");
 	}
 

@@ -32,8 +32,8 @@ public class OnkyoDriver {
 	}
 
 	public void setZone2Off() throws IOException, InterruptedException {
-		log("zone2", "off");
-		execute("zone2.power=off");
+		log("zone2", "standby");
+		execute("zone2.power=standby");
 	}
 
 	private void log(String zone, String state) {
