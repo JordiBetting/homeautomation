@@ -20,7 +20,7 @@ public class OnkyoTransmitterComponent {
 	
 	@Activate
 	public void createTransmitter() {
-		transmitter = instance = new OnkyoTransmitter();
+		transmitter = instance = new OnkyoTransmitter(logger);
 	}
 	
 	@Deactivate 

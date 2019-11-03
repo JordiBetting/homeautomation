@@ -9,13 +9,19 @@ import com.google.common.collect.Maps;
 import nl.gingerbeard.automation.devices.OnkyoReceiver;
 import nl.gingerbeard.automation.devices.OnkyoReceiver.OnkyoSubdevice;
 import nl.gingerbeard.automation.devices.OnkyoZoneMain;
+import nl.gingerbeard.automation.logging.ILogger;
 import nl.gingerbeard.automation.state.NextState;
 import nl.gingerbeard.automation.state.OnOffState;
 
 public class OnkyoTransmitter implements IOnkyoTransmitter {
 
 	private Map<String, OnkyoDriver> drivers = Maps.newHashMap();
+	private ILogger log;
 
+	public OnkyoTransmitter(ILogger log) {
+		this.log = log;
+	}
+	
 	@Override
 	public void transmit(NextState<?> newState) {
 		if (isOnkyoNextState(newState)) {
@@ -69,7 +75,7 @@ public class OnkyoTransmitter implements IOnkyoTransmitter {
 	}
 
 	OnkyoDriver createOnkyoDriver(String host) {
-		return fixedDriver.orElse(new OnkyoDriver(host));
+		return fixedDriver.orElse(new OnkyoDriver(log, host));
 	}
 	
 	

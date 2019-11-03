@@ -19,6 +19,7 @@ import org.junit.jupiter.api.Test;
 import nl.gingerbeard.automation.devices.OnkyoReceiver;
 import nl.gingerbeard.automation.devices.OnkyoZone2;
 import nl.gingerbeard.automation.devices.Switch;
+import nl.gingerbeard.automation.logging.ILogger;
 import nl.gingerbeard.automation.state.NextState;
 import nl.gingerbeard.automation.state.OnOffState;
 
@@ -27,11 +28,13 @@ public class OnkyoTransmitterTest {
 	private OnkyoReceiver receiver;
 	private OnkyoDriver driver;
 	private OnkyoTransmitter transmitter;
+	private ILogger log;
 
 	@BeforeEach
 	public void createMocks() {
+		log = mock(ILogger.class);
 		receiver = new OnkyoReceiver("1.2.3.4");
-		transmitter = spy(new OnkyoTransmitter());
+		transmitter = spy(new OnkyoTransmitter(log));
 		driver = mock(OnkyoDriver.class);
 		when(transmitter.createOnkyoDriver(anyString())).thenReturn(driver);
 	}
@@ -93,9 +96,9 @@ public class OnkyoTransmitterTest {
 	
 	@Test
 	public void fixedDriver() {
-		OnkyoTransmitter transmitter = new OnkyoTransmitter();
+		OnkyoTransmitter transmitter = new OnkyoTransmitter(log);
 		OnkyoDriver newDriver = transmitter.createOnkyoDriver("1");
-		OnkyoDriver fixed = new OnkyoDriver("1");
+		OnkyoDriver fixed = new OnkyoDriver(log, "1");
 		transmitter.setFixedDriver(fixed);
 		OnkyoDriver createdDriver1 = transmitter.createOnkyoDriver("1");
 		OnkyoDriver createdDriver2 = transmitter.createOnkyoDriver("1");
