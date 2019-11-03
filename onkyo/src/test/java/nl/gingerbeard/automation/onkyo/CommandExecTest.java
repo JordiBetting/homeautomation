@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.nio.charset.Charset;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -31,7 +32,7 @@ public class CommandExecTest {
 	@Test
 	public void exec_readOutput_works() throws IOException {
 		CommandExec exec = new CommandExec();
-		ByteArrayInputStream stream = new ByteArrayInputStream("hello".getBytes());
+		ByteArrayInputStream stream = new ByteArrayInputStream("hello".getBytes(Charset.defaultCharset()));
 
 		String result = exec.readOutput(stream);
 
