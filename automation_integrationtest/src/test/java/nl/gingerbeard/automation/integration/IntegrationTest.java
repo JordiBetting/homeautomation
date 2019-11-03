@@ -2,6 +2,7 @@ package nl.gingerbeard.automation.integration;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,11 +23,13 @@ import com.google.common.io.CharStreams;
 import fi.iki.elonen.NanoHTTPD.Response.Status;
 import nl.gingerbeard.automation.AutomationFrameworkContainer;
 import nl.gingerbeard.automation.IAutomationFrameworkInterface;
+import nl.gingerbeard.automation.components.OnkyoTransmitterComponent;
 import nl.gingerbeard.automation.configuration.ConfigurationServerSettings;
 import nl.gingerbeard.automation.domoticz.DomoticzThreadHandler;
 import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
 import nl.gingerbeard.automation.logging.TestLogger;
 import nl.gingerbeard.automation.logging.TestLogger.LogOutputToTestLogger;
+import nl.gingerbeard.automation.onkyo.OnkyoDriver;
 import nl.gingerbeard.automation.testutils.TestWebServer;
 
 public abstract class IntegrationTest {
@@ -38,6 +41,7 @@ public abstract class IntegrationTest {
 	protected IAutomationFrameworkInterface automation;
 	protected int configPort;
 	protected TestLogger logOutput;
+	protected OnkyoDriver onkyoDriver;
 
 	@BeforeEach
 	public void start() throws IOException {
@@ -56,6 +60,11 @@ public abstract class IntegrationTest {
 		final Optional<DomoticzThreadHandler> threadHandler = container.getRuntime().getService(DomoticzThreadHandler.class);
 		assertTrue(threadHandler.isPresent());
 		threadHandler.get().setSynchronous();
+		
+		Optional<OnkyoTransmitterComponent> onkyo = container.getRuntime().getComponent(OnkyoTransmitterComponent.class);
+		assertTrue(onkyo.isPresent());
+		onkyoDriver = mock(OnkyoDriver.class);
+		onkyo.get().instance.setFixedDriver(onkyoDriver);
 	}
 
 	@AfterEach

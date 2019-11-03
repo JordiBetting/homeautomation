@@ -1,6 +1,7 @@
 package nl.gingerbeard.automation.onkyo;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -79,7 +80,7 @@ public class OnkyoTransmitterTest {
 		NextState<?> newState = new NextState<>(new OnkyoZone2(), OnOffState.OFF);
 		
 		IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> transmitter.transmit(newState));
-		assertEquals("Onkyo subdevice should have parent set to Receiver", exception.getMessage());
+		assertEquals("Cannot process Onkyo subdevice without have its parent set. Have you created the NextState with OnkyoReceiver.create... ?", exception.getMessage());
 	}
 	
 	@Test
@@ -88,6 +89,21 @@ public class OnkyoTransmitterTest {
 		transmitter.transmit(receiver.createNextStateZone2(OnOffState.ON));
 		
 		verify(transmitter, times(1)).createOnkyoDriver(anyString());
+	}
+	
+	@Test
+	public void fixedDriver() {
+		OnkyoTransmitter transmitter = new OnkyoTransmitter();
+		OnkyoDriver newDriver = transmitter.createOnkyoDriver("1");
+		OnkyoDriver fixed = new OnkyoDriver("1");
+		transmitter.setFixedDriver(fixed);
+		OnkyoDriver createdDriver1 = transmitter.createOnkyoDriver("1");
+		OnkyoDriver createdDriver2 = transmitter.createOnkyoDriver("1");
+		
+		assertNotEquals(newDriver, fixed);
+		assertEquals(fixed, createdDriver1);
+		assertEquals(fixed, createdDriver2);
+		
 		
 	}
 }

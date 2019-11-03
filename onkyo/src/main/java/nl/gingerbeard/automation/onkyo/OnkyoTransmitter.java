@@ -68,9 +68,15 @@ public class OnkyoTransmitter implements IOnkyoTransmitter {
 		return driver;
 	}
 
+	OnkyoDriver createOnkyoDriver(String host) {
+		return fixedDriver.orElse(new OnkyoDriver(host));
+	}
+	
+	
+	private Optional<OnkyoDriver> fixedDriver = Optional.empty();
 	// for testing override
-	protected OnkyoDriver createOnkyoDriver(String host) {
-		return new OnkyoDriver(host);
+	public void setFixedDriver(OnkyoDriver driver) {
+		fixedDriver = Optional.of(driver);
 	}
 
 	private String getHost(NextState<?> newState) {
