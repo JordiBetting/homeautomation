@@ -4,16 +4,16 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
-public class Onkyo {
+public class OnkyoDriver {
 
 	private String onkyoIp;
 	private IExecutor executor;
 
-	public Onkyo(String onkyoIp) {
+	public OnkyoDriver(String onkyoIp) {
 		this(onkyoIp, new CommandExec());
 	}
 	
-	Onkyo(String onkyoIp, IExecutor executor) {
+	OnkyoDriver(String onkyoIp, IExecutor executor) {
 		this.onkyoIp = onkyoIp;
 		this.executor = executor;
 	}
@@ -35,9 +35,24 @@ public class Onkyo {
 		execute("system-power=off");
 	}
 	
-	private void execute(String ...command) throws IOException, InterruptedException {
+	public boolean isZone2On() throws IOException, InterruptedException {
+		String result = execute("zone2.power=query");
+		return getValue(result, "on"); 
+	}
+
+	public boolean isMainOn() throws IOException, InterruptedException {
+		String result = execute("system.power=query");
+		return getValue(result, "on"); 
+	}
+	
+	private boolean getValue(String result, String expectedValue) {
+		String[] split = result.split("=");
+		return (split.length > 1 && split[split.length-1].toLowerCase().contains(expectedValue));
+	}
+	
+	private String execute(String ...command) throws IOException, InterruptedException {
 		String[] cli = concatArrays(new String[] { "/usr/local/bin/onkyo", "--host", onkyoIp }, command);
-		executor.execute(cli);
+		return executor.execute(cli);
 	}
 
 	private String[] concatArrays(String[] a, String[] b) {
