@@ -2,7 +2,10 @@ package nl.gingerbeard.automation.onkyo;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Scanner;
+import java.io.InputStreamReader;
+import java.nio.charset.Charset;
+
+import com.google.common.io.CharStreams;
 
 public class CommandExec implements IExecutor {
 
@@ -19,10 +22,9 @@ public class CommandExec implements IExecutor {
 		return readOutput(process.getInputStream());
 	}
 
-	String readOutput(InputStream stdOut) {
-		try (@SuppressWarnings("resource") // useDelimiter() returns same object, thus scanner is closed
-		Scanner scanner = new Scanner(stdOut).useDelimiter("\\A")) {
-			return scanner.hasNext() ? scanner.next() : "";
+	String readOutput(InputStream stdOut) throws IOException {
+		try (InputStreamReader reader = new InputStreamReader(stdOut, Charset.defaultCharset())) {
+			return CharStreams.toString(reader);
 		}
 	}
 

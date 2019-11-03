@@ -29,7 +29,7 @@ public class CommandExecTest {
 	}
 	
 	@Test
-	public void exec_readOutput_works() {
+	public void exec_readOutput_works() throws IOException {
 		CommandExec exec = new CommandExec();
 		ByteArrayInputStream stream = new ByteArrayInputStream("hello".getBytes());
 
@@ -39,7 +39,7 @@ public class CommandExecTest {
 	}
 
 	@Test
-	public void exec_readOutput_noOutput() {
+	public void exec_readOutput_noOutput() throws IOException {
 		CommandExec exec = new CommandExec();
 		ByteArrayInputStream stream = new ByteArrayInputStream(new byte[] {});
 		
