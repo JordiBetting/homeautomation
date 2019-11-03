@@ -20,9 +20,11 @@ import nl.gingerbeard.automation.devices.IDevice;
 import nl.gingerbeard.automation.devices.Switch;
 import nl.gingerbeard.automation.devices.ThermostatModeDevice;
 import nl.gingerbeard.automation.event.annotations.Subscribe;
+import nl.gingerbeard.automation.logging.TestLogger;
 import nl.gingerbeard.automation.state.Level;
 import nl.gingerbeard.automation.state.NextState;
 import nl.gingerbeard.automation.state.OnOffState;
+import nl.gingerbeard.automation.state.State;
 
 public class OnOffAutoControlTest {
 
@@ -84,7 +86,7 @@ public class OnOffAutoControlTest {
 	public void initSensorsActuators() {
 		listener = new TestListener();
 		autoControl = new OnOffAutoControl<>(OnOffState.ON, OnOffState.ON, OnOffState.OFF);
-		autoControl.setListener(listener);
+		autoControl.init(listener, new State(), new TestLogger());
 		sensor1 = new Switch(1);
 		sensor2 = new Switch(2);
 		actuator = new Switch(3);
@@ -207,7 +209,7 @@ public class OnOffAutoControlTest {
 		final CountDownLatch outputReceivedLatch = new CountDownLatch(1);
 		final TestListener listener = new TestListener(outputReceivedLatch);
 		final OnOffAutoControl<Switch, OnOffState, OnOffState> autoControl = new OnOffAutoControl<>(OnOffState.ON, OnOffState.ON, OnOffState.OFF);
-		autoControl.setListener(listener);
+		autoControl.init(listener, new State(), new TestLogger());
 
 		autoControl.addSensor(sensor1);
 		autoControl.addActuator(actuator);
@@ -226,7 +228,7 @@ public class OnOffAutoControlTest {
 		final CountDownLatch outputReceivedLatch = new CountDownLatch(2);
 		final TestListener listener = new TestListener(outputReceivedLatch);
 		final OnOffAutoControl<Switch, OnOffState, OnOffState> autoControl = new OnOffAutoControl<>(OnOffState.ON, OnOffState.ON, OnOffState.OFF);
-		autoControl.setListener(listener);
+		autoControl.init(listener, new State(), new TestLogger());
 
 		autoControl.addSensor(sensor1);
 		autoControl.addActuator(actuator);
@@ -258,7 +260,7 @@ public class OnOffAutoControlTest {
 		final CountDownLatch outputReceivedLatch = new CountDownLatch(2);
 		final TestListener listener = new TestListener(outputReceivedLatch);
 		final OnOffAutoControl<DimmeableLight, Level, OnOffState> autoControl = new OnOffAutoControl<>(new Level(40), OnOffState.ON, OnOffState.OFF);
-		autoControl.setListener(listener);
+		autoControl.init(listener, new State(), new TestLogger());
 
 		final DimmeableLight dimLight = new DimmeableLight(42);
 		autoControl.addSensor(dimLight);

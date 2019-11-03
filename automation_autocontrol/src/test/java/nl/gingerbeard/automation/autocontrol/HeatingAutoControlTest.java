@@ -18,6 +18,8 @@ import nl.gingerbeard.automation.devices.OnOffDevice;
 import nl.gingerbeard.automation.devices.OpenCloseDevice;
 import nl.gingerbeard.automation.devices.Switch;
 import nl.gingerbeard.automation.devices.Thermostat;
+import nl.gingerbeard.automation.logging.LogLevel;
+import nl.gingerbeard.automation.logging.TestLogger;
 import nl.gingerbeard.automation.state.AlarmState;
 import nl.gingerbeard.automation.state.NextState;
 import nl.gingerbeard.automation.state.OnOffState;
@@ -64,6 +66,7 @@ public class HeatingAutoControlTest {
 	private HeatingAutoControl sut;
 	private TestListener listener;
 	private Thermostat testDevice;
+	private TestLogger log;
 	
 	private void initSut() {
 		initSut(TimeOfDay.NIGHTTIME, AlarmState.DISARMED);
@@ -72,11 +75,11 @@ public class HeatingAutoControlTest {
 	private void initSut(TimeOfDay initialTimeOfDay, AlarmState initialAlarmState) {
 		state = new State();
 		sut = new HeatingAutoControl();
-		sut.setState(state);
 		listener = new TestListener();
 		testDevice = new Thermostat(1, 2);
 		sut.addThermostat(testDevice);
-		sut.setListener(listener);
+		log = new TestLogger();
+		sut.init(listener, state, log);
 		updateTimeOfDay(initialTimeOfDay);
 		updateAlarm(initialAlarmState);
 	}
@@ -376,6 +379,16 @@ public class HeatingAutoControlTest {
 		switchOff(pauseDevice);
 
 		assertDelayedNotTriggered();
+	}
+	
+	@Test
+	public void stateChange_logged() {
+		initSut(TimeOfDay.DAYTIME, AlarmState.ARM_AWAY);
+
+		updateAlarm(AlarmState.DISARMED);
+		
+		log.assertContains(LogLevel.INFO, "[INFO] [root] HeatingAutoControl for HeatingAutoControlTest changing state from StateHeatingOff to StateHeatingOnDelay");
+		log.assertContains(LogLevel.INFO, "[INFO] [root] HeatingAutoControl for HeatingAutoControlTest changing state from StateHeatingOnDelay to StateHeatingOnDaytime");
 	}
 	
 	private List<NextState<?>> switchOn(OnOffDevice pauseDevice) {

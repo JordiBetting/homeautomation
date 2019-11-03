@@ -12,6 +12,7 @@ import java.util.ArrayList;
 
 import org.junit.jupiter.api.Test;
 
+import nl.gingerbeard.automation.logging.TestLogger;
 import nl.gingerbeard.automation.state.IState;
 import nl.gingerbeard.automation.state.State;
 
@@ -21,7 +22,7 @@ public class AutoControlTest {
 	public void updateListener_listenerCalled() {
 		final AutoControlExample control = new AutoControlExample();
 		final AutoControlListener listener = mock(AutoControlListener.class);
-		control.setListener(listener);
+		control.init(listener, new State(), new TestLogger());
 
 		control.triggerListener(new ArrayList<>());
 
@@ -41,7 +42,7 @@ public class AutoControlTest {
 	public void updateListener_ownerIsTestClass() {
 		final AutoControlExample control = new AutoControlExample();
 		final AutoControlListener listener = mock(AutoControlListener.class);
-		control.setListener(listener);
+		control.init(listener, new State(), new TestLogger());
 
 		control.triggerListener(new ArrayList<>());
 
@@ -59,7 +60,7 @@ public class AutoControlTest {
 		IState state = new State();
 		final AutoControlExample control = new AutoControlExample();
 		
-		control.setState(state);
+		control.init(null, state, new TestLogger());
 		
 		assertEquals(state, control.getState());
 	}

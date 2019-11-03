@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import nl.gingerbeard.automation.devices.IDevice;
+import nl.gingerbeard.automation.logging.ILogger;
 import nl.gingerbeard.automation.state.IState;
 import nl.gingerbeard.automation.state.NextState;
 
@@ -12,6 +13,7 @@ public abstract class AutoControl {
 	private Optional<AutoControlListener> listener = Optional.empty();
 	private final String owner;
 	private IState state;
+	private ILogger log;
 
 	protected AutoControl() {
 		owner = determineOwner();
@@ -24,10 +26,6 @@ public abstract class AutoControl {
 		// 3 Derived AutoControl class
 		// 4 Creator of the derived AutoControl
 		return Thread.currentThread().getStackTrace()[4].getClassName().replaceAll(".*\\.", "");
-	}
-
-	public final void setListener(final AutoControlListener listener) {
-		this.listener = Optional.of(listener);
 	}
 
 	protected final void updateActuators(final List<NextState<?>> updates) {
@@ -49,12 +47,21 @@ public abstract class AutoControl {
 	public final String getOwner() {
 		return owner;
 	}
-	
-	public void setState(IState state)  {
-		this.state = state;
-	}
 
 	public final IState getState() {
 		return state;
 	}
+	
+	protected final ILogger getLogger() { 
+		return log;
+	}
+
+	public void init(AutoControlListener listener, IState state, ILogger log) {
+		this.listener = Optional.ofNullable(listener);
+		this.state = state;
+		this.log = log;
+		onInit();
+	}
+	
+	protected void onInit() {}
 }
