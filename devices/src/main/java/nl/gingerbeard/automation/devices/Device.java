@@ -12,6 +12,10 @@ public abstract class Device<T> extends StateDevice<T> {
 		Preconditions.checkArgument(idx > 0, "idx shall be bigger then 0");
 		this.idx = idx;
 	}
+	
+	public Device() {
+		this.idx = -1;
+	}
 
 	@Override
 	public int getIdx() {

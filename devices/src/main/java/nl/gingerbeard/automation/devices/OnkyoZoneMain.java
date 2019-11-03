@@ -1,9 +1,13 @@
 package nl.gingerbeard.automation.devices;
 
-public class OnkyoZoneMain extends OnOffDevice {
+import nl.gingerbeard.automation.devices.OnkyoReceiver.OnkyoSubdevice;
 
-	public OnkyoZoneMain(int idx) {
-		super(idx);
+public class OnkyoZoneMain extends OnkyoSubdevice { 
+
+	@Override
+	public boolean updateState(String newState) {
+		// TODO Auto-generated method stub
+		return false;
 	}
 
 }

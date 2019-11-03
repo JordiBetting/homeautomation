@@ -58,6 +58,14 @@ public class OnkyoDriver {
 	private String[] concatArrays(String[] a, String[] b) {
 		return Stream.concat(Arrays.stream(a), Arrays.stream(b)).toArray(String[]::new);
 	}
+
+	public void setZone2On() throws IOException, InterruptedException {
+		execute("zone2.power=on");
+	}
+
+	public void setMainOn() throws IOException, InterruptedException {
+		execute("zone2.power=off");
+	}
 	
 	
 }

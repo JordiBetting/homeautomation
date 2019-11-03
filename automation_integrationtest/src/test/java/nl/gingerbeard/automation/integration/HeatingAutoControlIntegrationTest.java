@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test;
 
 import nl.gingerbeard.automation.Room;
 import nl.gingerbeard.automation.autocontrol.HeatingAutoControl;
-import nl.gingerbeard.automation.devices.DoorSensor;
 import nl.gingerbeard.automation.devices.Switch;
 import nl.gingerbeard.automation.devices.Thermostat;
 

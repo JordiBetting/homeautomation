@@ -4,6 +4,7 @@ import nl.gingerbeard.automation.components.AutomationFrameworkComponent;
 import nl.gingerbeard.automation.components.ConfigurationServerComponent;
 import nl.gingerbeard.automation.components.EventsComponent;
 import nl.gingerbeard.automation.components.LoggingComponent;
+import nl.gingerbeard.automation.components.OnkyoTransmitterComponent;
 import nl.gingerbeard.automation.components.StateComponent;
 import nl.gingerbeard.automation.configuration.ConfigurationServerSettings;
 import nl.gingerbeard.automation.controlloop.ControlloopComponent;
@@ -41,6 +42,7 @@ public final class AutomationFrameworkContainer {
 		container.register(DeviceRegistryComponent.class);
 		container.register(ConfigurationServerComponent.class);
 		container.register(ConfigurationServerSettings.class, configSettings, 1);
+		container.register(OnkyoTransmitterComponent.class);
 	}
 
 	public IAutomationFrameworkInterface getAutomationFramework() {

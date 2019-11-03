@@ -19,6 +19,7 @@ import org.junit.jupiter.api.Test;
 import com.google.common.collect.Lists;
 
 import nl.gingerbeard.automation.devices.Device;
+import nl.gingerbeard.automation.devices.OnkyoReceiver;
 import nl.gingerbeard.automation.devices.Scene;
 import nl.gingerbeard.automation.devices.Switch;
 import nl.gingerbeard.automation.domoticz.transmitter.IDomoticzUpdateTransmitter;
@@ -27,6 +28,7 @@ import nl.gingerbeard.automation.event.IEvents;
 import nl.gingerbeard.automation.logging.ILogger;
 import nl.gingerbeard.automation.logging.LogLevel;
 import nl.gingerbeard.automation.logging.TestLogger;
+import nl.gingerbeard.automation.onkyo.IOnkyoTransmitter;
 import nl.gingerbeard.automation.state.AlarmState;
 import nl.gingerbeard.automation.state.IState;
 import nl.gingerbeard.automation.state.NextState;
@@ -45,7 +47,7 @@ public class ControlloopTest {
 		final IState state = mock(IState.class);
 		final IDomoticzUpdateTransmitter transmitter = mock(IDomoticzUpdateTransmitter.class);
 		when(events.trigger(any())).thenReturn(EventResult.empty());
-		final Controlloop control = new Controlloop(events, transmitter, state, log);
+		final Controlloop control = new Controlloop(events, transmitter, state, log, mock(IOnkyoTransmitter.class));
 		final TestDevice myDevice = new TestDevice();
 
 		control.statusChanged(myDevice);
@@ -77,6 +79,7 @@ public class ControlloopTest {
 	private static final Switch mockDevice1 = new Switch(1);
 	private static final Switch mockDevice2 = new Switch(2);
 	private static final Switch changedDevice = new Switch(666);
+	private static final OnkyoReceiver receiver = new OnkyoReceiver("1.2.3.4");
 
 	@Test
 	public void eventResultWithSingleNextState_transmitted() {
@@ -85,7 +88,7 @@ public class ControlloopTest {
 		final ILogger log = mock(ILogger.class);
 		when(log.createContext(any())).thenReturn(log);
 		final IState state = new State();
-		final Controlloop control = new Controlloop(events, transmitter, state, log);
+		final Controlloop control = new Controlloop(events, transmitter, state, log, mock(IOnkyoTransmitter.class));
 
 		final EventResult eventResult = EventResult.of(new NextState<>(mockDevice1, OnOffState.ON));
 		when(events.trigger(any())).thenReturn(eventResult);
@@ -103,7 +106,7 @@ public class ControlloopTest {
 		final ILogger log = mock(ILogger.class);
 		when(log.createContext(any())).thenReturn(log);
 		final IState state = mock(IState.class);
-		final Controlloop control = new Controlloop(events, transmitter, state, log);
+		final Controlloop control = new Controlloop(events, transmitter, state, log, mock(IOnkyoTransmitter.class));
 		when(events.trigger(any())).thenReturn(EventResult.of(Lists.newArrayList(//
 				new NextState<>(mockDevice1, OnOffState.ON), //
 				new NextState<>(mockDevice2, OnOffState.OFF)//
@@ -131,7 +134,7 @@ public class ControlloopTest {
 		final IEvents events = mock(IEvents.class);
 		final ILogger log = mock(ILogger.class);
 		final IState state = mock(IState.class);
-		final Controlloop control = new Controlloop(events, transmitter, state, log);
+		final Controlloop control = new Controlloop(events, transmitter, state, log, mock(IOnkyoTransmitter.class));
 		when(events.trigger(any())).thenReturn(EventResult.of("StringIsNotNextState"));
 
 		control.statusChanged(changedDevice);
@@ -158,7 +161,7 @@ public class ControlloopTest {
 		final IEvents events = mock(IEvents.class);
 		final TestLogger log = new TestLogger();
 		final IState state = mock(IState.class);
-		final Controlloop control = new Controlloop(events, transmitter, state, log);
+		final Controlloop control = new Controlloop(events, transmitter, state, log, mock(IOnkyoTransmitter.class));
 		when(events.trigger(any())).thenReturn(EventResult.of(Lists.newArrayList(//
 				new NextState<>(mockDevice1, OnOffState.ON), //
 				new NextState<>(mockDevice2, OnOffState.OFF)//
@@ -178,7 +181,7 @@ public class ControlloopTest {
 		final TestLogger log = new TestLogger();
 		final IState state = new State();
 		state.setTimeOfDay(TimeOfDay.NIGHTTIME);
-		final Controlloop control = new Controlloop(events, transmitter, state, log);
+		final Controlloop control = new Controlloop(events, transmitter, state, log, mock(IOnkyoTransmitter.class));
 
 		when(events.trigger(any())).thenReturn(EventResult.empty());
 
@@ -198,7 +201,7 @@ public class ControlloopTest {
 
 		when(events.trigger(any())).thenReturn(EventResult.empty());
 
-		final Controlloop control = new Controlloop(events, transmitter, state, log);
+		final Controlloop control = new Controlloop(events, transmitter, state, log, mock(IOnkyoTransmitter.class));
 
 		control.alarmChanged(AlarmState.ARM_AWAY);
 
@@ -216,7 +219,7 @@ public class ControlloopTest {
 
 		when(events.trigger(any())).thenReturn(EventResult.empty());
 
-		final Controlloop control = new Controlloop(events, transmitter, state, log);
+		final Controlloop control = new Controlloop(events, transmitter, state, log, mock(IOnkyoTransmitter.class));
 
 		control.alarmChanged(AlarmState.ARM_AWAY);
 		control.alarmChanged(AlarmState.ARM_AWAY);
@@ -233,7 +236,7 @@ public class ControlloopTest {
 		when(events.trigger(any(Device.class))).thenReturn(EventResult.of(nextState));
 
 		final IDomoticzUpdateTransmitter transmitter = mock(IDomoticzUpdateTransmitter.class);
-		final Controlloop control = new Controlloop(events, transmitter, mock(IState.class), mock(ILogger.class));
+		final Controlloop control = new Controlloop(events, transmitter, mock(IState.class), mock(ILogger.class), mock(IOnkyoTransmitter.class));
 
 		device.setState(OnOffState.ON);
 		control.statusChanged(device);
@@ -251,7 +254,7 @@ public class ControlloopTest {
 		when(events.trigger(any(Device.class))).thenReturn(EventResult.of(nextState));
 
 		final IDomoticzUpdateTransmitter transmitter = mock(IDomoticzUpdateTransmitter.class);
-		final Controlloop control = new Controlloop(events, transmitter, mock(IState.class), log);
+		final Controlloop control = new Controlloop(events, transmitter, mock(IState.class), log, mock(IOnkyoTransmitter.class));
 
 		device.setState(OnOffState.ON);
 		control.statusChanged(device);
@@ -265,7 +268,7 @@ public class ControlloopTest {
 		final IEvents events = mock(IEvents.class);
 		final TestLogger log = new TestLogger();
 		final IState state = mock(IState.class);
-		final Controlloop control = new Controlloop(events, transmitter, state, log);
+		final Controlloop control = new Controlloop(events, transmitter, state, log, mock(IOnkyoTransmitter.class));
 
 		final EventResult eventResult = EventResult.of(new NextState<>(mockDevice1, OnOffState.ON));
 		when(events.trigger(any())).thenReturn(eventResult);
@@ -275,5 +278,22 @@ public class ControlloopTest {
 		assertEquals(1, transmitter.getTransmitted().size());
 		assertTransmitted(transmitter, 0, mockDevice1, OnOffState.ON);
 		log.assertContains(LogLevel.INFO, "[INFO] [trace] " + getClass().getSimpleName() + ": NextState [device=Device [idx=1, name=Optional.empty, state=null], nextState=ON]");
+	}
+	
+	@Test
+	public void onkyoTransmission() {
+		final RecordingTransmitter transmitter = new RecordingTransmitter();
+		final IEvents events = mock(IEvents.class);
+		final TestLogger log = new TestLogger();
+		final IState state = mock(IState.class);
+		IOnkyoTransmitter onkyoTransmitter = mock(IOnkyoTransmitter.class);
+		final Controlloop control = new Controlloop(events, transmitter, state, log, onkyoTransmitter);
+		
+		EventResult eventResult = EventResult.of(receiver.createNextStateMainAndZone2(OnOffState.ON));
+		when(events.trigger(any())).thenReturn(eventResult);
+		
+		control.statusChanged(changedDevice);
+		
+		verify(onkyoTransmitter, times(2)).transmit(any());
 	}
 }

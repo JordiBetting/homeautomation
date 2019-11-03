@@ -6,6 +6,7 @@ import nl.gingerbeard.automation.domoticz.IDomoticzTimeOfDayChanged;
 import nl.gingerbeard.automation.domoticz.transmitter.IDomoticzUpdateTransmitter;
 import nl.gingerbeard.automation.event.IEvents;
 import nl.gingerbeard.automation.logging.ILogger;
+import nl.gingerbeard.automation.onkyo.IOnkyoTransmitter;
 import nl.gingerbeard.automation.service.annotation.Activate;
 import nl.gingerbeard.automation.service.annotation.Deactivate;
 import nl.gingerbeard.automation.service.annotation.Provides;
@@ -25,6 +26,9 @@ public class ControlloopComponent {
 
 	@Requires
 	public IState state;
+	
+	@Requires
+	public IOnkyoTransmitter onkyoTransmitter;
 
 	@Provides
 	public IDomoticzDeviceStatusChanged devicelistener;
@@ -37,7 +41,7 @@ public class ControlloopComponent {
 
 	@Activate
 	public void provideListener() {
-		final Controlloop controlloop = new Controlloop(events, transmitter, state, log);
+		final Controlloop controlloop = new Controlloop(events, transmitter, state, log, onkyoTransmitter);
 		devicelistener = controlloop;
 		timeListener = controlloop;
 		alarmListener = controlloop;

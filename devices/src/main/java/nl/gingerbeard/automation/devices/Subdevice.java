@@ -8,6 +8,10 @@ public abstract class Subdevice<ParentType extends CompositeDevice<?>, StateType
 	protected Subdevice(final int idx) {
 		super(idx);
 	}
+	
+	protected Subdevice() {
+		super();
+	}
 
 	final void setParent(final ParentType parent) {
 		this.parent = Optional.ofNullable(parent);

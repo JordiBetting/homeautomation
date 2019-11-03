@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import nl.gingerbeard.automation.devices.Scene;
+import nl.gingerbeard.automation.devices.OnkyoReceiver.OnkyoSubdevice;
 import nl.gingerbeard.automation.devices.StateDevice;
 import nl.gingerbeard.automation.devices.Subdevice;
 import nl.gingerbeard.automation.domoticz.IDomoticzAlarmChanged;
@@ -15,10 +15,10 @@ import nl.gingerbeard.automation.domoticz.transmitter.IDomoticzUpdateTransmitter
 import nl.gingerbeard.automation.event.EventResult;
 import nl.gingerbeard.automation.event.IEvents;
 import nl.gingerbeard.automation.logging.ILogger;
+import nl.gingerbeard.automation.onkyo.IOnkyoTransmitter;
 import nl.gingerbeard.automation.state.AlarmState;
 import nl.gingerbeard.automation.state.IState;
 import nl.gingerbeard.automation.state.NextState;
-import nl.gingerbeard.automation.state.Time;
 import nl.gingerbeard.automation.state.TimeOfDay;
 import nl.gingerbeard.automation.state.TimeOfDayValues;
 
@@ -28,11 +28,14 @@ class Controlloop implements IDomoticzDeviceStatusChanged, IDomoticzTimeOfDayCha
 	private final ILogger log;
 	private final ILogger tracelog;
 	private final IState state;
+	private IOnkyoTransmitter onkyoTransmitter;
 
-	public Controlloop(final IEvents events, final IDomoticzUpdateTransmitter transmitter, final IState state, final ILogger log) {
+	public Controlloop(final IEvents events, final IDomoticzUpdateTransmitter transmitter, final IState state,
+			final ILogger log, IOnkyoTransmitter onkyoTransmitter) {
 		this.events = events;
 		this.transmitter = transmitter;
 		this.log = log;
+		this.onkyoTransmitter = onkyoTransmitter;
 		tracelog = log.createContext("trace");
 		this.state = state;
 	}
@@ -51,11 +54,19 @@ class Controlloop implements IDomoticzDeviceStatusChanged, IDomoticzTimeOfDayCha
 		for (final NextState<?> update : filter(results)) {
 			try {
 				tracelog.info(update.getTrigger() + ": " + update);
-				transmitter.transmitDeviceUpdate(update);
+				if (isOnkyoDevice(update)) { // TODO: Chain of responsibility of transmitters
+					onkyoTransmitter.transmit(update);
+				} else {
+					transmitter.transmitDeviceUpdate(update);
+				}
 			} catch (final IOException e) {
 				log.exception(e, "Failed to transmit device update: " + update);
 			}
 		}
+	}
+
+	private boolean isOnkyoDevice(NextState<?> update) {
+		return OnkyoSubdevice.class.isAssignableFrom(update.getDevice().getClass());
 	}
 
 	private List<NextState<?>> filter(final EventResult results) {
@@ -77,10 +88,10 @@ class Controlloop implements IDomoticzDeviceStatusChanged, IDomoticzTimeOfDayCha
 	private boolean mustReportNextState(final NextState<?> nextState) {
 		return isDifferentState(nextState) || isAlwaysReported(nextState);
 	}
-	
+
 	private boolean isAlwaysReported(final NextState<?> nextState) {
 		return !nextState.getDevice().reportOnUpdateOnly();
-	} 
+	}
 
 	private boolean isDifferentState(final NextState<?> nextState) {
 		return !nextState.get().equals(nextState.getDevice().getState());
