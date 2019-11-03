@@ -1,6 +1,7 @@
 package nl.gingerbeard.automation.onkyo;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Scanner;
 
 public class CommandExec implements IExecutor {
@@ -15,12 +16,12 @@ public class CommandExec implements IExecutor {
 					"Failure, command '" + String.join(" ", commandWithArgs) + "' returned exitcode: " + exitcode);
 		}
 
-		return readOutput(process);
+		return readOutput(process.getInputStream());
 	}
 
-	private String readOutput(Process process) {
+	String readOutput(InputStream stdOut) {
 		try (@SuppressWarnings("resource") // useDelimiter() returns same object, thus scanner is closed
-		Scanner scanner = new Scanner(process.getInputStream()).useDelimiter("\\A")) {
+		Scanner scanner = new Scanner(stdOut).useDelimiter("\\A")) {
 			return scanner.hasNext() ? scanner.next() : "";
 		}
 	}

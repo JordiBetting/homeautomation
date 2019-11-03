@@ -1,17 +1,28 @@
 package nl.gingerbeard.automation.devices;
 
 import java.util.List;
+import java.util.Locale;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import nl.gingerbeard.automation.state.NextState;
 import nl.gingerbeard.automation.state.OnOffState;
+import nl.gingerbeard.automation.state.OnkyoReceiverState;
 
 public class OnkyoReceiver extends CompositeDevice<OnkyoReceiverState> {
 
 	public static abstract class OnkyoSubdevice extends Subdevice<OnkyoReceiver, OnOffState> {
-		
+		@Override
+		public final boolean updateState(String newStateString) {
+			try {
+				final OnOffState newState = OnOffState.valueOf(newStateString.toUpperCase(Locale.US));
+				setState(newState);
+				return true;
+			} catch (final IllegalArgumentException e) {
+				return false;
+			}
+		}
 	}
 	
 	private final String host;

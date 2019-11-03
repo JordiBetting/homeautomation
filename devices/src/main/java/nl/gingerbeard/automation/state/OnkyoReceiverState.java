@@ -1,6 +1,4 @@
-package nl.gingerbeard.automation.devices;
-
-import nl.gingerbeard.automation.state.OnOffState;
+package nl.gingerbeard.automation.state;
 
 public class OnkyoReceiverState {
 	private final OnOffState main;

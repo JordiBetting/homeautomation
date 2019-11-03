@@ -45,9 +45,9 @@ public class OnkyoDriver {
 		return getValue(result, "on"); 
 	}
 	
-	private boolean getValue(String result, String expectedValue) {
+	boolean getValue(String result, String expectedValue) {
 		String[] split = result.split("=");
-		return (split.length > 1 && split[split.length-1].toLowerCase().contains(expectedValue));
+		return (split.length > 1 && split[split.length-1].toLowerCase().contains(expectedValue.toLowerCase()));
 	}
 	
 	private String execute(String ...command) throws IOException, InterruptedException {
@@ -64,7 +64,7 @@ public class OnkyoDriver {
 	}
 
 	public void setMainOn() throws IOException, InterruptedException {
-		execute("zone2.power=off");
+		execute("zone2.power=on");
 	}
 	
 	

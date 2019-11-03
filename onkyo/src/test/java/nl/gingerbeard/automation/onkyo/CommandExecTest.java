@@ -1,5 +1,8 @@
 package nl.gingerbeard.automation.onkyo;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
 import org.junit.jupiter.api.Assertions;
@@ -25,5 +28,24 @@ public class CommandExecTest {
 		Assertions.assertThrows(IOException.class, () -> exec.execute(command));
 	}
 	
+	@Test
+	public void exec_readOutput_works() {
+		CommandExec exec = new CommandExec();
+		ByteArrayInputStream stream = new ByteArrayInputStream("hello".getBytes());
+
+		String result = exec.readOutput(stream);
+
+		assertEquals("hello", result);
+	}
+
+	@Test
+	public void exec_readOutput_noOutput() {
+		CommandExec exec = new CommandExec();
+		ByteArrayInputStream stream = new ByteArrayInputStream(new byte[] {});
+		
+		String result = exec.readOutput(stream);
+		
+		assertEquals("", result);
+	}
 	
 }

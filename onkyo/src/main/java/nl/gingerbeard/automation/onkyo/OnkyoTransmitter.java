@@ -62,10 +62,15 @@ public class OnkyoTransmitter implements IOnkyoTransmitter {
 	private OnkyoDriver getOrCreateDriver(String host) {
 		OnkyoDriver driver = drivers.get(host);
 		if (driver == null) {
-			driver = new OnkyoDriver(host);
+			driver = createOnkyoDriver(host);
 			drivers.put(host, driver);
 		}
 		return driver;
+	}
+
+	// for testing override
+	protected OnkyoDriver createOnkyoDriver(String host) {
+		return new OnkyoDriver(host);
 	}
 
 	private String getHost(NextState<?> newState) {
@@ -73,15 +78,11 @@ public class OnkyoTransmitter implements IOnkyoTransmitter {
 		if (receiver.isPresent()) {
 			return receiver.get().getHost();
 		}
-		throw new IllegalArgumentException("Onkyo subdevice should have parent set to Receiver");
+		throw new IllegalArgumentException("Cannot process Onkyo subdevice without have its parent set. Have you created the NextState with OnkyoReceiver.create... ?");
 	}
 
 	private boolean isOnkyoNextState(NextState<?> newState) {
 		return OnkyoSubdevice.class.isAssignableFrom(newState.getDevice().getClass());
-	}
-
-	public void cleanup() {
-		drivers.clear();
 	}
 
 }

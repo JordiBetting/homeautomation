@@ -88,6 +88,20 @@ public class OnkyoDriverTest {
 	}
 
 	@Test
+	public void mainOn() throws IOException, InterruptedException {
+		onkyo.setMainOn();
+		
+		assertCommandsExecuted(exec, "/usr/local/bin/onkyo --host 1.2.3.4 system-power=on");
+	}
+	
+	@Test
+	public void zone2On() throws IOException, InterruptedException {
+		onkyo.setZone2On();
+		
+		assertCommandsExecuted(exec, "/usr/local/bin/onkyo --host 1.2.3.4 zone2.power=on");
+	}
+
+	@Test
 	public void isZone2On() throws IOException, InterruptedException {
 		exec.setAnswer("HT-R993: power = on");
 		
@@ -122,5 +136,36 @@ public class OnkyoDriverTest {
 			assertEquals(expectedCommands[i], executedCommands.get(i));
 		}
 	}
+	
+	@Test
+	public void getValue_expectedValue_returnsTrue() {
+		boolean result = onkyo.getValue("ABCD key=value", "value");
+		
+		assertTrue(result);
+	}
+	
+	@Test
+	public void getValue_otherValue_returnsFalse() {
+		boolean result = onkyo.getValue("ABCD key=blaat", "value");
+		
+		assertFalse(result);
+	}
+	
+	@Test
+	public void getValue_caseInsensitive_returnsFalse() {
+		boolean result = onkyo.getValue("ABCD key=blaAt", "BlaaT");
+		
+		assertTrue(result);
+	}
+	
+	@Test
+	public void getValue_unexpectedFormat_returnsFalse() {
+		boolean result = onkyo.getValue("noEqualsSign", "yes");
+		
+		assertFalse(result);
+	}
+	
+	
+	
 
 }

@@ -23,8 +23,8 @@ public class OnkyoTransmitterComponent {
 		transmitter = instance = new OnkyoTransmitter();
 	}
 	
-	@Deactivate public void cleanup() {
-		instance.cleanup();
+	@Deactivate 
+	public void cleanup() {
 		transmitter = instance = null;
 	}
 
