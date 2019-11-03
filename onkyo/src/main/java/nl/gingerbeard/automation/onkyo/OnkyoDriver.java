@@ -64,7 +64,7 @@ public class OnkyoDriver {
 	}
 
 	public void setMainOn() throws IOException, InterruptedException {
-		execute("zone2.power=on");
+		execute("system-power=on");
 	}
 	
 	
