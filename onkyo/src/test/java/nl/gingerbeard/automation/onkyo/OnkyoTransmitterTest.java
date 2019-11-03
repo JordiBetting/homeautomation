@@ -15,11 +15,13 @@ import java.io.IOException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 import nl.gingerbeard.automation.devices.OnkyoReceiver;
 import nl.gingerbeard.automation.devices.OnkyoZone2;
 import nl.gingerbeard.automation.devices.Switch;
-import nl.gingerbeard.automation.logging.ILogger;
+import nl.gingerbeard.automation.logging.LogLevel;
+import nl.gingerbeard.automation.logging.TestLogger;
 import nl.gingerbeard.automation.state.NextState;
 import nl.gingerbeard.automation.state.OnOffState;
 
@@ -28,11 +30,11 @@ public class OnkyoTransmitterTest {
 	private OnkyoReceiver receiver;
 	private OnkyoDriver driver;
 	private OnkyoTransmitter transmitter;
-	private ILogger log;
+	private TestLogger log;
 
 	@BeforeEach
 	public void createMocks() {
-		log = mock(ILogger.class);
+		log = new TestLogger();
 		receiver = new OnkyoReceiver("1.2.3.4");
 		transmitter = spy(new OnkyoTransmitter(log));
 		driver = mock(OnkyoDriver.class);
@@ -106,7 +108,18 @@ public class OnkyoTransmitterTest {
 		assertNotEquals(newDriver, fixed);
 		assertEquals(fixed, createdDriver1);
 		assertEquals(fixed, createdDriver2);
+	}
+	
+	@Test
+	public void transmit_IOException_logged() throws IOException, InterruptedException {
+		OnkyoTransmitter transmitter = new OnkyoTransmitter(log);
+		OnkyoDriver driver = mock(OnkyoDriver.class);
+		transmitter.setFixedDriver(driver);
 		
+		Mockito.doThrow(new IOException("TestException")).when(driver).setMainOff();
 		
+		transmitter.transmit(receiver.createNextStateMain(OnOffState.OFF));
+		
+		log.assertContains(LogLevel.WARNING, "Failed to update onkyo '1.2.3.4' with value OFF");
 	}
 }

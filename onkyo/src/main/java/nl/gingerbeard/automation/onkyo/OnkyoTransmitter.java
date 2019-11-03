@@ -21,7 +21,7 @@ public class OnkyoTransmitter implements IOnkyoTransmitter {
 	public OnkyoTransmitter(ILogger log) {
 		this.log = log;
 	}
-	
+
 	@Override
 	public void transmit(NextState<?> newState) {
 		if (isOnkyoNextState(newState)) {
@@ -31,7 +31,7 @@ public class OnkyoTransmitter implements IOnkyoTransmitter {
 			try {
 				updateState(newState, driver, nextState);
 			} catch (IOException | InterruptedException e) {
-				// TODO handle error
+				log.warning(e, "Failed to update onkyo '" + host + "' with value " + nextState);
 			}
 		}
 	}
@@ -40,7 +40,7 @@ public class OnkyoTransmitter implements IOnkyoTransmitter {
 			throws IOException, InterruptedException {
 		if (isMain(newState)) {
 			updateMainState(driver, nextState);
-		} else { 
+		} else {
 			updateZone2State(driver, nextState);
 		}
 	}
@@ -77,20 +77,21 @@ public class OnkyoTransmitter implements IOnkyoTransmitter {
 	OnkyoDriver createOnkyoDriver(String host) {
 		return fixedDriver.orElse(new OnkyoDriver(log, host));
 	}
-	
-	
+
 	private Optional<OnkyoDriver> fixedDriver = Optional.empty();
+
 	// for testing override
 	public void setFixedDriver(OnkyoDriver driver) {
 		fixedDriver = Optional.of(driver);
 	}
 
 	private String getHost(NextState<?> newState) {
-		Optional<OnkyoReceiver> receiver = ((OnkyoSubdevice)newState.getDevice()).getParent();
+		Optional<OnkyoReceiver> receiver = ((OnkyoSubdevice) newState.getDevice()).getParent();
 		if (receiver.isPresent()) {
 			return receiver.get().getHost();
 		}
-		throw new IllegalArgumentException("Cannot process Onkyo subdevice without have its parent set. Have you created the NextState with OnkyoReceiver.create... ?");
+		throw new IllegalArgumentException(
+				"Cannot process Onkyo subdevice without have its parent set. Have you created the NextState with OnkyoReceiver.create... ?");
 	}
 
 	private boolean isOnkyoNextState(NextState<?> newState) {
