@@ -107,11 +107,13 @@ public final class HeatingAutoControl extends AutoControl {
 		return true;
 	}
 	
-	List<NextState<?>> changeState(Optional<HeatingState> nextState) {
+	List<NextState<?>> changeState(Optional<HeatingState> nextStateOptional) {
 		List<NextState<?>> result = Lists.newArrayList();
 
-		if (nextState.isPresent()) {
-			currentState = nextState.get();
+		if (nextStateOptional.isPresent()) {
+			HeatingState nextState = nextStateOptional.get();
+			getLogger().info("HeatingAutoControl for " + getOwner() + " changing state from " + getStateName(currentState) + " to " + getStateName(nextState));
+			currentState = nextState;
 			Optional<Temperature> stateEntryResult = currentState.stateEntryResult();
 			stateEntryResult.ifPresent((entryResult) -> result.addAll(createNextState(entryResult)));
 
@@ -122,6 +124,10 @@ public final class HeatingAutoControl extends AutoControl {
 		return result;
 	}
 
+	private String getStateName(HeatingState state) {
+		return state.getClass().getSimpleName();
+	}
+	
 	void asyncOutput(List<NextState<?>> result) {
 		updateActuators(result);
 	}
