@@ -3,6 +3,7 @@ package nl.gingerbeard.automation.onkyo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -95,7 +96,7 @@ public class OnkyoTransmitterTest {
 		transmitter.transmit(receiver.createNextStateZone2(OnOffState.ON));
 		
 		OnkyoDriver driver = verify(transmitter, times(1)).createOnkyoDriver(anyString());
-		assertNotNull(driver); // satisfy bug analysis tools on unused return value of method without side-effects
+		assertNull(driver); // satisfy bug analysis tools on unused return value of method without side-effects
 	}
 	
 	@Test
