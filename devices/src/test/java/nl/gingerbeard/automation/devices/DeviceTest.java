@@ -1,7 +1,6 @@
 package nl.gingerbeard.automation.devices;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Optional;
@@ -56,9 +55,6 @@ public class DeviceTest {
 		final MockDevice device2 = new MockDevice(42);
 		assertEquals(42, device2.getIdx());
 
-		assertThrows(IllegalArgumentException.class, () -> new MockDevice(0));
-
-		assertThrows(IllegalArgumentException.class, () -> new MockDevice(-1));
 	}
 
 }

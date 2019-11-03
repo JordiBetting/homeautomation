@@ -9,7 +9,7 @@ public abstract class OnOffDevice extends Device<OnOffState> {
 	public OnOffDevice(final int idx) {
 		super(idx);
 	}
-
+	
 	@Override
 	public final boolean updateState(final String newStateString) {
 		try {

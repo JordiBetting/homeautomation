@@ -13,6 +13,7 @@ import nl.gingerbeard.automation.domoticz.transmitter.IDomoticzUpdateTransmitter
 import nl.gingerbeard.automation.event.EventResult;
 import nl.gingerbeard.automation.event.IEvents;
 import nl.gingerbeard.automation.logging.ILogger;
+import nl.gingerbeard.automation.onkyo.IOnkyoTransmitter;
 import nl.gingerbeard.automation.state.IState;
 import nl.gingerbeard.automation.testdevices.TestDevice;
 
@@ -24,8 +25,9 @@ public class ControlLoopSceneBugTest {
 			final ILogger log = mock(ILogger.class);
 			final IState state = mock(IState.class);
 			final IDomoticzUpdateTransmitter transmitter = mock(IDomoticzUpdateTransmitter.class);
+			final IOnkyoTransmitter onkyoTransmitter = mock(IOnkyoTransmitter.class);
 			when(events.trigger(any())).thenReturn(EventResult.empty());
-			final Controlloop control = new Controlloop(events, transmitter, state, log);
+			final Controlloop control = new Controlloop(events, transmitter, state, log, onkyoTransmitter);
 			final TestDevice myDevice = new TestDevice();
 
 			control.statusChanged(myDevice);
