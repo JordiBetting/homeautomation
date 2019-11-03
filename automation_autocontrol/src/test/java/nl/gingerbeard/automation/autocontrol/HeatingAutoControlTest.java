@@ -18,6 +18,7 @@ import nl.gingerbeard.automation.devices.OnOffDevice;
 import nl.gingerbeard.automation.devices.OpenCloseDevice;
 import nl.gingerbeard.automation.devices.Switch;
 import nl.gingerbeard.automation.devices.Thermostat;
+import nl.gingerbeard.automation.logging.TestLogger;
 import nl.gingerbeard.automation.state.AlarmState;
 import nl.gingerbeard.automation.state.NextState;
 import nl.gingerbeard.automation.state.OnOffState;
@@ -72,11 +73,10 @@ public class HeatingAutoControlTest {
 	private void initSut(TimeOfDay initialTimeOfDay, AlarmState initialAlarmState) {
 		state = new State();
 		sut = new HeatingAutoControl();
-		sut.setState(state);
 		listener = new TestListener();
 		testDevice = new Thermostat(1, 2);
 		sut.addThermostat(testDevice);
-		sut.setListener(listener);
+		sut.init(listener, state, new TestLogger());
 		updateTimeOfDay(initialTimeOfDay);
 		updateAlarm(initialAlarmState);
 	}

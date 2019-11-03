@@ -13,7 +13,6 @@ import nl.gingerbeard.automation.devices.OpenCloseDevice;
 import nl.gingerbeard.automation.devices.Thermostat;
 import nl.gingerbeard.automation.event.annotations.Subscribe;
 import nl.gingerbeard.automation.state.AlarmState;
-import nl.gingerbeard.automation.state.IState;
 import nl.gingerbeard.automation.state.NextState;
 import nl.gingerbeard.automation.state.OnOffState;
 import nl.gingerbeard.automation.state.OpenCloseState;
@@ -178,9 +177,8 @@ public final class HeatingAutoControl extends AutoControl {
 	}
 
 	@Override
-	public void setState(IState state) {
-		context.frameworkState = state;
-		super.setState(state);
+	protected void onInit() {
+		context.frameworkState = getState();
 	}
 	
 	// test interfaces

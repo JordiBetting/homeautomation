@@ -12,6 +12,7 @@ import nl.gingerbeard.automation.devices.CompositeDevice;
 import nl.gingerbeard.automation.devices.Device;
 import nl.gingerbeard.automation.devices.IDevice;
 import nl.gingerbeard.automation.event.IEvents;
+import nl.gingerbeard.automation.logging.ILogger;
 import nl.gingerbeard.automation.state.IState;
 
 public class AutomationFramework implements IAutomationFrameworkInterface {
@@ -20,12 +21,14 @@ public class AutomationFramework implements IAutomationFrameworkInterface {
 	private final IDeviceRegistry deviceRegistry;
 	private final AutoControlToDomoticz autoControlToDomoticz;
 	private final IState state;
+	private ILogger log;
 
-	public AutomationFramework(final IEvents events, final IDeviceRegistry deviceRegistry, final IState state, final AutoControlToDomoticz autoControlToDomoticz) {
+	public AutomationFramework(final IEvents events, final IDeviceRegistry deviceRegistry, final IState state, final AutoControlToDomoticz autoControlToDomoticz, ILogger log) {
 		this.events = events;
 		this.deviceRegistry = deviceRegistry;
 		this.state = state;
 		this.autoControlToDomoticz = autoControlToDomoticz;
+		this.log = log;
 	}
 
 	@Override
@@ -63,8 +66,7 @@ public class AutomationFramework implements IAutomationFrameworkInterface {
 	}
 
 	private void addAutoControl(final AutoControl autoControl) {
-		autoControl.setListener(autoControlToDomoticz);
-		autoControl.setState(state);
+		autoControl.init(autoControlToDomoticz, state, log);
 	}
 
 	private void addDevice(final IDevice<?> device) {
