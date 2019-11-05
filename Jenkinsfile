@@ -36,9 +36,7 @@ pipeline {
 		
 		stage("TmpForTest") {
 			steps {
-				dir("docker") {
-					gradleBuild 'publish'
-				}
+				gradleBuild 'publish'
 			}
 		}
 				
