@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -19,10 +20,19 @@ public class LoggingTest {
 		private final List<String> logs = new ArrayList<>();
 
 		@Override
-		public void log(final LogLevel level, final String context, final String message) {
+		public void log(LocalDateTime time, final LogLevel level, final String context, final String message) {
 			logs.add(level.name() + " [" + context + "] " + message);
 		}
+	}
+	
+	private static class LogMomentRecorder implements ILogOutput {
 
+		private final List<String> logMoments = new ArrayList<>();
+
+		@Override
+		public void log(LocalDateTime time, final LogLevel level, final String context, final String message) {
+			logMoments.add(time.toString());
+		}
 	}
 
 	@Test
@@ -51,7 +61,7 @@ public class LoggingTest {
 		System.setOut(ps);
 
 		try {
-			final ILogger logging = new Logging(Optional.empty());
+			final ILogger logging = new Logging(Optional.empty(), LocalDateTime.of(2019, 11, 5, 10, 14));
 
 			logging.debug("testdebug");
 			logging.info("testinfo");
@@ -60,10 +70,10 @@ public class LoggingTest {
 
 			System.out.flush();
 			final String output = baos.toString("UTF-8");
-			assertEquals("[DEBUG] [root] testdebug" + System.lineSeparator() + //
-					"[INFO] [root] testinfo" + System.lineSeparator() + //
-					"[ERROR] [root] testerror" + System.lineSeparator() + //
-					"[WARNING] [root] testwarning" + System.lineSeparator(), //
+			assertEquals("2019-11-05T10:14 [DEBUG] [root] testdebug" + System.lineSeparator() + //
+					"2019-11-05T10:14 [INFO] [root] testinfo" + System.lineSeparator() + //
+					"2019-11-05T10:14 [ERROR] [root] testerror" + System.lineSeparator() + //
+					"2019-11-05T10:14 [WARNING] [root] testwarning" + System.lineSeparator(), //
 					output);
 
 		} finally {
@@ -119,4 +129,17 @@ public class LoggingTest {
 		assertEquals("WARNING [root] message1", logOutput.logs.get(0));
 		assertEquals("WARNING [test] message2", logOutput.logs.get(1));
 	}
+	
+	@Test
+	public void logTimeStamp() {
+		LocalDateTime time = LocalDateTime.of(2014, 4, 16, 0, 30);
+		final LogMomentRecorder logOutput = new LogMomentRecorder();
+		final ILogger logging = new Logging(Optional.of(logOutput), time);
+		
+		logging.warning("testmessage");
+		
+		assertEquals(1, logOutput.logMoments.size());
+		assertEquals("2014-04-16T00:30", logOutput.logMoments.get(0));
+	}
+	
 }

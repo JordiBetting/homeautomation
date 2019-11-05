@@ -2,6 +2,7 @@ package nl.gingerbeard.automation.logging;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -13,7 +14,7 @@ public class TestLogger implements ILogger {
 		public static final TestLogger testLogger = new TestLogger();
 
 		@Override
-		public void log(final LogLevel level, final String context, final String message) {
+		public void log(LocalDateTime time, final LogLevel level, final String context, final String message) {
 			testLogger.log(Optional.empty(), level, "[" + context + "] " + message);
 		}
 
