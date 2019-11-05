@@ -13,18 +13,14 @@ pipeline {
 	}
 
 	stages {
-		stage("Build Java") {
+		stage("Build + test Java") {
 			steps {
-				gradleBuild 'clean assemble'
-				archiveArtifacts artifacts: '**/*.jar', excludes: '**/jacocoagent.jar, **/.gradle/**, gradle/', onlyIfSuccessful: true
-			}
-		}
-		
-		stage("Test") {
-			steps {
-				gradleBuild 'test jacocoRootReport'
+				gradleBuild 'clean assemble test jacocoRootReport'
 			}
 			post {
+				success {
+					archiveArtifacts artifacts: '**/*.jar', excludes: '**/jacocoagent.jar, **/.gradle/**, gradle/', onlyIfSuccessful: true
+				}
 				always {
 					sh script: 'touch automation_framework/build/test-results/test/*.xml', label: "Ensure always publishing junit test results"
 					junit allowEmptyResults: true, testResults: '**/build/test-results/test/*.xml'

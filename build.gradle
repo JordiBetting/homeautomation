@@ -1,14 +1,4 @@
 
-allprojects {
-	apply plugin: 'java'
-	apply plugin: 'jacoco'
-
-	repositories {
-		mavenLocal()
-		mavenCentral()
-	}	
-}
-
 buildscript {
   repositories {
     maven {
@@ -22,6 +12,14 @@ buildscript {
 }
 
 allprojects {
+	apply plugin: 'java'
+	apply plugin: 'jacoco'
+
+	repositories {
+		mavenLocal()
+		mavenCentral()
+	}	
+
 	apply plugin: 'eclipse'
 	apply plugin: 'com.github.spotbugs'
 	apply plugin: 'maven-publish'
@@ -43,12 +41,22 @@ allprojects {
 		compile group: 'com.google.guava', name: 'guava', version: '23.5-jre'
 	}
 
+	task sourcesJar(type: Jar, dependsOn: classes) {
+		classifier = 'sources'
+		from sourceSets.main.allSource
+	}
 
+	artifacts {
+		archives sourcesJar
+	}
+	
 	publishing {
 		publishing {
 			publications {
 				maven(MavenPublication) {
 					from components.java
+					
+					artifact sourcesJar
 				}
 			}
 			repositories {
@@ -63,7 +71,7 @@ allprojects {
 			}
 		}
 	}
-
+	
 	test {
 		jacocoTestReport {
 			reports {
