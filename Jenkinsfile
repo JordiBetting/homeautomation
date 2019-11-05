@@ -33,6 +33,14 @@ pipeline {
 				}
 			}
 		}
+		
+		stage("TmpForTest") {
+			steps {
+				dir("docker") {
+					gradleBuild 'publish'
+				}
+			}
+		}
 				
 		stage("Build docker") {
 			steps {
