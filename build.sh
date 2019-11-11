@@ -8,7 +8,7 @@ SCRIPTNAME=${SCRIPTNAME%.*}
 
 WORKSPACE="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
-COMMITCOUNT=$(git -C ${WORKSPACE} rev-list --count HEAD)
+COMMITCOUNT=$(git rev-list --count HEAD)
 TAG="jordibetting/jordibetting:java8build-${COMMITCOUNT}"
 
 if [ "build" == $SCRIPTNAME ]; then
