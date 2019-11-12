@@ -76,7 +76,7 @@ public class HeatingAutoControlTest {
 		state = new State();
 		sut = new HeatingAutoControl();
 		listener = new TestListener();
-		testDevice = new Thermostat(1, 2);
+		testDevice = new Thermostat(2, 1);
 		sut.addThermostat(testDevice);
 		log = new TestLogger();
 		sut.init(listener, state, log);

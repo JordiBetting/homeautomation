@@ -17,7 +17,7 @@ public class HeatingAutoControlIntegrationTest extends IntegrationTest {
 
 	public static class TestRoom extends Room {
 		
-		private final Thermostat thermostat = new Thermostat(1,2);
+		private final Thermostat thermostat = new Thermostat(2,1);
 		private final Switch doorSensor = new Switch(3);
 		
 		public TestRoom() {

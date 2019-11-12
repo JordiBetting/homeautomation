@@ -339,7 +339,7 @@ public class AutomationFrameworkTest {
 
 	public static class ThermostatRoom extends Room {
 		public ThermostatRoom() {
-			final Thermostat thermostat = new Thermostat(1, 2);
+			final Thermostat thermostat = new Thermostat(2, 1);
 			addDevice(thermostat);
 		}
 	}

@@ -1,9 +1,12 @@
 package nl.gingerbeard.automation.devices;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
-import com.google.common.collect.Sets;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 
 import nl.gingerbeard.automation.state.NextState;
 import nl.gingerbeard.automation.state.ThermostatState;
@@ -13,10 +16,10 @@ public final class Thermostat extends CompositeDevice<ThermostatState> {
 
 	private ThermostatModeDevice modeDevice;
 
-	private ThermostatSetpointDevice setpointDevice;
+	private List<ThermostatSetpointDevice> setpointDevices = Lists.newArrayList();
 
-	public Thermostat(final int idxSetpoint, final int idxMode) {
-		super(Sets.newHashSet(new ThermostatSetpointDevice(idxSetpoint), new ThermostatModeDevice(idxMode)));
+	public Thermostat(final int idxMode, final int ... idxSetpoint) {
+		super(createDevices(idxMode, idxSetpoint));
 
 		setState(new ThermostatState());
 
@@ -27,9 +30,23 @@ public final class Thermostat extends CompositeDevice<ThermostatState> {
 			if (sub instanceof ThermostatModeDevice) {
 				modeDevice = (ThermostatModeDevice) sub;
 			} else {
-				setpointDevice = (ThermostatSetpointDevice) sub;
+				setpointDevices.add((ThermostatSetpointDevice) sub);
 			}
 		}
+	}
+
+	private static Set<Device<?>> createDevices(int idxMode, int ... idxSetpointDevices) {
+		Preconditions.checkArgument(idxSetpointDevices != null, "idxSetpointDevices should not be null");
+		Preconditions.checkArgument(idxSetpointDevices.length > 0, "idxSetPointDevices array should not be empty");
+		
+		Set<Device<?>> devices = new LinkedHashSet<>(); //for maintaining order of insertion
+		
+		devices.add(new ThermostatModeDevice(idxMode));
+		
+		for (int idxSetpoint : idxSetpointDevices) {
+			devices.add(new ThermostatSetpointDevice(idxSetpoint));
+		}
+		return devices;
 	}
 
 	public void modeUpdated() {
@@ -38,7 +55,7 @@ public final class Thermostat extends CompositeDevice<ThermostatState> {
 	}
 
 	public void setpointUpdated() {
-		getState().setTemperature(setpointDevice.getState());
+		getState().setTemperature(setpointDevices.get(0).getState());
 	}
 
 	public List<NextState<?>> createNextState(final ThermostatState thermostatState) {
@@ -46,7 +63,9 @@ public final class Thermostat extends CompositeDevice<ThermostatState> {
 
 		nextStates.add(new NextState<>(modeDevice, thermostatState.getMode()));
 		thermostatState.getSetPoint().ifPresent(//
-				(setpoint) -> nextStates.add(new NextState<>(setpointDevice, setpoint)));
+				(setpoint) -> { 
+					setpointDevices.stream().forEach((device) -> nextStates.add(new NextState<>(device, setpoint)));
+				});
 
 		return nextStates;
 	}
@@ -55,7 +74,7 @@ public final class Thermostat extends CompositeDevice<ThermostatState> {
 		return modeDevice;
 	}
 
-	public ThermostatSetpointDevice getSetpointDevice() {
-		return setpointDevice;
+	public List<ThermostatSetpointDevice> getSetpointDevice() {
+		return setpointDevices;
 	}
 }

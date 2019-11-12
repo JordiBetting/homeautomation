@@ -32,7 +32,7 @@ public class ThermostatIntegrationTest extends IntegrationTest {
 		private int thermostatChanges;
 
 		public RoomWithThermostat() {
-			thermostat = new Thermostat(IDX_SETPOINT, IDX_MODE);
+			thermostat = new Thermostat(IDX_MODE, IDX_SETPOINT);
 			addDevice(thermostat).and(SENSOR);
 		}
 
