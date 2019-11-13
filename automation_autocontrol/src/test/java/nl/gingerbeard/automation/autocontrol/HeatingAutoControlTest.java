@@ -293,6 +293,16 @@ public class HeatingAutoControlTest {
 		assertTemperature(HeatingAutoControl.DEFAULT_TEMP_C_DAY, result);
 	}
 	
+
+	@Test
+	public void pauseDevices_on_logged() {
+		initSut(TimeOfDay.DAYTIME, AlarmState.DISARMED);
+		Switch pauseDevice = addPauseDevice();
+		
+		switchOn(pauseDevice);
+		log.assertContains(LogLevel.INFO, "HeatingAutoControl for HeatingAutoControlTest detected that pause device Device [idx=3, name=Optional.empty, state=ON] now has state ON");
+	}
+	
 	@Test
 	public void setDelayPauseSecondsToMillis() {
 		initSut();
