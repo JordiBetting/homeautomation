@@ -1,5 +1,6 @@
 package nl.gingerbeard.automation.domoticz;
 
+import java.io.IOException;
 import java.util.Optional;
 
 import nl.gingerbeard.automation.deviceregistry.IDeviceRegistry;
@@ -48,7 +49,7 @@ public final class DomoticzComponent {
 	public DomoticzThreadHandler threadHandler;
 
 	@Activate
-	public void registerReceiver() {
+	public void registerReceiver() throws IOException {
 		threadHandler = createThreadHandler();
 		final TimeOfDayClient todClient = new TimeOfDayClient(domoticzConfig);
 		domoticzInstance = new Domoticz(logger, threadHandler, todClient);
