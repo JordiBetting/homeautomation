@@ -100,6 +100,7 @@ public final class HeatingAutoControl extends AutoControl {
 	
 	private boolean isAllPauseDevicesOff(List<? extends IDevice<?>> devices, Object state) {
 		for (IDevice<?> pauseDevice : devices) {
+			getLogger().info("HeatingAutoControl for " + getOwner() + ", pause due to " + pauseDevice + "=" + state);
 			if (pauseDevice.getState() != state) {
 				return false;
 			}
