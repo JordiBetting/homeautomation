@@ -90,7 +90,7 @@ public abstract class IntegrationTest {
 
 	private void sendRequest(final int curTime, final int sunrise, final int sunset) throws IOException {
 		final String uri = "/json.htm?type=command&param=getSunRiseSet";
-		webserver.setResponse(uri, Status.OK, createSunRiseSetResponse(sunrise, sunset));
+		webserver.setResponse(uri, Status.OK, createSunRiseSetResponse(curTime, sunrise, sunset, sunrise, sunset));
 
 		final URL url = new URL("http://localhost:" + port + "/time/" + curTime + "/" + sunrise + "/" + sunset);
 		final HttpURLConnection con = (HttpURLConnection) url.openConnection();
@@ -100,7 +100,7 @@ public abstract class IntegrationTest {
 		webserver.forgetRequest("GET " + uri);
 	}
 
-	private String createSunRiseSetResponse(final int sunrise, final int sunset) {
+	private String createSunRiseSetResponse(int curtime, int sunrise, int sunset, final int civilStart, final int civilEnd) {
 		return String.format("{ " //
 				+ "\"AstrTwilightEnd\" : \"19:51\", " //
 				+ "\"AstrTwilightStart\" : \"05:56\", " //
@@ -109,17 +109,24 @@ public abstract class IntegrationTest {
 				+ "\"DayLength\" : \"10:11\"," //
 				+ "\"NautTwilightEnd\" : \"19:13\"," //
 				+ "\"NautTwilightStart\" : \"06:35\"," //
-				+ "\"ServerTime\" : \"2019-02-18 19:46:13\"," //
+				+ "\"ServerTime\" : \"2019-02-18 %d:%d:12\"," // FILLED
 				+ "\"SunAtSouth\" : \"12:05\"," //
-				+ "\"Sunrise\" : \"07:48\"," //
-				+ "\"Sunset\" : \"17:59\"," //
+				+ "\"Sunrise\" : \"%d:%d\"," // FILLED
+				+ "\"Sunset\" : \"%d:%d\"," // FILLED
 				+ "\"status\" : \"OK\"," //
 				+ "\"title\" : \"getSunRiseSet\"" //
 				+ "}", //
-				sunset / 60, //
-				sunset % 60, //
+				civilEnd / 60, //
+				civilEnd % 60, //
+				civilStart / 60, //
+				civilStart % 60, //
+				curtime / 60, //
+				curtime % 60, //
 				sunrise / 60, //
-				sunrise % 60);
+				sunrise % 60, //
+				sunset / 60, //
+				sunset % 60
+				);
 	}
 
 	protected void setDaytime() throws IOException {
