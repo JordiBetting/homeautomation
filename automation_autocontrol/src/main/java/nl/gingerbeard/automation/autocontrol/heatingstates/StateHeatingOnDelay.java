@@ -15,6 +15,7 @@ public final class StateHeatingOnDelay extends HeatingState {
 	StateHeatingOnDelay(HeatingAutoControlContext context) {
 		this.context = context;
 		if (context.delayOnMillis > 0) {
+			context.getLogger().info("Scheduling heating on for " + context.getOwner() + " in " + context.delayOnMillis + "ms.");
 			timer.schedule(new TimerTick(), context.delayOnMillis);
 		}
 	}

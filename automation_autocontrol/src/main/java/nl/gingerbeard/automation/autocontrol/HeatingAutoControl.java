@@ -44,12 +44,7 @@ public final class HeatingAutoControl extends AutoControl {
 	private final List<OnOffDevice> pauseOnOffDevices = Lists.newArrayList();
 	private final List<OpenCloseDevice> pauseOpenCloseDevices = Lists.newArrayList();
 
-	private final HeatingAutoControlContext context;
-
-	public HeatingAutoControl() {
-		context = new HeatingAutoControlContext(this);
-		currentState = new StateHeatingOff(context);
-	}
+	private HeatingAutoControlContext context;
 
 	public void addThermostat(Thermostat thermostat) {
 		thermostats.add(thermostat);
@@ -101,6 +96,7 @@ public final class HeatingAutoControl extends AutoControl {
 	private boolean isAllPauseDevicesOff(List<? extends IDevice<?>> devices, Object state) {
 		for (IDevice<?> pauseDevice : devices) {
 			if (pauseDevice.getState() != state) {
+				getLogger().info("HeatingAutoControl for " + getOwner() + " detected that pause device " + pauseDevice + " now has state " + pauseDevice.getState());
 				return false;
 			}
 		}
@@ -184,7 +180,8 @@ public final class HeatingAutoControl extends AutoControl {
 
 	@Override
 	protected void onInit() {
-		context.frameworkState = getState();
+		context = new HeatingAutoControlContext(this, getState(), getLogger());
+		currentState = new StateHeatingOff(context);
 	}
 	
 	// test interfaces
