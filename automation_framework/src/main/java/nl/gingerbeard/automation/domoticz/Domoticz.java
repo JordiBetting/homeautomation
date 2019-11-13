@@ -41,7 +41,7 @@ final class Domoticz implements EventReceived {
 		boolean success = false;
 		if (threadHandler.handlesTime()) {
 			try {
-				final TimeOfDayValues timeOfDayValues = timeOfDayClient.createTimeOfDayValues(curtime, sunrise, sunset);
+				final TimeOfDayValues timeOfDayValues = timeOfDayClient.createTimeOfDayValues();
 				threadHandler.timeChanged(timeOfDayValues);
 				success = true;
 			} catch (final IOException | InterruptedException e) {

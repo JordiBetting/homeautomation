@@ -124,7 +124,7 @@ public class DomoticzTest {
 
 	private TimeOfDayClient createTimeOfDayMock() throws IOException {
 		final TimeOfDayClient tod = mock(TimeOfDayClient.class);
-		when(tod.createTimeOfDayValues(anyInt(), anyInt(), anyInt())).thenReturn(new TimeOfDayValues(1, 2, 3, 4, 5));
+		when(tod.createTimeOfDayValues()).thenReturn(new TimeOfDayValues(1, 2, 3, 4, 5));
 		return tod;
 	}
 
@@ -199,7 +199,7 @@ public class DomoticzTest {
 	public void getCivilTwilightFails_warningLogged() throws IOException {
 		final TestLogger logger = new TestLogger();
 		final TimeOfDayClient todClient = mock(TimeOfDayClient.class);
-		when(todClient.createTimeOfDayValues(anyInt(), anyInt(), anyInt())).thenThrow(new IOException("testing exception"));
+		when(todClient.createTimeOfDayValues()).thenThrow(new IOException("testing exception"));
 		final DomoticzThreadHandler threadHandler = new DomoticzThreadHandler(logger, registry);
 		threadHandler.setSynchronous();
 		threadHandler.setTimeListener(Optional.of(mock(IDomoticzTimeOfDayChanged.class)));

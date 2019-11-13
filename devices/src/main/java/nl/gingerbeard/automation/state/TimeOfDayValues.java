@@ -8,7 +8,8 @@ public final class TimeOfDayValues {
 	private final int civilTwilightStart;
 	private final int civilTwilightEnd;
 
-	public TimeOfDayValues(final int curtime, final int sunrise, final int sunset, final int civilTwilightStart, final int civilTwilightEnd) {
+	public TimeOfDayValues(final int curtime, final int sunrise, final int sunset, final int civilTwilightStart,
+			final int civilTwilightEnd) {
 		this.curtime = curtime;
 		this.sunrise = sunrise;
 		this.sunset = sunset;
@@ -55,7 +56,8 @@ public final class TimeOfDayValues {
 
 	@Override
 	public String toString() {
-		return "TimeOfDayValues [curtime=" + curtime + ", sunrise=" + sunrise + ", sunset=" + sunset + ", civilTwilightStart=" + civilTwilightStart + ", civilTwilightEnd=" + civilTwilightEnd + "]";
+		return "TimeOfDayValues [curtime=" + curtime + ", sunrise=" + sunrise + ", sunset=" + sunset
+				+ ", civilTwilightStart=" + civilTwilightStart + ", civilTwilightEnd=" + civilTwilightEnd + "]";
 	}
 
 	@Override

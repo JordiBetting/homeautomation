@@ -8,14 +8,14 @@ import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
 import nl.gingerbeard.automation.state.TimeOfDayValues;
 
 public class TimeOfDayClient extends GetClient {
-	
+
 	public TimeOfDayClient(final DomoticzConfiguration config) throws IOException {
 		super(config, "/json.htm?type=command&param=getSunRiseSet");
 	}
 
-	public TimeOfDayValues createTimeOfDayValues(final int curtime, final int sunrise, final int sunset) throws IOException {
+	public TimeOfDayValues createTimeOfDayValues() throws IOException {
 		final GetSunRiseSet domoticzTime = getSunRiseSet();
-		return createTimeOfDayValues(curtime, sunrise, sunset, domoticzTime);
+		return createTimeOfDayValues(domoticzTime);
 	}
 
 	private GetSunRiseSet getSunRiseSet() throws IOException {
@@ -23,13 +23,14 @@ public class TimeOfDayClient extends GetClient {
 		return gson.fromJson(responseBodyReader, GetSunRiseSet.class);
 	}
 
-	private TimeOfDayValues createTimeOfDayValues(final int curtime, final int sunrise, final int sunset, final GetSunRiseSet domoticzTime) throws IOException {
+	private TimeOfDayValues createTimeOfDayValues(final GetSunRiseSet domoticzTime) throws IOException {
 		// TODO: fully fill timeOfDayValues and provide as info to controllers.
 		final int civTwilightEnd = domoticzTime.getCivilTwilightEnd();
 		final int civTwilightStart = domoticzTime.getCivilTwilightStart();
+		final int curtime = domoticzTime.getCurrentTime();
+		final int sunrise = domoticzTime.getSunrise();
+		final int sunset = domoticzTime.getSunSet();
 		return new TimeOfDayValues(curtime, sunrise, sunset, civTwilightStart, civTwilightEnd);
 	}
-
-
 
 }

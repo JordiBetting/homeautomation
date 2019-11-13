@@ -24,7 +24,8 @@ public class TimeOfDayClientTest {
 	public void createClientAndWebserver() throws IOException {
 		webserver = new TestWebServer();
 		webserver.start();
-		final DomoticzConfiguration config = new DomoticzConfiguration(0, new URL("http://localhost:" + webserver.getListeningPort()));
+		final DomoticzConfiguration config = new DomoticzConfiguration(0,
+				new URL("http://localhost:" + webserver.getListeningPort()));
 
 		client = new TimeOfDayClient(config);
 	}
@@ -34,18 +35,22 @@ public class TimeOfDayClientTest {
 		final int sunrise = 100;
 		final int currentTime = 150;
 		final int sunset = 200;
-		webserver.setResponse(DOMOTICZ_URL, Status.OK, createSunRiseSetResponse(sunrise + 10, sunset + 10));
+		System.out.println(createSunRiseSetResponse(sunrise, sunset, currentTime, sunrise + 10, sunset + 10));
+		webserver.setResponse(DOMOTICZ_URL, Status.OK,
+				createSunRiseSetResponse(sunrise, sunset, currentTime, sunrise + 10, sunset + 10));
 
-		final TimeOfDayValues timeOfDayValues = client.createTimeOfDayValues(currentTime, sunrise, sunset);
+		final TimeOfDayValues timeOfDayValues = client.createTimeOfDayValues();
 
 		assertEquals(currentTime, timeOfDayValues.getCurtime());
 		assertEquals(sunrise, timeOfDayValues.getSunrise());
 		assertEquals(sunset, timeOfDayValues.getSunset());
 		assertEquals(sunrise + 10, timeOfDayValues.getCivilTwilightStart());
 		assertEquals(sunset + 10, timeOfDayValues.getCivilTwilightEnd());
+		assertEquals(currentTime, timeOfDayValues.getCurtime());
 	}
 
-	private String createSunRiseSetResponse(final int sunrise, final int sunset) {
+	private String createSunRiseSetResponse(final int sunrise, final int sunset, final int currentTime,
+			final int civilStart, final int civilEnd) {
 		return String.format("{ " //
 				+ "\"AstrTwilightEnd\" : \"19:51\", " //
 				+ "\"AstrTwilightStart\" : \"05:56\", " //
@@ -54,33 +59,39 @@ public class TimeOfDayClientTest {
 				+ "\"DayLength\" : \"10:11\"," //
 				+ "\"NautTwilightEnd\" : \"19:13\"," //
 				+ "\"NautTwilightStart\" : \"06:35\"," //
-				+ "\"ServerTime\" : \"2019-02-18 19:46:13\"," //
+				+ "\"ServerTime\" : \"2019-02-18 %d:%d\"," // FILLED
 				+ "\"SunAtSouth\" : \"12:05\"," //
-				+ "\"Sunrise\" : \"07:48\"," //
-				+ "\"Sunset\" : \"17:59\"," //
+				+ "\"Sunrise\" : \"%d:%d\"," // FILLED
+				+ "\"Sunset\" : \"%d:%d\"," // FILLED
 				+ "\"status\" : \"OK\"," //
 				+ "\"title\" : \"getSunRiseSet\"" //
 				+ "}", //
-				sunset / 60, //
-				sunset % 60, //
+				civilEnd / 60, //
+				civilEnd % 60, //
+				civilStart / 60, //
+				civilStart % 60, //
+				currentTime / 60, //
+				currentTime % 60, //
 				sunrise / 60, //
-				sunrise % 60);
+				sunrise % 60, //
+				sunset / 60, //
+				sunset % 60);
 	}
 
 	@Test
 	public void invalidTime_throwsException() {
 		webserver.setResponse(DOMOTICZ_URL, Status.OK, createSunRiseSunSet_invalidTime());
 
-		final IOException e = assertThrows(IOException.class, () -> client.createTimeOfDayValues(1, 2, 3));
+		final IOException e = assertThrows(IOException.class, () -> client.createTimeOfDayValues());
 
-		assertEquals("Invalid input, could not find single : in 20:40:30", e.getMessage());
+		assertEquals("Invalid input, could not find single : in 2040", e.getMessage());
 	}
 
 	@Test
 	public void serverReturns404_throwsException() {
 		webserver.setResponse(DOMOTICZ_URL, Status.NOT_FOUND, "woops");
 
-		final IOException e = assertThrows(IOException.class, () -> client.createTimeOfDayValues(1, 2, 3));
+		final IOException e = assertThrows(IOException.class, () -> client.createTimeOfDayValues());
 		assertEquals("responsecode expected 200, but was: 404", e.getMessage());
 	}
 
@@ -88,9 +99,18 @@ public class TimeOfDayClientTest {
 	public void invalidNumber_throwsException() {
 		webserver.setResponse(DOMOTICZ_URL, Status.OK, createSunRiseSunSet_invalidNumber());
 
-		final IOException e = assertThrows(IOException.class, () -> client.createTimeOfDayValues(1, 2, 3));
+		final IOException e = assertThrows(IOException.class, () -> client.createTimeOfDayValues());
 
 		assertEquals("java.lang.NumberFormatException: For input string: \"WRONG\"", e.getMessage());
+	}
+	
+	@Test
+	public void invalidServerTime_throwsException() {
+		webserver.setResponse(DOMOTICZ_URL, Status.OK, createSunRiseSunSet_invalidServerTime());
+		
+		final IOException e = assertThrows(IOException.class, () -> client.createTimeOfDayValues());
+
+		assertEquals("Invalid input, expected hh:mm:ss in 2019-02-18___19:46:13", e.getMessage());
 	}
 
 	private String createSunRiseSunSet_invalidTime() {
@@ -98,7 +118,7 @@ public class TimeOfDayClientTest {
 				+ "\"AstrTwilightEnd\" : \"19:51\", " //
 				+ "\"AstrTwilightStart\" : \"05:56\", " //
 				+ "\"CivTwilightEnd\" : \"20:15\", " //
-				+ "\"CivTwilightStart\" : \"20:40:30\", " //
+				+ "\"CivTwilightStart\" : \"2040\", " //
 				+ "\"DayLength\" : \"10:11\"," //
 				+ "\"NautTwilightEnd\" : \"19:13\"," //
 				+ "\"NautTwilightStart\" : \"06:35\"," //
@@ -128,4 +148,24 @@ public class TimeOfDayClientTest {
 				+ "\"title\" : \"getSunRiseSet\"" //
 				+ "}";
 	}
+
+
+	private String createSunRiseSunSet_invalidServerTime() {
+		return "{ " //
+				+ "\"AstrTwilightEnd\" : \"19:51\", " //
+				+ "\"AstrTwilightStart\" : \"05:56\", " //
+				+ "\"CivTwilightEnd\" : \"20:14\", " //
+				+ "\"CivTwilightStart\" : \"20:40\", " //
+				+ "\"DayLength\" : \"10:11\"," //
+				+ "\"NautTwilightEnd\" : \"19:13\"," //
+				+ "\"NautTwilightStart\" : \"06:35\"," //
+				+ "\"ServerTime\" : \"2019-02-18___19:46:13\"," //
+				+ "\"SunAtSouth\" : \"12:05\"," //
+				+ "\"Sunrise\" : \"07:48\"," //
+				+ "\"Sunset\" : \"17:59\"," //
+				+ "\"status\" : \"OK\"," //
+				+ "\"title\" : \"getSunRiseSet\"" //
+				+ "}";
+	}
+
 }
