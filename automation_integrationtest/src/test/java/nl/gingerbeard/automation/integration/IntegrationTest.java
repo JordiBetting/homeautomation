@@ -51,6 +51,8 @@ public abstract class IntegrationTest {
 
 		config = new DomoticzConfiguration(0, new URL("http://localhost:" + webserver.getListeningPort()));
 		config.setEventHandlingSynchronous();
+		config.setMaxInitWait_s(0);
+		config.setInitInterval_s(0);
 		final ConfigurationServerSettings configSettings = new ConfigurationServerSettings(0);
 		container = IAutomationFrameworkInterface.createFrameworkContainer(config, new LogOutputToTestLogger(), configSettings);
 		container.start();
