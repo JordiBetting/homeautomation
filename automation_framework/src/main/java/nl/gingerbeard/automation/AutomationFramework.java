@@ -23,7 +23,8 @@ public class AutomationFramework implements IAutomationFrameworkInterface {
 	private final IState state;
 	private ILogger log;
 
-	public AutomationFramework(final IEvents events, final IDeviceRegistry deviceRegistry, final IState state, final AutoControlToDomoticz autoControlToDomoticz, ILogger log) {
+	public AutomationFramework(final IEvents events, final IDeviceRegistry deviceRegistry, final IState state,
+			final AutoControlToDomoticz autoControlToDomoticz, ILogger log) {
 		this.events = events;
 		this.deviceRegistry = deviceRegistry;
 		this.state = state;
@@ -35,16 +36,31 @@ public class AutomationFramework implements IAutomationFrameworkInterface {
 	public <T extends Room> T addRoom(final Class<T> roomClass) {
 		Preconditions.checkArgument(roomClass != null, "Please provide a non-null room");
 		final T room = createRoom(roomClass);
+		logAddRoom(room);
+
 		room.setState(state);
 		room.getDevices().stream().forEach((device) -> addDevice(device));
 		room.getAutoControls().stream().forEach((autoControl) -> {
 			addAutoControl(autoControl);
-			autoControl.getDevices().forEach((device) -> addDevice(device));
-			events.subscribe(autoControl);
 		});
 		events.subscribe(room);
-		
+
 		return room;
+	}
+
+	private void addAutoControl(AutoControl autoControl) {
+		autoControl.init(autoControlToDomoticz, state, log);
+		autoControl.getDevices().forEach((device) -> addDevice(device));
+		events.subscribe(autoControl);
+	}
+
+	private <T extends Room> void logAddRoom(T room) {
+		log.debug(String.format("Adding room %s with %d devices and %d autocontrols containing %d devices in total", //
+				room.getClass().getSimpleName(), //
+				room.getDevices().size(), //
+				room.getAutoControls().size(), //
+				room.getAutoControls().stream().mapToInt((autoControl) -> autoControl.getDevices().size()).sum() //
+		));
 	}
 
 	final <T extends Room> T createRoom(final Class<T> roomClass) {
@@ -62,10 +78,6 @@ public class AutomationFramework implements IAutomationFrameworkInterface {
 			rte.initCause(e);
 			throw rte;
 		}
-	}
-
-	private void addAutoControl(final AutoControl autoControl) {
-		autoControl.init(autoControlToDomoticz, state, log);
 	}
 
 	private void addDevice(final IDevice<?> device) {
@@ -86,7 +98,8 @@ public class AutomationFramework implements IAutomationFrameworkInterface {
 		return devices;
 	}
 
-	// TODO: responsibility does not feel right. Not an external interface as it shall be controlled via state receiver
+	// TODO: responsibility does not feel right. Not an external interface as it
+	// shall be controlled via state receiver
 	@Override
 	public void deviceChanged(final Device<?> changedDevice) {
 		events.trigger(changedDevice);
