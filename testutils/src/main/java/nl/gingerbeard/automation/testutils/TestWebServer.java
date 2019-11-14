@@ -77,7 +77,7 @@ public class TestWebServer extends NanoHTTPD {
 				session.getMethod(), //
 				session.getUri(), //
 				session.getQueryParameterString());
-		getRequests().add(logline);
+		requests.add(logline);
 	}
 
 	private FixedResponse determineResponse(final IHTTPSession session) {

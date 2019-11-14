@@ -61,7 +61,7 @@ public class DomoticzThreadHandlerTest {
 		handler.setSynchronous();
 		final IDomoticzTimeOfDayChanged listener = mock(IDomoticzTimeOfDayChanged.class);
 
-		handler.setTimeListener(Optional.of(listener));
+		handler.setTimeListener(listener);
 		handler.timeChanged(TIMEOFDAY_EXAMPLE);
 
 		verify(listener, times(1)).timeChanged(TIMEOFDAY_EXAMPLE);
@@ -94,7 +94,7 @@ public class DomoticzThreadHandlerTest {
 		handler.setSynchronous();
 		final IDomoticzAlarmChanged listener = mock(IDomoticzAlarmChanged.class);
 
-		handler.setAlarmListener(Optional.of(listener));
+		handler.setAlarmListener(listener);
 		handler.alarmChanged("disarmed");
 
 		verify(listener, times(1)).alarmChanged(AlarmState.DISARMED);
@@ -131,7 +131,7 @@ public class DomoticzThreadHandlerTest {
 		final IDomoticzDeviceStatusChanged listener = mock(IDomoticzDeviceStatusChanged.class);
 		final Device<?> device = new Switch(1);
 		when(registry.updateDevice(1, "on")).thenReturn(Optional.of(device));
-		handler.setDeviceListener(Optional.of(listener));
+		handler.setDeviceListener(listener);
 
 		handler.deviceChanged(1, "on");
 
@@ -189,8 +189,8 @@ public class DomoticzThreadHandlerTest {
 		final CountDownLatch finishLatch = new CountDownLatch(2);
 		final MultiListener listener = new MultiListener(finishLatch);
 
-		handler.setTimeListener(Optional.of(listener));
-		handler.setAlarmListener(Optional.of(listener));
+		handler.setTimeListener(listener);
+		handler.setAlarmListener(listener);
 
 		// final AtomicInteger
 		final Thread first = new Thread(() -> {
@@ -252,7 +252,7 @@ public class DomoticzThreadHandlerTest {
 
 	@Test
 	public void handlesTime_listenerPresent_returnsTrue() {
-		handler.setTimeListener(Optional.of(mock(IDomoticzTimeOfDayChanged.class)));
+		handler.setTimeListener(mock(IDomoticzTimeOfDayChanged.class));
 		assertTrue(handler.handlesTime());
 	}
 
@@ -263,7 +263,7 @@ public class DomoticzThreadHandlerTest {
 
 	@Test
 	public void handlesAlarm_listenerPresent_returnsTrue() {
-		handler.setAlarmListener(Optional.of(mock(IDomoticzAlarmChanged.class)));
+		handler.setAlarmListener(mock(IDomoticzAlarmChanged.class));
 		assertTrue(handler.handlesAlarm());
 	}
 
@@ -274,14 +274,14 @@ public class DomoticzThreadHandlerTest {
 
 	@Test
 	public void handlesDevice_unknownDevice_returnsFalse() {
-		handler.setDeviceListener(Optional.of(mock(IDomoticzDeviceStatusChanged.class)));
+		handler.setDeviceListener(mock(IDomoticzDeviceStatusChanged.class));
 
 		assertFalse(handler.handlesDevice(42));
 	}
 
 	@Test
 	public void handlesDevice_deviceKnown_returnsTrue() {
-		handler.setDeviceListener(Optional.of(mock(IDomoticzDeviceStatusChanged.class)));
+		handler.setDeviceListener(mock(IDomoticzDeviceStatusChanged.class));
 		when(registry.devicePresent(42)).thenReturn(true);
 
 		assertTrue(handler.handlesDevice(42));

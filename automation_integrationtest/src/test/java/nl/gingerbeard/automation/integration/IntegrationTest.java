@@ -10,6 +10,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -42,6 +43,7 @@ public abstract class IntegrationTest {
 	protected int configPort;
 	protected TestLogger logOutput;
 	protected OnkyoDriver onkyoDriver;
+	protected List<String> startupRequests = new ArrayList<>();
 
 	@BeforeEach
 	public void start() throws IOException {
@@ -65,6 +67,9 @@ public abstract class IntegrationTest {
 		assertTrue(onkyo.isPresent());
 		onkyoDriver = mock(OnkyoDriver.class);
 		onkyo.get().instance.setFixedDriver(onkyoDriver);
+		
+		startupRequests.addAll(webserver.getRequests());
+		webserver.getRequests().clear();
 	}
 
 	@AfterEach

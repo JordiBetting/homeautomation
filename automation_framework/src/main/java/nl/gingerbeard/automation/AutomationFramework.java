@@ -42,7 +42,8 @@ public class AutomationFramework implements IAutomationFrameworkInterface {
 			autoControl.getDevices().forEach((device) -> addDevice(device));
 			events.subscribe(autoControl);
 		});
-		events.subscribe(room);		
+		events.subscribe(room);
+		
 		return room;
 	}
 
@@ -56,8 +57,6 @@ public class AutomationFramework implements IAutomationFrameworkInterface {
 			} else {
 				throw new RuntimeException(cause);
 			}
-			// } catch (final InvocationTargetException e) {
-			// throw new RuntimeException(e.getCause());
 		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | NoSuchMethodException | SecurityException e) {
 			final RuntimeException rte = new RuntimeException("Is the room and its default constructor public?");
 			rte.initCause(e);

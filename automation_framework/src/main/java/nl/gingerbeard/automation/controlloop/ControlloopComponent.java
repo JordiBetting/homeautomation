@@ -1,15 +1,11 @@
 package nl.gingerbeard.automation.controlloop;
 
-import nl.gingerbeard.automation.domoticz.IDomoticzAlarmChanged;
-import nl.gingerbeard.automation.domoticz.IDomoticzDeviceStatusChanged;
-import nl.gingerbeard.automation.domoticz.IDomoticzTimeOfDayChanged;
+import nl.gingerbeard.automation.domoticz.DomoticzComponent.IDomoticz;
 import nl.gingerbeard.automation.domoticz.transmitter.IDomoticzUpdateTransmitter;
 import nl.gingerbeard.automation.event.IEvents;
 import nl.gingerbeard.automation.logging.ILogger;
 import nl.gingerbeard.automation.onkyo.IOnkyoTransmitter;
 import nl.gingerbeard.automation.service.annotation.Activate;
-import nl.gingerbeard.automation.service.annotation.Deactivate;
-import nl.gingerbeard.automation.service.annotation.Provides;
 import nl.gingerbeard.automation.service.annotation.Requires;
 import nl.gingerbeard.automation.state.IState;
 
@@ -29,28 +25,22 @@ public class ControlloopComponent {
 	
 	@Requires
 	public IOnkyoTransmitter onkyoTransmitter;
-
-	@Provides
-	public IDomoticzDeviceStatusChanged devicelistener;
-
-	@Provides
-	public IDomoticzTimeOfDayChanged timeListener;
-
-	@Provides
-	public IDomoticzAlarmChanged alarmListener;
+	
+	@Requires
+	public IDomoticz domoticz;
 
 	@Activate
 	public void provideListener() {
 		final Controlloop controlloop = new Controlloop(events, transmitter, state, log, onkyoTransmitter);
-		devicelistener = controlloop;
-		timeListener = controlloop;
-		alarmListener = controlloop;
+		domoticz.setAlarmListener(controlloop);
+		domoticz.setTimeListener(controlloop);
+		domoticz.setDeviceListener(controlloop);
+		
+		try {
+			controlloop.retrieveInitialState(domoticz.getClients());
+		} catch (Exception e) {
+			log.warning(e, "Could not retrieve initial state, skipping");
+		} // TODO: Retry mechanism?
 	}
 
-	@Deactivate
-	public void removeListener() {
-		devicelistener = null;
-		timeListener = null;
-		alarmListener = null;
-	}
 }
