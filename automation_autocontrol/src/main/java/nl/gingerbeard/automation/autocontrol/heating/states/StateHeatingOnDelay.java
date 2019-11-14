@@ -1,10 +1,10 @@
-package nl.gingerbeard.automation.autocontrol.heatingstates;
+package nl.gingerbeard.automation.autocontrol.heating.states;
 
 import java.util.Optional;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import nl.gingerbeard.automation.autocontrol.HeatingAutoControlContext;
+import nl.gingerbeard.automation.autocontrol.heating.HeatingAutoControlContext;
 import nl.gingerbeard.automation.state.AlarmState;
 import nl.gingerbeard.automation.state.Temperature;
 

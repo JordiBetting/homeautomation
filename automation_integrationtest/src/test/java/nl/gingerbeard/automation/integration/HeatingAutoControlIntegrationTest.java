@@ -12,6 +12,7 @@ import nl.gingerbeard.automation.Room;
 import nl.gingerbeard.automation.autocontrol.HeatingAutoControl;
 import nl.gingerbeard.automation.devices.Switch;
 import nl.gingerbeard.automation.devices.Thermostat;
+import nl.gingerbeard.automation.state.Temperature;
 
 public class HeatingAutoControlIntegrationTest extends IntegrationTest {
 
@@ -21,10 +22,12 @@ public class HeatingAutoControlIntegrationTest extends IntegrationTest {
 		private final Switch doorSensor = new Switch(3);
 		
 		public TestRoom() {
-			addDevice(thermostat).and(doorSensor);
 			HeatingAutoControl autoControl = new HeatingAutoControl();
 			autoControl.addThermostat(thermostat);
 			autoControl.addPauseDevice(doorSensor);
+			
+			// Proves NPE bug (using context before initialized, now refactored to prevent)
+			autoControl.setDaytimeTemperature(Temperature.celcius(18.5));
 			
 			assertTrue(super.getAutoControls().isEmpty());
 			addAutoControl(autoControl);

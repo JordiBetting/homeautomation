@@ -1,8 +1,8 @@
-package nl.gingerbeard.automation.autocontrol.heatingstates;
+package nl.gingerbeard.automation.autocontrol.heating.states;
 
 import java.util.Optional;
 
-import nl.gingerbeard.automation.autocontrol.HeatingAutoControlContext;
+import nl.gingerbeard.automation.autocontrol.heating.HeatingAutoControlContext;
 import nl.gingerbeard.automation.state.Temperature;
 
 public final class StateHeatingOnDaytime extends StateHeatingOn {
