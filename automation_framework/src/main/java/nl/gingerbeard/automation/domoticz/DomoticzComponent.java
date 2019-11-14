@@ -37,12 +37,11 @@ public final class DomoticzComponent {
 	@Requires
 	public DomoticzConfiguration domoticzConfig;
 
-	@Provides
-	public DomoticzThreadHandler threadHandler;
 
 	@Provides
 	public IDomoticz domoticz;
 
+	public DomoticzThreadHandler threadHandler;
 	private Domoticz domoticzInstance;
 
 	@Activate
@@ -58,6 +57,9 @@ public final class DomoticzComponent {
 
 	private DomoticzThreadHandler createThreadHandler() {
 		final DomoticzThreadHandler threadHandler = new DomoticzThreadHandler(logger, deviceRegistry);
+		if (domoticzConfig.isSynchronousEventHandling()) {
+			threadHandler.setSynchronous();
+		}
 		return threadHandler;
 	}
 

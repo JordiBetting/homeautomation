@@ -7,6 +7,7 @@ public final class DomoticzConfiguration {
 	private int listenPort;
 	private final URL baseURL;
 	private int connectTimeoutMS = DEFAULT_CONNECT_TIMEOUT_MS;
+	private boolean synchronousEventHandling = false;
 
 	public static final int DEFAULT_CONNECT_TIMEOUT_MS = 3000;
 
@@ -51,4 +52,12 @@ public final class DomoticzConfiguration {
 		this.connectTimeoutMS = connectTimeoutMS;
 	}
 
+	public void setEventHandlingSynchronous() {
+		this.synchronousEventHandling = true;
+	}
+
+	public boolean isSynchronousEventHandling() {
+		return synchronousEventHandling;
+	}
+	
 }

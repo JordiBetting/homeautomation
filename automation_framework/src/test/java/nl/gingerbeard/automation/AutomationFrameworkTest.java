@@ -30,7 +30,6 @@ import nl.gingerbeard.automation.devices.Switch;
 import nl.gingerbeard.automation.devices.Thermostat;
 import nl.gingerbeard.automation.devices.ThermostatModeDevice;
 import nl.gingerbeard.automation.devices.ThermostatSetpointDevice;
-import nl.gingerbeard.automation.domoticz.DomoticzThreadHandler;
 import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
 import nl.gingerbeard.automation.domoticz.receiver.IDomoticzEventReceiver;
 import nl.gingerbeard.automation.event.IEvents;
@@ -89,15 +88,13 @@ public class AutomationFrameworkTest {
 	}
 
 	private IAutomationFrameworkInterface createIntegration() {
-		container = IAutomationFrameworkInterface.createFrameworkContainer(new DomoticzConfiguration(0, createMockUrl()), log, new ConfigurationServerSettings(0));
+		DomoticzConfiguration domoticzConfig = new DomoticzConfiguration(0, createMockUrl());
+		domoticzConfig.setEventHandlingSynchronous();
+		container = IAutomationFrameworkInterface.createFrameworkContainer(domoticzConfig, log, new ConfigurationServerSettings(0));
 		container.start();
 
 		final Optional<IAutomationFrameworkInterface> framework = container.getRuntime().getService(IAutomationFrameworkInterface.class);
 		assertTrue(framework.isPresent());
-
-		final Optional<DomoticzThreadHandler> threadHandler = container.getRuntime().getService(DomoticzThreadHandler.class);
-		assertTrue(threadHandler.isPresent());
-		threadHandler.get().setSynchronous();
 
 		return framework.get();
 	}

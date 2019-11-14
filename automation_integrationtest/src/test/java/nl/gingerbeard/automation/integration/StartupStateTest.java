@@ -14,7 +14,6 @@ import fi.iki.elonen.NanoHTTPD.Response.Status;
 import nl.gingerbeard.automation.AutomationFrameworkContainer;
 import nl.gingerbeard.automation.IAutomationFrameworkInterface;
 import nl.gingerbeard.automation.configuration.ConfigurationServerSettings;
-import nl.gingerbeard.automation.domoticz.DomoticzThreadHandler;
 import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
 import nl.gingerbeard.automation.logging.TestLogger.LogOutputToTestLogger;
 import nl.gingerbeard.automation.state.AlarmState;
@@ -101,15 +100,10 @@ public class StartupStateTest {
 	}
 	private Optional<IState> startFramework(TestWebServer webserver) throws MalformedURLException {
 		DomoticzConfiguration config = new DomoticzConfiguration(0, new URL("http://localhost:" + webserver.getListeningPort()));
+		config.setEventHandlingSynchronous();
 		AutomationFrameworkContainer container = IAutomationFrameworkInterface.createFrameworkContainer(config, new LogOutputToTestLogger(), new ConfigurationServerSettings(0));
 		container.start();
-		setThreadhanderSynchronous(container);
 		return container.getRuntime().getService(IState.class);
-	}
-	private void setThreadhanderSynchronous(AutomationFrameworkContainer container) {
-		final Optional<DomoticzThreadHandler> threadHandler = container.getRuntime().getService(DomoticzThreadHandler.class);
-		assertTrue(threadHandler.isPresent());
-		threadHandler.get().setSynchronous();
 	}
 	
 }

@@ -1,6 +1,6 @@
 package nl.gingerbeard.automation.controlloop;
 
-import nl.gingerbeard.automation.domoticz.DomoticzComponent.IDomoticz;
+import nl.gingerbeard.automation.domoticz.IDomoticz;
 import nl.gingerbeard.automation.domoticz.transmitter.IDomoticzUpdateTransmitter;
 import nl.gingerbeard.automation.event.IEvents;
 import nl.gingerbeard.automation.logging.ILogger;

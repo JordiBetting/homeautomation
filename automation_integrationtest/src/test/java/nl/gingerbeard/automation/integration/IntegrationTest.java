@@ -26,7 +26,6 @@ import nl.gingerbeard.automation.AutomationFrameworkContainer;
 import nl.gingerbeard.automation.IAutomationFrameworkInterface;
 import nl.gingerbeard.automation.components.OnkyoTransmitterComponent;
 import nl.gingerbeard.automation.configuration.ConfigurationServerSettings;
-import nl.gingerbeard.automation.domoticz.DomoticzThreadHandler;
 import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
 import nl.gingerbeard.automation.logging.TestLogger;
 import nl.gingerbeard.automation.logging.TestLogger.LogOutputToTestLogger;
@@ -51,6 +50,7 @@ public abstract class IntegrationTest {
 		webserver.start();
 
 		config = new DomoticzConfiguration(0, new URL("http://localhost:" + webserver.getListeningPort()));
+		config.setEventHandlingSynchronous();
 		final ConfigurationServerSettings configSettings = new ConfigurationServerSettings(0);
 		container = IAutomationFrameworkInterface.createFrameworkContainer(config, new LogOutputToTestLogger(), configSettings);
 		container.start();
@@ -59,9 +59,6 @@ public abstract class IntegrationTest {
 		configPort = configSettings.getListenPort();
 		automation = container.getRuntime().getService(IAutomationFrameworkInterface.class).get();
 		logOutput = LogOutputToTestLogger.testLogger;
-		final Optional<DomoticzThreadHandler> threadHandler = container.getRuntime().getService(DomoticzThreadHandler.class);
-		assertTrue(threadHandler.isPresent());
-		threadHandler.get().setSynchronous();
 		
 		Optional<OnkyoTransmitterComponent> onkyo = container.getRuntime().getComponent(OnkyoTransmitterComponent.class);
 		assertTrue(onkyo.isPresent());
