@@ -14,7 +14,6 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,6 +24,7 @@ import nl.gingerbeard.automation.deviceregistry.IDeviceRegistry;
 import nl.gingerbeard.automation.devices.OnOffDevice;
 import nl.gingerbeard.automation.devices.StateDevice;
 import nl.gingerbeard.automation.devices.Switch;
+import nl.gingerbeard.automation.domoticz.clients.AlarmStateClient;
 import nl.gingerbeard.automation.domoticz.clients.TimeOfDayClient;
 import nl.gingerbeard.automation.logging.ILogger;
 import nl.gingerbeard.automation.logging.LogLevel;
@@ -43,7 +43,7 @@ public class DomoticzTest {
 		registry = new DeviceRegistry();
 		final ILogger logger = mock(ILogger.class);
 		final DomoticzThreadHandler domoticzThreadHandler = new DomoticzThreadHandler(logger, registry);
-		domoticz = new Domoticz(logger, domoticzThreadHandler, mock(TimeOfDayClient.class));
+		domoticz = new Domoticz(logger, domoticzThreadHandler, mock(TimeOfDayClient.class), mock(AlarmStateClient.class));
 	}
 
 	@Test
@@ -96,8 +96,8 @@ public class DomoticzTest {
 		final ILogger log = mock(ILogger.class);
 		final DomoticzThreadHandler threadHandler = new DomoticzThreadHandler(log, registry);
 		threadHandler.setSynchronous();
-		final Domoticz domoticz = new Domoticz(log, threadHandler, null);
-		threadHandler.setDeviceListener(Optional.of(listener));
+		final Domoticz domoticz = new Domoticz(log, threadHandler, null, null);
+		threadHandler.setDeviceListener(listener);
 
 		registry.addDevice(new Switch(1));
 
@@ -113,8 +113,8 @@ public class DomoticzTest {
 		final ILogger log = mock(ILogger.class);
 		final DomoticzThreadHandler threadHandler = new DomoticzThreadHandler(log, registry);
 		threadHandler.setSynchronous();
-		final Domoticz domoticz = new Domoticz(log, threadHandler, createTimeOfDayMock());
-		threadHandler.setTimeListener(Optional.of(listener));
+		final Domoticz domoticz = new Domoticz(log, threadHandler, createTimeOfDayMock(), null);
+		threadHandler.setTimeListener(listener);
 
 		domoticz.timeChanged(1, 2, 3);
 
@@ -124,7 +124,7 @@ public class DomoticzTest {
 
 	private TimeOfDayClient createTimeOfDayMock() throws IOException {
 		final TimeOfDayClient tod = mock(TimeOfDayClient.class);
-		when(tod.createTimeOfDayValues(anyInt(), anyInt(), anyInt())).thenReturn(new TimeOfDayValues(1, 2, 3, 4, 5));
+		when(tod.createTimeOfDayValues()).thenReturn(new TimeOfDayValues(1, 2, 3, 4, 5));
 		return tod;
 	}
 
@@ -132,7 +132,7 @@ public class DomoticzTest {
 	public void update_timeListener_noListener_noException() throws IOException {
 		final ILogger log = mock(ILogger.class);
 		final DomoticzThreadHandler threadHandler = new DomoticzThreadHandler(log, registry);
-		final Domoticz domoticz = new Domoticz(log, threadHandler, createTimeOfDayMock());
+		final Domoticz domoticz = new Domoticz(log, threadHandler, createTimeOfDayMock(), null);
 
 		final boolean result = domoticz.timeChanged(1, 2, 3);
 
@@ -145,8 +145,8 @@ public class DomoticzTest {
 		final ILogger log = mock(ILogger.class);
 		final DomoticzThreadHandler threadHandler = new DomoticzThreadHandler(log, registry);
 		threadHandler.setSynchronous();
-		final Domoticz domoticz = new Domoticz(log, threadHandler, null);
-		threadHandler.setAlarmListener(Optional.of(listener));
+		final Domoticz domoticz = new Domoticz(log, threadHandler, null, null);
+		threadHandler.setAlarmListener(listener);
 
 		domoticz.alarmChanged("arm_away");
 
@@ -160,8 +160,8 @@ public class DomoticzTest {
 		final ILogger log = mock(ILogger.class);
 		final DomoticzThreadHandler threadHandler = new DomoticzThreadHandler(log, registry);
 		threadHandler.setSynchronous();
-		final Domoticz domoticz = new Domoticz(log, threadHandler, null);
-		threadHandler.setAlarmListener(Optional.of(listener));
+		final Domoticz domoticz = new Domoticz(log, threadHandler, null, null);
+		threadHandler.setAlarmListener(listener);
 
 		domoticz.alarmChanged("arm_home");
 
@@ -175,8 +175,8 @@ public class DomoticzTest {
 		final ILogger log = mock(ILogger.class);
 		final DomoticzThreadHandler threadHandler = new DomoticzThreadHandler(log, registry);
 		threadHandler.setSynchronous();
-		final Domoticz domoticz = new Domoticz(log, threadHandler, null);
-		threadHandler.setAlarmListener(Optional.of(listener));
+		final Domoticz domoticz = new Domoticz(log, threadHandler, null, null);
+		threadHandler.setAlarmListener(listener);
 
 		domoticz.alarmChanged("disarmed");
 
@@ -188,7 +188,7 @@ public class DomoticzTest {
 	public void update_alarm_notlistener_noException() {
 		final ILogger log = mock(ILogger.class);
 		final DomoticzThreadHandler threadHandler = new DomoticzThreadHandler(log, registry);
-		final Domoticz domoticz = new Domoticz(log, threadHandler, null);
+		final Domoticz domoticz = new Domoticz(log, threadHandler, null, null);
 
 		final boolean result = domoticz.alarmChanged("disarmed");
 
@@ -199,11 +199,11 @@ public class DomoticzTest {
 	public void getCivilTwilightFails_warningLogged() throws IOException {
 		final TestLogger logger = new TestLogger();
 		final TimeOfDayClient todClient = mock(TimeOfDayClient.class);
-		when(todClient.createTimeOfDayValues(anyInt(), anyInt(), anyInt())).thenThrow(new IOException("testing exception"));
+		when(todClient.createTimeOfDayValues()).thenThrow(new IOException("testing exception"));
 		final DomoticzThreadHandler threadHandler = new DomoticzThreadHandler(logger, registry);
 		threadHandler.setSynchronous();
-		threadHandler.setTimeListener(Optional.of(mock(IDomoticzTimeOfDayChanged.class)));
-		final Domoticz domoticz = new Domoticz(logger, threadHandler, todClient);
+		threadHandler.setTimeListener(mock(IDomoticzTimeOfDayChanged.class));
+		final Domoticz domoticz = new Domoticz(logger, threadHandler, todClient, null);
 
 		domoticz.timeChanged(1, 2, 3);
 
@@ -217,7 +217,7 @@ public class DomoticzTest {
 		final DomoticzThreadHandler threadHandler = mock(DomoticzThreadHandler.class);
 		doThrow(InterruptedException.class).when(threadHandler).alarmChanged(any());
 		when(threadHandler.handlesAlarm()).thenReturn(true);
-		final Domoticz domoticz = new Domoticz(logger, threadHandler, todClient);
+		final Domoticz domoticz = new Domoticz(logger, threadHandler, todClient, null);
 
 		domoticz.alarmChanged("disarmed");
 
@@ -231,7 +231,7 @@ public class DomoticzTest {
 		final DomoticzThreadHandler threadHandler = mock(DomoticzThreadHandler.class);
 		doThrow(InterruptedException.class).when(threadHandler).timeChanged(any());
 		when(threadHandler.handlesTime()).thenReturn(true);
-		final Domoticz domoticz = new Domoticz(logger, threadHandler, todClient);
+		final Domoticz domoticz = new Domoticz(logger, threadHandler, todClient, null);
 
 		domoticz.timeChanged(1, 2, 3);
 
@@ -245,7 +245,7 @@ public class DomoticzTest {
 		final DomoticzThreadHandler threadHandler = mock(DomoticzThreadHandler.class);
 		doThrow(InterruptedException.class).when(threadHandler).deviceChanged(anyInt(), any());
 		when(threadHandler.handlesDevice(anyInt())).thenReturn(true);
-		final Domoticz domoticz = new Domoticz(logger, threadHandler, todClient);
+		final Domoticz domoticz = new Domoticz(logger, threadHandler, todClient, null);
 
 		domoticz.deviceChanged(1, "on");
 

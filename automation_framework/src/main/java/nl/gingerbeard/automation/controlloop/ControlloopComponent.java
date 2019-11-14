@@ -1,17 +1,18 @@
 package nl.gingerbeard.automation.controlloop;
 
-import nl.gingerbeard.automation.domoticz.IDomoticzAlarmChanged;
-import nl.gingerbeard.automation.domoticz.IDomoticzDeviceStatusChanged;
-import nl.gingerbeard.automation.domoticz.IDomoticzTimeOfDayChanged;
+import java.time.Duration;
+import java.util.Optional;
+
+import nl.gingerbeard.automation.domoticz.IDomoticz;
+import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
 import nl.gingerbeard.automation.domoticz.transmitter.IDomoticzUpdateTransmitter;
 import nl.gingerbeard.automation.event.IEvents;
 import nl.gingerbeard.automation.logging.ILogger;
 import nl.gingerbeard.automation.onkyo.IOnkyoTransmitter;
 import nl.gingerbeard.automation.service.annotation.Activate;
-import nl.gingerbeard.automation.service.annotation.Deactivate;
-import nl.gingerbeard.automation.service.annotation.Provides;
 import nl.gingerbeard.automation.service.annotation.Requires;
 import nl.gingerbeard.automation.state.IState;
+import nl.gingerbeard.automation.util.RetryUtil;
 
 public class ControlloopComponent {
 
@@ -29,28 +30,31 @@ public class ControlloopComponent {
 	
 	@Requires
 	public IOnkyoTransmitter onkyoTransmitter;
-
-	@Provides
-	public IDomoticzDeviceStatusChanged devicelistener;
-
-	@Provides
-	public IDomoticzTimeOfDayChanged timeListener;
-
-	@Provides
-	public IDomoticzAlarmChanged alarmListener;
+	
+	@Requires
+	public IDomoticz domoticz;
+	
+	@Requires
+	public DomoticzConfiguration domoticzConfig;
 
 	@Activate
-	public void provideListener() {
+	public void provideListener() throws InterruptedException {
 		final Controlloop controlloop = new Controlloop(events, transmitter, state, log, onkyoTransmitter);
-		devicelistener = controlloop;
-		timeListener = controlloop;
-		alarmListener = controlloop;
+		domoticz.setAlarmListener(controlloop);
+		domoticz.setTimeListener(controlloop);
+		domoticz.setDeviceListener(controlloop);
+		
+		getInitialState(controlloop); 
 	}
 
-	@Deactivate
-	public void removeListener() {
-		devicelistener = null;
-		timeListener = null;
-		alarmListener = null;
+	private void getInitialState(final Controlloop controlloop) throws InterruptedException {
+		int interval_s = domoticzConfig.getInitInterval_s();
+		int nrTries = interval_s == 0 ? 1 : Math.max(1, domoticzConfig.getMaxInitWait_s()/interval_s);
+		
+		Optional<Throwable> e = RetryUtil.retry(() -> controlloop.retrieveInitialState(domoticz.getClients()), nrTries, Duration.ofSeconds(interval_s));
+		if (e.isPresent()) {
+			log.warning(e.get(), "Could not retrieve initial state, skipping");
+		}
 	}
+
 }

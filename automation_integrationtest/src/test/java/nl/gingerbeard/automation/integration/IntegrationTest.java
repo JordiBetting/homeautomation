@@ -10,6 +10,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -25,7 +26,6 @@ import nl.gingerbeard.automation.AutomationFrameworkContainer;
 import nl.gingerbeard.automation.IAutomationFrameworkInterface;
 import nl.gingerbeard.automation.components.OnkyoTransmitterComponent;
 import nl.gingerbeard.automation.configuration.ConfigurationServerSettings;
-import nl.gingerbeard.automation.domoticz.DomoticzThreadHandler;
 import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
 import nl.gingerbeard.automation.logging.TestLogger;
 import nl.gingerbeard.automation.logging.TestLogger.LogOutputToTestLogger;
@@ -42,6 +42,7 @@ public abstract class IntegrationTest {
 	protected int configPort;
 	protected TestLogger logOutput;
 	protected OnkyoDriver onkyoDriver;
+	protected List<String> startupRequests = new ArrayList<>();
 
 	@BeforeEach
 	public void start() throws IOException {
@@ -49,6 +50,9 @@ public abstract class IntegrationTest {
 		webserver.start();
 
 		config = new DomoticzConfiguration(0, new URL("http://localhost:" + webserver.getListeningPort()));
+		config.setEventHandlingSynchronous();
+		config.setMaxInitWait_s(0);
+		config.setInitInterval_s(0);
 		final ConfigurationServerSettings configSettings = new ConfigurationServerSettings(0);
 		container = IAutomationFrameworkInterface.createFrameworkContainer(config, new LogOutputToTestLogger(), configSettings);
 		container.start();
@@ -57,14 +61,14 @@ public abstract class IntegrationTest {
 		configPort = configSettings.getListenPort();
 		automation = container.getRuntime().getService(IAutomationFrameworkInterface.class).get();
 		logOutput = LogOutputToTestLogger.testLogger;
-		final Optional<DomoticzThreadHandler> threadHandler = container.getRuntime().getService(DomoticzThreadHandler.class);
-		assertTrue(threadHandler.isPresent());
-		threadHandler.get().setSynchronous();
 		
 		Optional<OnkyoTransmitterComponent> onkyo = container.getRuntime().getComponent(OnkyoTransmitterComponent.class);
 		assertTrue(onkyo.isPresent());
 		onkyoDriver = mock(OnkyoDriver.class);
 		onkyo.get().instance.setFixedDriver(onkyoDriver);
+		
+		startupRequests.addAll(webserver.getRequests());
+		webserver.getRequests().clear();
 	}
 
 	@AfterEach
@@ -90,7 +94,7 @@ public abstract class IntegrationTest {
 
 	private void sendRequest(final int curTime, final int sunrise, final int sunset) throws IOException {
 		final String uri = "/json.htm?type=command&param=getSunRiseSet";
-		webserver.setResponse(uri, Status.OK, createSunRiseSetResponse(sunrise, sunset));
+		webserver.setResponse(uri, Status.OK, createSunRiseSetResponse(curTime, sunrise, sunset, sunrise, sunset));
 
 		final URL url = new URL("http://localhost:" + port + "/time/" + curTime + "/" + sunrise + "/" + sunset);
 		final HttpURLConnection con = (HttpURLConnection) url.openConnection();
@@ -100,7 +104,7 @@ public abstract class IntegrationTest {
 		webserver.forgetRequest("GET " + uri);
 	}
 
-	private String createSunRiseSetResponse(final int sunrise, final int sunset) {
+	private String createSunRiseSetResponse(int curtime, int sunrise, int sunset, final int civilStart, final int civilEnd) {
 		return String.format("{ " //
 				+ "\"AstrTwilightEnd\" : \"19:51\", " //
 				+ "\"AstrTwilightStart\" : \"05:56\", " //
@@ -109,17 +113,24 @@ public abstract class IntegrationTest {
 				+ "\"DayLength\" : \"10:11\"," //
 				+ "\"NautTwilightEnd\" : \"19:13\"," //
 				+ "\"NautTwilightStart\" : \"06:35\"," //
-				+ "\"ServerTime\" : \"2019-02-18 19:46:13\"," //
+				+ "\"ServerTime\" : \"2019-02-18 %d:%d:12\"," // FILLED
 				+ "\"SunAtSouth\" : \"12:05\"," //
-				+ "\"Sunrise\" : \"07:48\"," //
-				+ "\"Sunset\" : \"17:59\"," //
+				+ "\"Sunrise\" : \"%d:%d\"," // FILLED
+				+ "\"Sunset\" : \"%d:%d\"," // FILLED
 				+ "\"status\" : \"OK\"," //
 				+ "\"title\" : \"getSunRiseSet\"" //
 				+ "}", //
-				sunset / 60, //
-				sunset % 60, //
+				civilEnd / 60, //
+				civilEnd % 60, //
+				civilStart / 60, //
+				civilStart % 60, //
+				curtime / 60, //
+				curtime % 60, //
 				sunrise / 60, //
-				sunrise % 60);
+				sunrise % 60, //
+				sunset / 60, //
+				sunset % 60
+				);
 	}
 
 	protected void setDaytime() throws IOException {

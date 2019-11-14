@@ -9,6 +9,7 @@ import nl.gingerbeard.automation.devices.OnkyoReceiver.OnkyoSubdevice;
 import nl.gingerbeard.automation.devices.StateDevice;
 import nl.gingerbeard.automation.devices.Subdevice;
 import nl.gingerbeard.automation.domoticz.IDomoticzAlarmChanged;
+import nl.gingerbeard.automation.domoticz.IDomoticzClient;
 import nl.gingerbeard.automation.domoticz.IDomoticzDeviceStatusChanged;
 import nl.gingerbeard.automation.domoticz.IDomoticzTimeOfDayChanged;
 import nl.gingerbeard.automation.domoticz.transmitter.IDomoticzUpdateTransmitter;
@@ -107,17 +108,20 @@ class Controlloop implements IDomoticzDeviceStatusChanged, IDomoticzTimeOfDayCha
 
 	@Override
 	public void timeChanged(final TimeOfDayValues time) {
-		final TimeOfDay prevTod = state.getTimeOfDay();
-		updateTimeState(time);
-		if (state.getTimeOfDay() != prevTod) {
+		boolean stateChanged = updateTimeState(time);
+		if (stateChanged) {
 			final EventResult result = events.trigger(state.getTimeOfDay());
 			processEventResult(result);
 		}
 	}
 
-	private void updateTimeState(final TimeOfDayValues time) {
+	private boolean updateTimeState(final TimeOfDayValues time) {
+		final TimeOfDay prevTod = state.getTimeOfDay();
 		final TimeOfDay newTimeOfDay = time.isDayTime() ? TimeOfDay.DAYTIME : TimeOfDay.NIGHTTIME;
+		
 		state.setTimeOfDay(newTimeOfDay);
+
+		return state.getTimeOfDay() != prevTod;
 	}
 
 	@Override
@@ -128,6 +132,14 @@ class Controlloop implements IDomoticzDeviceStatusChanged, IDomoticzTimeOfDayCha
 			final EventResult results = events.trigger(state.getAlarmState());
 			processEventResult(results);
 		}
+	}
+
+	public void retrieveInitialState(IDomoticzClient domoticz) throws IOException {
+		TimeOfDayValues time = domoticz.getCurrentTime();
+		updateTimeState(time);
+		
+		AlarmState alarm = domoticz.getCurrentAlarmState();
+		state.setAlarmState(alarm);
 	}
 
 }

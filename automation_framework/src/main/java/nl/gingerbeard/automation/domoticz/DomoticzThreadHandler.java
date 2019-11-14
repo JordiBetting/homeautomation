@@ -31,16 +31,16 @@ public class DomoticzThreadHandler {
 		executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(1);
 	}
 
-	public void setDeviceListener(final Optional<IDomoticzDeviceStatusChanged> deviceListener) {
-		this.deviceListener = deviceListener;
+	public void setDeviceListener(final IDomoticzDeviceStatusChanged deviceListener) {
+		this.deviceListener = Optional.of(deviceListener);
 	}
 
-	public void setTimeListener(final Optional<IDomoticzTimeOfDayChanged> timeListener) {
-		this.timeListener = timeListener;
+	public void setTimeListener(final IDomoticzTimeOfDayChanged timeListener) {
+		this.timeListener = Optional.of(timeListener);
 	}
 
-	public void setAlarmListener(final Optional<IDomoticzAlarmChanged> alarmListener) {
-		this.alarmListener = alarmListener;
+	public void setAlarmListener(IDomoticzAlarmChanged alarmListener) {
+		this.alarmListener = Optional.of(alarmListener);
 	}
 
 	private AlarmState getAlarmStateByString(final String alarmStateString) {
@@ -110,4 +110,5 @@ public class DomoticzThreadHandler {
 		executor.shutdown();
 		executor.awaitTermination(timeout, unit);
 	}
+
 }

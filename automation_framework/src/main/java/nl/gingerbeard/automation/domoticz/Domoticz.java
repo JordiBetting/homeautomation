@@ -2,22 +2,26 @@ package nl.gingerbeard.automation.domoticz;
 
 import java.io.IOException;
 
+import nl.gingerbeard.automation.domoticz.clients.AlarmStateClient;
 import nl.gingerbeard.automation.domoticz.clients.TimeOfDayClient;
 import nl.gingerbeard.automation.domoticz.receiver.DomoticzEventReceiverServer.EventReceived;
 import nl.gingerbeard.automation.logging.ILogger;
+import nl.gingerbeard.automation.state.AlarmState;
 import nl.gingerbeard.automation.state.TimeOfDayValues;
 
 // high - level access
-final class Domoticz implements EventReceived {
+final class Domoticz implements EventReceived, IDomoticzClient {
 
 	private final ILogger logger;
 	private final DomoticzThreadHandler threadHandler;
 	private final TimeOfDayClient timeOfDayClient;
+	private AlarmStateClient alarmClient;
 
-	public Domoticz(final ILogger logger, final DomoticzThreadHandler threadHandler, final TimeOfDayClient timeOfDayClient) {
+	public Domoticz(final ILogger logger, final DomoticzThreadHandler threadHandler, final TimeOfDayClient timeOfDayClient, AlarmStateClient alarmClient) {
 		this.logger = logger;
 		this.threadHandler = threadHandler;
 		this.timeOfDayClient = timeOfDayClient;
+		this.alarmClient = alarmClient;
 	}
 
 	@Override
@@ -41,7 +45,7 @@ final class Domoticz implements EventReceived {
 		boolean success = false;
 		if (threadHandler.handlesTime()) {
 			try {
-				final TimeOfDayValues timeOfDayValues = timeOfDayClient.createTimeOfDayValues(curtime, sunrise, sunset);
+				final TimeOfDayValues timeOfDayValues = timeOfDayClient.createTimeOfDayValues();
 				threadHandler.timeChanged(timeOfDayValues);
 				success = true;
 			} catch (final IOException | InterruptedException e) {
@@ -63,6 +67,16 @@ final class Domoticz implements EventReceived {
 			}
 		}
 		return success;
+	}
+
+	@Override
+	public TimeOfDayValues getCurrentTime() throws IOException {
+		return timeOfDayClient.createTimeOfDayValues();
+	}
+
+	@Override
+	public AlarmState getCurrentAlarmState() throws IOException{
+		return alarmClient.getAlarmState();
 	}
 
 }

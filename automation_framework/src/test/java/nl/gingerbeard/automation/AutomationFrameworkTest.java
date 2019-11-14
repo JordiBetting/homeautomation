@@ -30,7 +30,6 @@ import nl.gingerbeard.automation.devices.Switch;
 import nl.gingerbeard.automation.devices.Thermostat;
 import nl.gingerbeard.automation.devices.ThermostatModeDevice;
 import nl.gingerbeard.automation.devices.ThermostatSetpointDevice;
-import nl.gingerbeard.automation.domoticz.DomoticzThreadHandler;
 import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
 import nl.gingerbeard.automation.domoticz.receiver.IDomoticzEventReceiver;
 import nl.gingerbeard.automation.event.IEvents;
@@ -89,15 +88,15 @@ public class AutomationFrameworkTest {
 	}
 
 	private IAutomationFrameworkInterface createIntegration() {
-		container = IAutomationFrameworkInterface.createFrameworkContainer(new DomoticzConfiguration(0, createMockUrl()), log, new ConfigurationServerSettings(0));
+		DomoticzConfiguration domoticzConfig = new DomoticzConfiguration(0, createMockUrl());
+		domoticzConfig.setMaxInitWait_s(1);
+		domoticzConfig.setInitInterval_s(0);
+		domoticzConfig.setEventHandlingSynchronous();
+		container = IAutomationFrameworkInterface.createFrameworkContainer(domoticzConfig, log, new ConfigurationServerSettings(0));
 		container.start();
 
 		final Optional<IAutomationFrameworkInterface> framework = container.getRuntime().getService(IAutomationFrameworkInterface.class);
 		assertTrue(framework.isPresent());
-
-		final Optional<DomoticzThreadHandler> threadHandler = container.getRuntime().getService(DomoticzThreadHandler.class);
-		assertTrue(threadHandler.isPresent());
-		threadHandler.get().setSynchronous();
 
 		return framework.get();
 	}
@@ -403,7 +402,10 @@ public class AutomationFrameworkTest {
 
 	@Test
 	public void automationFrameworkContainerTest() {
-		final AutomationFrameworkContainer container = IAutomationFrameworkInterface.createFrameworkContainer(new DomoticzConfiguration(0, createMockUrl()), new ConfigurationServerSettings(0));
+		DomoticzConfiguration domoticzConfig = new DomoticzConfiguration(0, createMockUrl());
+		domoticzConfig.setMaxInitWait_s(0);
+		domoticzConfig.setInitInterval_s(0);
+		final AutomationFrameworkContainer container = IAutomationFrameworkInterface.createFrameworkContainer(domoticzConfig, new ConfigurationServerSettings(0));
 		container.start();
 		final IAutomationFrameworkInterface framework = container.getAutomationFramework();
 		final Container runtime = container.getRuntime();
@@ -416,7 +418,10 @@ public class AutomationFrameworkTest {
 	@Test
 	public void automationFramework() throws MalformedURLException, ProtocolException, IOException {
 		final ILogOutput logOut = mock(ILogOutput.class);
-		container = IAutomationFrameworkInterface.createFrameworkContainer(new DomoticzConfiguration(0, createMockUrl()), logOut, new ConfigurationServerSettings(0));
+		DomoticzConfiguration domoticzConfig = new DomoticzConfiguration(0, createMockUrl());
+		domoticzConfig.setMaxInitWait_s(0);
+		domoticzConfig.setInitInterval_s(0);
+		container = IAutomationFrameworkInterface.createFrameworkContainer(domoticzConfig, logOut, new ConfigurationServerSettings(0));
 		container.start();
 		container.getAutomationFramework().addRoom(TestRoom.class);
 		updateDevice(1, "on");
