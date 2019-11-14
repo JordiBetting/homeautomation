@@ -38,7 +38,7 @@ public class AutomationFramework implements IAutomationFrameworkInterface {
 		final T room = createRoom(roomClass);
 		logAddRoom(room);
 
-		room.setState(state);
+		room.init(state);
 		room.getDevices().stream().forEach((device) -> addDevice(device));
 		room.getAutoControls().stream().forEach((autoControl) -> {
 			addAutoControl(autoControl);

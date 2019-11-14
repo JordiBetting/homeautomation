@@ -25,9 +25,12 @@ public class Room {
 		}
 	}
 
-	void setState(final IState state) {
+	final void init(final IState state) {
 		this.state = Optional.of(state);
+		onInit();
 	}
+	
+	protected void onInit() {}
 
 	protected final IState getState() {
 		return state.orElseThrow(() -> new IllegalStateException("State is not available when room has not been added to the automation framework."));
