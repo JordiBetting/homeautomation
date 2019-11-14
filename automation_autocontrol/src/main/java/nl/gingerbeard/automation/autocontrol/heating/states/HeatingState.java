@@ -1,4 +1,4 @@
-package nl.gingerbeard.automation.autocontrol.heatingstates;
+package nl.gingerbeard.automation.autocontrol.heating.states;
 
 import java.util.Optional;
 

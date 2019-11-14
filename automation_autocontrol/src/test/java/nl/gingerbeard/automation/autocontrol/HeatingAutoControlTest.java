@@ -10,8 +10,8 @@ import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.Test;
 
-import nl.gingerbeard.automation.autocontrol.heatingstates.StateHeatingOnDaytime;
-import nl.gingerbeard.automation.autocontrol.heatingstates.StateHeatingOnNighttime;
+import nl.gingerbeard.automation.autocontrol.heating.states.StateHeatingOnDaytime;
+import nl.gingerbeard.automation.autocontrol.heating.states.StateHeatingOnNighttime;
 import nl.gingerbeard.automation.devices.DoorSensor;
 import nl.gingerbeard.automation.devices.IDevice;
 import nl.gingerbeard.automation.devices.OnOffDevice;

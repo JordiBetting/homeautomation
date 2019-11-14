@@ -5,8 +5,10 @@ import java.util.Optional;
 
 import com.google.common.collect.Lists;
 
-import nl.gingerbeard.automation.autocontrol.heatingstates.HeatingState;
-import nl.gingerbeard.automation.autocontrol.heatingstates.StateHeatingOff;
+import nl.gingerbeard.automation.autocontrol.heating.HeatingAutoControlContext;
+import nl.gingerbeard.automation.autocontrol.heating.IHeatingAutoControlStateControl;
+import nl.gingerbeard.automation.autocontrol.heating.states.HeatingState;
+import nl.gingerbeard.automation.autocontrol.heating.states.StateHeatingOff;
 import nl.gingerbeard.automation.devices.IDevice;
 import nl.gingerbeard.automation.devices.OnOffDevice;
 import nl.gingerbeard.automation.devices.OpenCloseDevice;
@@ -26,14 +28,18 @@ import nl.gingerbeard.automation.state.TimeOfDay;
  * 
  * Has 3 temperature settings:
  * <ol>
- *   <li>OFF temperature, when alarm is set to an armed state
- *   <li>DAY temperature, when alarm is set to disarmed and TimeOfDay is DAYTIME
- *   <li>NIGHT temperature, when alarm is set to disarmed and TimeOfDay is NIGHTTIME
+ * <li>OFF temperature, when alarm is set to an armed state
+ * <li>DAY temperature, when alarm is set to disarmed and TimeOfDay is DAYTIME
+ * <li>NIGHT temperature, when alarm is set to disarmed and TimeOfDay is
+ * NIGHTTIME
  * </ol>
- * Turning heating on after disarm can be delayed with setting to avoid short on/off times (e.g. coming home, directly go to bed).
- * PauseDevices can be added. When these OnOffDevices will turn ON (e.g. door open), the heating will be set to OFF temperature. This can also be delayed (e.g. door must be open for at least 2 minutes) to avoid battery drain of thermostats.
+ * Turning heating on after disarm can be delayed with setting to avoid short
+ * on/off times (e.g. coming home, directly go to bed). PauseDevices can be
+ * added. When these OnOffDevices will turn ON (e.g. door open), the heating
+ * will be set to OFF temperature. This can also be delayed (e.g. door must be
+ * open for at least 2 minutes) to avoid battery drain of thermostats.
  */
-public final class HeatingAutoControl extends AutoControl {
+public final class HeatingAutoControl extends AutoControl implements IHeatingAutoControlStateControl {
 
 	public static final double DEFAULT_TEMP_C_NIGHT = 20;
 	public static final double DEFAULT_TEMP_C_DAY = 18;
@@ -46,6 +52,10 @@ public final class HeatingAutoControl extends AutoControl {
 
 	private HeatingAutoControlContext context;
 
+	public HeatingAutoControl() {
+		context = new HeatingAutoControlContext(this, getOwner());
+	}
+
 	public void addThermostat(Thermostat thermostat) {
 		thermostats.add(thermostat);
 	}
@@ -53,7 +63,7 @@ public final class HeatingAutoControl extends AutoControl {
 	public void addPauseDevice(OnOffDevice pauseDevice) {
 		pauseOnOffDevices.add(pauseDevice);
 	}
-	
+
 	public void addPauseDevice(OpenCloseDevice pauseDevice) {
 		pauseOpenCloseDevices.add(pauseDevice);
 	}
@@ -69,7 +79,7 @@ public final class HeatingAutoControl extends AutoControl {
 		Optional<HeatingState> nextState = currentState.timeOfDayChanged();
 		return changeState(nextState);
 	}
-	
+
 	@Subscribe
 	public List<NextState<?>> deviceChanged(OnOffDevice _void) {
 		return deviceChanged();
@@ -90,25 +100,38 @@ public final class HeatingAutoControl extends AutoControl {
 	}
 
 	private boolean isAllPauseDevicesOff() {
-		return isAllPauseDevicesOff(pauseOnOffDevices, OnOffState.OFF) && isAllPauseDevicesOff(pauseOpenCloseDevices, OpenCloseState.CLOSE);
+		return isAllPauseDevicesOff(pauseOnOffDevices, OnOffState.OFF)
+				&& isAllPauseDevicesOff(pauseOpenCloseDevices, OpenCloseState.CLOSE);
 	}
-	
+
 	private boolean isAllPauseDevicesOff(List<? extends IDevice<?>> devices, Object state) {
 		for (IDevice<?> pauseDevice : devices) {
 			if (pauseDevice.getState() != state) {
-				getLogger().info("HeatingAutoControl for " + getOwner() + " detected that pause device " + pauseDevice + " now has state " + pauseDevice.getState());
+				getLogger().info("HeatingAutoControl for " + getOwner() + " detected that pause device " + pauseDevice
+						+ " now has state " + pauseDevice.getState());
 				return false;
 			}
 		}
 		return true;
 	}
-	
-	List<NextState<?>> changeState(Optional<HeatingState> nextStateOptional) {
+
+	private String getStateName(HeatingState state) {
+		return state.getClass().getSimpleName();
+	}
+
+	@Override
+	public void changeStateAsync(Optional<HeatingState> newState) {
+		List<NextState<?>> result = changeState(newState);
+		asyncOutput(result);
+	}
+
+	private List<NextState<?>> changeState(Optional<HeatingState> nextStateOptional) {
 		List<NextState<?>> result = Lists.newArrayList();
 
 		if (nextStateOptional.isPresent()) {
 			HeatingState nextState = nextStateOptional.get();
-			getLogger().info("HeatingAutoControl for " + getOwner() + " changing state from " + getStateName(currentState) + " to " + getStateName(nextState));
+			getLogger().info("HeatingAutoControl for " + getOwner() + " changing state from "
+					+ getStateName(currentState) + " to " + getStateName(nextState));
 			currentState = nextState;
 			Optional<Temperature> stateEntryResult = currentState.stateEntryResult();
 			stateEntryResult.ifPresent((entryResult) -> result.addAll(createNextState(entryResult)));
@@ -120,14 +143,10 @@ public final class HeatingAutoControl extends AutoControl {
 		return result;
 	}
 
-	private String getStateName(HeatingState state) {
-		return state.getClass().getSimpleName();
-	}
-	
-	void asyncOutput(List<NextState<?>> result) {
+	private void asyncOutput(List<NextState<?>> result) {
 		updateActuators(result);
 	}
-	
+
 	private List<NextState<?>> createNextState(Temperature temperature) {
 		List<NextState<?>> result = Lists.newArrayList();
 		for (Thermostat thermostat : thermostats) {
@@ -180,10 +199,10 @@ public final class HeatingAutoControl extends AutoControl {
 
 	@Override
 	protected void onInit() {
-		context = new HeatingAutoControlContext(this, getState(), getLogger());
+		context.configure(getState(), getLogger());
 		currentState = new StateHeatingOff(context);
 	}
-	
+
 	// test interfaces
 	void setDelayOnMillis(long delayOnMillis) {
 		context.delayOnMillis = delayOnMillis;
