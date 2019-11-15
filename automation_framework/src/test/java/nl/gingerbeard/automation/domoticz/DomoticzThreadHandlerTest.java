@@ -37,7 +37,7 @@ import nl.gingerbeard.automation.state.TimeOfDayValues;
 
 public class DomoticzThreadHandlerTest {
 
-	private static final TimeOfDayValues TIMEOFDAY_EXAMPLE = new TimeOfDayValues(5, 1, 2, 4, 5);
+	private static final TimeOfDayValues TIMEOFDAY_EXAMPLE = new TimeOfDayValues(125, 50, 200, 190, 135);
 
 	private ILogger logger;
 	private IDeviceRegistry registry;
@@ -108,9 +108,9 @@ public class DomoticzThreadHandlerTest {
 		final IDomoticzAlarmChanged listener = mock(IDomoticzAlarmChanged.class);
 
 		handler.setAlarmListener(listener);
-		handler.alarmChanged("disarmed");
+		handler.alarmChanged("arm_away");
 
-		verify(listener, times(1)).alarmChanged(AlarmState.DISARMED);
+		verify(listener, times(1)).alarmChanged(AlarmState.ARM_AWAY);
 		verifyNoMoreInteractions(listener);
 	}
 
@@ -127,6 +127,7 @@ public class DomoticzThreadHandlerTest {
 
 		handler.deviceChanged(1, "on");
 
+		verify(registry, times(1)).getDeviceState(1);
 		verify(registry, times(1)).updateDevice(1, "on");
 		verifyNoMoreInteractions(registry);
 	}
@@ -224,7 +225,7 @@ public class DomoticzThreadHandlerTest {
 				assertDoesNotThrow(() -> {
 					threadsAliveLatch.countDown();
 					startLatch.await();
-					handler.alarmChanged("disarmed");
+					handler.alarmChanged("arm_away");
 				});
 			} catch (final AssertionError t) {
 				failure.set(t);
