@@ -105,7 +105,7 @@ public class DomoticzThreadHandler {
 		void execute() throws DomoticzException;
 	}
 
-	private void execute(final Task command) throws InterruptedException, DomoticzException {
+	void execute(final Task command) throws InterruptedException, DomoticzException {
 		final CountDownLatch sync = new CountDownLatch(1);
 
 		Container<DomoticzException> thrown = new Container<>();

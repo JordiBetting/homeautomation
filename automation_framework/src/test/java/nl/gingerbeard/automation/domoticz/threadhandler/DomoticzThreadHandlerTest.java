@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -32,11 +33,9 @@ import nl.gingerbeard.automation.domoticz.api.IDomoticzTimeOfDayChanged;
 import nl.gingerbeard.automation.domoticz.clients.AlarmStateClient;
 import nl.gingerbeard.automation.domoticz.clients.TimeOfDayClient;
 import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
-import nl.gingerbeard.automation.domoticz.threadhandler.DomoticzThreadHandler;
 import nl.gingerbeard.automation.logging.ILogger;
 import nl.gingerbeard.automation.state.AlarmState;
 import nl.gingerbeard.automation.state.IState;
-import nl.gingerbeard.automation.state.OnOffState;
 import nl.gingerbeard.automation.state.State;
 import nl.gingerbeard.automation.state.TimeOfDayValues;
 import nl.gingerbeard.automation.util.RetryUtil.RetryTask;
@@ -369,13 +368,22 @@ public class DomoticzThreadHandlerTest {
 	@Test
 	public void deviceUpdated_noOldState_works() throws IOException, InterruptedException, DomoticzException {
 		create(true);
+		IDomoticzDeviceStatusChanged deviceListener = mock(IDomoticzDeviceStatusChanged.class);
+		handler.setDeviceListener(deviceListener);
 		
-		Switch device = new Switch(1);
-		registry.addDevice(device);
+		when(registry.devicePresent(1)).thenReturn(true);
+		when(registry.updateDevice(1, "on")).thenReturn(Optional.of(new Switch(1)));
 		
-		handler.deviceChanged(1, "On");
+		handler.deviceChanged(1, "on");
 		
-		assertEquals(OnOffState.ON, device.getState());
+		verify(deviceListener, times(1)).statusChanged(any());
+	}
+	
+	@Test
+	public void interruptedTask() throws IOException, InterruptedException, DomoticzException {
+		create(true);
+		
+		assertThrows(InterruptedException.class, () ->handler.execute(() -> { throw new DomoticzException(new InterruptedException()); }));
 	}
 
 }
