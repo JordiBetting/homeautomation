@@ -22,7 +22,11 @@ import nl.gingerbeard.automation.devices.Device;
 import nl.gingerbeard.automation.devices.OnkyoReceiver;
 import nl.gingerbeard.automation.devices.Scene;
 import nl.gingerbeard.automation.devices.Switch;
-import nl.gingerbeard.automation.domoticz.transmitter.IDomoticzUpdateTransmitter;
+import nl.gingerbeard.automation.domoticz.api.DomoticzApi;
+import nl.gingerbeard.automation.domoticz.api.DomoticzException;
+import nl.gingerbeard.automation.domoticz.api.IDomoticzAlarmChanged;
+import nl.gingerbeard.automation.domoticz.api.IDomoticzDeviceStatusChanged;
+import nl.gingerbeard.automation.domoticz.api.IDomoticzTimeOfDayChanged;
 import nl.gingerbeard.automation.event.EventResult;
 import nl.gingerbeard.automation.event.IEvents;
 import nl.gingerbeard.automation.logging.ILogger;
@@ -45,7 +49,7 @@ public class ControlloopTest {
 		final IEvents events = mock(IEvents.class);
 		final ILogger log = mock(ILogger.class);
 		final IState state = mock(IState.class);
-		final IDomoticzUpdateTransmitter transmitter = mock(IDomoticzUpdateTransmitter.class);
+		final DomoticzApi transmitter = mock(DomoticzApi.class);
 		when(events.trigger(any())).thenReturn(EventResult.empty());
 		final Controlloop control = new Controlloop(events, transmitter, state, log, mock(IOnkyoTransmitter.class));
 		final TestDevice myDevice = new TestDevice();
@@ -61,12 +65,31 @@ public class ControlloopTest {
 		assertTrue(Collection.class.isAssignableFrom(ArrayList.class));
 	}
 
-	private static class RecordingTransmitter implements IDomoticzUpdateTransmitter {
+	private static abstract class AbstractTransmitter implements DomoticzApi {
+		@Override
+		public void setAlarmListener(IDomoticzAlarmChanged alarmListener) {
+		}
+
+		@Override
+		public void setDeviceListener(IDomoticzDeviceStatusChanged deviceListener) {
+		}
+
+		@Override
+		public void setTimeListener(IDomoticzTimeOfDayChanged timeListener) {
+		}
+
+		@Override
+		public void syncFullState() throws InterruptedException, DomoticzException {
+		}
+
+	}
+	
+	private static class RecordingTransmitter extends AbstractTransmitter {
 
 		private final List<NextState<?>> transmitted = new ArrayList<>();
 
 		@Override
-		public <T> void transmitDeviceUpdate(final NextState<T> newState) throws IOException {
+		public <T> void transmitDeviceUpdate(final NextState<T> newState) throws DomoticzException {
 			transmitted.add(newState);
 		}
 
@@ -146,9 +169,9 @@ public class ControlloopTest {
 		private int callCount = 0;
 
 		@Override
-		public <T> void transmitDeviceUpdate(final NextState<T> newState) throws IOException {
+		public <T> void transmitDeviceUpdate(final NextState<T> newState) throws DomoticzException {
 			if (callCount++ == 0) {
-				throw new IOException("test exception");
+				throw new DomoticzException("test exception");
 			}
 			super.transmitDeviceUpdate(newState);
 		}
@@ -176,66 +199,43 @@ public class ControlloopTest {
 
 	@Test
 	public void timeUpdated_eventTriggered() {
-		final IDomoticzUpdateTransmitter transmitter = mock(IDomoticzUpdateTransmitter.class);
+		final DomoticzApi transmitter = mock(DomoticzApi.class);
 		final IEvents events = mock(IEvents.class);
 		final TestLogger log = new TestLogger();
 		final IState state = new State();
-		state.setTimeOfDay(TimeOfDay.NIGHTTIME);
 		final Controlloop control = new Controlloop(events, transmitter, state, log, mock(IOnkyoTransmitter.class));
 
 		when(events.trigger(any())).thenReturn(EventResult.empty());
 
 		control.timeChanged(new TimeOfDayValues(5, 1, 10, 1, 10));
 
-		assertEquals(TimeOfDay.DAYTIME, state.getTimeOfDay());
 		verify(events, times(1)).trigger(any(TimeOfDay.class));
 	}
 
 	@Test
 	public void alarmUpdated_eventTriggered() {
-		final IDomoticzUpdateTransmitter transmitter = mock(IDomoticzUpdateTransmitter.class);
+		final DomoticzApi transmitter = mock(DomoticzApi.class);
 		final IEvents events = mock(IEvents.class);
 		final TestLogger log = new TestLogger();
 		final IState state = new State();
-		state.setAlarmState(AlarmState.DISARMED);
-
 		when(events.trigger(any())).thenReturn(EventResult.empty());
 
 		final Controlloop control = new Controlloop(events, transmitter, state, log, mock(IOnkyoTransmitter.class));
 
 		control.alarmChanged(AlarmState.ARM_AWAY);
 
-		assertEquals(AlarmState.ARM_AWAY, state.getAlarmState());
 		verify(events, times(1)).trigger(AlarmState.ARM_AWAY);
 	}
 
 	@Test
-	public void alarmUpdatedSameState_noeventTriggered() {
-		final IDomoticzUpdateTransmitter transmitter = mock(IDomoticzUpdateTransmitter.class);
-		final IEvents events = mock(IEvents.class);
-		final TestLogger log = new TestLogger();
-		final IState state = new State();
-		state.setAlarmState(AlarmState.DISARMED);
-
-		when(events.trigger(any())).thenReturn(EventResult.empty());
-
-		final Controlloop control = new Controlloop(events, transmitter, state, log, mock(IOnkyoTransmitter.class));
-
-		control.alarmChanged(AlarmState.ARM_AWAY);
-		control.alarmChanged(AlarmState.ARM_AWAY);
-
-		verify(events, times(1)).trigger(AlarmState.ARM_AWAY);
-	}
-
-	@Test
-	public void nextState_noUpdate_notTransmitted() throws IOException {
+	public void nextState_noUpdate_notTransmitted() throws IOException, DomoticzException {
 		final Switch device = new Switch(1);
 		final NextState<OnOffState> nextState = new NextState<>(device, OnOffState.ON);
 
 		final IEvents events = mock(IEvents.class);
 		when(events.trigger(any(Device.class))).thenReturn(EventResult.of(nextState));
 
-		final IDomoticzUpdateTransmitter transmitter = mock(IDomoticzUpdateTransmitter.class);
+		final DomoticzApi transmitter = mock(DomoticzApi.class);
 		final Controlloop control = new Controlloop(events, transmitter, mock(IState.class), mock(ILogger.class), mock(IOnkyoTransmitter.class));
 
 		device.setState(OnOffState.ON);
@@ -245,7 +245,7 @@ public class ControlloopTest {
 	}
 	
 	@Test
-	public void nextState_scene_reportedAgain() throws IOException {
+	public void nextState_scene_reportedAgain() throws IOException, DomoticzException {
 		final TestLogger log = new TestLogger();
 		final Scene device = new Scene(1);
 		final NextState<OnOffState> nextState = new NextState<>(device, OnOffState.ON);
@@ -253,7 +253,7 @@ public class ControlloopTest {
 		final IEvents events = mock(IEvents.class);
 		when(events.trigger(any(Device.class))).thenReturn(EventResult.of(nextState));
 
-		final IDomoticzUpdateTransmitter transmitter = mock(IDomoticzUpdateTransmitter.class);
+		final DomoticzApi transmitter = mock(DomoticzApi.class);
 		final Controlloop control = new Controlloop(events, transmitter, mock(IState.class), log, mock(IOnkyoTransmitter.class));
 
 		device.setState(OnOffState.ON);

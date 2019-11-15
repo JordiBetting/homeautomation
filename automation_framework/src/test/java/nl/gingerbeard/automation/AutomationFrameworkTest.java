@@ -31,7 +31,6 @@ import nl.gingerbeard.automation.devices.Thermostat;
 import nl.gingerbeard.automation.devices.ThermostatModeDevice;
 import nl.gingerbeard.automation.devices.ThermostatSetpointDevice;
 import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
-import nl.gingerbeard.automation.domoticz.receiver.IDomoticzEventReceiver;
 import nl.gingerbeard.automation.event.IEvents;
 import nl.gingerbeard.automation.event.annotations.EventState;
 import nl.gingerbeard.automation.event.annotations.Subscribe;
@@ -328,11 +327,13 @@ public class AutomationFrameworkTest {
 	}
 
 	private int getListeningPort() {
-		final Optional<IDomoticzEventReceiver> eventReceiverOptional = container.getRuntime().getService(IDomoticzEventReceiver.class);
-		assertTrue(eventReceiverOptional.isPresent());
-		final IDomoticzEventReceiver eventReceiver = eventReceiverOptional.get();
-		final int port = eventReceiver.getListeningPort();
+		final Optional<DomoticzConfiguration> configurationService = container.getRuntime().getService(DomoticzConfiguration.class);
+		assertTrue(configurationService.isPresent());
+		final DomoticzConfiguration config = configurationService.get();
+		final int port = config.getListenPort();
+		
 		assertNotEquals(0, port);
+		
 		return port;
 	}
 

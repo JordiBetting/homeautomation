@@ -9,7 +9,7 @@ import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.Test;
 
-import nl.gingerbeard.automation.domoticz.transmitter.IDomoticzUpdateTransmitter;
+import nl.gingerbeard.automation.domoticz.api.DomoticzApi;
 import nl.gingerbeard.automation.event.EventResult;
 import nl.gingerbeard.automation.event.IEvents;
 import nl.gingerbeard.automation.logging.ILogger;
@@ -24,7 +24,7 @@ public class ControlLoopSceneBugTest {
 			final IEvents events = mock(IEvents.class);
 			final ILogger log = mock(ILogger.class);
 			final IState state = mock(IState.class);
-			final IDomoticzUpdateTransmitter transmitter = mock(IDomoticzUpdateTransmitter.class);
+			final DomoticzApi transmitter = mock(DomoticzApi.class);
 			final IOnkyoTransmitter onkyoTransmitter = mock(IOnkyoTransmitter.class);
 			when(events.trigger(any())).thenReturn(EventResult.empty());
 			final Controlloop control = new Controlloop(events, transmitter, state, log, onkyoTransmitter);

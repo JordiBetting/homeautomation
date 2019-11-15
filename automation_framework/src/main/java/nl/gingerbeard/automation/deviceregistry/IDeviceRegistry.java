@@ -25,4 +25,5 @@ public interface IDeviceRegistry {
 	 */
 	boolean devicePresent(int idx);
 
+	Optional<?> getDeviceState(int idx);
 }

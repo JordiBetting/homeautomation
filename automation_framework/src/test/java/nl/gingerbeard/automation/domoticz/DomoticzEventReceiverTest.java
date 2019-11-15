@@ -20,6 +20,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import nl.gingerbeard.automation.domoticz.api.DomoticzException;
 import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
 import nl.gingerbeard.automation.domoticz.receiver.DomoticzEventReceiverServer;
 import nl.gingerbeard.automation.domoticz.receiver.DomoticzEventReceiverServer.EventReceived;
@@ -62,7 +63,7 @@ public class DomoticzEventReceiverTest {
 	}
 
 	@Test
-	public void parse_input() throws IOException {
+	public void parse_input() throws IOException, DomoticzException {
 		final EventReceived listener = mock(EventReceived.class);
 		when(listener.deviceChanged(anyInt(), any())).thenReturn(true);
 		receiver.setEventListener(listener);
@@ -79,7 +80,7 @@ public class DomoticzEventReceiverTest {
 	}
 
 	@Test
-	public void parse_input_trailingSlash() throws IOException {
+	public void parse_input_trailingSlash() throws IOException, DomoticzException {
 		final EventReceived listener = mock(EventReceived.class);
 		when(listener.deviceChanged(anyInt(), any())).thenReturn(true);
 		receiver.setEventListener(listener);
@@ -96,7 +97,7 @@ public class DomoticzEventReceiverTest {
 	}
 
 	@Test
-	public void succes_logging_device() throws IOException {
+	public void succes_logging_device() throws IOException, DomoticzException {
 		final EventReceived listener = mock(EventReceived.class);
 		when(listener.deviceChanged(anyInt(), any())).thenReturn(true);
 		receiver.setEventListener(listener);
@@ -111,7 +112,7 @@ public class DomoticzEventReceiverTest {
 	}
 
 	@Test
-	public void succes_logging_time() throws IOException {
+	public void succes_logging_time() throws IOException, DomoticzException {
 		final EventReceived listener = mock(EventReceived.class);
 		when(listener.timeChanged(anyInt(), anyInt(), anyInt())).thenReturn(true);
 		receiver.setEventListener(listener);
@@ -174,7 +175,7 @@ public class DomoticzEventReceiverTest {
 	}
 
 	@Test
-	public void listener_throwsException_internalServerError() throws IOException {
+	public void listener_throwsException_internalServerError() throws IOException, DomoticzException {
 		final EventReceived listener = mock(EventReceived.class);
 		receiver.setEventListener(listener);
 		final int port = receiver.getListeningPort();
@@ -190,7 +191,7 @@ public class DomoticzEventReceiverTest {
 	}
 
 	@Test
-	public void deviceListenerReturnsFalse_errorCode404() throws IOException {
+	public void deviceListenerReturnsFalse_errorCode404() throws IOException, DomoticzException {
 		final EventReceived listener = mock(EventReceived.class);
 		when(listener.deviceChanged(anyInt(), any())).thenReturn(false);
 		receiver.setEventListener(listener);
@@ -204,7 +205,7 @@ public class DomoticzEventReceiverTest {
 	}
 
 	@Test
-	public void timerListenerReturnsFalse_errorCode404() throws IOException {
+	public void timerListenerReturnsFalse_errorCode404() throws IOException, DomoticzException {
 		final EventReceived listener = mock(EventReceived.class);
 		when(listener.timeChanged(anyInt(), anyInt(), anyInt())).thenReturn(false);
 		receiver.setEventListener(listener);
@@ -218,18 +219,18 @@ public class DomoticzEventReceiverTest {
 	}
 
 	@Test
-	public void parse_timeinput() throws IOException {
+	public void parse_timeinput() throws IOException, DomoticzException {
 		final String path = "/time/1234/5678/9012";
 		testTimePath(path, 1234, 5678, 9012);
 	}
 
 	@Test
-	public void parse_timeinput_trailingSlash() throws IOException {
+	public void parse_timeinput_trailingSlash() throws IOException, DomoticzException {
 		final String path = "/time/1/2/3/";
 		testTimePath(path, 1, 2, 3);
 	}
 
-	private void testTimePath(final String path, final int expectedCurtime, final int expectedSunrise, final int expectedSunset) throws MalformedURLException, IOException, ProtocolException {
+	private void testTimePath(final String path, final int expectedCurtime, final int expectedSunrise, final int expectedSunset) throws MalformedURLException, DomoticzException, IOException, ProtocolException {
 		final EventReceived listener = mock(EventReceived.class);
 		when(listener.timeChanged(anyInt(), anyInt(), anyInt())).thenReturn(true);
 		receiver.setEventListener(listener);
@@ -272,7 +273,7 @@ public class DomoticzEventReceiverTest {
 	}
 
 	@Test
-	public void alarm_received() throws IOException {
+	public void alarm_received() throws IOException, DomoticzException {
 		final EventReceived listener = mock(EventReceived.class);
 		when(listener.alarmChanged(any())).thenReturn(true);
 		receiver.setEventListener(listener);
@@ -287,7 +288,7 @@ public class DomoticzEventReceiverTest {
 	}
 
 	@Test
-	public void alarm_sameTwice_onceUpdated() throws IOException {
+	public void alarm_sameTwice_onceUpdated() throws IOException, DomoticzException {
 		final EventReceived listener = mock(EventReceived.class);
 		when(listener.alarmChanged(any())).thenReturn(true);
 		receiver.setEventListener(listener);
@@ -326,7 +327,7 @@ public class DomoticzEventReceiverTest {
 	}
 
 	@Test
-	public void alarm_receiverFalse_404() throws IOException {
+	public void alarm_receiverFalse_404() throws IOException, DomoticzException {
 		final EventReceived listener = mock(EventReceived.class);
 		when(listener.alarmChanged(any())).thenReturn(false);
 		receiver.setEventListener(listener);

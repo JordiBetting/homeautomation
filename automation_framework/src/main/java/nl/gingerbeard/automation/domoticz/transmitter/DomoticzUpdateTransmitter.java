@@ -14,12 +14,13 @@ import org.json.simple.parser.ParseException;
 import com.google.common.base.Charsets;
 import com.google.common.io.CharStreams;
 
+import nl.gingerbeard.automation.domoticz.api.DomoticzException;
 import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
 import nl.gingerbeard.automation.domoticz.transmitter.urlcreator.DomoticzUrls;
 import nl.gingerbeard.automation.logging.ILogger;
 import nl.gingerbeard.automation.state.NextState;
 
-public final class DomoticzUpdateTransmitter implements IDomoticzUpdateTransmitter {
+public final class DomoticzUpdateTransmitter {
 
 	private final DomoticzUrls urlCreator;
 	private final ILogger log;
@@ -31,10 +32,13 @@ public final class DomoticzUpdateTransmitter implements IDomoticzUpdateTransmitt
 		timeoutMS = configuration.getConnectTimeoutMS();
 	}
 
-	@Override
-	public <T> void transmitDeviceUpdate(final NextState<T> nextState) throws IOException {
-		final URL url = urlCreator.getUrl(nextState);
-		executeRequest(url);
+	public <T> void transmitDeviceUpdate(final NextState<T> nextState) throws DomoticzException {
+		try {
+			final URL url = urlCreator.getUrl(nextState);
+			executeRequest(url);
+		} catch(IOException e) {
+			throw new DomoticzException(e.getMessage(), e); 
+		}
 	}
 
 	private void executeRequest(final URL url) throws IOException, ProtocolException {
@@ -53,6 +57,8 @@ public final class DomoticzUpdateTransmitter implements IDomoticzUpdateTransmitt
 		}
 	}
 
+	// TODO: Split off into clients package
+	
 	private void validateResponseCode(final URL url, final HttpURLConnection con, final int responseCode) throws IOException {
 		if (responseCode != HttpURLConnection.HTTP_OK) {
 			String body = readErrorBody(con);

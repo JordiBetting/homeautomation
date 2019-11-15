@@ -1,6 +1,5 @@
 package nl.gingerbeard.automation.controlloop;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -8,11 +7,11 @@ import java.util.List;
 import nl.gingerbeard.automation.devices.OnkyoReceiver.OnkyoSubdevice;
 import nl.gingerbeard.automation.devices.StateDevice;
 import nl.gingerbeard.automation.devices.Subdevice;
-import nl.gingerbeard.automation.domoticz.IDomoticzAlarmChanged;
-import nl.gingerbeard.automation.domoticz.IDomoticzClient;
-import nl.gingerbeard.automation.domoticz.IDomoticzDeviceStatusChanged;
-import nl.gingerbeard.automation.domoticz.IDomoticzTimeOfDayChanged;
-import nl.gingerbeard.automation.domoticz.transmitter.IDomoticzUpdateTransmitter;
+import nl.gingerbeard.automation.domoticz.api.DomoticzApi;
+import nl.gingerbeard.automation.domoticz.api.DomoticzException;
+import nl.gingerbeard.automation.domoticz.api.IDomoticzAlarmChanged;
+import nl.gingerbeard.automation.domoticz.api.IDomoticzDeviceStatusChanged;
+import nl.gingerbeard.automation.domoticz.api.IDomoticzTimeOfDayChanged;
 import nl.gingerbeard.automation.event.EventResult;
 import nl.gingerbeard.automation.event.IEvents;
 import nl.gingerbeard.automation.logging.ILogger;
@@ -20,21 +19,20 @@ import nl.gingerbeard.automation.onkyo.IOnkyoTransmitter;
 import nl.gingerbeard.automation.state.AlarmState;
 import nl.gingerbeard.automation.state.IState;
 import nl.gingerbeard.automation.state.NextState;
-import nl.gingerbeard.automation.state.TimeOfDay;
 import nl.gingerbeard.automation.state.TimeOfDayValues;
 
 class Controlloop implements IDomoticzDeviceStatusChanged, IDomoticzTimeOfDayChanged, IDomoticzAlarmChanged {
 	private final IEvents events;
-	private final IDomoticzUpdateTransmitter transmitter;
+	private final DomoticzApi domoticz;
 	private final ILogger log;
 	private final ILogger tracelog;
 	private final IState state;
 	private IOnkyoTransmitter onkyoTransmitter;
 
-	public Controlloop(final IEvents events, final IDomoticzUpdateTransmitter transmitter, final IState state,
+	public Controlloop(final IEvents events, final DomoticzApi domoticz, final IState state,
 			final ILogger log, IOnkyoTransmitter onkyoTransmitter) {
 		this.events = events;
-		this.transmitter = transmitter;
+		this.domoticz = domoticz;
 		this.log = log;
 		this.onkyoTransmitter = onkyoTransmitter;
 		tracelog = log.createContext("trace");
@@ -58,9 +56,9 @@ class Controlloop implements IDomoticzDeviceStatusChanged, IDomoticzTimeOfDayCha
 				if (isOnkyoDevice(update)) { // TODO: Chain of responsibility of transmitters
 					onkyoTransmitter.transmit(update);
 				} else {
-					transmitter.transmitDeviceUpdate(update);
+					domoticz.transmitDeviceUpdate(update);
 				}
-			} catch (final IOException e) {
+			} catch (final DomoticzException e) {
 				log.exception(e, "Failed to transmit device update: " + update);
 			}
 		}
@@ -108,38 +106,16 @@ class Controlloop implements IDomoticzDeviceStatusChanged, IDomoticzTimeOfDayCha
 
 	@Override
 	public void timeChanged(final TimeOfDayValues time) {
-		boolean stateChanged = updateTimeState(time);
-		if (stateChanged) {
-			final EventResult result = events.trigger(state.getTimeOfDay());
-			processEventResult(result);
-		}
+		final EventResult result = events.trigger(state.getTimeOfDay());
+		processEventResult(result);
 	}
 
-	private boolean updateTimeState(final TimeOfDayValues time) {
-		final TimeOfDay prevTod = state.getTimeOfDay();
-		final TimeOfDay newTimeOfDay = time.isDayTime() ? TimeOfDay.DAYTIME : TimeOfDay.NIGHTTIME;
-		
-		state.setTimeOfDay(newTimeOfDay);
-
-		return state.getTimeOfDay() != prevTod;
-	}
 
 	@Override
 	public void alarmChanged(final AlarmState newState) {
-		final AlarmState curState = state.getAlarmState();
-		if (curState != newState) {
-			state.setAlarmState(newState);
-			final EventResult results = events.trigger(state.getAlarmState());
-			processEventResult(results);
-		}
+		final EventResult results = events.trigger(newState);
+		processEventResult(results);
 	}
 
-	public void retrieveInitialState(IDomoticzClient domoticz) throws IOException {
-		TimeOfDayValues time = domoticz.getCurrentTime();
-		updateTimeState(time);
-		
-		AlarmState alarm = domoticz.getCurrentAlarmState();
-		state.setAlarmState(alarm);
-	}
 
 }

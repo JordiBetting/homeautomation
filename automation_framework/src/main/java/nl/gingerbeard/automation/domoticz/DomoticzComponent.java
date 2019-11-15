@@ -3,72 +3,43 @@ package nl.gingerbeard.automation.domoticz;
 import java.io.IOException;
 
 import nl.gingerbeard.automation.deviceregistry.IDeviceRegistry;
-import nl.gingerbeard.automation.domoticz.clients.AlarmStateClient;
-import nl.gingerbeard.automation.domoticz.clients.TimeOfDayClient;
+import nl.gingerbeard.automation.domoticz.api.DomoticzApi;
 import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
-import nl.gingerbeard.automation.domoticz.receiver.IDomoticzEventReceiver;
-import nl.gingerbeard.automation.domoticz.transmitter.IDomoticzUpdateTransmitter;
 import nl.gingerbeard.automation.logging.ILogger;
 import nl.gingerbeard.automation.service.annotation.Activate;
 import nl.gingerbeard.automation.service.annotation.Deactivate;
 import nl.gingerbeard.automation.service.annotation.Provides;
 import nl.gingerbeard.automation.service.annotation.Requires;
+import nl.gingerbeard.automation.state.IState;
 
-public final class DomoticzComponent {
-
-	// TODO: Is this design clean enough? Quite some requires, while you would
-	// expect central component (e.g. Controller) to have that. Is this component
-	// needed at all?
-
-	// TODO: IDomoticzEventReceiver shall be a @Provide. GetListeningPort needs
-	// refactoring
-	@Requires
-	public IDomoticzEventReceiver domoticzReceiver;
+public class DomoticzComponent {
 
 	@Requires
-	public IDomoticzUpdateTransmitter domoticzTransmitter;
+	public DomoticzConfiguration config;
 
 	@Requires
-	public ILogger logger;
+	public ILogger log;
 
 	@Requires
 	public IDeviceRegistry deviceRegistry;
 
 	@Requires
-	public DomoticzConfiguration domoticzConfig;
-
+	public IState state;
 
 	@Provides
-	public IDomoticz domoticz;
+	public DomoticzApi api;
 
-	public DomoticzThreadHandler threadHandler;
-	private Domoticz domoticzInstance;
+	private DomoticzImpl instance;
 
 	@Activate
-	public void registerReceiver() throws IOException {
-		threadHandler = createThreadHandler();
-		final TimeOfDayClient todClient = new TimeOfDayClient(domoticzConfig);
-		final AlarmStateClient alarmClient = new AlarmStateClient(domoticzConfig);
-		domoticzInstance = new Domoticz(logger, threadHandler, todClient, alarmClient);
-		domoticzReceiver.setEventListener(domoticzInstance);
-		domoticz = new DomoticzImpl(threadHandler, domoticzInstance);
-		// TODO: it's getting messy. This needs to be redesigned
-	}
-
-	private DomoticzThreadHandler createThreadHandler() {
-		final DomoticzThreadHandler threadHandler = new DomoticzThreadHandler(logger, deviceRegistry);
-		if (domoticzConfig.isSynchronousEventHandling()) {
-			threadHandler.setSynchronous();
-		}
-		return threadHandler;
+	public void create() throws IOException {
+		api = instance = new DomoticzImpl(config, deviceRegistry, state, log);
 	}
 
 	@Deactivate
-	public void unregisterReceiver() {
-		domoticzReceiver.setEventListener(null);
-		domoticzInstance = null;
-		threadHandler = null;
-		domoticz = null;
+	public void destroy() throws InterruptedException {
+		instance.stop();
+		api = instance = null;
 	}
 
 }

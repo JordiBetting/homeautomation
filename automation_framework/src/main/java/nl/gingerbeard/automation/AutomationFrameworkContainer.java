@@ -11,8 +11,6 @@ import nl.gingerbeard.automation.controlloop.ControlloopComponent;
 import nl.gingerbeard.automation.deviceregistry.DeviceRegistryComponent;
 import nl.gingerbeard.automation.domoticz.DomoticzComponent;
 import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
-import nl.gingerbeard.automation.domoticz.receiver.DomoticzEventReceiverComponent;
-import nl.gingerbeard.automation.domoticz.transmitter.DomoticzUpdateTransmitterComponent;
 import nl.gingerbeard.automation.logging.ILogOutput;
 import nl.gingerbeard.automation.service.Container;
 
@@ -33,8 +31,6 @@ public final class AutomationFrameworkContainer {
 		container.register(StateComponent.class);
 		container.register(EventsComponent.class);
 		container.register(DomoticzComponent.class);
-		container.register(DomoticzEventReceiverComponent.class);
-		container.register(DomoticzUpdateTransmitterComponent.class);
 		container.register(ControlloopComponent.class);
 		container.register(AutomationFrameworkComponent.class);
 		container.register(LoggingComponent.class);

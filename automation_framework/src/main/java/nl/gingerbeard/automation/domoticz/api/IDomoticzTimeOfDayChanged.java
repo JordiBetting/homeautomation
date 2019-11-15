@@ -1,4 +1,4 @@
-package nl.gingerbeard.automation.domoticz;
+package nl.gingerbeard.automation.domoticz.api;
 
 import nl.gingerbeard.automation.state.TimeOfDayValues;
 

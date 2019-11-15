@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import fi.iki.elonen.NanoHTTPD;
 import fi.iki.elonen.NanoHTTPD.Response.Status;
+import nl.gingerbeard.automation.domoticz.api.DomoticzException;
 import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
 import nl.gingerbeard.automation.domoticz.receiver.ResponseParameters.ResponseAlarmParameters;
 import nl.gingerbeard.automation.domoticz.receiver.ResponseParameters.ResponseDeviceParameters;
@@ -12,41 +13,41 @@ import nl.gingerbeard.automation.domoticz.receiver.ResponseParameters.ResponsePa
 import nl.gingerbeard.automation.domoticz.receiver.ResponseParameters.ResponseTimeParameters;
 import nl.gingerbeard.automation.logging.ILogger;
 
-public final class DomoticzEventReceiverServer extends NanoHTTPD implements IDomoticzEventReceiver {
-	// TODO: Refactor to be similar with configurationServer. Consider making a generic component out of configurationServer.
+public final class DomoticzEventReceiverServer extends NanoHTTPD /* implements IDomoticzEventReceiver */ {
+	// TODO: Refactor to be similar with configurationServer. Consider making a
+	// generic component out of configurationServer.
 	public static interface EventReceived {
 		/**
-		 * Indicate that a device state has changed in domoticz. Exceptions result in internal server error (500).
+		 * Indicate that a device state has changed in domoticz. Exceptions result in
+		 * internal server error (500).
 		 *
-		 * @param idx
-		 *            Identification in domoticz
-		 * @param newState
-		 *            State string
-		 * @return True in case the device update was processed succesfully. False otherwise.
+		 * @param idx      Identification in domoticz
+		 * @param newState State string
+		 * @return True in case the device update was processed succesfully. False
+		 *         otherwise.
+		 * @throws DomoticzException resulting in a http 500 on rest response
 		 */
-		public boolean deviceChanged(int idx, String newState);
+		public boolean deviceChanged(int idx, String newState) throws DomoticzException;
 
 		/**
 		 * Update to the current time
 		 *
-		 * @param curtime
-		 *            The current time in minutes since start of day
-		 * @param sunrise
-		 *            The sunrise time in minutes since start of day
-		 * @param sunset
-		 *            The sunset time in minutes since start of day
+		 * @param curtime The current time in minutes since start of day
+		 * @param sunrise The sunrise time in minutes since start of day
+		 * @param sunset  The sunset time in minutes since start of day
 		 * @return True if processing was successful. False otherwise.
+		 * @throws DomoticzException resulting in a http 500 on rest response
 		 */
-		public boolean timeChanged(int curtime, int sunrise, int sunset);
+		public boolean timeChanged(int curtime, int sunrise, int sunset) throws DomoticzException;
 
 		/**
 		 * Update the alarm state
 		 *
-		 * @param alarmState
-		 *            the new state
+		 * @param alarmState the new state
 		 * @return True if processing was successful. False otherwise.
+		 * @throws DomoticzException resulting in a http 500 on rest response
 		 */
-		public boolean alarmChanged(String alarmState);
+		public boolean alarmChanged(String alarmState) throws DomoticzException;
 	}
 
 	private Optional<EventReceived> listener = Optional.empty();
@@ -59,7 +60,6 @@ public final class DomoticzEventReceiverServer extends NanoHTTPD implements IDom
 		config.updateListenPort(getListeningPort());
 	}
 
-	@Override
 	public void setEventListener(final EventReceived listener) {
 		this.listener = Optional.ofNullable(listener);
 	}
@@ -67,17 +67,24 @@ public final class DomoticzEventReceiverServer extends NanoHTTPD implements IDom
 	@Override
 	public Response serve(final IHTTPSession session) {
 		Response response;
-		// log.debug(session.getMethod() + " " + session.getUri() + " from " + session.getRemoteIpAddress());
+		// log.debug(session.getMethod() + " " + session.getUri() + " from " +
+		// session.getRemoteIpAddress());
 		if (session.getMethod() == Method.GET) {
-			response = processGetRequest(session.getUri());
+			try {
+				response = processGetRequest(session.getUri());
+			} catch (DomoticzException e) {
+				log.warning(e, "Error serving request " + session.getUri());
+				response = newFixedLengthResponse(Status.INTERNAL_ERROR, NanoHTTPD.MIME_PLAINTEXT, "Internal error: " + e.getMessage());
+			}
 		} else {
 			log.warning("Received unsupported method " + session.getMethod().name() + " on " + session.getUri());
-			response = newFixedLengthResponse(Status.METHOD_NOT_ALLOWED, NanoHTTPD.MIME_PLAINTEXT, "Only GET is supported");
+			response = newFixedLengthResponse(Status.METHOD_NOT_ALLOWED, NanoHTTPD.MIME_PLAINTEXT,
+					"Only GET is supported");
 		}
 		return response;
 	}
 
-	private Response processGetRequest(final String uri) {
+	private Response processGetRequest(final String uri) throws DomoticzException {
 		Response response;
 
 		final Optional<ResponseParameters> responseParams = UrlPatternParser.parseParameters(uri);
@@ -86,12 +93,13 @@ public final class DomoticzEventReceiverServer extends NanoHTTPD implements IDom
 			response = listenerResponse.orElse(newFixedLengthResponse(Status.OK, NanoHTTPD.MIME_PLAINTEXT, "OKIDOKI"));
 		} else {
 			// log.warning("Returning 404 after unrecognized URL: " + uri);
-			response = newFixedLengthResponse(Status.NOT_FOUND, NanoHTTPD.MIME_PLAINTEXT, "URL not in supported format");
+			response = newFixedLengthResponse(Status.NOT_FOUND, NanoHTTPD.MIME_PLAINTEXT,
+					"URL not in supported format");
 		}
 		return response;
 	}
 
-	private Optional<Response> triggerListener(final ResponseParameters responseParams) {
+	private Optional<Response> triggerListener(final ResponseParameters responseParams) throws DomoticzException {
 		if (responseParams.getType() == ResponseParametersType.DEVICE) {
 			return triggerDeviceListener(responseParams.getDeviceParameters().get());
 		} else if (responseParams.getType() == ResponseParametersType.TIME) {
@@ -100,7 +108,7 @@ public final class DomoticzEventReceiverServer extends NanoHTTPD implements IDom
 		return triggerAlarmListener(responseParams.getAlarmParametres().get());
 	}
 
-	private Optional<Response> triggerAlarmListener(final ResponseAlarmParameters alarm) {
+	private Optional<Response> triggerAlarmListener(final ResponseAlarmParameters alarm) throws DomoticzException {
 		Optional<Response> response = Optional.empty();
 
 		if (listener.isPresent()) {
@@ -110,14 +118,15 @@ public final class DomoticzEventReceiverServer extends NanoHTTPD implements IDom
 				log.debug("Alarm state updated to " + alarm.getAlarmState());
 			} else {
 				log.error("Could not process alarm request: " + alarm);
-				response = Optional.of(newFixedLengthResponse(Status.NOT_FOUND, NanoHTTPD.MIME_PLAINTEXT, "Could not process request."));
+				response = Optional.of(newFixedLengthResponse(Status.NOT_FOUND, NanoHTTPD.MIME_PLAINTEXT,
+						"Could not process request."));
 			}
 		}
 
 		return response;
 	}
 
-	private Optional<Response> triggerTimeListener(final ResponseTimeParameters time) {
+	private Optional<Response> triggerTimeListener(final ResponseTimeParameters time) throws DomoticzException {
 		Optional<Response> response = Optional.empty();
 
 		if (listener.isPresent()) {
@@ -129,7 +138,8 @@ public final class DomoticzEventReceiverServer extends NanoHTTPD implements IDom
 				log.debug("Updated time to " + time.toString());
 			} else {
 				log.error("Could not process time request: " + time);
-				response = Optional.of(newFixedLengthResponse(Status.NOT_FOUND, NanoHTTPD.MIME_PLAINTEXT, "Could not process request."));
+				response = Optional.of(newFixedLengthResponse(Status.NOT_FOUND, NanoHTTPD.MIME_PLAINTEXT,
+						"Could not process request."));
 			}
 		}
 
@@ -143,17 +153,19 @@ public final class DomoticzEventReceiverServer extends NanoHTTPD implements IDom
 				response = triggerDeviceListenerWithLogging(device);
 			} catch (final Throwable t) {
 				log.exception(t, "Failure in processing request");
-				response = Optional.of(newFixedLengthResponse(Status.INTERNAL_ERROR, NanoHTTPD.MIME_PLAINTEXT, t.getMessage()));
+				response = Optional
+						.of(newFixedLengthResponse(Status.INTERNAL_ERROR, NanoHTTPD.MIME_PLAINTEXT, t.getMessage()));
 			}
 		}
 		return response;
 	}
 
-	private Optional<Response> triggerDeviceListenerWithLogging(final ResponseDeviceParameters device) {
+	private Optional<Response> triggerDeviceListenerWithLogging(final ResponseDeviceParameters device) throws DomoticzException {
 		Optional<Response> response = Optional.empty();
 		final boolean result = listener.get().deviceChanged(device.getIdx(), device.getState());
 		if (!result) {
-			response = Optional.of(newFixedLengthResponse(Status.NOT_FOUND, NanoHTTPD.MIME_PLAINTEXT, "Could not process request."));
+			response = Optional.of(
+					newFixedLengthResponse(Status.NOT_FOUND, NanoHTTPD.MIME_PLAINTEXT, "Could not process request."));
 		}
 		return response;
 	}
