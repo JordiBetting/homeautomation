@@ -26,6 +26,7 @@ import nl.gingerbeard.automation.state.IState;
 import nl.gingerbeard.automation.state.TimeOfDay;
 import nl.gingerbeard.automation.state.TimeOfDayValues;
 import nl.gingerbeard.automation.util.RetryUtil;
+import nl.gingerbeard.automation.util.RetryUtil.RetryTask;
 
 public class DomoticzThreadHandler {
 	private Optional<IDomoticzDeviceStatusChanged> deviceListener = Optional.empty();
@@ -185,18 +186,21 @@ public class DomoticzThreadHandler {
 	public void syncFull() throws DomoticzException, InterruptedException {
 		execute(() -> {
 			try {
-				int interval_s = config.getInitInterval_s();
-				int nrTries = interval_s == 0 ? 1 : Math.max(1, config.getMaxInitWait_s() / interval_s);
-
-				Optional<Throwable> e = RetryUtil.retry(() -> syncFullStateSingleAttempt(), nrTries,
-						Duration.ofSeconds(interval_s));
-				if (e.isPresent()) {
-					throw new DomoticzException("Failed to sync full state with Domoticz", e.get());
-				}
+				executeTaskWithRetries(() -> syncFullStateSingleAttempt());
 			} catch (InterruptedException e) {
 				throw new DomoticzException("Interrupted while retrying syncFull", e);
 			}
 		});
+	}
+
+	void executeTaskWithRetries(RetryTask task) throws InterruptedException, DomoticzException {
+		int interval_s = config.getInitInterval_s();
+		int nrTries = interval_s == 0 ? 1 : Math.max(1, config.getMaxInitWait_s() / interval_s);
+		Optional<Throwable> e = RetryUtil.retry(task, nrTries,
+				Duration.ofSeconds(interval_s));
+		if (e.isPresent()) {
+			throw new DomoticzException("Failed to sync full state with Domoticz", e.get());
+		}
 	}
 
 	private void syncFullStateSingleAttempt() throws IOException {

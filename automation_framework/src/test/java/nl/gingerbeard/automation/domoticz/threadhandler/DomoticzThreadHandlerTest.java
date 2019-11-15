@@ -35,8 +35,10 @@ import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
 import nl.gingerbeard.automation.domoticz.threadhandler.DomoticzThreadHandler;
 import nl.gingerbeard.automation.logging.ILogger;
 import nl.gingerbeard.automation.state.AlarmState;
+import nl.gingerbeard.automation.state.IState;
 import nl.gingerbeard.automation.state.State;
 import nl.gingerbeard.automation.state.TimeOfDayValues;
+import nl.gingerbeard.automation.util.RetryUtil.RetryTask;
 
 public class DomoticzThreadHandlerTest {
 
@@ -53,6 +55,11 @@ public class DomoticzThreadHandlerTest {
 	private AlarmStateClient alarmClient;
 
 	public void create(boolean synchronous) throws IOException {
+		createMocks(synchronous);
+		handler = new DomoticzThreadHandler(config, registry, new State(), logger, alarmClient, todClient);
+	}
+
+	private void createMocks(boolean synchronous) {
 		config = new DomoticzConfiguration(0, null);
 		if (synchronous) {
 			config.setEventHandlingSynchronous();
@@ -61,7 +68,11 @@ public class DomoticzThreadHandlerTest {
 		registry = mock(IDeviceRegistry.class);
 		todClient = mock(TimeOfDayClient.class);
 		alarmClient = mock(AlarmStateClient.class);
-		handler = new DomoticzThreadHandler(config, registry, new State(), logger, alarmClient, todClient);
+	}
+	
+	public void createFailing() {
+		createMocks(true);
+		handler = new FailingThreadHandler(config, registry, new State(), logger, alarmClient, todClient);
 	}
 
 	@AfterEach
@@ -327,6 +338,31 @@ public class DomoticzThreadHandlerTest {
 		
 		verify(todClient, times(1)).createTimeOfDayValues();
 		verify(alarmClient, times(1)).getAlarmState();
+	}
+	
+	@Test
+	public void syncFull_interrupted_throwsInterruptedException() {
+		createFailing();
+		
+		config.setInitInterval_s(5);
+		config.setMaxInitWait_s(15);
+
+		Thread.currentThread().interrupt();
+		assertThrows(InterruptedException.class, () -> handler.syncFull());
+	}
+	
+	private class FailingThreadHandler extends DomoticzThreadHandler {
+
+		FailingThreadHandler(DomoticzConfiguration config, IDeviceRegistry deviceRegistry, IState state,
+				ILogger logger, AlarmStateClient alarmClient, TimeOfDayClient todClient) {
+			super(config, deviceRegistry, state, logger, alarmClient, todClient);
+		}
+
+		@Override
+		void executeTaskWithRetries(RetryTask task) throws DomoticzException {
+			throw new DomoticzException();
+		}
+		
 	}
 
 }
