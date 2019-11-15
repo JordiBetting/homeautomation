@@ -1,10 +1,10 @@
 package nl.gingerbeard.automation.domoticz;
 
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -18,7 +18,6 @@ import nl.gingerbeard.automation.domoticz.receiver.DomoticzEventReceiverServer;
 import nl.gingerbeard.automation.domoticz.threadhandler.DomoticzThreadHandler;
 import nl.gingerbeard.automation.domoticz.transmitter.DomoticzUpdateTransmitter;
 import nl.gingerbeard.automation.logging.ILogger;
-import nl.gingerbeard.automation.state.AlarmState;
 
 public class DomoticzImplTest {
 
