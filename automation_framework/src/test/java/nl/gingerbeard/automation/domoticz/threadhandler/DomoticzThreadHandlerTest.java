@@ -74,6 +74,11 @@ public class DomoticzThreadHandlerTest {
 		createMocks(true);
 		handler = new FailingThreadHandler(config, registry, new State(), logger, alarmClient, todClient);
 	}
+	
+	public void createInterrupting() {
+		createMocks(true);
+		handler = new InterruptingThreadHandler(config, registry, new State(), logger, alarmClient, todClient);
+	}
 
 	@AfterEach
 	public void shutdown() throws IOException, InterruptedException {
@@ -341,7 +346,7 @@ public class DomoticzThreadHandlerTest {
 	}
 	
 	@Test
-	public void syncFull_interrupted_throwsInterruptedException() {
+	public void syncFull_failed_throwsInterruptedException() {
 		createFailing();
 		
 		config.setInitInterval_s(5);
@@ -361,6 +366,31 @@ public class DomoticzThreadHandlerTest {
 		@Override
 		void executeTaskWithRetries(RetryTask task) throws DomoticzException {
 			throw new DomoticzException();
+		}
+		
+	}
+	
+	@Test
+	public void syncFull_interrupted_throwsInterruptedException() {
+		createFailing();
+		
+		config.setInitInterval_s(5);
+		config.setMaxInitWait_s(15);
+
+		Thread.currentThread().interrupt();
+		assertThrows(InterruptedException.class, () -> handler.syncFull());
+	}
+	
+	private class InterruptingThreadHandler extends DomoticzThreadHandler {
+
+		InterruptingThreadHandler(DomoticzConfiguration config, IDeviceRegistry deviceRegistry, IState state,
+				ILogger logger, AlarmStateClient alarmClient, TimeOfDayClient todClient) {
+			super(config, deviceRegistry, state, logger, alarmClient, todClient);
+		}
+
+		@Override
+		void executeTaskWithRetries(RetryTask task) throws DomoticzException, InterruptedException {
+			throw new InterruptedException();
 		}
 		
 	}
