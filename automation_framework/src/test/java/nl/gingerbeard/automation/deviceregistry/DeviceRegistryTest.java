@@ -148,4 +148,23 @@ public class DeviceRegistryTest {
 
 		assertFalse(registry.devicePresent(66));
 	}
+	
+	@Test
+	public void getState() {
+		final Switch testDevice = new Switch(42);
+		testDevice.setState(OnOffState.OFF);
+
+		registry.addDevice(testDevice);
+		
+		Optional<?> deviceState = registry.getDeviceState(42);
+		assertTrue(deviceState.isPresent());
+		assertEquals(OnOffState.OFF, deviceState.get());
+	}
+	
+	@Test
+	public void getState_noDevice_returnsEmptu() {
+		Optional<?> deviceState = registry.getDeviceState(42);
+		
+		assertFalse(deviceState.isPresent());
+	}
 }
