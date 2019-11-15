@@ -36,6 +36,7 @@ import nl.gingerbeard.automation.domoticz.threadhandler.DomoticzThreadHandler;
 import nl.gingerbeard.automation.logging.ILogger;
 import nl.gingerbeard.automation.state.AlarmState;
 import nl.gingerbeard.automation.state.IState;
+import nl.gingerbeard.automation.state.OnOffState;
 import nl.gingerbeard.automation.state.State;
 import nl.gingerbeard.automation.state.TimeOfDayValues;
 import nl.gingerbeard.automation.util.RetryUtil.RetryTask;
@@ -363,6 +364,18 @@ public class DomoticzThreadHandlerTest {
 			throw new DomoticzException();
 		}
 		
+	}
+	
+	@Test
+	public void deviceUpdated_noOldState_works() throws IOException, InterruptedException, DomoticzException {
+		create(true);
+		
+		Switch device = new Switch(1);
+		registry.addDevice(device);
+		
+		handler.deviceChanged(1, "On");
+		
+		assertEquals(OnOffState.ON, device.getState());
 	}
 
 }
