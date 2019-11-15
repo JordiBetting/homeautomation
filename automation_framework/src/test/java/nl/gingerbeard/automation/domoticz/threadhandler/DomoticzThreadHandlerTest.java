@@ -1,4 +1,4 @@
-package nl.gingerbeard.automation.domoticz;
+package nl.gingerbeard.automation.domoticz.threadhandler;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -11,6 +11,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.RejectedExecutionException;
@@ -28,6 +29,8 @@ import nl.gingerbeard.automation.domoticz.api.DomoticzException;
 import nl.gingerbeard.automation.domoticz.api.IDomoticzAlarmChanged;
 import nl.gingerbeard.automation.domoticz.api.IDomoticzDeviceStatusChanged;
 import nl.gingerbeard.automation.domoticz.api.IDomoticzTimeOfDayChanged;
+import nl.gingerbeard.automation.domoticz.clients.AlarmStateClient;
+import nl.gingerbeard.automation.domoticz.clients.TimeOfDayClient;
 import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
 import nl.gingerbeard.automation.domoticz.threadhandler.DomoticzThreadHandler;
 import nl.gingerbeard.automation.logging.ILogger;
@@ -45,32 +48,38 @@ public class DomoticzThreadHandlerTest {
 
 	private DomoticzConfiguration config;
 
-	public void create(boolean synchronous) {
+	private TimeOfDayClient todClient;
+
+	private AlarmStateClient alarmClient;
+
+	public void create(boolean synchronous) throws IOException {
 		config = new DomoticzConfiguration(0, null);
 		if (synchronous) {
 			config.setEventHandlingSynchronous();
 		}
 		logger = mock(ILogger.class);
 		registry = mock(IDeviceRegistry.class);
-		handler = new DomoticzThreadHandler(config, registry, new State(), logger);
+		todClient = mock(TimeOfDayClient.class);
+		alarmClient = mock(AlarmStateClient.class);
+		handler = new DomoticzThreadHandler(config, registry, new State(), logger, alarmClient, todClient);
 	}
 
 	@AfterEach
-	public void shutdown() throws InterruptedException {
+	public void shutdown() throws IOException, InterruptedException {
 		create(false);
-		
+
 		handler.stop(3, TimeUnit.SECONDS);
 	}
 
 	@Test
-	public void sync_time_nolistener_noexception() throws InterruptedException, DomoticzException {
+	public void sync_time_nolistener_noexception() throws IOException, InterruptedException, DomoticzException {
 		create(false);
 
 		handler.timeChanged(TIMEOFDAY_EXAMPLE);
 	}
 
 	@Test
-	public void sync_time_listener_listenerCalled() throws InterruptedException, DomoticzException {
+	public void sync_time_listener_listenerCalled() throws IOException, InterruptedException, DomoticzException {
 		create(true);
 		final IDomoticzTimeOfDayChanged listener = mock(IDomoticzTimeOfDayChanged.class);
 
@@ -82,28 +91,28 @@ public class DomoticzThreadHandlerTest {
 	}
 
 	@Test
-	public void sync_time_invalidInput_exceptionThrown() {
+	public void sync_time_invalidInput_exceptionThrown() throws IOException {
 		create(false);
 
 		assertThrows(IllegalArgumentException.class, () -> handler.timeChanged(null));
 	}
 
 	@Test
-	public void sync_alarm_nolistener_noException() throws InterruptedException, DomoticzException {
+	public void sync_alarm_nolistener_noException() throws IOException, InterruptedException, DomoticzException {
 		create(false);
 
 		handler.alarmChanged("disarmed");
 	}
 
 	@Test
-	public void sync_alarm_invalidValue_exceptionThrown() {
+	public void sync_alarm_invalidValue_exceptionThrown() throws IOException {
 		create(false);
 
 		assertThrows(IllegalArgumentException.class, () -> handler.alarmChanged("doesNotExist"));
 	}
 
 	@Test
-	public void sync_alarm_listener_listenerCalled() throws InterruptedException, DomoticzException {
+	public void sync_alarm_listener_listenerCalled() throws IOException, InterruptedException, DomoticzException {
 		create(true);
 		final IDomoticzAlarmChanged listener = mock(IDomoticzAlarmChanged.class);
 
@@ -115,14 +124,14 @@ public class DomoticzThreadHandlerTest {
 	}
 
 	@Test
-	public void sync_device_nolistener_noException() throws InterruptedException, DomoticzException {
+	public void sync_device_nolistener_noException() throws IOException, InterruptedException, DomoticzException {
 		create(false);
 
 		handler.deviceChanged(1, "On");
 	}
 
 	@Test
-	public void sync_device_nolistener_deviceUpdated() throws InterruptedException, DomoticzException {
+	public void sync_device_nolistener_deviceUpdated() throws IOException, InterruptedException, DomoticzException {
 		create(true);
 
 		handler.deviceChanged(1, "on");
@@ -133,14 +142,14 @@ public class DomoticzThreadHandlerTest {
 	}
 
 	@Test
-	public void sync_device_invalidInput_throwsException() {
+	public void sync_device_invalidInput_throwsException() throws IOException {
 		create(false);
 
 		assertThrows(IllegalArgumentException.class, () -> handler.deviceChanged(1, null));
 	}
 
 	@Test
-	public void sync_device_listener_listenerCalled() throws InterruptedException, DomoticzException {
+	public void sync_device_listener_listenerCalled() throws IOException, InterruptedException, DomoticzException {
 		create(true);
 		final IDomoticzDeviceStatusChanged listener = mock(IDomoticzDeviceStatusChanged.class);
 		final Device<?> device = new Switch(1);
@@ -251,7 +260,7 @@ public class DomoticzThreadHandlerTest {
 	}
 
 	@Test
-	public void submitAfterStop() {
+	public void submitAfterStop() throws IOException {
 		create(false);
 
 		assertDoesNotThrow(() -> handler.stop(1, TimeUnit.SECONDS));
@@ -260,39 +269,39 @@ public class DomoticzThreadHandlerTest {
 	}
 
 	@Test
-	public void handlesTime_noListener_returnsFalse() {
+	public void handlesTime_noListener_returnsFalse() throws IOException {
 		create(false);
 		assertFalse(handler.handlesTime());
 	}
 
 	@Test
-	public void handlesTime_listenerPresent_returnsTrue() {
+	public void handlesTime_listenerPresent_returnsTrue() throws IOException {
 		create(false);
 		handler.setTimeListener(mock(IDomoticzTimeOfDayChanged.class));
 		assertTrue(handler.handlesTime());
 	}
 
 	@Test
-	public void handlesAlarm_noListener_returnsFalse() {
+	public void handlesAlarm_noListener_returnsFalse() throws IOException {
 		create(false);
 		assertFalse(handler.handlesAlarm());
 	}
 
 	@Test
-	public void handlesAlarm_listenerPresent_returnsTrue() {
+	public void handlesAlarm_listenerPresent_returnsTrue() throws IOException {
 		create(false);
 		handler.setAlarmListener(mock(IDomoticzAlarmChanged.class));
 		assertTrue(handler.handlesAlarm());
 	}
 
 	@Test
-	public void handlesDevice_noListener_returnsFalse() {
+	public void handlesDevice_noListener_returnsFalse() throws IOException {
 		create(false);
 		assertFalse(handler.handlesDevice(42));
 	}
 
 	@Test
-	public void handlesDevice_unknownDevice_returnsFalse() {
+	public void handlesDevice_unknownDevice_returnsFalse() throws IOException {
 		create(false);
 		handler.setDeviceListener(mock(IDomoticzDeviceStatusChanged.class));
 
@@ -300,12 +309,24 @@ public class DomoticzThreadHandlerTest {
 	}
 
 	@Test
-	public void handlesDevice_deviceKnown_returnsTrue() {
+	public void handlesDevice_deviceKnown_returnsTrue() throws IOException {
 		create(false);
 		handler.setDeviceListener(mock(IDomoticzDeviceStatusChanged.class));
 		when(registry.devicePresent(42)).thenReturn(true);
 
 		assertTrue(handler.handlesDevice(42));
+	}
+
+	@Test
+	public void syncFull_retrievesAlarmAndTime() throws IOException, DomoticzException, InterruptedException {
+		create(true);
+		when(todClient.createTimeOfDayValues()).thenReturn(new TimeOfDayValues(1, 2, 3, 4, 5));
+		when(alarmClient.getAlarmState()).thenReturn(AlarmState.DISARMED);
+		
+		handler.syncFull();
+		
+		verify(todClient, times(1)).createTimeOfDayValues();
+		verify(alarmClient, times(1)).getAlarmState();
 	}
 
 }

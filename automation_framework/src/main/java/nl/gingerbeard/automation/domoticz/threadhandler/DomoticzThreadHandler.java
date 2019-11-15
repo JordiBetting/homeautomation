@@ -31,18 +31,28 @@ public class DomoticzThreadHandler {
 	private Optional<IDomoticzDeviceStatusChanged> deviceListener = Optional.empty();
 	private Optional<IDomoticzTimeOfDayChanged> timeListener = Optional.empty();
 	private Optional<IDomoticzAlarmChanged> alarmListener = Optional.empty();
+	
 	private final IDeviceRegistry deviceRegistry;
 	private final ThreadPoolExecutor executor;
 	private final ILogger logger;
 	private final IState state;
-	private DomoticzConfiguration config;
+	private final DomoticzConfiguration config;
+	private final AlarmStateClient alarmClient;
+	private final TimeOfDayClient todClient;
 
 	public DomoticzThreadHandler(final DomoticzConfiguration config, final IDeviceRegistry deviceRegistry, IState state,
-			final ILogger logger) {
+			final ILogger logger) throws IOException {
+		this(config, deviceRegistry, state, logger, new AlarmStateClient(config), new TimeOfDayClient(config));
+	}
+	
+	DomoticzThreadHandler(final DomoticzConfiguration config, final IDeviceRegistry deviceRegistry, IState state,
+			final ILogger logger, AlarmStateClient alarmClient, TimeOfDayClient todClient) {
 		this.config = config;
 		this.deviceRegistry = deviceRegistry;
 		this.state = state;
 		this.logger = logger;
+		this.alarmClient = alarmClient;
+		this.todClient = todClient;
 
 		executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(1);
 	}
@@ -201,14 +211,12 @@ public class DomoticzThreadHandler {
 	}
 
 	private void syncTimeOfDay() throws IOException {
-		TimeOfDayClient timeClient = new TimeOfDayClient(config);
-		TimeOfDayValues timeOfDayValues = timeClient.createTimeOfDayValues();
+		TimeOfDayValues timeOfDayValues = todClient.createTimeOfDayValues();
 		TimeOfDay timeOfDay = toTimeOfDay(timeOfDayValues);
 		state.setTimeOfDay(timeOfDay);
 	}
 
 	private void syncAlarm() throws IOException {
-		AlarmStateClient alarmClient = new AlarmStateClient(config);
 		state.setAlarmState(alarmClient.getAlarmState());
 	}
 
