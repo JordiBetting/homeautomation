@@ -47,7 +47,6 @@ public class OnOffAutoControlIntegrationTest extends IntegrationTest {
 
 		requestLatch = resetLatch();
 		deviceChanged(1, "on");
-		logOutput.printAll();
 		assertTrue(requestLatch.await(5, TimeUnit.SECONDS));
 		final List<String> requests = webserver.getRequests();
 		assertEquals(1, requests.size());
