@@ -340,4 +340,19 @@ public class DomoticzEventReceiverTest {
 
 		assertEquals(404, con.getResponseCode());
 	}
+	
+	@Test
+	public void processGetRequest_throwsDomoticzException_erro500() throws DomoticzException, IOException {
+		final EventReceived listener = mock(EventReceived.class);
+		when(listener.alarmChanged(any())).thenThrow(new DomoticzException("This is an purposely thrown exception, hope it lands far!"));
+		receiver.setEventListener(listener);
+
+		final int port = receiver.getListeningPort();
+
+		final URL url = new URL("http://localhost:" + port + "/alarm/arm_away");
+		final HttpURLConnection con = (HttpURLConnection) url.openConnection();
+		con.setRequestMethod("GET");
+
+		assertEquals(500, con.getResponseCode());
+	}
 }

@@ -2,7 +2,7 @@ package nl.gingerbeard.automation.domoticz.configuration;
 
 import java.net.URL;
 
-public final class DomoticzConfiguration {
+public class DomoticzConfiguration {
 
 	private int listenPort;
 	private final URL baseURL;

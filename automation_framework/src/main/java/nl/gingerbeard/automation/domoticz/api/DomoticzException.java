@@ -15,5 +15,9 @@ public class DomoticzException extends Exception {
 	public DomoticzException(String message) {
 		super(message);
 	}
+	
+	public DomoticzException(Throwable cause) {
+		super(cause);
+	}
 
 }

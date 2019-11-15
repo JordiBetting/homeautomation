@@ -26,15 +26,25 @@ public class DomoticzImpl implements DomoticzApi, EventReceived {
 	private final DomoticzUpdateTransmitter transmitter;
 	private final DomoticzEventReceiverServer receiver;
 	private final ILogger log;
-	private DomoticzConfiguration config;
+	private final TimeOfDayClient todClient;
 
 	public DomoticzImpl(DomoticzConfiguration config, IDeviceRegistry deviceRegistry, IState state, ILogger log)
 			throws IOException {
-		this.config = config;
+		this(new DomoticzUpdateTransmitter(config, log), //
+				new DomoticzEventReceiverServer(config, log),  //
+				new DomoticzThreadHandler(config, deviceRegistry, state, log), //
+				new TimeOfDayClient(config),//
+				log);
+	}
+
+	 DomoticzImpl(DomoticzUpdateTransmitter transmitter,
+			DomoticzEventReceiverServer receiver, DomoticzThreadHandler threadHandler, TimeOfDayClient todClient, ILogger log) {
+		this.threadHandler = threadHandler;
+		this.transmitter = transmitter;
+		this.receiver = receiver;
 		this.log = log;
-		threadHandler = new DomoticzThreadHandler(config, deviceRegistry, state, log);
-		transmitter = new DomoticzUpdateTransmitter(config, log);
-		receiver = new DomoticzEventReceiverServer(config, log);
+		this.todClient = todClient;
+
 		receiver.setEventListener(this);
 	}
 
@@ -78,6 +88,7 @@ public class DomoticzImpl implements DomoticzApi, EventReceived {
 				success = true;
 			} catch (final InterruptedException e) {
 				log.warning(e, "Interrupted while updating device");
+				throw new DomoticzException(e);
 			}
 		} else {
 			// logger.debug("Received update for unknown device with idx: " + idx);
@@ -91,11 +102,12 @@ public class DomoticzImpl implements DomoticzApi, EventReceived {
 		if (threadHandler.handlesTime()) {
 			try {
 				// TODO: Should todClient be used here?
-				final TimeOfDayValues timeOfDayValues = (new TimeOfDayClient(config)).createTimeOfDayValues();
+				final TimeOfDayValues timeOfDayValues = todClient.createTimeOfDayValues();
 				threadHandler.timeChanged(timeOfDayValues);
 				success = true;
 			} catch (final IOException | InterruptedException e) {
 				log.warning(e, "Failed retrieving time of day values");
+				throw new DomoticzException(e);
 			}
 		}
 		return success;
@@ -110,6 +122,7 @@ public class DomoticzImpl implements DomoticzApi, EventReceived {
 				success = true;
 			} catch (final InterruptedException e) {
 				log.warning(e, "Interrupted while changing alarm state");
+				throw new DomoticzException(e);
 			}
 		}
 		return success;

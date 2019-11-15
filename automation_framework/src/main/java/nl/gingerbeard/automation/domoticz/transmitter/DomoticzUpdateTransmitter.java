@@ -20,7 +20,7 @@ import nl.gingerbeard.automation.domoticz.transmitter.urlcreator.DomoticzUrls;
 import nl.gingerbeard.automation.logging.ILogger;
 import nl.gingerbeard.automation.state.NextState;
 
-public final class DomoticzUpdateTransmitter {
+public class DomoticzUpdateTransmitter {
 
 	private final DomoticzUrls urlCreator;
 	private final ILogger log;

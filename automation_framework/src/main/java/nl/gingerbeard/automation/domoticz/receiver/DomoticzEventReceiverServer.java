@@ -13,7 +13,7 @@ import nl.gingerbeard.automation.domoticz.receiver.ResponseParameters.ResponsePa
 import nl.gingerbeard.automation.domoticz.receiver.ResponseParameters.ResponseTimeParameters;
 import nl.gingerbeard.automation.logging.ILogger;
 
-public final class DomoticzEventReceiverServer extends NanoHTTPD /* implements IDomoticzEventReceiver */ {
+public class DomoticzEventReceiverServer extends NanoHTTPD {
 	// TODO: Refactor to be similar with configurationServer. Consider making a
 	// generic component out of configurationServer.
 	public static interface EventReceived {
