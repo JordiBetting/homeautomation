@@ -2,6 +2,7 @@ package nl.gingerbeard.automation.domoticz;
 
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.when;
@@ -17,6 +18,7 @@ import nl.gingerbeard.automation.domoticz.receiver.DomoticzEventReceiverServer;
 import nl.gingerbeard.automation.domoticz.threadhandler.DomoticzThreadHandler;
 import nl.gingerbeard.automation.domoticz.transmitter.DomoticzUpdateTransmitter;
 import nl.gingerbeard.automation.logging.ILogger;
+import nl.gingerbeard.automation.state.AlarmState;
 
 public class DomoticzImplTest {
 
@@ -63,5 +65,32 @@ public class DomoticzImplTest {
 		doThrow(InterruptedException.class).when(threadHandler).alarmChanged(any());
 		
 		assertThrows(DomoticzException.class, () -> domoticz.alarmChanged(""));
+	}
+	
+	@Test
+	public void updateTime_handlerDoesNotHanledTime_returnsFalse() throws DomoticzException {
+		when(threadHandler.handlesTime()).thenReturn(false);
+		
+		boolean result = domoticz.timeChanged(1, 2, 3);
+		
+		assertFalse(result);
+	}
+	
+	@Test
+	public void updateAlarm_handlerDoesNotHandleAlarm_returnsFalse() throws DomoticzException {
+		when(threadHandler.handlesAlarm()).thenReturn(false);
+		
+		boolean result = domoticz.alarmChanged("ARM_HOME");
+		
+		assertFalse(result);
+	}
+	
+	@Test
+	public void updateDevice_handlerDoesNotHandleDevice_returnsFalse() throws DomoticzException {
+		when(threadHandler.handlesDevice(1)).thenReturn(false);
+		
+		boolean result = domoticz.deviceChanged(1, "niks");
+		
+		assertFalse(result);
 	}
 }
