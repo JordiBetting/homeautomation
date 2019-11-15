@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.IOException;
 import java.util.Optional;
 
-import org.junit.After;
 import org.junit.jupiter.api.Test;
 
 import nl.gingerbeard.automation.Room;
@@ -32,11 +31,6 @@ public class TimeOfDayIncorrect  extends IntegrationTest{
 		public void updatedAlarm(final AlarmState alarm) {
 			timeOfDayDuringAlarmTrigger = Optional.ofNullable(getState().getTimeOfDay());
 		}
-	}
-	
-	@After
-	public void logOut() {
-		logOutput.printAll();
 	}
 	
 	@Test

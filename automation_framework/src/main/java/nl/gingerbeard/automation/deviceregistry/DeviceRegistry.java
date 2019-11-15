@@ -66,7 +66,7 @@ public final class DeviceRegistry implements IDeviceRegistry {
 	public Optional<?> getDeviceState(int idx) {
 		DeviceGroup group = deviceGroups.get(idx);
 		if (group != null) {
-			return Optional.of(group.getAny().get().getState());
+			return Optional.ofNullable(group.getAny().get().getState());
 		}
 		return Optional.empty();
 	}
