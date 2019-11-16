@@ -32,7 +32,7 @@ public class DomoticzThreadHandler {
 	private Optional<IDomoticzDeviceStatusChanged> deviceListener = Optional.empty();
 	private Optional<IDomoticzTimeOfDayChanged> timeListener = Optional.empty();
 	private Optional<IDomoticzAlarmChanged> alarmListener = Optional.empty();
-	
+
 	private final IDeviceRegistry deviceRegistry;
 	private final ThreadPoolExecutor executor;
 	private final ILogger logger;
@@ -45,7 +45,7 @@ public class DomoticzThreadHandler {
 			final ILogger logger) throws IOException {
 		this(config, deviceRegistry, state, logger, new AlarmStateClient(config), new TimeOfDayClient(config));
 	}
-	
+
 	DomoticzThreadHandler(final DomoticzConfiguration config, final IDeviceRegistry deviceRegistry, IState state,
 			final ILogger logger, AlarmStateClient alarmClient, TimeOfDayClient todClient) {
 		this.config = config;
@@ -134,20 +134,22 @@ public class DomoticzThreadHandler {
 		}
 	}
 
-	public void deviceChanged(final int idx, final String newState)
-			throws InterruptedException, DomoticzException {
+	public void deviceChanged(final int idx, final String newState) throws InterruptedException, DomoticzException {
 		Preconditions.checkArgument(newState != null);
 		execute(() -> {
 			Optional<?> oldState = deviceRegistry.getDeviceState(idx);
 			final Optional<Device<?>> device = deviceRegistry.updateDevice(idx, newState);
-			if (device.isPresent() && (!oldState.isPresent() || oldState.get() != device.get().getState())) {
-				logger.debug("Device with idx " + idx + " changed state into: " + newState); // TODO consistent logging
-				final Device<?> changedDevice = device.get();
-				deviceListener.ifPresent((listener) -> listener.statusChanged(changedDevice));
+			if (device.isPresent()) {
+				if (!oldState.isPresent() || oldState.get() != device.get().getState()) {
+					// TODO consistent logging
+					logger.debug("Device with idx " + idx + " changed state into: " + newState); 
+					final Device<?> changedDevice = device.get();
+					deviceListener.ifPresent((listener) -> listener.statusChanged(changedDevice));
+				}
 			}
 		});
 	}
-	
+
 	public void timeChanged(final TimeOfDayValues timeOfDayValues) throws InterruptedException, DomoticzException {
 		// TODO: timeOfDayValues may contain valuable information for rules. Propagate
 		// into state and events.
@@ -196,8 +198,7 @@ public class DomoticzThreadHandler {
 	void executeTaskWithRetries(RetryTask task) throws InterruptedException, DomoticzException {
 		int interval_s = config.getInitInterval_s();
 		int nrTries = interval_s == 0 ? 1 : Math.max(1, config.getMaxInitWait_s() / interval_s);
-		Optional<Throwable> e = RetryUtil.retry(task, nrTries,
-				Duration.ofSeconds(interval_s));
+		Optional<Throwable> e = RetryUtil.retry(task, nrTries, Duration.ofSeconds(interval_s));
 		if (e.isPresent()) {
 			throw new DomoticzException("Failed to sync full state with Domoticz", e.get());
 		}
@@ -211,7 +212,7 @@ public class DomoticzThreadHandler {
 
 	private void syncDevices() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	private void syncTimeOfDay() throws IOException {
