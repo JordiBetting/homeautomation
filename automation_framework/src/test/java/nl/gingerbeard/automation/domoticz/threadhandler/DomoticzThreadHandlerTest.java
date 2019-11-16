@@ -372,7 +372,7 @@ public class DomoticzThreadHandlerTest {
 	
 	@Test
 	public void syncFull_interrupted_throwsInterruptedException() {
-		createFailing();
+		createInterrupting();
 		
 		config.setInitInterval_s(5);
 		config.setMaxInitWait_s(15);
