@@ -108,7 +108,7 @@ public class AlarmIntegrationTest extends IntegrationTest {
 		assertEquals(0, room.getCallCount());
 
 		updateAlarm("arm_home");
-		deviceChanged(1, "on");
+		deviceChanged(1, "off");
 		assertEquals(1, room.getCallCount());
 
 		updateAlarm("arm_away");
@@ -116,7 +116,7 @@ public class AlarmIntegrationTest extends IntegrationTest {
 		assertEquals(1, room.getCallCount());
 
 		updateAlarm("disarmed");
-		deviceChanged(1, "on");
+		deviceChanged(1, "off");
 		assertEquals(1, room.getCallCount());
 
 		updateAlarm("arm_home");
