@@ -14,7 +14,7 @@ pipeline {
 	stages {
 		stage("Build + test Java") {
 			steps {
-				gradleBuild 'clean assemble test jacocoRootReport'
+				gradleBuild 'assemble test jacocoRootReport'
 			}
 			post {
 				success {
