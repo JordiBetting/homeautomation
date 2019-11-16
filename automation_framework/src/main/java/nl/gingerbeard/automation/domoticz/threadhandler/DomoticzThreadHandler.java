@@ -150,9 +150,9 @@ public class DomoticzThreadHandler {
 
 	private boolean isNewState(Optional<?> oldState, final Device<?> device) {
 		if (oldState.isPresent()) {
-			return true;
+			return oldState.get() != device.getState();
 		}
-		return oldState != device.getState();
+		return false;
 	}
 
 	public void timeChanged(final TimeOfDayValues timeOfDayValues) throws InterruptedException, DomoticzException {
