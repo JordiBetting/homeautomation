@@ -140,21 +140,14 @@ public class DomoticzThreadHandler {
 		execute(() -> {
 			Optional<?> oldState = deviceRegistry.getDeviceState(idx);
 			final Optional<Device<?>> device = deviceRegistry.updateDevice(idx, newState);
-			if (device.isPresent() && isNewState(oldState, device.get())) {
+			if (device.isPresent() && (!oldState.isPresent() || oldState.get() != device.get().getState())) {
 				logger.debug("Device with idx " + idx + " changed state into: " + newState); // TODO consistent logging
 				final Device<?> changedDevice = device.get();
 				deviceListener.ifPresent((listener) -> listener.statusChanged(changedDevice));
 			}
 		});
 	}
-
-	private boolean isNewState(Optional<?> oldState, final Device<?> device) {
-		if (oldState.isPresent()) {
-			return oldState.get() != device.getState();
-		}
-		return false;
-	}
-
+	
 	public void timeChanged(final TimeOfDayValues timeOfDayValues) throws InterruptedException, DomoticzException {
 		// TODO: timeOfDayValues may contain valuable information for rules. Propagate
 		// into state and events.
