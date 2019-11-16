@@ -36,6 +36,7 @@ import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
 import nl.gingerbeard.automation.logging.ILogger;
 import nl.gingerbeard.automation.state.AlarmState;
 import nl.gingerbeard.automation.state.IState;
+import nl.gingerbeard.automation.state.OnOffState;
 import nl.gingerbeard.automation.state.State;
 import nl.gingerbeard.automation.state.TimeOfDayValues;
 import nl.gingerbeard.automation.util.RetryUtil.RetryTask;
@@ -69,12 +70,12 @@ public class DomoticzThreadHandlerTest {
 		todClient = mock(TimeOfDayClient.class);
 		alarmClient = mock(AlarmStateClient.class);
 	}
-	
+
 	public void createFailing() {
 		createMocks(true);
 		handler = new FailingThreadHandler(config, registry, new State(), logger, alarmClient, todClient);
 	}
-	
+
 	public void createInterrupting() {
 		createMocks(true);
 		handler = new InterruptingThreadHandler(config, registry, new State(), logger, alarmClient, todClient);
@@ -168,8 +169,13 @@ public class DomoticzThreadHandlerTest {
 	public void sync_device_listener_listenerCalled() throws IOException, InterruptedException, DomoticzException {
 		create(true);
 		final IDomoticzDeviceStatusChanged listener = mock(IDomoticzDeviceStatusChanged.class);
-		final Device<?> device = new Switch(1);
+		final Switch device = new Switch(1);
 		when(registry.updateDevice(1, "on")).thenReturn(Optional.of(device));
+		when(registry.updateDevice(1, "on")).thenAnswer((args) -> {
+			device.setState(OnOffState.ON);
+			return Optional.of(device);
+		});
+		
 		handler.setDeviceListener(listener);
 
 		handler.deviceChanged(1, "on");
@@ -338,28 +344,28 @@ public class DomoticzThreadHandlerTest {
 		create(true);
 		when(todClient.createTimeOfDayValues()).thenReturn(new TimeOfDayValues(1, 2, 3, 4, 5));
 		when(alarmClient.getAlarmState()).thenReturn(AlarmState.DISARMED);
-		
+
 		handler.syncFull();
-		
+
 		verify(todClient, times(1)).createTimeOfDayValues();
 		verify(alarmClient, times(1)).getAlarmState();
 	}
-	
+
 	@Test
 	public void syncFull_failed_throwsInterruptedException() {
 		createFailing();
-		
+
 		config.setInitInterval_s(5);
 		config.setMaxInitWait_s(15);
 
 		Thread.currentThread().interrupt();
 		assertThrows(InterruptedException.class, () -> handler.syncFull());
 	}
-	
+
 	private class FailingThreadHandler extends DomoticzThreadHandler {
 
-		FailingThreadHandler(DomoticzConfiguration config, IDeviceRegistry deviceRegistry, IState state,
-				ILogger logger, AlarmStateClient alarmClient, TimeOfDayClient todClient) {
+		FailingThreadHandler(DomoticzConfiguration config, IDeviceRegistry deviceRegistry, IState state, ILogger logger,
+				AlarmStateClient alarmClient, TimeOfDayClient todClient) {
 			super(config, deviceRegistry, state, logger, alarmClient, todClient);
 		}
 
@@ -367,20 +373,20 @@ public class DomoticzThreadHandlerTest {
 		void executeTaskWithRetries(RetryTask task) throws DomoticzException {
 			throw new DomoticzException();
 		}
-		
+
 	}
-	
+
 	@Test
 	public void syncFull_interrupted_throwsInterruptedException() {
 		createInterrupting();
-		
+
 		config.setInitInterval_s(5);
 		config.setMaxInitWait_s(15);
 
 		Thread.currentThread().interrupt();
 		assertThrows(InterruptedException.class, () -> handler.syncFull());
 	}
-	
+
 	private class InterruptingThreadHandler extends DomoticzThreadHandler {
 
 		InterruptingThreadHandler(DomoticzConfiguration config, IDeviceRegistry deviceRegistry, IState state,
@@ -392,28 +398,34 @@ public class DomoticzThreadHandlerTest {
 		void executeTaskWithRetries(RetryTask task) throws DomoticzException, InterruptedException {
 			throw new InterruptedException();
 		}
-		
+
 	}
-	
+
 	@Test
 	public void deviceUpdated_noOldState_works() throws IOException, InterruptedException, DomoticzException {
 		create(true);
 		IDomoticzDeviceStatusChanged deviceListener = mock(IDomoticzDeviceStatusChanged.class);
 		handler.setDeviceListener(deviceListener);
-		
+
 		when(registry.devicePresent(1)).thenReturn(true);
-		when(registry.updateDevice(1, "on")).thenReturn(Optional.of(new Switch(1)));
-		
+		when(registry.updateDevice(1, "on")).thenAnswer((args) -> {
+			Switch s = new Switch(1);
+			s.setState(OnOffState.ON);
+			return Optional.of(s);
+		});
+
 		handler.deviceChanged(1, "on");
-		
+
 		verify(deviceListener, times(1)).statusChanged(any());
 	}
-	
+
 	@Test
 	public void interruptedTask() throws IOException, InterruptedException, DomoticzException {
 		create(true);
-		
-		assertThrows(InterruptedException.class, () ->handler.execute(() -> { throw new DomoticzException(new InterruptedException()); }));
+
+		assertThrows(InterruptedException.class, () -> handler.execute(() -> {
+			throw new DomoticzException(new InterruptedException());
+		}));
 	}
 
 }
