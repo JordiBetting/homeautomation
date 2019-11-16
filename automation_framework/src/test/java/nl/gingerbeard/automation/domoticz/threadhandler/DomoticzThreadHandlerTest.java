@@ -175,7 +175,7 @@ public class DomoticzThreadHandlerTest {
 			device.setState(OnOffState.ON);
 			return Optional.of(device);
 		});
-		
+
 		handler.setDeviceListener(listener);
 
 		handler.deviceChanged(1, "on");
@@ -417,6 +417,27 @@ public class DomoticzThreadHandlerTest {
 		handler.deviceChanged(1, "on");
 
 		verify(deviceListener, times(1)).statusChanged(any());
+	}
+
+	@Test
+	public void deviceUpdated_sameState_noUpdate() throws IOException, InterruptedException, DomoticzException {
+		create(true);
+		IDomoticzDeviceStatusChanged deviceListener = mock(IDomoticzDeviceStatusChanged.class);
+		handler.setDeviceListener(deviceListener);
+
+		when(registry.devicePresent(1)).thenReturn(true);
+		when(registry.updateDevice(1, "on")).thenAnswer((args) -> {
+			Switch s = new Switch(1);
+			s.setState(OnOffState.ON);
+			return Optional.of(s);
+		});
+		when(registry.getDeviceState(1)).thenAnswer((args) -> {
+			return Optional.of(OnOffState.ON);
+		});
+
+		handler.deviceChanged(1, "on");
+
+		verify(deviceListener, times(0)).statusChanged(any());
 	}
 
 	@Test
