@@ -27,7 +27,7 @@ public class ThermostatIntegrationTest extends IntegrationTest {
 		public static final int IDX_MODE = 3;
 
 		private final Thermostat thermostat;
-		private static final Switch SENSOR = new Switch(IDX_SENSOR);
+		private final Switch SENSOR = new Switch(IDX_SENSOR);
 		private ThermostatState nextState;
 		private int thermostatChanges;
 
@@ -61,7 +61,7 @@ public class ThermostatIntegrationTest extends IntegrationTest {
 	}
 
 	@Test
-	public void thermostatSetpointUpdated_bySensorUpdate() throws IOException {
+	public void thermostatSetpointUpdated_bySensorUpdate() throws IOException, InterruptedException {
 		final ThermostatState thermostatState = new ThermostatState();
 		thermostatState.setTemperature(Temperature.celcius(15));
 
