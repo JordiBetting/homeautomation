@@ -140,7 +140,7 @@ public class DomoticzThreadHandler {
 			Optional<?> oldState = deviceRegistry.getDeviceState(idx);
 			final Optional<Device<?>> device = deviceRegistry.updateDevice(idx, newState);
 			if (device.isPresent()) {
-				if (!oldState.isPresent() || oldState.get() != device.get().getState()) {
+				if (oldState.or(null) != device.get().getState()) {
 					// TODO consistent logging
 					logger.debug("Device with idx " + idx + " changed state into: " + newState); 
 					final Device<?> changedDevice = device.get();
