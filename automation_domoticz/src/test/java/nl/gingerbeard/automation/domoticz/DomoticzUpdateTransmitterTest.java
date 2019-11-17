@@ -14,6 +14,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import fi.iki.elonen.NanoHTTPD.Response.Status;
+import nl.gingerbeard.automation.devices.Device;
 import nl.gingerbeard.automation.devices.DimmeableLight;
 import nl.gingerbeard.automation.devices.Switch;
 import nl.gingerbeard.automation.devices.ThermostatSetpointDevice;
@@ -26,7 +27,6 @@ import nl.gingerbeard.automation.state.NextState;
 import nl.gingerbeard.automation.state.OnOffState;
 import nl.gingerbeard.automation.state.Temperature;
 import nl.gingerbeard.automation.state.Temperature.Unit;
-import nl.gingerbeard.automation.testdevices.StringTestDevice;
 import nl.gingerbeard.automation.testutils.TestWebServer;
 
 public class DomoticzUpdateTransmitterTest {
@@ -34,6 +34,20 @@ public class DomoticzUpdateTransmitterTest {
 	private TestWebServer webserver;
 	private DomoticzConfiguration domoticzConfig;
 
+
+	public class StringTestDevice extends Device<String> {
+
+	public StringTestDevice() {
+		super(42);
+	}
+
+	@Override
+	public boolean updateState(final String newState) {
+		return false;
+	}
+
+}
+	
 	@BeforeEach
 	public void createTestServer() throws Exception {
 		webserver = new TestWebServer();

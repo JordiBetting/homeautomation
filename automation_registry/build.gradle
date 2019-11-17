@@ -1,17 +1,8 @@
 dependencies {
 	compile group: 'com.google.guava', name: 'guava', version: '23.5-jre'
-	compile group: 'org.nanohttpd', name: 'nanohttpd', version: '2.3.1'
-	compile group: 'com.googlecode.json-simple', name: 'json-simple', version: '1.1.1'
-	compile group: 'org.reflections', name: 'reflections', version: '0.9.11'
-	compile 'com.google.code.gson:gson:2.8.5'
 	compile project(':service')
 	compile project(':devices')
 	compile project(':logging')
-	compile project(':automation_configurationserver')
-	compile project(':onkyo')
-	compile project(':automation_domoticz')
-	compile project(':automation_registry')
-	compile project(':util')
 	testCompile project(':testutils')
 }
 

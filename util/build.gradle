@@ -1,0 +1,4 @@
+dependencies {
+	compile group: 'com.google.guava', name: 'guava', version: '23.5-jre'
+	compile group: 'org.reflections', name: 'reflections', version: '0.9.11'
+}
