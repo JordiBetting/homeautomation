@@ -24,7 +24,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import nl.gingerbeard.automation.deviceregistry.IDeviceRegistry;
-import nl.gingerbeard.automation.devices.Device;
 import nl.gingerbeard.automation.devices.Switch;
 import nl.gingerbeard.automation.domoticz.api.DomoticzException;
 import nl.gingerbeard.automation.domoticz.api.IDomoticzAlarmChanged;
