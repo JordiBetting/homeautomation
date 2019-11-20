@@ -1,5 +1,6 @@
 package nl.gingerbeard.automation;
 
+import java.util.Arrays;
 import java.util.Collection;
 
 import nl.gingerbeard.automation.components.AutomationFrameworkComponent;
@@ -54,8 +55,7 @@ public final class AutomationFrameworkContainer {
 
 	@SafeVarargs
 	public final void start(Class<? extends Room> ... rooms) throws InterruptedException {
-		container.start(); 
-		getAutomationFramework().start(rooms);
+		start(Arrays.asList(rooms));
 	}
 	
 	public void start(Collection<Class<? extends Room>> rooms) throws InterruptedException {
