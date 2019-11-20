@@ -25,11 +25,10 @@ import nl.gingerbeard.automation.testutils.TestWebServer;
 
 public class StartupStateTest {
 
-	private IAutomationFrameworkInterface automation;
 	private Optional<IState> state;
 
 	@Test
-	public void startDayArmAway() throws IOException {
+	public void startDayArmAway() throws IOException, InterruptedException {
 		TestWebServer webserver = startWebserver();
 
 		// configure webserver for testcase
@@ -45,7 +44,7 @@ public class StartupStateTest {
 	}
 
 	@Test
-	public void startNighDisarmed() throws IOException {
+	public void startNighDisarmed() throws IOException, InterruptedException {
 		TestWebServer webserver = startWebserver();
 
 		// configure webserver for testcase
@@ -73,17 +72,15 @@ public class StartupStateTest {
 	
 	
 	@Test
-	public void roomHasAccessToStateOnInit() throws IOException {
+	public void roomHasAccessToStateOnInit() throws IOException, InterruptedException {
 		TestWebServer webserver = startWebserver();
 
 		// configure webserver for testcase
 		webserver.setResponse("/json.htm?type=command&param=getSunRiseSet", Status.OK,
 				createSunRiseSetResponse(100, 200, 50, 80, 220));
 		webserver.setResponse("/json.htm?type=command&param=getsecstatus", Status.OK, createSecstatusResponse(1));
-		startFramework(webserver);
+		startFramework(webserver, MyRoom.class);
 
-		automation.addRoom(MyRoom.class);
-		
 		//Assertions present in MyRoom
 	}
 
@@ -131,20 +128,19 @@ public class StartupStateTest {
 		return webserver;
 	}
 
-	private void startFramework(TestWebServer webserver) throws MalformedURLException {
+	@SafeVarargs
+	private void startFramework(TestWebServer webserver, Class<? extends Room> ... rooms) throws MalformedURLException, InterruptedException {
 		DomoticzConfiguration config = new DomoticzConfiguration(0,
 				new URL("http://localhost:" + webserver.getListeningPort()));
 		config.setEventHandlingSynchronous();
 		AutomationFrameworkContainer container = IAutomationFrameworkInterface.createFrameworkContainer(config,
 				new LogOutputToTestLogger(), new ConfigurationServerSettings(0));
-		container.start();
-		automation = container.getRuntime().getService(IAutomationFrameworkInterface.class).get();
+		container.start(rooms);
 		state = container.getRuntime().getService(IState.class);
 	}
 
 	@AfterEach
 	public void cleanup() {
-		automation = null;
 		state = null;
 	}
 }

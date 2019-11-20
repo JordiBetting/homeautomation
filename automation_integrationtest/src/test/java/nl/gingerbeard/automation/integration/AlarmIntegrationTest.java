@@ -54,8 +54,9 @@ public class AlarmIntegrationTest extends IntegrationTest {
 	}
 
 	@Test
-	public void sendAlarm() throws IOException {
-		final AlarmRoom room = automation.addRoom(AlarmRoom.class);
+	public void sendAlarm() throws IOException, InterruptedException {
+		start(AlarmRoom.class);
+		final AlarmRoom room = automation.getRoom(AlarmRoom.class);
 
 		assertEquals(0, room.getAway_count());
 		assertEquals(0, room.getHome_count());
@@ -100,8 +101,9 @@ public class AlarmIntegrationTest extends IntegrationTest {
 	}
 
 	@Test
-	public void switch_alarmstate_received() throws IOException {
-		final AlarmSwitchRoom room = automation.addRoom(AlarmSwitchRoom.class);
+	public void switch_alarmstate_received() throws IOException, InterruptedException {
+		start(AlarmSwitchRoom.class);
+		final AlarmSwitchRoom room = automation.getRoom(AlarmSwitchRoom.class);
 
 		// intial state = disarmed. No receiving stuff
 		deviceChanged(1, "on");
@@ -125,7 +127,8 @@ public class AlarmIntegrationTest extends IntegrationTest {
 	}
 
 	@Test
-	public void alarmState_invalid_404() throws IOException {
+	public void alarmState_invalid_404() throws IOException, InterruptedException {
+		start();
 		updateAlarm("invalid", 404);
 	}
 
@@ -143,8 +146,9 @@ public class AlarmIntegrationTest extends IntegrationTest {
 	}
 
 	@Test
-	public void alarmChange_triggersOutput() throws IOException {
-		automation.addRoom(AlarmWithDeviceOutput.class);
+	public void alarmChange_triggersOutput() throws IOException, InterruptedException {
+		start(AlarmWithDeviceOutput.class);
+		automation.getRoom(AlarmWithDeviceOutput.class);
 
 		updateAlarm("arm_away");
 

@@ -167,4 +167,21 @@ public class DeviceRegistryTest {
 		
 		assertFalse(deviceState.isPresent());
 	}
+	
+	@Test
+	public void addDeviceOnce_returnsTrue() {
+		boolean result = registry.addDevice(new Switch(123));
+		
+		assertTrue(result);
+	}
+	
+	@Test
+	public void addDeviceTwice_returnsFalse() {
+		registry.addDevice(new Switch(1));
+
+		boolean result = registry.addDevice(new Switch(1));
+		
+		assertFalse(result);
+		
+	}
 }

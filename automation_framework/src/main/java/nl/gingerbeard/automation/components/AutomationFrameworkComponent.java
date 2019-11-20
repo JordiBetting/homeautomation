@@ -36,7 +36,7 @@ public class AutomationFrameworkComponent {
 	@Activate
 	public void createFramework() {
 		final AutoControlToDomoticz autoControlToDomoticz = new AutoControlToDomoticz(logger, domoticz);
-		framework = new AutomationFramework(events, deviceRegistry, state, autoControlToDomoticz, logger);
+		framework = new AutomationFramework(events, deviceRegistry, state, autoControlToDomoticz, logger, domoticz);
 	}
 
 	@Deactivate

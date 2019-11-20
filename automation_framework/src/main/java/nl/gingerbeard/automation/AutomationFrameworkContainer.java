@@ -1,5 +1,7 @@
 package nl.gingerbeard.automation;
 
+import java.util.Collection;
+
 import nl.gingerbeard.automation.components.AutomationFrameworkComponent;
 import nl.gingerbeard.automation.components.ConfigurationServerComponent;
 import nl.gingerbeard.automation.components.EventsComponent;
@@ -44,10 +46,23 @@ public final class AutomationFrameworkContainer {
 	public IAutomationFrameworkInterface getAutomationFramework() {
 		return container.getService(IAutomationFrameworkInterface.class).get();
 	}
-
-	public void start() {
+	
+	public void start(Class<? extends Room> room) throws InterruptedException {
 		container.start();
+		getAutomationFramework().start(room);
 	}
+
+	@SafeVarargs
+	public final void start(Class<? extends Room> ... rooms) throws InterruptedException {
+		container.start(); 
+		getAutomationFramework().start(rooms);
+	}
+	
+	public void start(Collection<Class<? extends Room>> rooms) throws InterruptedException {
+		container.start();
+		getAutomationFramework().start(rooms);
+	}
+
 
 	public void stop() {
 		container.shutDown();

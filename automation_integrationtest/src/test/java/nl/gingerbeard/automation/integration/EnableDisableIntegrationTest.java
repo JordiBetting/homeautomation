@@ -41,10 +41,9 @@ public class EnableDisableIntegrationTest extends IntegrationTest {
 	}
 
 	@Test
-	public void enableDisableIntegrationTest() throws IOException {
+	public void enableDisableIntegrationTest() throws IOException, InterruptedException {
+		start(MyRoom.class, MyRoom2.class);
 		final List<String> requests = webserver.getRequests();
-		automation.addRoom(MyRoom.class);
-		automation.addRoom(MyRoom2.class);
 
 		deviceChanged(2, "on");
 		assertEquals(1, requests.size());
@@ -64,9 +63,8 @@ public class EnableDisableIntegrationTest extends IntegrationTest {
 	}
 
 	@Test
-	public void isEnabled() throws IOException {
-		automation.addRoom(MyRoom.class);
-		automation.addRoom(MyRoom2.class);
+	public void isEnabled() throws IOException, InterruptedException {
+		start(MyRoom.class, MyRoom2.class);
 
 		disableRoom("MyRoom");
 

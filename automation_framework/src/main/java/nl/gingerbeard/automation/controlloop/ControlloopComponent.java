@@ -1,8 +1,6 @@
 package nl.gingerbeard.automation.controlloop;
 
 import nl.gingerbeard.automation.domoticz.api.DomoticzApi;
-import nl.gingerbeard.automation.domoticz.api.DomoticzException;
-import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
 import nl.gingerbeard.automation.event.IEvents;
 import nl.gingerbeard.automation.logging.ILogger;
 import nl.gingerbeard.automation.onkyo.IOnkyoTransmitter;
@@ -33,13 +31,6 @@ public class ControlloopComponent {
 		domoticz.setAlarmListener(controlloop);
 		domoticz.setTimeListener(controlloop);
 		domoticz.setDeviceListener(controlloop);
-
-		try {
-			domoticz.syncFullState();
-		} catch (DomoticzException e) {
-			log.warning(e,
-					"Cloud not sync full state at startup, continuing without initial state. This may result in misbehaving rules.");
-		}
 	}
 
 }

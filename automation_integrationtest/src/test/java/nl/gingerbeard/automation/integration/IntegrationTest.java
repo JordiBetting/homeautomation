@@ -17,13 +17,13 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 
 import com.google.common.io.CharStreams;
 
 import fi.iki.elonen.NanoHTTPD.Response.Status;
 import nl.gingerbeard.automation.AutomationFrameworkContainer;
 import nl.gingerbeard.automation.IAutomationFrameworkInterface;
+import nl.gingerbeard.automation.Room;
 import nl.gingerbeard.automation.components.OnkyoTransmitterComponent;
 import nl.gingerbeard.automation.configuration.ConfigurationServerSettings;
 import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
@@ -44,8 +44,8 @@ public abstract class IntegrationTest {
 	protected OnkyoDriver onkyoDriver;
 	protected List<String> startupRequests = new ArrayList<>();
 
-	@BeforeEach
-	public void start() throws IOException {
+	@SafeVarargs
+	public final void start(Class<? extends Room> ... rooms) throws IOException, InterruptedException {
 		webserver = new TestWebServer();
 		webserver.start();
 
@@ -54,7 +54,7 @@ public abstract class IntegrationTest {
 		config.disableInit();
 		final ConfigurationServerSettings configSettings = new ConfigurationServerSettings(0);
 		container = IAutomationFrameworkInterface.createFrameworkContainer(config, new LogOutputToTestLogger(), configSettings);
-		container.start();
+		container.start(rooms);
 
 		port = config.getListenPort();
 		configPort = configSettings.getListenPort();

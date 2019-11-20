@@ -41,8 +41,9 @@ public class TimeIntegrationTest extends IntegrationTest {
 	}
 
 	@Test
-	public void switch_daytime_received() throws IOException {
-		final DayTimeSwitchRoom room = automation.addRoom(DayTimeSwitchRoom.class);
+	public void switch_daytime_received() throws IOException, InterruptedException {
+		start(DayTimeSwitchRoom.class);
+		final DayTimeSwitchRoom room = automation.getRoom(DayTimeSwitchRoom.class);
 
 		// initial, no calls
 		assertEquals(0, room.getCallCount());
@@ -99,8 +100,9 @@ public class TimeIntegrationTest extends IntegrationTest {
 	}
 
 	@Test
-	public void updateTime_eventReceived() throws IOException {
-		final TimeRoom room = automation.addRoom(TimeRoom.class);
+	public void updateTime_eventReceived() throws IOException, InterruptedException {
+		start(TimeRoom.class);
+		final TimeRoom room = automation.getRoom(TimeRoom.class);
 
 		assertEquals(0, room.getDaytime_count());
 		assertEquals(0, room.getNighttime_count());
@@ -143,9 +145,10 @@ public class TimeIntegrationTest extends IntegrationTest {
 	}
 
 	@Test
-	public void eventStateTimeOfDay_triggeredCorrectly() throws IOException {
-		final MyNightRoom night = automation.addRoom(MyNightRoom.class);
-		final MyDayRoom day = automation.addRoom(MyDayRoom.class);
+	public void eventStateTimeOfDay_triggeredCorrectly() throws IOException, InterruptedException {
+		start(MyNightRoom.class, MyDayRoom.class);
+		final MyNightRoom night = automation.getRoom(MyNightRoom.class);
+		final MyDayRoom day = automation.getRoom(MyDayRoom.class);
 
 		assertEquals(0, day.count);
 		assertEquals(0, night.count);
@@ -160,9 +163,10 @@ public class TimeIntegrationTest extends IntegrationTest {
 	}
 
 	@Test
-	public void timeEvent_updatesDevice() throws IOException {
-		automation.addRoom(MyNightRoom.class);
-		automation.addRoom(MyDayRoom.class);
+	public void timeEvent_updatesDevice() throws IOException, InterruptedException {
+		start(MyNightRoom.class, MyDayRoom.class);
+		automation.getRoom(MyNightRoom.class);
+		automation.getRoom(MyDayRoom.class);
 
 		setNightTime();
 		final List<String> requests = webserver.getRequests();

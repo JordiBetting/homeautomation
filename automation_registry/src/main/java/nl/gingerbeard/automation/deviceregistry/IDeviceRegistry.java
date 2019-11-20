@@ -4,9 +4,24 @@ import java.util.Optional;
 
 import nl.gingerbeard.automation.devices.Device;
 
+/**
+ * This class holds an instance of all client Device types. Clients may use
+ * multiple instances of a Device instance, that represent the same physical
+ * device (e.g. one device shared in multiple Rooms). This class groups those
+ * and ensures that all instances get updated state when a state update has been
+ * received.
+ * 
+ * @author Jordi
+ *
+ */
 public interface IDeviceRegistry {
 
-	void addDevice(Device<?> device);
+	/** 
+	 * Adds a device to the registry.
+	 * @param device The device to add.
+	 * @return True when it is the first instance of the device. False otherwise.
+	 */
+	boolean addDevice(Device<?> device);
 
 	/**
 	 * Updates the devices with the specifix idx, returns one of those registered

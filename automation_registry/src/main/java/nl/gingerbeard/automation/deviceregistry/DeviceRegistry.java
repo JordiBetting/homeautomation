@@ -15,10 +15,12 @@ public final class DeviceRegistry implements IDeviceRegistry {
 	private final Map<Integer, DeviceGroup> deviceGroups = new HashMap<>();
 
 	@Override
-	public void addDevice(final Device<?> device) {
+	public boolean addDevice(final Device<?> device) {
 		Preconditions.checkArgument(device != null, "Please provide a non-null device to registry");
+		boolean isNew = !devicePresent(device.getIdx());
 		final DeviceGroup deviceGroup = getOrCreateGroup(device.getIdx());
 		deviceGroup.addDevice(device);
+		return isNew;
 	}
 
 	private DeviceGroup getOrCreateGroup(final int idx) {

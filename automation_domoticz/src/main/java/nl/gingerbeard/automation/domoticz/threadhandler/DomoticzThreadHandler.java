@@ -208,13 +208,10 @@ public class DomoticzThreadHandler {
 	}
 
 	private void syncFullStateSingleAttempt() throws IOException {
-		syncAlarm();
 		syncTimeOfDay();
+		syncAlarm();
 		syncDevices();
-	}
-
-	private void syncDevices() {
-		// TODO Auto-generated method stub
+		syncScenes();
 	}
 
 	private void syncTimeOfDay() throws IOException {
@@ -225,6 +222,14 @@ public class DomoticzThreadHandler {
 
 	private void syncAlarm() throws IOException {
 		state.setAlarmState(alarmClient.getAlarmState());
+	}
+
+	private void syncDevices() {
+		// TODO Auto-generated method stub
+	}
+
+	private void syncScenes() {
+		// TODO Auto-generated method stub
 	}
 
 }

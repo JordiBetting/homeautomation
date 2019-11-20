@@ -30,6 +30,7 @@ import nl.gingerbeard.automation.devices.Switch;
 import nl.gingerbeard.automation.devices.Thermostat;
 import nl.gingerbeard.automation.devices.ThermostatModeDevice;
 import nl.gingerbeard.automation.devices.ThermostatSetpointDevice;
+import nl.gingerbeard.automation.domoticz.api.DomoticzApi;
 import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
 import nl.gingerbeard.automation.event.IEvents;
 import nl.gingerbeard.automation.event.annotations.EventState;
@@ -71,6 +72,7 @@ public class AutomationFrameworkTest {
 
 	private AutomationFrameworkContainer container;
 	private LogOutputToTestLogger log;
+	private IAutomationFrameworkInterface framework;
 
 	@BeforeEach
 	public void initLogger() {
@@ -86,17 +88,14 @@ public class AutomationFrameworkTest {
 		log = null;
 	}
 
-	private IAutomationFrameworkInterface createIntegration() {
+	@SafeVarargs
+	private void createIntegration(Class<? extends Room> ... rooms) throws InterruptedException {
 		DomoticzConfiguration domoticzConfig = new DomoticzConfiguration(0, createMockUrl());
 		domoticzConfig.disableInit();
 		domoticzConfig.setEventHandlingSynchronous();
 		container = IAutomationFrameworkInterface.createFrameworkContainer(domoticzConfig, log, new ConfigurationServerSettings(0));
-		container.start();
-
-		final Optional<IAutomationFrameworkInterface> framework = container.getRuntime().getService(IAutomationFrameworkInterface.class);
-		assertTrue(framework.isPresent());
-
-		return framework.get();
+		container.start(rooms);
+		framework = container.getAutomationFramework();
 	}
 
 	private URL createMockUrl() {
@@ -114,35 +113,35 @@ public class AutomationFrameworkTest {
 	}
 
 	@Test
-	public void timeOfDay_correctState_eventReceived() throws IOException {
-		final IAutomationFrameworkInterface framework = createIntegration();
+	public void timeOfDay_correctState_eventReceived() throws IOException, InterruptedException {
+		createIntegration(TimeOfDaySubscriber.class);
 		getState().setTimeOfDay(TimeOfDay.DAYTIME);
-		final TimeOfDaySubscriber subscriber = framework.addRoom(TimeOfDaySubscriber.class);
 
 		framework.deviceChanged(new TestDevice());
 
+		TimeOfDaySubscriber subscriber = framework.getRoom(TimeOfDaySubscriber.class);
 		assertEquals(1, subscriber.counter);
 	}
 
 	@Test
-	public void timeOfDay_OtherState_nothingReceived() throws IOException {
-		final IAutomationFrameworkInterface framework = createIntegration();
+	public void timeOfDay_OtherState_nothingReceived() throws IOException, InterruptedException {
+		createIntegration(TimeOfDaySubscriber.class);
 		getState().setTimeOfDay(TimeOfDay.NIGHTTIME);
 
-		final TimeOfDaySubscriber subscriber = framework.addRoom(TimeOfDaySubscriber.class);
+		final TimeOfDaySubscriber subscriber = framework.getRoom(TimeOfDaySubscriber.class);
 		framework.deviceChanged(new TestDevice());
 
 		assertEquals(0, subscriber.counter);
 	}
 
 	@Test
-	public void timeOfDay_allday_received() throws IOException {
-		final IAutomationFrameworkInterface framework = createIntegration();
+	public void timeOfDay_allday_received() throws IOException, InterruptedException {
+		createIntegration(TimeOfDaySubscriber.class);
 		getState().setTimeOfDay(TimeOfDay.DAYTIME);
-		final TimeOfDaySubscriber subscriber = framework.addRoom(TimeOfDaySubscriber.class);
 
 		framework.deviceChanged(new TestDevice());
 
+		final TimeOfDaySubscriber subscriber = framework.getRoom(TimeOfDaySubscriber.class);
 		assertEquals(1, subscriber.counter);
 	}
 
@@ -180,44 +179,44 @@ public class AutomationFrameworkTest {
 	}
 
 	@Test
-	public void alarm_correctState_eventReceived() throws IOException {
-		final IAutomationFrameworkInterface framework = createIntegration();
+	public void alarm_correctState_eventReceived() throws IOException, InterruptedException {
+		createIntegration(TimeOfDaySubscriber.class);
 		getState().setAlarmState(AlarmState.ARM_HOME);
 
-		final TimeOfDaySubscriber subscriber = framework.addRoom(TimeOfDaySubscriber.class);
+		final TimeOfDaySubscriber subscriber = framework.getRoom(TimeOfDaySubscriber.class);
 		framework.deviceChanged(new TestDevice());
 
 		assertEquals(1, subscriber.counter);
 	}
 
 	@Test
-	public void alarm_otherState_nothingReceived() throws IOException {
-		final IAutomationFrameworkInterface framework = createIntegration();
+	public void alarm_otherState_nothingReceived() throws IOException, InterruptedException {
+		createIntegration(AlarmSubscriber.class);
 		getState().setAlarmState(AlarmState.DISARMED);
 
-		final AlarmSubscriber subscriber = framework.addRoom(AlarmSubscriber.class);
+		final AlarmSubscriber subscriber = framework.getRoom(AlarmSubscriber.class);
 		framework.deviceChanged(new TestDevice());
 
 		assertEquals(0, subscriber.counter);
 	}
 
 	@Test
-	public void alarm_all_received() throws IOException {
-		final IAutomationFrameworkInterface framework = createIntegration();
+	public void alarm_all_received() throws IOException, InterruptedException {
+		createIntegration(AllAlarmSubscriber.class);
 		getState().setAlarmState(AlarmState.ARM_AWAY);
 
-		final AllAlarmSubscriber subscriber = framework.addRoom(AllAlarmSubscriber.class);
+		final AllAlarmSubscriber subscriber = framework.getRoom(AllAlarmSubscriber.class);
 		framework.deviceChanged(new TestDevice());
 
 		assertEquals(1, subscriber.counter);
 	}
 
 	@Test
-	public void alarm_armed_received() throws IOException {
-		final IAutomationFrameworkInterface framework = createIntegration();
+	public void alarm_armed_received() throws IOException, InterruptedException {
+		createIntegration(ArmAlarmSubscriber.class);
 		getState().setAlarmState(AlarmState.ARM_AWAY);
 
-		final ArmAlarmSubscriber subscriber = framework.addRoom(ArmAlarmSubscriber.class);
+		final ArmAlarmSubscriber subscriber = framework.getRoom(ArmAlarmSubscriber.class);
 		framework.deviceChanged(new TestDevice());
 
 		assertEquals(1, subscriber.counter);
@@ -246,41 +245,41 @@ public class AutomationFrameworkTest {
 	}
 
 	@Test
-	public void homeSubscriber_home_received() throws IOException {
-		final IAutomationFrameworkInterface framework = createIntegration();
+	public void homeSubscriber_home_received() throws IOException, InterruptedException {
+		createIntegration(HomeSubscriber.class);
 		getState().setHomeAway(HomeAway.HOME);
-
-		final HomeSubscriber subscriber = framework.addRoom(HomeSubscriber.class);
+		final HomeSubscriber subscriber = framework.getRoom(HomeSubscriber.class);
+		
 		framework.deviceChanged(new TestDevice());
 
 		assertEquals(1, subscriber.counter);
 	}
 
 	@Test
-	public void homeSubscriber_away_nothingReceived() throws IOException {
-		final IAutomationFrameworkInterface framework = createIntegration();
+	public void homeSubscriber_away_nothingReceived() throws IOException, InterruptedException {
+		createIntegration(HomeSubscriber.class);
 		getState().setHomeAway(HomeAway.AWAY);
 
-		final HomeSubscriber subscriber = framework.addRoom(HomeSubscriber.class);
+		final HomeSubscriber subscriber = framework.getRoom(HomeSubscriber.class);
 		framework.deviceChanged(new TestDevice());
 
 		assertEquals(0, subscriber.counter);
 	}
 
 	@Test
-	public void homeAwayAlwaysSubscriber_away_received() throws IOException {
-		final IAutomationFrameworkInterface framework = createIntegration();
+	public void homeAwayAlwaysSubscriber_away_received() throws IOException, InterruptedException {
+		createIntegration(AlwaysHomeAwaySubscriber.class);
 		getState().setHomeAway(HomeAway.AWAY);
 
-		final AlwaysHomeAwaySubscriber subscriber = framework.addRoom(AlwaysHomeAwaySubscriber.class);
+		final AlwaysHomeAwaySubscriber subscriber = framework.getRoom(AlwaysHomeAwaySubscriber.class);
 		framework.deviceChanged(new TestDevice());
 
 		assertEquals(1, subscriber.counter);
 	}
 
 	@Test
-	public void createAndStop_noException() {
-		createIntegration();
+	public void createAndStop_noException() throws InterruptedException {
+		createIntegration(TimeOfDaySubscriber.class);
 		container.stop();
 		container = null;
 	}
@@ -304,9 +303,9 @@ public class AutomationFrameworkTest {
 	}
 
 	@Test
-	public void integration_updateEventWebserverReceived_deviceUpdated() throws IOException {
-		final IAutomationFrameworkInterface framework = createIntegration();
-		final TestRoom testRoom = framework.addRoom(TestRoom.class);
+	public void integration_updateEventWebserverReceived_deviceUpdated() throws IOException, InterruptedException {
+		createIntegration(TestRoom.class);
+		final TestRoom testRoom = framework.getRoom(TestRoom.class);
 
 		updateDevice(1, "on");
 		assertEquals(OnOffState.ON, testRoom.testSwitch.getState());
@@ -344,11 +343,11 @@ public class AutomationFrameworkTest {
 	}
 
 	@Test
-	public void compositeTest_allDevicesAdded() {
+	public void compositeTest_allDevicesAdded() throws InterruptedException {
 		final DeviceRegistry registry = new DeviceRegistry();
-		final IAutomationFrameworkInterface framework = new AutomationFramework(mock(IEvents.class), registry, mock(IState.class), mock(AutoControlToDomoticz.class), new TestLogger());
+		final IAutomationFrameworkInterface framework = new AutomationFramework(mock(IEvents.class), registry, mock(IState.class), mock(AutoControlToDomoticz.class), new TestLogger(), mock(DomoticzApi.class));
 
-		framework.addRoom(ThermostatRoom.class);
+		framework.start(ThermostatRoom.class);
 
 		final List<Device<?>> devices = registry.getAllDevices();
 		assertEquals(2, devices.size());
@@ -396,12 +395,12 @@ public class AutomationFrameworkTest {
 
 	@Test
 	public void addUnsupportedDevice_throwsException() {
-		final IAutomationFrameworkInterface framework = new AutomationFramework(mock(IEvents.class), mock(IDeviceRegistry.class), mock(IState.class), mock(AutoControlToDomoticz.class), new TestLogger());
-		assertThrows(UnsupportedOperationException.class, () -> framework.addRoom(RoomWithFakeDevice.class));
+		final IAutomationFrameworkInterface framework = new AutomationFramework(mock(IEvents.class), mock(IDeviceRegistry.class), mock(IState.class), mock(AutoControlToDomoticz.class), new TestLogger(), mock(DomoticzApi.class));
+		assertThrows(UnsupportedOperationException.class, () -> framework.start(RoomWithFakeDevice.class));
 	}
 
 	@Test
-	public void automationFrameworkContainerTest() {
+	public void automationFrameworkContainerTest() throws InterruptedException {
 		DomoticzConfiguration domoticzConfig = new DomoticzConfiguration(0, createMockUrl());
 		domoticzConfig.disableInit();
 		final AutomationFrameworkContainer container = IAutomationFrameworkInterface.createFrameworkContainer(domoticzConfig, new ConfigurationServerSettings(0));
@@ -415,13 +414,12 @@ public class AutomationFrameworkTest {
 	}
 
 	@Test
-	public void automationFramework() throws MalformedURLException, ProtocolException, IOException {
+	public void automationFramework() throws MalformedURLException, ProtocolException, IOException, InterruptedException {
 		final ILogOutput logOut = mock(ILogOutput.class);
 		DomoticzConfiguration domoticzConfig = new DomoticzConfiguration(0, createMockUrl());
 		domoticzConfig.disableInit();
 		container = IAutomationFrameworkInterface.createFrameworkContainer(domoticzConfig, logOut, new ConfigurationServerSettings(0));
-		container.start();
-		container.getAutomationFramework().addRoom(TestRoom.class);
+		container.start(TestRoom.class);
 		updateDevice(1, "on");
 		container.stop();
 	}
@@ -443,15 +441,14 @@ public class AutomationFrameworkTest {
 	}
 
 	@Test
-	public void roomState_isSystemState() {
-
-		final IAutomationFrameworkInterface framework = createIntegration();
+	public void roomState_isSystemState() throws InterruptedException {
+		createIntegration(StateRoom.class);
 		final Optional<IState> optionalState = container.getRuntime().getService(IState.class);
 		assertTrue(optionalState.isPresent());
 		final IState state = optionalState.get();
 		state.setTimeOfDay(TimeOfDay.DAYTIME);
 
-		final StateRoom stateroom = framework.addRoom(StateRoom.class);
+		final StateRoom stateroom = framework.getRoom(StateRoom.class);
 
 		assertDoesNotThrow(() -> stateroom.getState());
 		assertEquals(TimeOfDay.DAYTIME, stateroom.getState().getTimeOfDay());
@@ -465,7 +462,7 @@ public class AutomationFrameworkTest {
 
 	@Test
 	public void createRoom() {
-		final AutomationFramework automation = new AutomationFramework(mock(IEvents.class), mock(IDeviceRegistry.class), mock(IState.class), mock(AutoControlToDomoticz.class), new TestLogger());
+		final AutomationFramework automation = new AutomationFramework(mock(IEvents.class), mock(IDeviceRegistry.class), mock(IState.class), mock(AutoControlToDomoticz.class), new TestLogger(), mock(DomoticzApi.class));
 
 		final WorkingRoom room = automation.createRoom(WorkingRoom.class);
 
@@ -480,7 +477,7 @@ public class AutomationFrameworkTest {
 
 	@Test
 	public void createRoom_constructorThrowsNPE_exceptionThrown() {
-		final AutomationFramework automation = new AutomationFramework(mock(IEvents.class), mock(IDeviceRegistry.class), mock(IState.class), mock(AutoControlToDomoticz.class), new TestLogger());
+		final AutomationFramework automation = new AutomationFramework(mock(IEvents.class), mock(IDeviceRegistry.class), mock(IState.class), mock(AutoControlToDomoticz.class), new TestLogger(), mock(DomoticzApi.class));
 
 		final NullPointerException e = assertThrows(NullPointerException.class, () -> automation.createRoom(ThrowingNPEConstructorRoom.class));
 		assertEquals("Test NPE", e.getMessage());
@@ -494,7 +491,7 @@ public class AutomationFrameworkTest {
 
 	@Test
 	public void createRoom_constructorThrowsChecked_exceptionWrappedInRTE() {
-		final AutomationFramework automation = new AutomationFramework(mock(IEvents.class), mock(IDeviceRegistry.class), mock(IState.class), mock(AutoControlToDomoticz.class), new TestLogger());
+		final AutomationFramework automation = new AutomationFramework(mock(IEvents.class), mock(IDeviceRegistry.class), mock(IState.class), mock(AutoControlToDomoticz.class), new TestLogger(), mock(DomoticzApi.class));
 
 		final RuntimeException e = assertThrows(RuntimeException.class, () -> automation.createRoom(ThrowingCheckedExceptionConstructorRoom.class));
 
@@ -510,17 +507,11 @@ public class AutomationFrameworkTest {
 
 	@Test
 	public void createRoom_privateConstructor_throwsException() {
-		final AutomationFramework automation = new AutomationFramework(mock(IEvents.class), mock(IDeviceRegistry.class), mock(IState.class), mock(AutoControlToDomoticz.class), new TestLogger());
+		final AutomationFramework automation = new AutomationFramework(mock(IEvents.class), mock(IDeviceRegistry.class), mock(IState.class), mock(AutoControlToDomoticz.class), new TestLogger(), mock(DomoticzApi.class));
 
 		final RuntimeException e = assertThrows(RuntimeException.class, () -> automation.createRoom(PrivateConstructorRoom.class));
 		assertEquals("Is the room and its default constructor public?", e.getMessage());
 		assertEquals(NoSuchMethodException.class, e.getCause().getClass());
 	}
 
-	@Test
-	public void addRoom_roomIsNull_throwsException() {
-		final AutomationFramework automation = new AutomationFramework(mock(IEvents.class), mock(IDeviceRegistry.class), mock(IState.class), mock(AutoControlToDomoticz.class), new TestLogger());
-
-		assertThrows(IllegalArgumentException.class, () -> automation.addRoom(null));
-	}
 }
