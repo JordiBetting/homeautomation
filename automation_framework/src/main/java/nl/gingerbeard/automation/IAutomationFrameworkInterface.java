@@ -25,8 +25,6 @@ public interface IAutomationFrameworkInterface {
 	
 	void start(Collection<Class<? extends Room>> rooms) throws InterruptedException;
 
-	void start(@SuppressWarnings("unchecked") Class<? extends Room>... rooms) throws InterruptedException;
-
 	<T extends Room> T getRoom(Class<T> roomType);
 
 }

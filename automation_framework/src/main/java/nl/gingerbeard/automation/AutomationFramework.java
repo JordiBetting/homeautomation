@@ -120,14 +120,6 @@ public class AutomationFramework implements IAutomationFrameworkInterface {
 	}
 	
 	@Override
-	public void start(@SuppressWarnings("unchecked") Class<? extends Room> ... rooms) throws InterruptedException {
-		for (Class<? extends Room> room : rooms) {
-			addRoom(room);
-		}
-		roomsAdded();
-	}
-	
-	@Override
 	public void start(Collection<Class<? extends Room>> rooms) throws InterruptedException {
 		for (Class<? extends Room> room : rooms) {
 			addRoom(room);
