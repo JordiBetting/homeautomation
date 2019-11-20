@@ -22,6 +22,9 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 import nl.gingerbeard.automation.deviceregistry.IDeviceRegistry;
 import nl.gingerbeard.automation.devices.Switch;
@@ -456,4 +459,24 @@ public class DomoticzThreadHandlerTest {
 		assertEquals("Failing test task", e.getCause().getMessage());
 	}
 
+	@Test
+	public void execute_async_failed_exceptionLogged() throws IOException, InterruptedException, DomoticzException {
+		create(false);
+		
+		final CountDownLatch latch = new CountDownLatch(1);
+		Mockito.doAnswer(new Answer<>() {
+			@Override
+			public Object answer(InvocationOnMock invocation) throws Throwable {
+				latch.countDown();
+				return null;
+			}}).when(logger).exception(any(), any());
+		
+		final DomoticzException exc = new DomoticzException("Test exception");
+		handler.execute(() -> { throw exc; });
+		
+		latch.await(1, TimeUnit.MINUTES);
+		verify(logger, times(1)).exception(exc, "Failed to execute command");
+		
+	}
+	
 }
