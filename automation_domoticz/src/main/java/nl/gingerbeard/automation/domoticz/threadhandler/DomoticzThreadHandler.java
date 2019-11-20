@@ -108,6 +108,7 @@ public class DomoticzThreadHandler {
 
 	void execute(final Task command) throws InterruptedException, DomoticzException {
 		final CountDownLatch sync = new CountDownLatch(1);
+		final boolean isSynchronous = config.isSynchronousEventHandling();
 
 		Container<DomoticzException> thrown = new Container<>();
 
@@ -116,12 +117,15 @@ public class DomoticzThreadHandler {
 				command.execute();
 			} catch (DomoticzException e) {
 				thrown.set(e);
+				if (!isSynchronous) {
+					logger.exception(e, "Failed to execute command");
+				}
 			} finally {
 				sync.countDown();
 			}
 		});
 
-		if (config.isSynchronousEventHandling()) {
+		if (isSynchronous) {
 			sync.await();
 			if (thrown.isPresent()) {
 				if (thrown.get().getCause() instanceof InterruptedException) {
@@ -130,8 +134,6 @@ public class DomoticzThreadHandler {
 					throw thrown.get();
 				}
 			}
-		} else {
-
 		}
 	}
 

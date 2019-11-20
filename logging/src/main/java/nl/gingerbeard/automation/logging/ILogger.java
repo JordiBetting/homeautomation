@@ -20,7 +20,6 @@ public interface ILogger {
 		log(Optional.empty(), LogLevel.WARNING, message);
 	}
 
-	void log(Optional<Throwable> t, LogLevel level, String message);
 
 	default void exception(final Throwable t, final String message) {
 		log(Optional.of(t), LogLevel.EXCEPTION, message);
@@ -32,7 +31,5 @@ public interface ILogger {
 
 	ILogger createContext(String string);
 
-	// default String getContext() {
-	// return "root";
-	// }
+	void log(Optional<Throwable> t, LogLevel level, String message);
 }
