@@ -200,7 +200,7 @@ public class DomoticzThreadHandler {
 
 	void executeTaskWithRetries(RetryTask task, DomoticzInitBehaviorConfig config) throws InterruptedException, DomoticzException {
 		int interval_s = config.getInitInterval_s();
-		int nrTries = interval_s == 0 ? 1 : Math.max(1, config.getMaxInitWait_s() / interval_s);
+		int nrTries = Math.max(1, config.getMaxInitWait_s() / Math.max(1, interval_s));
 		Optional<Throwable> e = RetryUtil.retry(task, nrTries, Duration.ofSeconds(interval_s));
 		if (e.isPresent()) {
 			throw new DomoticzException("Failed to sync full state with Domoticz", e.get());

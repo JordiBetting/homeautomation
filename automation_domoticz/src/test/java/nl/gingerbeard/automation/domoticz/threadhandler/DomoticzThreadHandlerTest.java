@@ -446,5 +446,14 @@ public class DomoticzThreadHandlerTest {
 			throw new DomoticzException(new InterruptedException());
 		}));
 	}
+	
+	@Test
+	public void retryFailed() throws IOException, InterruptedException, DomoticzException {
+		create(true);
+		
+		DomoticzException e = assertThrows(DomoticzException.class, () -> handler.executeTaskWithRetries(() -> { throw new Exception("Failing test task"); }, new DomoticzInitBehaviorConfig(1, 1)));
+		assertEquals("Failed to sync full state with Domoticz", e.getMessage());
+		assertEquals("Failing test task", e.getCause().getMessage());
+	}
 
 }
