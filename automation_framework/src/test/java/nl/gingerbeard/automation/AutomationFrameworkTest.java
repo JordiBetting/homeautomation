@@ -551,4 +551,15 @@ public class AutomationFrameworkTest {
 		
 		log.assertContains(LogLevel.WARNING, "Could not sync full state at startup, continuing without initial state. This may result in misbehaving rules.");
 	}
+	
+	@Test
+	public void createRoom_nullRoom_throwsException() {
+		final AutomationFramework automation = new AutomationFramework(mock(IEvents.class), mock(IDeviceRegistry.class), mock(IState.class), mock(AutoControlToDomoticz.class), new TestLogger(), mock(DomoticzApi.class));
+
+		final IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> automation.start((Class<? extends Room>)null));
+		
+		assertEquals("Please provide a non-null room", e.getMessage());
+	}
+	
+	
 }
