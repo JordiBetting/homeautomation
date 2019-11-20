@@ -1,21 +1,52 @@
 package nl.gingerbeard.automation.domoticz.configuration;
 
 import java.net.URL;
+import java.util.Optional;
 
-public class DomoticzConfiguration {
+public class DomoticzConfiguration { // TODO: Refactor into general settings
 
 	private int listenPort;
 	private final URL baseURL;
 	private int connectTimeoutMS = DEFAULT_CONNECT_TIMEOUT_MS;
 	private boolean synchronousEventHandling = false;
-	private int maxInitWait_s = 60 * 15; // TODO: Use Duration i.s.o. int_s
-	private int initInterval_s = 5;
+	private Optional<DomoticzInitBehaviorConfig> initBehavior = Optional.of(new DomoticzInitBehaviorConfig());
 
 	public static final int DEFAULT_CONNECT_TIMEOUT_MS = 3000;
 
 	public DomoticzConfiguration(final int listenPort, final URL baseURL) {
 		this.listenPort = listenPort;
 		this.baseURL = baseURL;
+	}
+
+	public static class DomoticzInitBehaviorConfig {
+		private final int maxInitWait_s; // TODO: Use Duration i.s.o. int_s
+		private final int initInterval_s;
+
+		/**
+		 * Configuration for initialization behavior retry mechanism.
+		 * 
+		 * @param maxInitWait_s  Sets the maximum wait time for Domoticz to be online
+		 *                       during initialization.
+		 * @param initInterval_s ets the interval of retries connecting to Domoticz
+		 *                       during initialization..
+		 */
+		public DomoticzInitBehaviorConfig(int maxInitWait_s, int initInterval_s) {
+			this.maxInitWait_s = maxInitWait_s;
+			this.initInterval_s = initInterval_s;
+		}
+
+		public DomoticzInitBehaviorConfig() {
+			this(60 * 15, 5);
+		}
+
+		public int getMaxInitWait_s() {
+			return maxInitWait_s;
+		}
+
+		public int getInitInterval_s() {
+			return initInterval_s;
+		}
+
 	}
 
 	/**
@@ -68,8 +99,8 @@ public class DomoticzConfiguration {
 	/**
 	 * When this synchronous has been enabled (by calling this method), the REST
 	 * call of the events received will be blocked until all reactions on event have
-	 * been handled. If set, the HTTP code is based on the successful handling of the
-	 * event. If set to false, event is handled asynchronously from the received
+	 * been handled. If set, the HTTP code is based on the successful handling of
+	 * the event. If set to false, event is handled asynchronously from the received
 	 * event.
 	 */
 	public void setEventHandlingSynchronous() {
@@ -80,30 +111,19 @@ public class DomoticzConfiguration {
 		return synchronousEventHandling;
 	}
 
-	public int getMaxInitWait_s() {
-		return maxInitWait_s;
+	public void setInitConfiguration(DomoticzInitBehaviorConfig config) {
+		this.initBehavior = Optional.of(config);
 	}
 
-	/**
-	 * Sets the maximum wait time for Domoticz to be online during initialization.
-	 * 
-	 * @param maxInitWait_s
-	 */
-	public void setMaxInitWait_s(int maxInitWait_s) {
-		this.maxInitWait_s = maxInitWait_s;
+	public void disableInit() {
+		this.initBehavior = Optional.empty();
 	}
 
-	public int getInitInterval_s() {
-		return initInterval_s;
+	public boolean isInitEnabled() {
+		return initBehavior.isPresent();
 	}
 
-	/**
-	 * Sets the interval of retries connecting to Domoticz during initialization.
-	 * 
-	 * @param initInterval_s The interval in seconds.
-	 */
-	public void setInitInterval_s(int initInterval_s) {
-		this.initInterval_s = initInterval_s;
+	public Optional<DomoticzInitBehaviorConfig> getInitConfig() {
+		return this.initBehavior;
 	}
-
 }

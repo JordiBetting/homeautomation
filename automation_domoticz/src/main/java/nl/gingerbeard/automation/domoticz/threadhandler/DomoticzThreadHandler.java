@@ -20,6 +20,7 @@ import nl.gingerbeard.automation.domoticz.api.IDomoticzTimeOfDayChanged;
 import nl.gingerbeard.automation.domoticz.clients.AlarmStateClient;
 import nl.gingerbeard.automation.domoticz.clients.TimeOfDayClient;
 import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
+import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration.DomoticzInitBehaviorConfig;
 import nl.gingerbeard.automation.logging.ILogger;
 import nl.gingerbeard.automation.state.AlarmState;
 import nl.gingerbeard.automation.state.IState;
@@ -142,7 +143,7 @@ public class DomoticzThreadHandler {
 			if (device.isPresent()) {
 				if (oldState.orElse(null) != device.get().getState()) {
 					// TODO consistent logging
-					logger.debug("Device with idx " + idx + " changed state into: " + newState); 
+					logger.debug("Device with idx " + idx + " changed state into: " + newState);
 					final Device<?> changedDevice = device.get();
 					deviceListener.ifPresent((listener) -> listener.statusChanged(changedDevice));
 				}
@@ -186,16 +187,18 @@ public class DomoticzThreadHandler {
 	}
 
 	public void syncFull() throws DomoticzException, InterruptedException {
-		execute(() -> {
-			try {
-				executeTaskWithRetries(() -> syncFullStateSingleAttempt());
-			} catch (InterruptedException e) {
-				throw new DomoticzException("Interrupted while retrying syncFull", e);
-			}
-		});
+		if (config.isInitEnabled()) {
+			execute(() -> {
+				try {
+					executeTaskWithRetries(() -> syncFullStateSingleAttempt(), config.getInitConfig().get());
+				} catch (InterruptedException e) {
+					throw new DomoticzException("Interrupted while retrying syncFull", e);
+				}
+			});
+		}
 	}
 
-	void executeTaskWithRetries(RetryTask task) throws InterruptedException, DomoticzException {
+	void executeTaskWithRetries(RetryTask task, DomoticzInitBehaviorConfig config) throws InterruptedException, DomoticzException {
 		int interval_s = config.getInitInterval_s();
 		int nrTries = interval_s == 0 ? 1 : Math.max(1, config.getMaxInitWait_s() / interval_s);
 		Optional<Throwable> e = RetryUtil.retry(task, nrTries, Duration.ofSeconds(interval_s));
@@ -212,7 +215,6 @@ public class DomoticzThreadHandler {
 
 	private void syncDevices() {
 		// TODO Auto-generated method stub
-
 	}
 
 	private void syncTimeOfDay() throws IOException {

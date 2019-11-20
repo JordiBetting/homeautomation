@@ -20,15 +20,12 @@ public class ControlloopComponent {
 
 	@Requires
 	public IState state;
-	
+
 	@Requires
 	public IOnkyoTransmitter onkyoTransmitter;
-	
+
 	@Requires
 	public DomoticzApi domoticz;
-	
-	@Requires
-	public DomoticzConfiguration domoticzConfig;
 
 	@Activate
 	public void create() throws InterruptedException {
@@ -36,10 +33,12 @@ public class ControlloopComponent {
 		domoticz.setAlarmListener(controlloop);
 		domoticz.setTimeListener(controlloop);
 		domoticz.setDeviceListener(controlloop);
+
 		try {
 			domoticz.syncFullState();
 		} catch (DomoticzException e) {
-			log.warning(e, "Cloud not sync full state at startup, continuing without initial state. This may result in misbehaving rules.");
+			log.warning(e,
+					"Cloud not sync full state at startup, continuing without initial state. This may result in misbehaving rules.");
 		}
 	}
 

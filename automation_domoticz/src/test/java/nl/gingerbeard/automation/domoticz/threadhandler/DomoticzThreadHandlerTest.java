@@ -24,7 +24,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import nl.gingerbeard.automation.deviceregistry.IDeviceRegistry;
-import nl.gingerbeard.automation.devices.Device;
 import nl.gingerbeard.automation.devices.Switch;
 import nl.gingerbeard.automation.domoticz.api.DomoticzException;
 import nl.gingerbeard.automation.domoticz.api.IDomoticzAlarmChanged;
@@ -33,6 +32,7 @@ import nl.gingerbeard.automation.domoticz.api.IDomoticzTimeOfDayChanged;
 import nl.gingerbeard.automation.domoticz.clients.AlarmStateClient;
 import nl.gingerbeard.automation.domoticz.clients.TimeOfDayClient;
 import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
+import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration.DomoticzInitBehaviorConfig;
 import nl.gingerbeard.automation.logging.ILogger;
 import nl.gingerbeard.automation.state.AlarmState;
 import nl.gingerbeard.automation.state.IState;
@@ -355,8 +355,7 @@ public class DomoticzThreadHandlerTest {
 	public void syncFull_failed_throwsInterruptedException() {
 		createFailing();
 
-		config.setInitInterval_s(5);
-		config.setMaxInitWait_s(15);
+		config.setInitConfiguration(new DomoticzInitBehaviorConfig(5,15));
 
 		Thread.currentThread().interrupt();
 		assertThrows(InterruptedException.class, () -> handler.syncFull());
@@ -370,7 +369,7 @@ public class DomoticzThreadHandlerTest {
 		}
 
 		@Override
-		void executeTaskWithRetries(RetryTask task) throws DomoticzException {
+		void executeTaskWithRetries(RetryTask task, DomoticzInitBehaviorConfig config) throws DomoticzException {
 			throw new DomoticzException();
 		}
 
@@ -380,8 +379,7 @@ public class DomoticzThreadHandlerTest {
 	public void syncFull_interrupted_throwsInterruptedException() {
 		createInterrupting();
 
-		config.setInitInterval_s(5);
-		config.setMaxInitWait_s(15);
+		config.setInitConfiguration(new DomoticzInitBehaviorConfig(5,15));
 
 		Thread.currentThread().interrupt();
 		assertThrows(InterruptedException.class, () -> handler.syncFull());
@@ -395,7 +393,7 @@ public class DomoticzThreadHandlerTest {
 		}
 
 		@Override
-		void executeTaskWithRetries(RetryTask task) throws DomoticzException, InterruptedException {
+		void executeTaskWithRetries(RetryTask task, DomoticzInitBehaviorConfig config) throws DomoticzException, InterruptedException {
 			throw new InterruptedException();
 		}
 

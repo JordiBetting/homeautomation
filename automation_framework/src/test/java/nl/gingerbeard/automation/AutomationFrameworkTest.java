@@ -88,8 +88,7 @@ public class AutomationFrameworkTest {
 
 	private IAutomationFrameworkInterface createIntegration() {
 		DomoticzConfiguration domoticzConfig = new DomoticzConfiguration(0, createMockUrl());
-		domoticzConfig.setMaxInitWait_s(1);
-		domoticzConfig.setInitInterval_s(0);
+		domoticzConfig.disableInit();
 		domoticzConfig.setEventHandlingSynchronous();
 		container = IAutomationFrameworkInterface.createFrameworkContainer(domoticzConfig, log, new ConfigurationServerSettings(0));
 		container.start();
@@ -404,8 +403,7 @@ public class AutomationFrameworkTest {
 	@Test
 	public void automationFrameworkContainerTest() {
 		DomoticzConfiguration domoticzConfig = new DomoticzConfiguration(0, createMockUrl());
-		domoticzConfig.setMaxInitWait_s(0);
-		domoticzConfig.setInitInterval_s(0);
+		domoticzConfig.disableInit();
 		final AutomationFrameworkContainer container = IAutomationFrameworkInterface.createFrameworkContainer(domoticzConfig, new ConfigurationServerSettings(0));
 		container.start();
 		final IAutomationFrameworkInterface framework = container.getAutomationFramework();
@@ -420,8 +418,7 @@ public class AutomationFrameworkTest {
 	public void automationFramework() throws MalformedURLException, ProtocolException, IOException {
 		final ILogOutput logOut = mock(ILogOutput.class);
 		DomoticzConfiguration domoticzConfig = new DomoticzConfiguration(0, createMockUrl());
-		domoticzConfig.setMaxInitWait_s(0);
-		domoticzConfig.setInitInterval_s(0);
+		domoticzConfig.disableInit();
 		container = IAutomationFrameworkInterface.createFrameworkContainer(domoticzConfig, logOut, new ConfigurationServerSettings(0));
 		container.start();
 		container.getAutomationFramework().addRoom(TestRoom.class);
