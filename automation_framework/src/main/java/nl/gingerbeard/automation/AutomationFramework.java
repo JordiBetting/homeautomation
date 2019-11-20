@@ -143,10 +143,7 @@ public class AutomationFramework implements IAutomationFrameworkInterface {
 	@Override
 	public <T extends Room> T getRoom(Class<T> roomType) {
 		Room room = rooms.get(roomType);
-		if (room != null && room.getClass().isAssignableFrom(roomType)) {
-			return (T) room;
-		}
-		return null;
+		return (T) room;
 	}
 
 }
