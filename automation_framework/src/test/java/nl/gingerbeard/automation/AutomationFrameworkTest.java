@@ -89,7 +89,7 @@ public class AutomationFrameworkTest {
 	}
 
 	@SafeVarargs
-	private void createIntegration(Class<? extends Room> ... rooms) throws InterruptedException {
+	private final void createIntegration(Class<? extends Room> ... rooms) throws InterruptedException {
 		DomoticzConfiguration domoticzConfig = new DomoticzConfiguration(0, createMockUrl());
 		domoticzConfig.disableInit();
 		domoticzConfig.setEventHandlingSynchronous();
