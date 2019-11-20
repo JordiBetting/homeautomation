@@ -129,7 +129,7 @@ public class StartupStateTest {
 	}
 
 	@SafeVarargs
-	private void startFramework(TestWebServer webserver, Class<? extends Room> ... rooms) throws MalformedURLException, InterruptedException {
+	private final void startFramework(TestWebServer webserver, Class<? extends Room> ... rooms) throws MalformedURLException, InterruptedException {
 		DomoticzConfiguration config = new DomoticzConfiguration(0,
 				new URL("http://localhost:" + webserver.getListeningPort()));
 		config.setEventHandlingSynchronous();
