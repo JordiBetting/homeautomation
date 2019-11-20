@@ -140,7 +140,7 @@ public class AutomationFramework implements IAutomationFrameworkInterface {
 			domoticz.syncFullState();
 		} catch (DomoticzException e) {
 			log.warning(e,
-					"Cloud not sync full state at startup, continuing without initial state. This may result in misbehaving rules.");
+					"Could not sync full state at startup, continuing without initial state. This may result in misbehaving rules.");
 		}
 		for (Room room : rooms.values()) {
 			room.init(state);

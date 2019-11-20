@@ -1,5 +1,6 @@
 package nl.gingerbeard.automation;
 
+import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -19,6 +20,9 @@ import java.util.Optional;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+
+import com.google.common.collect.Lists;
 
 import nl.gingerbeard.automation.autocontrol.AutoControlToDomoticz;
 import nl.gingerbeard.automation.configuration.ConfigurationServerSettings;
@@ -31,11 +35,13 @@ import nl.gingerbeard.automation.devices.Thermostat;
 import nl.gingerbeard.automation.devices.ThermostatModeDevice;
 import nl.gingerbeard.automation.devices.ThermostatSetpointDevice;
 import nl.gingerbeard.automation.domoticz.api.DomoticzApi;
+import nl.gingerbeard.automation.domoticz.api.DomoticzException;
 import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
 import nl.gingerbeard.automation.event.IEvents;
 import nl.gingerbeard.automation.event.annotations.EventState;
 import nl.gingerbeard.automation.event.annotations.Subscribe;
 import nl.gingerbeard.automation.logging.ILogOutput;
+import nl.gingerbeard.automation.logging.LogLevel;
 import nl.gingerbeard.automation.logging.TestLogger;
 import nl.gingerbeard.automation.logging.TestLogger.LogOutputToTestLogger;
 import nl.gingerbeard.automation.service.Container;
@@ -514,4 +520,35 @@ public class AutomationFrameworkTest {
 		assertEquals(NoSuchMethodException.class, e.getCause().getClass());
 	}
 
+	@Test
+	public void getRoom_notAdded_returnsNull() throws InterruptedException {
+		createIntegration(StateRoom.class);
+		
+		assertNull(framework.getRoom(AlarmSubscriber.class));
+	}
+	
+	@Test
+	public void start_collection_allRoomsAdded() throws InterruptedException {
+		DomoticzConfiguration domoticzConfig = new DomoticzConfiguration(0, createMockUrl());
+		domoticzConfig.disableInit();
+		domoticzConfig.setEventHandlingSynchronous();
+		container = IAutomationFrameworkInterface.createFrameworkContainer(domoticzConfig, log, new ConfigurationServerSettings(0));
+		
+		container.start(Lists.newArrayList(StateRoom.class));
+		
+		assertNotNull(container.getAutomationFramework().getRoom(StateRoom.class));
+	}
+	
+	@Test
+	public void initFailed_warningLogged() throws InterruptedException, DomoticzException {
+		DomoticzApi domoticz = mock(DomoticzApi.class);
+		TestLogger log = new TestLogger();
+		final AutomationFramework automation = new AutomationFramework(mock(IEvents.class), mock(IDeviceRegistry.class), mock(IState.class), mock(AutoControlToDomoticz.class), log, domoticz);
+
+		Mockito.doThrow(DomoticzException.class).when(domoticz).syncFullState();
+		
+		automation.start(StateRoom.class);
+		
+		log.assertContains(LogLevel.WARNING, "Could not sync full state at startup, continuing without initial state. This may result in misbehaving rules.");
+	}
 }
