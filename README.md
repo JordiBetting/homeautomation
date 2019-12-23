@@ -16,7 +16,6 @@ Potential future uses:
 
 TODO:
 - Example folder
-- Deliver a docker image next to the jar file
 
 ## Usage
 **Build**
