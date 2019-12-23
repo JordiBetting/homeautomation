@@ -5,12 +5,13 @@ import java.io.InputStreamReader;
 
 import nl.gingerbeard.automation.domoticz.clients.json.GetSunRiseSet;
 import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
+import nl.gingerbeard.automation.logging.ILogger;
 import nl.gingerbeard.automation.state.TimeOfDayValues;
 
 public class TimeOfDayClient extends GetClient {
 
-	public TimeOfDayClient(final DomoticzConfiguration config) throws IOException {
-		super(config, "/json.htm?type=command&param=getSunRiseSet");
+	public TimeOfDayClient(final DomoticzConfiguration config, final ILogger log) throws IOException {
+		super(config, log, "/json.htm?type=command&param=getSunRiseSet");
 	}
 
 	public TimeOfDayValues createTimeOfDayValues() throws IOException {

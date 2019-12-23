@@ -2,6 +2,7 @@ package nl.gingerbeard.automation.domoticz.clients;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -12,6 +13,7 @@ import org.junit.jupiter.api.Test;
 
 import fi.iki.elonen.NanoHTTPD.Response.Status;
 import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
+import nl.gingerbeard.automation.logging.TestLogger;
 import nl.gingerbeard.automation.state.TimeOfDayValues;
 import nl.gingerbeard.automation.testutils.TestWebServer;
 
@@ -28,7 +30,7 @@ public class TimeOfDayClientTest {
 	}
 
 	private void createClient(final DomoticzConfiguration config) throws IOException {
-		client = new TimeOfDayClient(config);
+		client = new TimeOfDayClient(config, new TestLogger());
 	}
 
 	private DomoticzConfiguration setUp() throws IOException, MalformedURLException {
@@ -100,7 +102,7 @@ public class TimeOfDayClientTest {
 		webserver.setResponse(DOMOTICZ_URL, Status.NOT_FOUND, "woops");
 
 		final IOException e = assertThrows(IOException.class, () -> client.createTimeOfDayValues());
-		assertEquals("responsecode expected 200, but was: 404", e.getMessage());
+		assertTrue(e.getMessage().startsWith("responsecode expected 200, but was: 404"));
 	}
 
 	@Test

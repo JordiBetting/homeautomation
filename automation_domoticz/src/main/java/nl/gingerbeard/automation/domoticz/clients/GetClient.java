@@ -5,23 +5,31 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.ProtocolException;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.Optional;
 
 import com.google.common.base.Charsets;
+import com.google.common.io.CharStreams;
 import com.google.gson.Gson;
 
 import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
+import nl.gingerbeard.automation.logging.ILogger;
 
 public abstract class GetClient {
 
+	private URL baseUrl;
 	private URL url;
 	protected static final Gson gson = new Gson();
 	private final Optional<String> authorizationHeader;
+	private int timeoutMS;
+	private ILogger log;
 
-	public GetClient(DomoticzConfiguration config, String url) throws IOException {
-		this.url = createUrl(config, url);
+	public GetClient(DomoticzConfiguration config, final ILogger log, String url) throws IOException {
+		this.log = log;
+		this.baseUrl = config.getBaseURL();
+		this.url = createUrl(url);
 		this.authorizationHeader = getAuthorizationHeader(config);
-
+		timeoutMS = config.getConnectTimeoutMS();
 	}
 
 	private Optional<String> getAuthorizationHeader(DomoticzConfiguration config) {
@@ -31,9 +39,13 @@ public abstract class GetClient {
 		}
 		return Optional.ofNullable(auth);
 	}
+	
+	protected void setUrl(URL url) {
+		this.url = url;
+	}
 
-	private URL createUrl(DomoticzConfiguration config, String path) throws IOException {
-		return new URL(config.getBaseURL().toString() + path);
+	private URL createUrl(String path) throws IOException {
+		return new URL(baseUrl.toString() + path);
 	}
 
 	protected final InputStreamReader executeRequest() throws IOException, ProtocolException {
@@ -43,15 +55,32 @@ public abstract class GetClient {
 	}
 
 	private void validateResponseCode(final HttpURLConnection con) throws IOException {
-		final int httpCode = con.getResponseCode();
-		if (httpCode != 200) {
-			throw new IOException("responsecode expected 200, but was: " + httpCode);
+		int responseCode = con.getResponseCode();
+		log.debug("Domoticz call " + responseCode + " on " + con.getURL().toString());
+		
+		if (responseCode != HttpURLConnection.HTTP_OK) {
+			String body = readErrorBody(con);
+			if (body.length() > 0) {
+				body = System.lineSeparator() + body;
+			}
+			throw new IOException("responsecode expected 200, but was: " + responseCode + System.lineSeparator() + url.toString() + " " + con.getResponseMessage() + body);
 		}
+	}
+	
+	private String readErrorBody(final HttpURLConnection con) throws IOException {
+		if (con.getErrorStream() != null) {
+			try (InputStreamReader reader = new InputStreamReader(con.getErrorStream(), Charset.defaultCharset())) {
+				return CharStreams.toString(reader);
+			}
+		}
+		return "";
 	}
 
 	private HttpURLConnection createConnection(final URL url) throws IOException, ProtocolException {
 		final HttpURLConnection con = (HttpURLConnection) url.openConnection();
-		con.setUseCaches(false);
+		con.setUseCaches(false);		
+		con.setConnectTimeout(timeoutMS);
+		con.setReadTimeout(timeoutMS);
 		con.setRequestMethod("GET");
 		authorizationHeader.ifPresent((header) -> con.addRequestProperty("Authorization", header));
 		con.connect();

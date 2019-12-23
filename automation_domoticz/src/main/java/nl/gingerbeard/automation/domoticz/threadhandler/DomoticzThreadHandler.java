@@ -44,7 +44,7 @@ public class DomoticzThreadHandler {
 
 	public DomoticzThreadHandler(final DomoticzConfiguration config, final IDeviceRegistry deviceRegistry, IState state,
 			final ILogger logger) throws IOException {
-		this(config, deviceRegistry, state, logger, new AlarmStateClient(config), new TimeOfDayClient(config));
+		this(config, deviceRegistry, state, logger, new AlarmStateClient(config, logger), new TimeOfDayClient(config, logger));
 	}
 
 	DomoticzThreadHandler(final DomoticzConfiguration config, final IDeviceRegistry deviceRegistry, IState state,

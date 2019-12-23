@@ -10,11 +10,11 @@ import nl.gingerbeard.automation.domoticz.api.IDomoticzAlarmChanged;
 import nl.gingerbeard.automation.domoticz.api.IDomoticzDeviceStatusChanged;
 import nl.gingerbeard.automation.domoticz.api.IDomoticzTimeOfDayChanged;
 import nl.gingerbeard.automation.domoticz.clients.TimeOfDayClient;
+import nl.gingerbeard.automation.domoticz.clients.UpdateTransmitterClient;
 import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
 import nl.gingerbeard.automation.domoticz.receiver.DomoticzEventReceiverServer;
 import nl.gingerbeard.automation.domoticz.receiver.DomoticzEventReceiverServer.EventReceived;
 import nl.gingerbeard.automation.domoticz.threadhandler.DomoticzThreadHandler;
-import nl.gingerbeard.automation.domoticz.transmitter.DomoticzUpdateTransmitter;
 import nl.gingerbeard.automation.logging.ILogger;
 import nl.gingerbeard.automation.state.IState;
 import nl.gingerbeard.automation.state.NextState;
@@ -23,21 +23,21 @@ import nl.gingerbeard.automation.state.TimeOfDayValues;
 public class DomoticzImpl implements DomoticzApi, EventReceived {
 
 	private final DomoticzThreadHandler threadHandler;
-	private final DomoticzUpdateTransmitter transmitter;
+	private final UpdateTransmitterClient transmitter;
 	private final DomoticzEventReceiverServer receiver;
 	private final ILogger log;
 	private final TimeOfDayClient todClient;
 
 	public DomoticzImpl(DomoticzConfiguration config, IDeviceRegistry deviceRegistry, IState state, ILogger log)
 			throws IOException {
-		this(new DomoticzUpdateTransmitter(config, log), //
+		this(new UpdateTransmitterClient(config, log), //
 				new DomoticzEventReceiverServer(config, log),  //
 				new DomoticzThreadHandler(config, deviceRegistry, state, log), //
-				new TimeOfDayClient(config),//
+				new TimeOfDayClient(config, log),//
 				log);
 	}
 
-	 DomoticzImpl(DomoticzUpdateTransmitter transmitter,
+	 DomoticzImpl(UpdateTransmitterClient transmitter,
 			DomoticzEventReceiverServer receiver, DomoticzThreadHandler threadHandler, TimeOfDayClient todClient, ILogger log) {
 		this.threadHandler = threadHandler;
 		this.transmitter = transmitter;

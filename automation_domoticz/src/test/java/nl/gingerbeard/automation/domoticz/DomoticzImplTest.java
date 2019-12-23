@@ -14,9 +14,9 @@ import org.junit.jupiter.api.Test;
 
 import nl.gingerbeard.automation.domoticz.api.DomoticzException;
 import nl.gingerbeard.automation.domoticz.clients.TimeOfDayClient;
+import nl.gingerbeard.automation.domoticz.clients.UpdateTransmitterClient;
 import nl.gingerbeard.automation.domoticz.receiver.DomoticzEventReceiverServer;
 import nl.gingerbeard.automation.domoticz.threadhandler.DomoticzThreadHandler;
-import nl.gingerbeard.automation.domoticz.transmitter.DomoticzUpdateTransmitter;
 import nl.gingerbeard.automation.logging.ILogger;
 
 public class DomoticzImplTest {
@@ -24,13 +24,13 @@ public class DomoticzImplTest {
 	private ILogger log;
 	private DomoticzThreadHandler threadHandler;
 	private DomoticzEventReceiverServer receiver;
-	private DomoticzUpdateTransmitter transmitter;
+	private UpdateTransmitterClient transmitter;
 	private DomoticzImpl domoticz;
 	private TimeOfDayClient todClient;
 
 	@BeforeEach
 	public void setup() {
-		transmitter = mock(DomoticzUpdateTransmitter.class);
+		transmitter = mock(UpdateTransmitterClient.class);
 		receiver = mock(DomoticzEventReceiverServer.class);
 		threadHandler = mock(DomoticzThreadHandler.class);
 		log = mock(ILogger.class);

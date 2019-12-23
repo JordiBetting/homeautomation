@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import nl.gingerbeard.automation.devices.DimmeableLight;
 import nl.gingerbeard.automation.domoticz.api.DomoticzException;
-import nl.gingerbeard.automation.domoticz.transmitter.DomoticzUpdateTransmitter;
+import nl.gingerbeard.automation.domoticz.clients.UpdateTransmitterClient;
 import nl.gingerbeard.automation.logging.TestLogger;
 import nl.gingerbeard.automation.state.Level;
 import nl.gingerbeard.automation.state.NextState;
@@ -16,7 +16,7 @@ import nl.gingerbeard.automation.state.NextState;
 public class LightHilTest extends DomoticzHILIntegrationTest {
 	@Test
 	public void light_bank_on() throws IOException, DomoticzException {
-		final DomoticzUpdateTransmitter transmitter = new DomoticzUpdateTransmitter(domoticzConfig, new TestLogger());
+		final UpdateTransmitterClient transmitter = new UpdateTransmitterClient(domoticzConfig, new TestLogger());
 		final DimmeableLight device = new DimmeableLight(274);
 
 		transmitter.transmitDeviceUpdate(new NextState<>(device, new Level(10)));

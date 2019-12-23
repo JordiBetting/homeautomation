@@ -5,12 +5,13 @@ import java.io.InputStreamReader;
 
 import nl.gingerbeard.automation.domoticz.clients.json.GetSecStatus;
 import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
+import nl.gingerbeard.automation.logging.ILogger;
 import nl.gingerbeard.automation.state.AlarmState;
 
 public class AlarmStateClient extends GetClient {
 
-	public AlarmStateClient(DomoticzConfiguration config) throws IOException {
-		super(config, "/json.htm?type=command&param=getsecstatus");
+	public AlarmStateClient(DomoticzConfiguration config, final ILogger log) throws IOException {
+		super(config, log, "/json.htm?type=command&param=getsecstatus");
 	}
 
 	public AlarmState getAlarmState() throws IOException {
