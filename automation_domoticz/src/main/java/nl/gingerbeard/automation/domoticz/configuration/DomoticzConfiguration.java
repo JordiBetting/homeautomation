@@ -1,6 +1,8 @@
 package nl.gingerbeard.automation.domoticz.configuration;
 
 import java.net.URL;
+import java.nio.charset.Charset;
+import java.util.Base64;
 import java.util.Optional;
 
 public class DomoticzConfiguration { // TODO: Refactor into general settings
@@ -10,6 +12,7 @@ public class DomoticzConfiguration { // TODO: Refactor into general settings
 	private int connectTimeoutMS = DEFAULT_CONNECT_TIMEOUT_MS;
 	private boolean synchronousEventHandling = false;
 	private Optional<DomoticzInitBehaviorConfig> initBehavior = Optional.of(new DomoticzInitBehaviorConfig());
+	private Optional<String> credentials = Optional.empty();
 
 	public static final int DEFAULT_CONNECT_TIMEOUT_MS = 3000;
 
@@ -126,4 +129,19 @@ public class DomoticzConfiguration { // TODO: Refactor into general settings
 	public Optional<DomoticzInitBehaviorConfig> getInitConfig() {
 		return this.initBehavior;
 	}
+
+	public void setCredentials(String username, String password) {
+		this.credentials = Optional.of(encode(username, password));
+	}
+
+	private String encode(String username, String password) {
+		String credString = String.format("%s:%s", username, password);
+		byte[] encoded = Base64.getEncoder().encode(credString.getBytes(Charset.defaultCharset()));
+		return new String(encoded, Charset.defaultCharset());
+	}
+
+	public Optional<String> getCredentialsEncoded() {
+		return credentials;
+	}
+
 }

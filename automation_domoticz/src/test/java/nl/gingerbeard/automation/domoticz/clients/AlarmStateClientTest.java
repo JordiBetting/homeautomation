@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.stream.Stream;
 
@@ -26,12 +27,29 @@ public class AlarmStateClientTest {
 
 	@BeforeEach
 	public void createClientAndWebserver() throws IOException {
-		webserver = new TestWebServer();
-		webserver.start();
+		final DomoticzConfiguration config = setUp();
+		createClient(config);
+	}
+
+	private DomoticzConfiguration setUp() throws IOException, MalformedURLException {
+		createWebserver();
+		final DomoticzConfiguration config = createDomoticzConfig();
+		return config;
+	}
+
+	private void createClient(final DomoticzConfiguration config) throws IOException {
+		client = new AlarmStateClient(config);
+	}
+
+	private DomoticzConfiguration createDomoticzConfig() throws MalformedURLException {
 		final DomoticzConfiguration config = new DomoticzConfiguration(0,
 				new URL("http://localhost:" + webserver.getListeningPort()));
+		return config;
+	}
 
-		client = new AlarmStateClient(config);
+	private void createWebserver() throws IOException {
+		webserver = new TestWebServer();
+		webserver.start();
 	}
 
 	@ParameterizedTest(name = "secstatus={0}, ExpectedAlarmState={1}")
@@ -75,6 +93,19 @@ public class AlarmStateClientTest {
 				"   \"status\" : \"OK\",\r\n" + //
 				"   \"title\" : \"GetSecStatus\"\r\n" + //
 				"}";
+	}
+	
+	@Test
+	public void usesAuthorizationHeader() throws IOException {
+		final DomoticzConfiguration config = setUp();
+		config.setCredentials("pepernoten", "lekker");
+		createClient(config);
+		webserver.setResponse(DOMOTICZ_URL, Status.OK, createJson(1));
+		
+		client.getAlarmState();
+		
+		assertEquals(1, webserver.getRequestHeaders().size());
+		assertEquals("Basic cGVwZXJub3RlbjpsZWtrZXI=", webserver.getRequestHeaders().get(0).get("authorization"));
 	}
 
 }

@@ -6,6 +6,7 @@ import java.net.HttpURLConnection;
 import java.net.ProtocolException;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.util.Optional;
 
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -25,11 +26,21 @@ public class DomoticzUpdateTransmitter {
 	private final DomoticzUrls urlCreator;
 	private final ILogger log;
 	private final int timeoutMS;
+	private final Optional<String> authHeader;
 
 	public DomoticzUpdateTransmitter(final DomoticzConfiguration configuration, final ILogger log) {
 		this.log = log;
 		urlCreator = new DomoticzUrls(configuration);
 		timeoutMS = configuration.getConnectTimeoutMS();
+		authHeader = getAuthorizationHeader(configuration);
+	}
+	
+	private Optional<String> getAuthorizationHeader(DomoticzConfiguration config) {
+		String auth = null;
+		if (config.getCredentialsEncoded().isPresent()) {
+			auth = "Basic " + config.getCredentialsEncoded().get();
+		}
+		return Optional.ofNullable(auth);
 	}
 
 	public <T> void transmitDeviceUpdate(final NextState<T> nextState) throws DomoticzException {
@@ -83,6 +94,7 @@ public class DomoticzUpdateTransmitter {
 		con.setConnectTimeout(timeoutMS);
 		con.setReadTimeout(timeoutMS);
 		con.setRequestMethod("GET");
+		authHeader.ifPresent((header) -> con.addRequestProperty("Authorization", header));
 		con.connect();
 		return con;
 	}

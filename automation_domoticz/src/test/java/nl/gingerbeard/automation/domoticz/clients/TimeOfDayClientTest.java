@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -22,12 +23,20 @@ public class TimeOfDayClientTest {
 
 	@BeforeEach
 	public void createClientAndWebserver() throws IOException {
+		final DomoticzConfiguration config = setUp();
+		createClient(config);
+	}
+
+	private void createClient(final DomoticzConfiguration config) throws IOException {
+		client = new TimeOfDayClient(config);
+	}
+
+	private DomoticzConfiguration setUp() throws IOException, MalformedURLException {
 		webserver = new TestWebServer();
 		webserver.start();
 		final DomoticzConfiguration config = new DomoticzConfiguration(0,
 				new URL("http://localhost:" + webserver.getListeningPort()));
-
-		client = new TimeOfDayClient(config);
+		return config;
 	}
 
 	@Test
@@ -35,7 +44,6 @@ public class TimeOfDayClientTest {
 		final int sunrise = 100;
 		final int currentTime = 150;
 		final int sunset = 200;
-		System.out.println(createSunRiseSetResponse(sunrise, sunset, currentTime, sunrise + 10, sunset + 10));
 		webserver.setResponse(DOMOTICZ_URL, Status.OK,
 				createSunRiseSetResponse(sunrise, sunset, currentTime, sunrise + 10, sunset + 10));
 
@@ -168,4 +176,17 @@ public class TimeOfDayClientTest {
 				+ "}";
 	}
 
+	@Test
+	public void usesAuthorizationHeader() throws IOException {
+		final DomoticzConfiguration config = setUp();
+		config.setCredentials("pepernoten", "lekker");
+		createClient(config);
+		webserver.setResponse(DOMOTICZ_URL, Status.OK, createSunRiseSetResponse(1, 2, 3, 4, 5));
+		
+		client.createTimeOfDayValues();
+		
+		assertEquals(1, webserver.getRequestHeaders().size());
+		assertEquals("Basic cGVwZXJub3RlbjpsZWtrZXI=", webserver.getRequestHeaders().get(0).get("authorization"));
+	}
+	
 }

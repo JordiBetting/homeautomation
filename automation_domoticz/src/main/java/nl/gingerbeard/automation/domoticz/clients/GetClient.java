@@ -5,6 +5,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.ProtocolException;
 import java.net.URL;
+import java.util.Optional;
 
 import com.google.common.base.Charsets;
 import com.google.gson.Gson;
@@ -15,9 +16,20 @@ public abstract class GetClient {
 
 	private URL url;
 	protected static final Gson gson = new Gson();
+	private final Optional<String> authorizationHeader;
 
 	public GetClient(DomoticzConfiguration config, String url) throws IOException {
 		this.url = createUrl(config, url);
+		this.authorizationHeader = getAuthorizationHeader(config);
+
+	}
+
+	private Optional<String> getAuthorizationHeader(DomoticzConfiguration config) {
+		String auth = null;
+		if (config.getCredentialsEncoded().isPresent()) {
+			auth = "Basic " + config.getCredentialsEncoded().get();
+		}
+		return Optional.ofNullable(auth);
 	}
 
 	private URL createUrl(DomoticzConfiguration config, String path) throws IOException {
@@ -41,6 +53,7 @@ public abstract class GetClient {
 		final HttpURLConnection con = (HttpURLConnection) url.openConnection();
 		con.setUseCaches(false);
 		con.setRequestMethod("GET");
+		authorizationHeader.ifPresent((header) -> con.addRequestProperty("Authorization", header));
 		con.connect();
 		return con;
 	}

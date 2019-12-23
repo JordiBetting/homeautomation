@@ -208,4 +208,16 @@ public class DomoticzUpdateTransmitterTest {
 		final DomoticzException e = assertThrows(DomoticzException.class, () -> transmitter.transmitDeviceUpdate(new NextState<>(device, OnOffState.ON)));
 		assertEquals("http://localhost:" + webserver.getListeningPort() + "/json.htm?type=command&param=switchlight&idx=1&switchcmd=On Not Found", e.getMessage());
 	}
+	
+	@Test
+	public void usesAuthentication() throws DomoticzException {
+		domoticzConfig.setCredentials("rootOfAllEvil", "money");
+		final DomoticzUpdateTransmitter transmitter = new DomoticzUpdateTransmitter(domoticzConfig, new TestLogger());
+		final Switch device = new Switch(1);
+
+		transmitter.transmitDeviceUpdate(new NextState<>(device, OnOffState.ON));
+
+		assertEquals(1, webserver.getRequestHeaders().size());
+		assertEquals("Basic cm9vdE9mQWxsRXZpbDptb25leQ==", webserver.getRequestHeaders().get(0).get("authorization"));
+	}
 }
