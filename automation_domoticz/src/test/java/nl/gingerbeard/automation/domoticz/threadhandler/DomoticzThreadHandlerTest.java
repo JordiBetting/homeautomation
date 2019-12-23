@@ -476,7 +476,14 @@ public class DomoticzThreadHandlerTest {
 		
 		latch.await(1, TimeUnit.MINUTES);
 		verify(logger, times(1)).exception(exc, "Failed to execute command");
+	}
+	
+	@Test
+	public void execute_sync_throwsDomoticzException_caught() throws IOException {
+		create(true);
 		
+		DomoticzException e = assertThrows(DomoticzException.class, () -> handler.execute(() -> {throw new DomoticzException("TEST");}));
+		assertEquals("TEST", e.getMessage());
 	}
 	
 }
