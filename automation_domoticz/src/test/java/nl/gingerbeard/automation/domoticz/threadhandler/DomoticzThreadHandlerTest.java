@@ -464,9 +464,9 @@ public class DomoticzThreadHandlerTest {
 		create(false);
 		
 		final CountDownLatch latch = new CountDownLatch(1);
-		Mockito.doAnswer(new Answer<>() {
+		Mockito.doAnswer(new Answer<Void>() {
 			@Override
-			public Object answer(InvocationOnMock invocation) throws Throwable {
+			public Void answer(InvocationOnMock invocation) throws Throwable {
 				latch.countDown();
 				return null;
 			}}).when(logger).exception(any(), any());
