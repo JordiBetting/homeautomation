@@ -52,4 +52,10 @@ public interface DomoticzApi {
 	 * @throws DomoticzException Thrown on communication failure.
 	 */
 	<T> void transmitDeviceUpdate(NextState<T> newState) throws DomoticzException;
+
+	/**
+	 * Stops receiver and all internal threads. Other methods will no longer be functional.
+	 * @throws InterruptedException Thrown when one of the threads is interrupted during stopping.
+	 */
+	void stop() throws InterruptedException;
 }

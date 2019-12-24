@@ -29,17 +29,15 @@ public class DomoticzComponent {
 	@Provides
 	public DomoticzApi api;
 
-	private DomoticzImpl instance;
-
 	@Activate
 	public void create() throws IOException {
-		api = instance = new DomoticzImpl(config, deviceRegistry, state, log);
+		api = new DomoticzImpl(config, deviceRegistry, state, log);
 	}
 
 	@Deactivate
 	public void destroy() throws InterruptedException {
-		instance.stop();
-		api = instance = null;
+		api.stop();
+		api = null;
 	}
 
 }
