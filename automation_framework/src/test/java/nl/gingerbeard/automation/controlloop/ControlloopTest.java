@@ -19,6 +19,7 @@ import org.junit.jupiter.api.Test;
 import com.google.common.collect.Lists;
 
 import nl.gingerbeard.automation.devices.Device;
+import nl.gingerbeard.automation.devices.Group;
 import nl.gingerbeard.automation.devices.OnkyoReceiver;
 import nl.gingerbeard.automation.devices.Scene;
 import nl.gingerbeard.automation.devices.Switch;
@@ -262,6 +263,25 @@ public class ControlloopTest {
 		verify(transmitter, times(1)).transmitDeviceUpdate(nextState);
 	}
 
+	@Test
+	public void nextState_group_reportedAgain() throws IOException {
+		final TestLogger log = new TestLogger();
+		final Group device = new Group(42);
+		final NextState<OnOffState> nextState = new NextState<>(device, OnOffState.ON);
+
+		final IEvents events = mock(IEvents.class);
+		when(events.trigger(any(Device.class))).thenReturn(EventResult.of(nextState));
+
+		final IDomoticzUpdateTransmitter transmitter = mock(IDomoticzUpdateTransmitter.class);
+		final Controlloop control = new Controlloop(events, transmitter, mock(IState.class), log, mock(IOnkyoTransmitter.class));
+
+		device.setState(OnOffState.ON);
+		control.statusChanged(device);
+
+		verify(transmitter, times(1)).transmitDeviceUpdate(nextState);
+	}
+
+	
 	@Test
 	public void transmitted_logContainsTrigger() {
 		final RecordingTransmitter transmitter = new RecordingTransmitter();
