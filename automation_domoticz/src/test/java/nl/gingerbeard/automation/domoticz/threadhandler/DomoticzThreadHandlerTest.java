@@ -6,7 +6,9 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -83,10 +85,10 @@ public class DomoticzThreadHandlerTest {
 		todClient = mock(TimeOfDayClient.class);
 		alarmClient = mock(AlarmStateClient.class);
 		deviceClient = mock(GetDeviceClient.class);
-		syncAll = new SyncAll(registry, //
+		syncAll = spy(new SyncAll(registry, //
 				new AlarmSync(state, alarmClient),
 				new DeviceSync(deviceClient, registry, logger), //
-				new TimeSync(state, todClient));
+				new TimeSync(state, todClient)));
 	}
 
 	@AfterEach
@@ -435,6 +437,17 @@ public class DomoticzThreadHandlerTest {
 		
 		DomoticzException e = assertThrows(DomoticzException.class, () -> handler.execute(() -> {throw new DomoticzException("TEST");}));
 		assertEquals("TEST", e.getMessage());
+	}
+	
+	@Test
+	public void sync_IOException_thrown() throws IOException {
+		create(true);
+		
+		doThrow(new IOException("Testcase")).when(syncAll).syncAll();
+		
+		DomoticzException e = assertThrows(DomoticzException.class, () -> handler.syncFull());
+		assertEquals(IOException.class, e.getCause().getClass());
+		assertEquals("Testcase", e.getCause().getMessage());
 	}
 	
 }
