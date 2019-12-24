@@ -71,12 +71,12 @@ public class DomoticzImpl implements DomoticzApi, EventReceived {
 	}
 
 	@Override
-	public void syncFullState() throws DomoticzException, InterruptedException {
+	public void syncFullState() throws DomoticzException {
 		if (config.isInitEnabled()) {
 			try {
 				executeTaskWithRetries(() -> threadHandler.syncFull(), config.getInitConfig().get());
 			} catch (InterruptedException e) {
-				throw new DomoticzException("Interrupted while retrying syncFull", e);
+				throw new DomoticzException("Interrupted while retrying syncFullState", e);
 			}
 		}
 	}
