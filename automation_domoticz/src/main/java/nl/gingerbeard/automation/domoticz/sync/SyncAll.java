@@ -3,7 +3,6 @@ package nl.gingerbeard.automation.domoticz.sync;
 import java.io.IOException;
 
 import nl.gingerbeard.automation.deviceregistry.IDeviceRegistry;
-import nl.gingerbeard.automation.domoticz.clients.TimeOfDayClient;
 import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
 import nl.gingerbeard.automation.logging.ILogger;
 import nl.gingerbeard.automation.state.IState;
@@ -18,7 +17,7 @@ public class SyncAll {
 	public SyncAll(DomoticzConfiguration config, IState state, IDeviceRegistry deviceRegistry, ILogger log)
 			throws IOException {
 		this(deviceRegistry, new AlarmSync(state, config, log), new DeviceSync(config, deviceRegistry, log),
-				new TimeSync(state, new TimeOfDayClient(config, log)));
+				new TimeSync(state, config, log));
 	}
 
 	public SyncAll(IDeviceRegistry deviceRegistry, AlarmSync alarmSync, DeviceSync deviceSync, TimeSync timeSync) {
