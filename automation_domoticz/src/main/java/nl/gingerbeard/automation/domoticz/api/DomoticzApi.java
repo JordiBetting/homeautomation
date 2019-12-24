@@ -40,6 +40,7 @@ public interface DomoticzApi {
 	 * Initialize the system, receiving current state for alarm, time and all devices. Result in stored in {@link State} and {@link DeviceRegistry}.
 	 * The initialization is retried in case it fails. See {@link DomoticzConfiguration} for configuration options.
 	 * Calling this method will not result in triggering of any listeners.
+	 * Skipped in case no init behavior is configured in {@link DomoticzConfiguration}
 	 * @throws DomoticzException Thrown on communication failure.
 	 * @throws InterruptedException Thrown when thread is interrupted during this (potentially long running) method.
 	 */

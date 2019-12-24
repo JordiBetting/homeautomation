@@ -9,11 +9,12 @@ import nl.gingerbeard.automation.logging.ILogger;
 
 public class GetDeviceClient extends GetClient {
 
-	public GetDeviceClient(DomoticzConfiguration config, ILogger log, int idx) throws IOException {
-		super(config, log, "/json.htm?type=devices&rid="+idx);
+	public GetDeviceClient(DomoticzConfiguration config, ILogger log) throws IOException {
+		super(config, log, "");
 	}
 	
-	public DeviceJSON getDeviceDetails() throws IOException {
+	public DeviceJSON getDeviceDetails(int idx) throws IOException {
+		super.setUrl("/json.htm?type=devices&rid="+idx);
 		InputStreamReader result = executeRequest();
 		return gson.fromJson(result, DeviceJSON.class);
 	}

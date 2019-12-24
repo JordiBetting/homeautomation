@@ -1,7 +1,6 @@
 package nl.gingerbeard.automation.domoticz.threadhandler;
 
 import java.io.IOException;
-import java.time.Duration;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
@@ -17,19 +16,14 @@ import nl.gingerbeard.automation.domoticz.api.DomoticzException;
 import nl.gingerbeard.automation.domoticz.api.IDomoticzAlarmChanged;
 import nl.gingerbeard.automation.domoticz.api.IDomoticzDeviceStatusChanged;
 import nl.gingerbeard.automation.domoticz.api.IDomoticzTimeOfDayChanged;
-import nl.gingerbeard.automation.domoticz.clients.AlarmStateClient;
-import nl.gingerbeard.automation.domoticz.clients.GetDeviceClient;
 import nl.gingerbeard.automation.domoticz.clients.TimeOfDayClient;
-import nl.gingerbeard.automation.domoticz.clients.json.DeviceJSON;
 import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
-import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration.DomoticzInitBehaviorConfig;
+import nl.gingerbeard.automation.domoticz.sync.SyncAll;
 import nl.gingerbeard.automation.logging.ILogger;
 import nl.gingerbeard.automation.state.AlarmState;
 import nl.gingerbeard.automation.state.IState;
 import nl.gingerbeard.automation.state.TimeOfDay;
 import nl.gingerbeard.automation.state.TimeOfDayValues;
-import nl.gingerbeard.automation.util.RetryUtil;
-import nl.gingerbeard.automation.util.RetryUtil.RetryTask;
 
 public class DomoticzThreadHandler {
 	private Optional<IDomoticzDeviceStatusChanged> deviceListener = Optional.empty();
@@ -41,22 +35,21 @@ public class DomoticzThreadHandler {
 	private final ILogger logger;
 	private final IState state;
 	private final DomoticzConfiguration config;
-	private final AlarmStateClient alarmClient;
-	private final TimeOfDayClient todClient;
+	private SyncAll syncAll;
 
 	public DomoticzThreadHandler(final DomoticzConfiguration config, final IDeviceRegistry deviceRegistry, IState state,
 			final ILogger logger) throws IOException {
-		this(config, deviceRegistry, state, logger, new AlarmStateClient(config, logger), new TimeOfDayClient(config, logger));
+		this(config, deviceRegistry, state, logger, new TimeOfDayClient(config, logger),
+				new SyncAll(config, state, deviceRegistry, logger));
 	}
 
 	DomoticzThreadHandler(final DomoticzConfiguration config, final IDeviceRegistry deviceRegistry, IState state,
-			final ILogger logger, AlarmStateClient alarmClient, TimeOfDayClient todClient) {
+			final ILogger logger, TimeOfDayClient todClient, SyncAll syncAll) {
 		this.config = config;
 		this.deviceRegistry = deviceRegistry;
 		this.state = state;
 		this.logger = logger;
-		this.alarmClient = alarmClient;
-		this.todClient = todClient;
+		this.syncAll = syncAll;
 
 		executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(1);
 	}
@@ -191,53 +184,14 @@ public class DomoticzThreadHandler {
 	}
 
 	public void syncFull() throws DomoticzException, InterruptedException {
-		if (config.isInitEnabled()) {
-			execute(() -> {
-				try {
-					executeTaskWithRetries(() -> syncFullStateSingleAttempt(), config.getInitConfig().get());
-				} catch (InterruptedException e) {
-					throw new DomoticzException("Interrupted while retrying syncFull", e);
-				}
-			});
-		}
+		execute(() -> {
+			try {
+				syncAll.syncAll();
+			} catch (IOException e) {
+				throw new DomoticzException(e);
+			}
+		});
 	}
 
-	void executeTaskWithRetries(RetryTask task, DomoticzInitBehaviorConfig config) throws InterruptedException, DomoticzException {
-		int interval_s = config.getInitInterval_s();
-		int nrTries = Math.max(1, config.getMaxInitWait_s() / Math.max(1, interval_s));
-		Optional<Throwable> e = RetryUtil.retry(task, nrTries, Duration.ofSeconds(interval_s));
-		if (e.isPresent()) {
-			throw new DomoticzException("Failed to sync full state with Domoticz", e.get());
-		}
-	}
-
-	private void syncFullStateSingleAttempt() throws IOException {
-		syncTimeOfDay();
-		syncAlarm();
-		syncDevices();
-		syncScenes();
-	}
-
-	private void syncTimeOfDay() throws IOException {
-		TimeOfDayValues timeOfDayValues = todClient.createTimeOfDayValues();
-		TimeOfDay timeOfDay = toTimeOfDay(timeOfDayValues);
-		state.setTimeOfDay(timeOfDay);
-	}
-
-	private void syncAlarm() throws IOException {
-		state.setAlarmState(alarmClient.getAlarmState());
-	}
-
-	private void syncDevices() throws IOException {
-		for (int idx : deviceRegistry.getAllIdx()) {
-			GetDeviceClient deviceClient = new GetDeviceClient(config, logger, idx);
-			DeviceJSON deviceState = deviceClient.getDeviceDetails();
-			deviceRegistry.updateDevice(idx, deviceState.result.status);
-		}
-	}
-
-	private void syncScenes() {
-		// TODO Auto-generated method stub
-	}
 
 }

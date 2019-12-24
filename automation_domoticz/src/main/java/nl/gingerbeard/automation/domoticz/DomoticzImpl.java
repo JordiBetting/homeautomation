@@ -1,6 +1,8 @@
 package nl.gingerbeard.automation.domoticz;
 
 import java.io.IOException;
+import java.time.Duration;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import nl.gingerbeard.automation.deviceregistry.IDeviceRegistry;
@@ -12,6 +14,7 @@ import nl.gingerbeard.automation.domoticz.api.IDomoticzTimeOfDayChanged;
 import nl.gingerbeard.automation.domoticz.clients.TimeOfDayClient;
 import nl.gingerbeard.automation.domoticz.clients.UpdateTransmitterClient;
 import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
+import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration.DomoticzInitBehaviorConfig;
 import nl.gingerbeard.automation.domoticz.receiver.DomoticzEventReceiverServer;
 import nl.gingerbeard.automation.domoticz.receiver.DomoticzEventReceiverServer.EventReceived;
 import nl.gingerbeard.automation.domoticz.threadhandler.DomoticzThreadHandler;
@@ -19,6 +22,8 @@ import nl.gingerbeard.automation.logging.ILogger;
 import nl.gingerbeard.automation.state.IState;
 import nl.gingerbeard.automation.state.NextState;
 import nl.gingerbeard.automation.state.TimeOfDayValues;
+import nl.gingerbeard.automation.util.RetryUtil;
+import nl.gingerbeard.automation.util.RetryUtil.RetryTask;
 
 public class DomoticzImpl implements DomoticzApi, EventReceived {
 
@@ -27,21 +32,23 @@ public class DomoticzImpl implements DomoticzApi, EventReceived {
 	private final DomoticzEventReceiverServer receiver;
 	private final ILogger log;
 	private final TimeOfDayClient todClient;
+	private DomoticzConfiguration config;
 
 	public DomoticzImpl(DomoticzConfiguration config, IDeviceRegistry deviceRegistry, IState state, ILogger log)
 			throws IOException {
 		this(new UpdateTransmitterClient(config, log), //
-				new DomoticzEventReceiverServer(config, log),  //
+				new DomoticzEventReceiverServer(config, log), //
 				new DomoticzThreadHandler(config, deviceRegistry, state, log), //
-				new TimeOfDayClient(config, log),//
-				log);
+				new TimeOfDayClient(config, log), //
+				config, log);
 	}
 
-	 DomoticzImpl(UpdateTransmitterClient transmitter,
-			DomoticzEventReceiverServer receiver, DomoticzThreadHandler threadHandler, TimeOfDayClient todClient, ILogger log) {
+	DomoticzImpl(UpdateTransmitterClient transmitter, DomoticzEventReceiverServer receiver,
+			DomoticzThreadHandler threadHandler, TimeOfDayClient todClient, DomoticzConfiguration config, ILogger log) {
 		this.threadHandler = threadHandler;
 		this.transmitter = transmitter;
 		this.receiver = receiver;
+		this.config = config;
 		this.log = log;
 		this.todClient = todClient;
 
@@ -65,7 +72,23 @@ public class DomoticzImpl implements DomoticzApi, EventReceived {
 
 	@Override
 	public void syncFullState() throws DomoticzException, InterruptedException {
-		threadHandler.syncFull();
+		if (config.isInitEnabled()) {
+			try {
+				executeTaskWithRetries(() -> threadHandler.syncFull(), config.getInitConfig().get());
+			} catch (InterruptedException e) {
+				throw new DomoticzException("Interrupted while retrying syncFull", e);
+			}
+		}
+	}
+
+	void executeTaskWithRetries(RetryTask task, DomoticzInitBehaviorConfig config)
+			throws InterruptedException, DomoticzException {
+		int interval_s = config.getInitInterval_s();
+		int nrTries = Math.max(1, config.getMaxInitWait_s() / Math.max(1, interval_s));
+		Optional<Throwable> e = RetryUtil.retry(task, nrTries, Duration.ofSeconds(interval_s));
+		if (e.isPresent()) {
+			throw new DomoticzException("Failed to sync full state with Domoticz", e.get());
+		}
 	}
 
 	@Override

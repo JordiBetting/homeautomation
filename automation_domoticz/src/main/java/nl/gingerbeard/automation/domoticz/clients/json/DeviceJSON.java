@@ -23,9 +23,15 @@ public class DeviceJSON {
 		@SerializedName("idx")
 		public int idx;
 		
+		@SerializedName("Level")
+		public String level;
+		
+		@SerializedName("LevelInt")
+		public String levelInt;
+		
 		@Override
 		public String toString() {
-			return String.format("%d (%s) Type: %s - %s : data=%s status=%s", idx, name, type, subtype, data, status);
+			return String.format("%d, %s, %s, %s, %s, %s, %s, %s", idx, name, type, subtype, data, status, level, levelInt);
 		}
 	}
 	

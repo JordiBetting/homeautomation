@@ -1,5 +1,6 @@
 package nl.gingerbeard.automation.domoticz;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -11,13 +12,17 @@ import java.io.IOException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 import nl.gingerbeard.automation.domoticz.api.DomoticzException;
 import nl.gingerbeard.automation.domoticz.clients.TimeOfDayClient;
 import nl.gingerbeard.automation.domoticz.clients.UpdateTransmitterClient;
+import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
+import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration.DomoticzInitBehaviorConfig;
 import nl.gingerbeard.automation.domoticz.receiver.DomoticzEventReceiverServer;
 import nl.gingerbeard.automation.domoticz.threadhandler.DomoticzThreadHandler;
 import nl.gingerbeard.automation.logging.ILogger;
+import nl.gingerbeard.automation.util.RetryUtil.RetryTask;
 
 public class DomoticzImplTest {
 
@@ -27,6 +32,7 @@ public class DomoticzImplTest {
 	private UpdateTransmitterClient transmitter;
 	private DomoticzImpl domoticz;
 	private TimeOfDayClient todClient;
+	private DomoticzConfiguration config;
 
 	@BeforeEach
 	public void setup() {
@@ -35,7 +41,8 @@ public class DomoticzImplTest {
 		threadHandler = mock(DomoticzThreadHandler.class);
 		log = mock(ILogger.class);
 		todClient = mock(TimeOfDayClient.class);
-		domoticz = new DomoticzImpl(transmitter, receiver, threadHandler, todClient, log);
+		config = mock(DomoticzConfiguration.class);
+		domoticz = new DomoticzImpl(transmitter, receiver, threadHandler, todClient, config, log);
 	}
 	
 	@Test
@@ -91,5 +98,49 @@ public class DomoticzImplTest {
 		boolean result = domoticz.deviceChanged(1, "niks");
 		
 		assertFalse(result);
+	}
+	
+// TODO: dup testcase?
+//	@Test
+//	public void syncFull_failed_throwsInterruptedException() {
+//		FailingThreadHandler handler = new FailingThreadHandler(transmitter,receiver,threadHandler,todClient,config,log);
+//
+//		config.setInitConfiguration(new DomoticzInitBehaviorConfig(5,15));
+//
+//		Thread.currentThread().interrupt();
+//		assertThrows(InterruptedException.class, () -> handler.syncFullState());
+//	}
+
+	private class FailingThreadHandler extends DomoticzImpl {
+
+		FailingThreadHandler(UpdateTransmitterClient transmitter, DomoticzEventReceiverServer receiver,
+				DomoticzThreadHandler threadHandler, TimeOfDayClient todClient, DomoticzConfiguration config,
+				ILogger log) {
+			super(transmitter, receiver, threadHandler, todClient, config, log);
+		}
+
+		@Override
+		void executeTaskWithRetries(RetryTask task, DomoticzInitBehaviorConfig config) throws DomoticzException {
+			throw new DomoticzException();
+		}
+	}
+//	
+//	@Test
+//	public void syncFull_interrupted_throwsInterruptedException() throws InterruptedException, DomoticzException {
+//		DomoticzImpl handler = Mockito.spy(domoticz);
+//		Mockito.doThrow(InterruptedException.class).when(handler).executeTaskWithRetries(Mockito.any(), Mockito.any());
+//
+//		config.setInitConfiguration(new DomoticzInitBehaviorConfig(5,15));
+//
+//		Thread.currentThread().interrupt();
+//		assertThrows(InterruptedException.class, () -> handler.syncFullState());
+//	}
+
+	
+	@Test
+	public void retryFailed() throws IOException, InterruptedException, DomoticzException {
+		DomoticzException e = assertThrows(DomoticzException.class, () -> domoticz.executeTaskWithRetries(() -> { throw new Exception("Failing test task"); }, new DomoticzInitBehaviorConfig(1, 1)));
+		assertEquals("Failed to sync full state with Domoticz", e.getMessage());
+		assertEquals("Failing test task", e.getCause().getMessage());
 	}
 }

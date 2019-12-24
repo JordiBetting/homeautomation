@@ -33,16 +33,20 @@ import nl.gingerbeard.automation.domoticz.api.IDomoticzAlarmChanged;
 import nl.gingerbeard.automation.domoticz.api.IDomoticzDeviceStatusChanged;
 import nl.gingerbeard.automation.domoticz.api.IDomoticzTimeOfDayChanged;
 import nl.gingerbeard.automation.domoticz.clients.AlarmStateClient;
+import nl.gingerbeard.automation.domoticz.clients.GetDeviceClient;
 import nl.gingerbeard.automation.domoticz.clients.TimeOfDayClient;
 import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
-import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration.DomoticzInitBehaviorConfig;
+import nl.gingerbeard.automation.domoticz.sync.AlarmSync;
+import nl.gingerbeard.automation.domoticz.sync.DeviceSync;
+import nl.gingerbeard.automation.domoticz.sync.DeviceSyncTest;
+import nl.gingerbeard.automation.domoticz.sync.SyncAll;
+import nl.gingerbeard.automation.domoticz.sync.TimeSync;
 import nl.gingerbeard.automation.logging.ILogger;
 import nl.gingerbeard.automation.state.AlarmState;
 import nl.gingerbeard.automation.state.IState;
 import nl.gingerbeard.automation.state.OnOffState;
 import nl.gingerbeard.automation.state.State;
 import nl.gingerbeard.automation.state.TimeOfDayValues;
-import nl.gingerbeard.automation.util.RetryUtil.RetryTask;
 
 public class DomoticzThreadHandlerTest {
 
@@ -57,31 +61,33 @@ public class DomoticzThreadHandlerTest {
 	private TimeOfDayClient todClient;
 
 	private AlarmStateClient alarmClient;
+	
+	private SyncAll syncAll;
+	
+	private IState state;
+
+	private GetDeviceClient deviceClient;
 
 	public void create(boolean synchronous) throws IOException {
 		createMocks(synchronous);
-		handler = new DomoticzThreadHandler(config, registry, new State(), logger, alarmClient, todClient);
+		handler = new DomoticzThreadHandler(config, registry, state, logger, todClient, syncAll);
 	}
 
-	private void createMocks(boolean synchronous) {
+	private void createMocks(boolean synchronous) throws IOException {
 		config = new DomoticzConfiguration(0, null);
 		if (synchronous) {
 			config.setEventHandlingSynchronous();
 		}
+		state = new State();
 		logger = mock(ILogger.class);
 		registry = mock(IDeviceRegistry.class);
 		todClient = mock(TimeOfDayClient.class);
 		alarmClient = mock(AlarmStateClient.class);
-	}
-
-	public void createFailing() {
-		createMocks(true);
-		handler = new FailingThreadHandler(config, registry, new State(), logger, alarmClient, todClient);
-	}
-
-	public void createInterrupting() {
-		createMocks(true);
-		handler = new InterruptingThreadHandler(config, registry, new State(), logger, alarmClient, todClient);
+		deviceClient = mock(GetDeviceClient.class);
+		syncAll = new SyncAll(registry, //
+				new AlarmSync(state, alarmClient),
+				new DeviceSync(deviceClient, registry, logger), //
+				new TimeSync(state, todClient));
 	}
 
 	@AfterEach
@@ -354,53 +360,7 @@ public class DomoticzThreadHandlerTest {
 		verify(alarmClient, times(1)).getAlarmState();
 	}
 
-	@Test
-	public void syncFull_failed_throwsInterruptedException() {
-		createFailing();
 
-		config.setInitConfiguration(new DomoticzInitBehaviorConfig(5,15));
-
-		Thread.currentThread().interrupt();
-		assertThrows(InterruptedException.class, () -> handler.syncFull());
-	}
-
-	private class FailingThreadHandler extends DomoticzThreadHandler {
-
-		FailingThreadHandler(DomoticzConfiguration config, IDeviceRegistry deviceRegistry, IState state, ILogger logger,
-				AlarmStateClient alarmClient, TimeOfDayClient todClient) {
-			super(config, deviceRegistry, state, logger, alarmClient, todClient);
-		}
-
-		@Override
-		void executeTaskWithRetries(RetryTask task, DomoticzInitBehaviorConfig config) throws DomoticzException {
-			throw new DomoticzException();
-		}
-
-	}
-
-	@Test
-	public void syncFull_interrupted_throwsInterruptedException() {
-		createInterrupting();
-
-		config.setInitConfiguration(new DomoticzInitBehaviorConfig(5,15));
-
-		Thread.currentThread().interrupt();
-		assertThrows(InterruptedException.class, () -> handler.syncFull());
-	}
-
-	private class InterruptingThreadHandler extends DomoticzThreadHandler {
-
-		InterruptingThreadHandler(DomoticzConfiguration config, IDeviceRegistry deviceRegistry, IState state,
-				ILogger logger, AlarmStateClient alarmClient, TimeOfDayClient todClient) {
-			super(config, deviceRegistry, state, logger, alarmClient, todClient);
-		}
-
-		@Override
-		void executeTaskWithRetries(RetryTask task, DomoticzInitBehaviorConfig config) throws DomoticzException, InterruptedException {
-			throw new InterruptedException();
-		}
-
-	}
 
 	@Test
 	public void deviceUpdated_noOldState_works() throws IOException, InterruptedException, DomoticzException {
@@ -449,15 +409,7 @@ public class DomoticzThreadHandlerTest {
 			throw new DomoticzException(new InterruptedException());
 		}));
 	}
-	
-	@Test
-	public void retryFailed() throws IOException, InterruptedException, DomoticzException {
-		create(true);
-		
-		DomoticzException e = assertThrows(DomoticzException.class, () -> handler.executeTaskWithRetries(() -> { throw new Exception("Failing test task"); }, new DomoticzInitBehaviorConfig(1, 1)));
-		assertEquals("Failed to sync full state with Domoticz", e.getMessage());
-		assertEquals("Failing test task", e.getCause().getMessage());
-	}
+
 
 	@Test
 	public void execute_async_failed_exceptionLogged() throws IOException, InterruptedException, DomoticzException {

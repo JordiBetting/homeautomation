@@ -24,10 +24,10 @@ public abstract class GetClient {
 	private int timeoutMS;
 	private ILogger log;
 
-	public GetClient(DomoticzConfiguration config, final ILogger log, String url) throws IOException {
+	public GetClient(DomoticzConfiguration config, final ILogger log, String path) throws IOException {
 		this.log = log;
 		this.baseUrl = config.getBaseURL();
-		this.url = createUrl(url);
+		this.url = createUrl(path);
 		this.authorizationHeader = getAuthorizationHeader(config);
 		timeoutMS = config.getConnectTimeoutMS();
 	}
@@ -43,10 +43,15 @@ public abstract class GetClient {
 	protected void setUrl(URL url) {
 		this.url = url;
 	}
+	
+	protected void setUrl(String path) throws IOException {
+		this.url = createUrl(path);
+	}
 
 	private URL createUrl(String path) throws IOException {
 		return new URL(baseUrl.toString() + path);
 	}
+	
 
 	protected final InputStreamReader executeRequest() throws IOException, ProtocolException {
 		final HttpURLConnection con = createConnection(url);
