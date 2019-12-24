@@ -32,7 +32,7 @@ public class SyncAll {
 		timeSync.syncTime();
 		alarmSync.syncAlarm();
 		syncDevices();
-		syncScenes();
+//		syncScenes();
 	}
 
 	private void syncDevices() throws IOException {
@@ -41,7 +41,4 @@ public class SyncAll {
 		}
 	}
 
-	private void syncScenes() {
-		// TODO Auto-generated method stub
-	}
 }
