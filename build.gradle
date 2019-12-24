@@ -12,20 +12,19 @@ buildscript {
 }
 
 allprojects {
+	apply plugin: 'java'
+	apply plugin: 'jacoco'
 
 	repositories {
 		mavenLocal()
 		mavenCentral()
 	}	
 
-	plugins {
-		id 'java'
-		id 'jacoco'
-		id 'eclipse'
-		id 'com.github.spotbugs' version: '3.0.0'
-		id 'maven-publish'
-		id 'com.adarshr.test-logger'
-	}
+	apply plugin: 'eclipse'
+	apply plugin: 'com.github.spotbugs:3.0.0'
+	apply plugin: 'maven-publish'
+	apply plugin: 'com.adarshr.test-logger'
+	
 	def branch = "git rev-parse --abbrev-ref HEAD".execute().text.trim()
 	def revCount = "git rev-list HEAD --count".execute().text.trim()
 	def branchIndicator = ((branch == "master") ? "" : "-" + branch)
