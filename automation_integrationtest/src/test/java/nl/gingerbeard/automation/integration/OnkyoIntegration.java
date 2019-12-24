@@ -37,7 +37,7 @@ public class OnkyoIntegration extends IntegrationTest {
 	
 	@Test
 	public void doSomething() throws IOException, InterruptedException {
-		automation.addRoom(OnkyoRoom.class);
+		start(OnkyoRoom.class);
 		
 		deviceChanged(2, "off");
 		

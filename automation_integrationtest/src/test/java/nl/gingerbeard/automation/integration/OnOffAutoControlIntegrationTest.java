@@ -42,7 +42,7 @@ public class OnOffAutoControlIntegrationTest extends IntegrationTest {
 
 	@Test
 	public void theTest() throws IOException, InterruptedException {
-		automation.addRoom(TestRoom.class);
+		start(TestRoom.class);
 		CountDownLatch requestLatch;
 
 		requestLatch = resetLatch();

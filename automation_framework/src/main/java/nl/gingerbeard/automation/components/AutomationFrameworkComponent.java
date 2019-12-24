@@ -4,7 +4,7 @@ import nl.gingerbeard.automation.AutomationFramework;
 import nl.gingerbeard.automation.IAutomationFrameworkInterface;
 import nl.gingerbeard.automation.autocontrol.AutoControlToDomoticz;
 import nl.gingerbeard.automation.deviceregistry.IDeviceRegistry;
-import nl.gingerbeard.automation.domoticz.transmitter.IDomoticzUpdateTransmitter;
+import nl.gingerbeard.automation.domoticz.api.DomoticzApi;
 import nl.gingerbeard.automation.event.IEvents;
 import nl.gingerbeard.automation.logging.ILogger;
 import nl.gingerbeard.automation.service.annotation.Activate;
@@ -18,9 +18,6 @@ public class AutomationFrameworkComponent {
 	@Requires
 	public IEvents events;
 
-	@Provides
-	public IAutomationFrameworkInterface framework;
-
 	@Requires
 	public IDeviceRegistry deviceRegistry;
 
@@ -31,12 +28,15 @@ public class AutomationFrameworkComponent {
 	public ILogger logger;
 
 	@Requires
-	public IDomoticzUpdateTransmitter transmitter;
+	public DomoticzApi domoticz;
+
+	@Provides
+	public IAutomationFrameworkInterface framework;
 
 	@Activate
 	public void createFramework() {
-		final AutoControlToDomoticz autoControlToDomoticz = new AutoControlToDomoticz(logger, transmitter);
-		framework = new AutomationFramework(events, deviceRegistry, state, autoControlToDomoticz, logger);
+		final AutoControlToDomoticz autoControlToDomoticz = new AutoControlToDomoticz(logger, domoticz);
+		framework = new AutomationFramework(events, deviceRegistry, state, autoControlToDomoticz, logger, domoticz);
 	}
 
 	@Deactivate

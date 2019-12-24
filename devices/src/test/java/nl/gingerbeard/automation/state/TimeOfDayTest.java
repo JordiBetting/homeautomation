@@ -114,6 +114,6 @@ public class TimeOfDayTest {
 
 	@Test
 	public void equalsContract() {
-		EqualsVerifier.forClass(TimeOfDayValues.class).verify();
+		EqualsVerifier.forClass(TimeOfDayValues.class).usingGetClass().verify();
 	}
 }

@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -17,17 +18,16 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 
 import com.google.common.io.CharStreams;
 
 import fi.iki.elonen.NanoHTTPD.Response.Status;
 import nl.gingerbeard.automation.AutomationFrameworkContainer;
 import nl.gingerbeard.automation.IAutomationFrameworkInterface;
+import nl.gingerbeard.automation.Room;
 import nl.gingerbeard.automation.components.OnkyoTransmitterComponent;
 import nl.gingerbeard.automation.configuration.ConfigurationServerSettings;
 import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
-import nl.gingerbeard.automation.logging.TestLogger;
 import nl.gingerbeard.automation.logging.TestLogger.LogOutputToTestLogger;
 import nl.gingerbeard.automation.onkyo.OnkyoDriver;
 import nl.gingerbeard.automation.testutils.TestWebServer;
@@ -40,27 +40,23 @@ public abstract class IntegrationTest {
 	protected TestWebServer webserver;
 	protected IAutomationFrameworkInterface automation;
 	protected int configPort;
-	protected TestLogger logOutput;
 	protected OnkyoDriver onkyoDriver;
 	protected List<String> startupRequests = new ArrayList<>();
 
-	@BeforeEach
-	public void start() throws IOException {
+	@SafeVarargs
+	public final void start(Class<? extends Room> ... rooms) throws IOException, InterruptedException {
 		webserver = new TestWebServer();
 		webserver.start();
 
-		config = new DomoticzConfiguration(0, new URL("http://localhost:" + webserver.getListeningPort()));
-		config.setEventHandlingSynchronous();
-		config.setMaxInitWait_s(0);
-		config.setInitInterval_s(0);
+		this.config = createConfig();
+		initWebserver();
 		final ConfigurationServerSettings configSettings = new ConfigurationServerSettings(0);
 		container = IAutomationFrameworkInterface.createFrameworkContainer(config, new LogOutputToTestLogger(), configSettings);
-		container.start();
+		container.start(rooms);
 
 		port = config.getListenPort();
 		configPort = configSettings.getListenPort();
 		automation = container.getRuntime().getService(IAutomationFrameworkInterface.class).get();
-		logOutput = LogOutputToTestLogger.testLogger;
 		
 		Optional<OnkyoTransmitterComponent> onkyo = container.getRuntime().getComponent(OnkyoTransmitterComponent.class);
 		assertTrue(onkyo.isPresent());
@@ -69,6 +65,17 @@ public abstract class IntegrationTest {
 		
 		startupRequests.addAll(webserver.getRequests());
 		webserver.getRequests().clear();
+	}
+
+	protected void initWebserver() {
+		
+	}
+
+	DomoticzConfiguration createConfig() throws MalformedURLException {
+		DomoticzConfiguration config = new DomoticzConfiguration(0, new URL("http://localhost:" + webserver.getListeningPort()));
+		config.setEventHandlingSynchronous();
+		config.disableInit();
+		return config;
 	}
 
 	@AfterEach
@@ -82,7 +89,6 @@ public abstract class IntegrationTest {
 		automation = null;
 		port = 0;
 		config = null;
-		logOutput = null;
 	}
 
 	protected void deviceChanged(final int idx, final String state) throws IOException {

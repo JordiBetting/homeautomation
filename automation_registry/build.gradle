@@ -1,0 +1,27 @@
+dependencies {
+	compile group: 'com.google.guava', name: 'guava', version: '23.5-jre'
+	compile project(':service')
+	compile project(':devices')
+	compile project(':logging')
+	testCompile project(':testutils')
+}
+
+jar {
+    from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+	
+	manifest {
+		attributes(
+			'Built-By'       : System.properties['user.name'],
+			'Build-Timestamp': new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(new Date()),
+			'Build-Revision' : "git rev-parse HEAD".execute().text.trim(),
+			'Build-Branch'   : "git rev-parse --abbrev-ref HEAD".execute().text.trim(),
+			'Build-Version'  : project.version,
+			'Created-By'     : "Gradle ${gradle.gradleVersion}",
+			'Build-Jdk'      : "${System.properties['java.version']} (${System.properties['java.vendor']} ${System.properties['java.vm.version']})",
+			'Build-OS'       : "${System.properties['os.name']} ${System.properties['os.arch']} ${System.properties['os.version']}"
+		)
+	}
+}
+

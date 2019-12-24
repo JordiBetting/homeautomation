@@ -1,5 +1,7 @@
 package nl.gingerbeard.automation.integration.manual;
 
+import java.io.IOException;
+
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -29,12 +31,15 @@ public class ConfigurationWebpage extends IntegrationTest {
 	}
 
 	@Test
-	public void hostWebpage() throws InterruptedException {
+	public void hostWebpage() throws InterruptedException, IOException {
 		final int duration = 30;
 
-		automation.addRoom(Room1.class);
-		automation.addRoom(Room2.class);
-		System.out.println("configuration page reachable on http://localhost:" + configPort + "/static/configuration.html");
+		start(Room1.class, Room2.class);
+
+		automation.getRoom(Room1.class);
+		automation.getRoom(Room2.class);
+		System.out.println(
+				"configuration page reachable on http://localhost:" + configPort + "/static/configuration.html");
 		System.out.println("will automatically stop in " + duration + " seconds.");
 
 		Thread.sleep(duration * 1000);

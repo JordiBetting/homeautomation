@@ -1,6 +1,6 @@
 package nl.gingerbeard.automation.state;
 
-public final class TimeOfDayValues {
+public class TimeOfDayValues {
 
 	private final int curtime;
 	private final int sunrise;

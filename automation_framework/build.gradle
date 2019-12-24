@@ -9,6 +9,9 @@ dependencies {
 	compile project(':logging')
 	compile project(':automation_configurationserver')
 	compile project(':onkyo')
+	compile project(':automation_domoticz')
+	compile project(':automation_registry')
+	compile project(':util')
 	testCompile project(':testutils')
 }
 

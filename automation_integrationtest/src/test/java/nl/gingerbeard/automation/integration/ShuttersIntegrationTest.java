@@ -32,8 +32,8 @@ public class ShuttersIntegrationTest extends IntegrationTest {
 	}
 
 	@Test
-	public void shutters_integration() throws IOException {
-		automation.addRoom(ShuttersRoom.class);
+	public void shutters_integration() throws IOException, InterruptedException {
+		start(ShuttersRoom.class);
 
 		deviceChanged(2, "off");
 

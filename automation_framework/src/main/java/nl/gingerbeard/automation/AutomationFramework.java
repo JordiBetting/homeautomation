@@ -1,6 +1,9 @@
 package nl.gingerbeard.automation;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import com.google.common.base.Preconditions;
@@ -11,6 +14,8 @@ import nl.gingerbeard.automation.deviceregistry.IDeviceRegistry;
 import nl.gingerbeard.automation.devices.CompositeDevice;
 import nl.gingerbeard.automation.devices.Device;
 import nl.gingerbeard.automation.devices.IDevice;
+import nl.gingerbeard.automation.domoticz.api.DomoticzApi;
+import nl.gingerbeard.automation.domoticz.api.DomoticzException;
 import nl.gingerbeard.automation.event.IEvents;
 import nl.gingerbeard.automation.logging.ILogger;
 import nl.gingerbeard.automation.state.IState;
@@ -22,30 +27,31 @@ public class AutomationFramework implements IAutomationFrameworkInterface {
 	private final AutoControlToDomoticz autoControlToDomoticz;
 	private final IState state;
 	private ILogger log;
+	private DomoticzApi domoticz;
+	private Map<Class<? extends Room>, Room> rooms = new HashMap<>();
 
 	public AutomationFramework(final IEvents events, final IDeviceRegistry deviceRegistry, final IState state,
-			final AutoControlToDomoticz autoControlToDomoticz, ILogger log) {
+			final AutoControlToDomoticz autoControlToDomoticz, ILogger log, DomoticzApi domoticz) {
 		this.events = events;
 		this.deviceRegistry = deviceRegistry;
 		this.state = state;
 		this.autoControlToDomoticz = autoControlToDomoticz;
 		this.log = log;
+		this.domoticz = domoticz;
 	}
 
-	@Override
-	public <T extends Room> T addRoom(final Class<T> roomClass) {
+	private void addRoom(final Class<? extends Room> roomClass) {
 		Preconditions.checkArgument(roomClass != null, "Please provide a non-null room");
-		final T room = createRoom(roomClass);
+		final Room room = createRoom(roomClass);
 		logAddRoom(room);
 
-		room.init(state);
 		room.getDevices().stream().forEach((device) -> addDevice(device));
 		room.getAutoControls().stream().forEach((autoControl) -> {
 			addAutoControl(autoControl);
 		});
 		events.subscribe(room);
 
-		return room;
+		rooms.put(roomClass, room);
 	}
 
 	private void addAutoControl(AutoControl autoControl) {
@@ -83,7 +89,7 @@ public class AutomationFramework implements IAutomationFrameworkInterface {
 	private void addDevice(final IDevice<?> device) {
 		if (device instanceof CompositeDevice) {
 			for (final Device<?> childDevice : getDevices(device)) {
-				deviceRegistry.addDevice(childDevice);
+				addDevice(childDevice);
 			}
 		} else if (device instanceof Device) {
 			deviceRegistry.addDevice((Device<?>) device);
@@ -103,6 +109,41 @@ public class AutomationFramework implements IAutomationFrameworkInterface {
 	@Override
 	public void deviceChanged(final Device<?> changedDevice) {
 		events.trigger(changedDevice);
+	}
+	
+	/////////////////////////////////
+	
+	@Override
+	public void start(Class<? extends Room> room) throws InterruptedException {
+		addRoom(room);
+		roomsAdded();
+	}
+	
+	@Override
+	public void start(Collection<Class<? extends Room>> rooms) throws InterruptedException {
+		for (Class<? extends Room> room : rooms) {
+			addRoom(room);
+		}
+		roomsAdded();
+	}
+
+	public void roomsAdded() throws InterruptedException {
+		try {
+			domoticz.syncFullState();
+		} catch (DomoticzException e) {
+			log.warning(e,
+					"Could not sync full state at startup, continuing without initial state. This may result in misbehaving rules.");
+		}
+		for (Room room : rooms.values()) {
+			room.init(state);
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T extends Room> T getRoom(Class<T> roomType) {
+		Room room = rooms.get(roomType);
+		return (T) room;
 	}
 
 }

@@ -18,6 +18,7 @@ public class TestWebServer extends NanoHTTPD {
 	public static final String JSON_MALFORMED = "{ \"status\" ";
 
 	private final List<String> requests = new ArrayList<>();
+	public final List<Map<String,String>> requestHeaders = new ArrayList<>();
 	private FixedResponse defaultResponse;
 
 	private static class FixedResponse {
@@ -78,6 +79,7 @@ public class TestWebServer extends NanoHTTPD {
 				session.getUri(), //
 				session.getQueryParameterString());
 		requests.add(logline);
+		requestHeaders.add(session.getHeaders());
 	}
 
 	private FixedResponse determineResponse(final IHTTPSession session) {
@@ -99,6 +101,10 @@ public class TestWebServer extends NanoHTTPD {
 
 	public void setRequestLatch(final CountDownLatch requestLatch) {
 		this.requestLatch = Optional.of(requestLatch);
+	}
+
+	public List<Map<String, String>> getRequestHeaders() {
+		return requestHeaders;
 	}
 
 }

@@ -37,8 +37,8 @@ public class ActuatorSensorIntegrationTest extends IntegrationTest {
 	}
 
 	@Test
-	public void actuatorUpdatedBySensorUpdate() throws IOException {
-		automation.addRoom(MyRoom.class);
+	public void actuatorUpdatedBySensorUpdate() throws IOException, InterruptedException {
+		start(MyRoom.class);
 
 		deviceChanged(2, "on");
 

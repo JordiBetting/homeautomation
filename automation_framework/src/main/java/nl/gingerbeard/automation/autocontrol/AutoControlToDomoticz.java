@@ -1,22 +1,22 @@
 package nl.gingerbeard.automation.autocontrol;
 
-import java.io.IOException;
 import java.util.List;
 
-import nl.gingerbeard.automation.domoticz.transmitter.IDomoticzUpdateTransmitter;
+import nl.gingerbeard.automation.domoticz.api.DomoticzApi;
+import nl.gingerbeard.automation.domoticz.api.DomoticzException;
 import nl.gingerbeard.automation.logging.ILogger;
 import nl.gingerbeard.automation.state.NextState;
 
 public class AutoControlToDomoticz implements AutoControlListener {
 
-	private final IDomoticzUpdateTransmitter transmitter;
+	private final DomoticzApi domoticz;
 	private final ILogger log;
 	private final ILogger tracelog;
 
-	public AutoControlToDomoticz(final ILogger logger, final IDomoticzUpdateTransmitter transmitter) {
+	public AutoControlToDomoticz(final ILogger logger, final DomoticzApi domoticz) {
 		log = logger;
 		tracelog = logger.createContext("trace");
-		this.transmitter = transmitter;
+		this.domoticz = domoticz;
 	}
 
 	@Override
@@ -24,8 +24,8 @@ public class AutoControlToDomoticz implements AutoControlListener {
 		output.forEach((update) -> {
 			try {
 				tracelog.info(owner + ": " + update);
-				transmitter.transmitDeviceUpdate(update);
-			} catch (final IOException e) {
+				domoticz.transmitDeviceUpdate(update);
+			} catch (DomoticzException e) {
 				log.warning(e, "Could not transmit update");
 			}
 		});

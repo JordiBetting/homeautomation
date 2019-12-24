@@ -36,8 +36,8 @@ public class HeatingAutoControlIntegrationTest extends IntegrationTest {
 	}
 	
 	@Test
-	public void theTest() throws IOException {
-		automation.addRoom(TestRoom.class);
+	public void theTest() throws IOException, InterruptedException {
+		start(TestRoom.class);
 		updateAlarm("arm_away");
 		setNightTime();
 		assertEquals(0, webserver.getRequests().size());
