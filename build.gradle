@@ -21,7 +21,7 @@ allprojects {
 	}	
 
 	apply plugin: 'eclipse'
-	apply plugin: 'com.github.spotbugs'
+	apply plugin: 'com.github.spotbugs' version '3.0.0'
 	apply plugin: 'maven-publish'
 	apply plugin: 'com.adarshr.test-logger'
 	
