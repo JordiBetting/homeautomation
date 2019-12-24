@@ -28,7 +28,6 @@ import nl.gingerbeard.automation.Room;
 import nl.gingerbeard.automation.components.OnkyoTransmitterComponent;
 import nl.gingerbeard.automation.configuration.ConfigurationServerSettings;
 import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
-import nl.gingerbeard.automation.logging.TestLogger;
 import nl.gingerbeard.automation.logging.TestLogger.LogOutputToTestLogger;
 import nl.gingerbeard.automation.onkyo.OnkyoDriver;
 import nl.gingerbeard.automation.testutils.TestWebServer;
@@ -41,7 +40,6 @@ public abstract class IntegrationTest {
 	protected TestWebServer webserver;
 	protected IAutomationFrameworkInterface automation;
 	protected int configPort;
-	protected TestLogger logOutput;
 	protected OnkyoDriver onkyoDriver;
 	protected List<String> startupRequests = new ArrayList<>();
 
@@ -59,7 +57,6 @@ public abstract class IntegrationTest {
 		port = config.getListenPort();
 		configPort = configSettings.getListenPort();
 		automation = container.getRuntime().getService(IAutomationFrameworkInterface.class).get();
-		logOutput = LogOutputToTestLogger.testLogger;
 		
 		Optional<OnkyoTransmitterComponent> onkyo = container.getRuntime().getComponent(OnkyoTransmitterComponent.class);
 		assertTrue(onkyo.isPresent());
@@ -92,7 +89,6 @@ public abstract class IntegrationTest {
 		automation = null;
 		port = 0;
 		config = null;
-		logOutput = null;
 	}
 
 	protected void deviceChanged(final int idx, final String state) throws IOException {
