@@ -99,6 +99,41 @@ public class DeviceSyncTest {
 		log.assertContains(LogLevel.WARNING, "No details received for device with idx 1. Could not set initial state. DomoticzReplyStatus: OK");
 	}
 	
+	@Test
+	public void emptyStatus_registryNotCalled() throws IOException {
+		when(client.getDeviceDetails(1)).thenReturn(createDeviceWithEmptyStatus());
+		
+		sync.syncDevice(1);
+		
+		verifyNoMoreInteractions(registry);
+	}
+	
+	@Test
+	public void emptyStatus_warningLogged() throws IOException {
+		when(client.getDeviceDetails(1)).thenReturn(createDeviceWithEmptyStatus());
+		
+		sync.syncDevice(1);
+		
+		log.assertContains(LogLevel.WARNING, "No status reported for device with idx 1. Could not set initial state");
+	}
+	
+	@Test
+	public void noStatus_registryNotCalled() throws IOException {
+		when(client.getDeviceDetails(1)).thenReturn(createDeviceWithNoStatus());
+		
+		sync.syncDevice(1);
+		
+		verifyNoMoreInteractions(registry);
+	}
+	
+	@Test
+	public void noStatus_warningLogged() throws IOException {
+		when(client.getDeviceDetails(1)).thenReturn(createDeviceWithNoStatus());
+		
+		sync.syncDevice(1);
+		
+		log.assertContains(LogLevel.WARNING, "No status reported for device with idx 1. Could not set initial state");
+	}
 	
 	@Test
 	public void requestFailed() throws IOException {
@@ -149,6 +184,26 @@ public class DeviceSyncTest {
 		DeviceJSON json = new DeviceJSON();
 		json.status = "OK"; 
 		json.result = new DeviceResultJSON[] { };
+		return json;
+	}
+	
+	private DeviceJSON createDeviceWithNoStatus() {
+		DeviceResultJSON result = new DeviceResultJSON();
+		result.status = null;
+		
+		DeviceJSON json = new DeviceJSON();
+		json.status = "OK"; 
+		json.result = new DeviceResultJSON[] { result };
+		return json;
+	}
+	
+	private DeviceJSON createDeviceWithEmptyStatus() {
+		DeviceResultJSON result = new DeviceResultJSON();
+		result.status = "";
+		
+		DeviceJSON json = new DeviceJSON();
+		json.status = "OK"; 
+		json.result = new DeviceResultJSON[] { result };
 		return json;
 	}
 }
