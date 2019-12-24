@@ -264,7 +264,7 @@ public class ControlloopTest {
 	}
 
 	@Test
-	public void nextState_group_reportedAgain() throws IOException {
+	public void nextState_group_reportedAgain() throws IOException, DomoticzException {
 		final TestLogger log = new TestLogger();
 		final Group device = new Group(42);
 		final NextState<OnOffState> nextState = new NextState<>(device, OnOffState.ON);
@@ -272,7 +272,7 @@ public class ControlloopTest {
 		final IEvents events = mock(IEvents.class);
 		when(events.trigger(any(Device.class))).thenReturn(EventResult.of(nextState));
 
-		final IDomoticzUpdateTransmitter transmitter = mock(IDomoticzUpdateTransmitter.class);
+		final DomoticzApi transmitter = mock(DomoticzApi.class);
 		final Controlloop control = new Controlloop(events, transmitter, mock(IState.class), log, mock(IOnkyoTransmitter.class));
 
 		device.setState(OnOffState.ON);
