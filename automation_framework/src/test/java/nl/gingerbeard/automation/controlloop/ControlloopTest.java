@@ -98,6 +98,10 @@ public class ControlloopTest {
 			return transmitted;
 		}
 
+		@Override
+		public void stop() throws InterruptedException {
+		}
+
 	}
 
 	private static final Switch mockDevice1 = new Switch(1);
