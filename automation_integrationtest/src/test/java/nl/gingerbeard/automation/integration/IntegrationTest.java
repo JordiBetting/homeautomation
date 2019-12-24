@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -49,9 +50,8 @@ public abstract class IntegrationTest {
 		webserver = new TestWebServer();
 		webserver.start();
 
-		config = new DomoticzConfiguration(0, new URL("http://localhost:" + webserver.getListeningPort()));
-		config.setEventHandlingSynchronous();
-		config.disableInit();
+		this.config = createConfig();
+		initWebserver();
 		final ConfigurationServerSettings configSettings = new ConfigurationServerSettings(0);
 		container = IAutomationFrameworkInterface.createFrameworkContainer(config, new LogOutputToTestLogger(), configSettings);
 		container.start(rooms);
@@ -68,6 +68,17 @@ public abstract class IntegrationTest {
 		
 		startupRequests.addAll(webserver.getRequests());
 		webserver.getRequests().clear();
+	}
+
+	protected void initWebserver() {
+		
+	}
+
+	DomoticzConfiguration createConfig() throws MalformedURLException {
+		DomoticzConfiguration config = new DomoticzConfiguration(0, new URL("http://localhost:" + webserver.getListeningPort()));
+		config.setEventHandlingSynchronous();
+		config.disableInit();
+		return config;
 	}
 
 	@AfterEach
