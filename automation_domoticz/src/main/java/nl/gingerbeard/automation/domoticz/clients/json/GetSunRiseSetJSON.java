@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import com.google.gson.annotations.SerializedName;
 
-public class GetSunRiseSet {
+public class GetSunRiseSetJSON {
 	@SerializedName("CivTwilightEnd")
 	private String civilTwilightEnd;
 

@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Optional;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -182,6 +183,20 @@ public class DeviceRegistryTest {
 		boolean result = registry.addDevice(new Switch(1));
 		
 		assertFalse(result);
+	}
+	
+	@Test
+	public void getIdx_unique() {
+		registry.addDevice(new Switch(1));
+		registry.addDevice(new Switch(1));
+		registry.addDevice(new Switch(2));
+		registry.addDevice(new Switch(3));
 		
+		Set<Integer> result = registry.getAllIdx();
+		
+		assertEquals(3, result.size());
+		assertTrue(result.contains(1));
+		assertTrue(result.contains(2));
+		assertTrue(result.contains(3));
 	}
 }

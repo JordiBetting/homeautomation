@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import com.google.common.base.Preconditions;
 
@@ -71,6 +72,11 @@ public final class DeviceRegistry implements IDeviceRegistry {
 			return Optional.ofNullable(group.getAny().get().getState());
 		}
 		return Optional.empty();
+	}
+
+	@Override
+	public Set<Integer> getAllIdx() {
+		return deviceGroups.keySet();
 	}
 
 }

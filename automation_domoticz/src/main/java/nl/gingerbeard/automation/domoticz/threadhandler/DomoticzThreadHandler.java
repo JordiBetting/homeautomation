@@ -18,7 +18,9 @@ import nl.gingerbeard.automation.domoticz.api.IDomoticzAlarmChanged;
 import nl.gingerbeard.automation.domoticz.api.IDomoticzDeviceStatusChanged;
 import nl.gingerbeard.automation.domoticz.api.IDomoticzTimeOfDayChanged;
 import nl.gingerbeard.automation.domoticz.clients.AlarmStateClient;
+import nl.gingerbeard.automation.domoticz.clients.GetDeviceClient;
 import nl.gingerbeard.automation.domoticz.clients.TimeOfDayClient;
+import nl.gingerbeard.automation.domoticz.clients.json.DeviceJSON;
 import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
 import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration.DomoticzInitBehaviorConfig;
 import nl.gingerbeard.automation.logging.ILogger;
@@ -226,8 +228,12 @@ public class DomoticzThreadHandler {
 		state.setAlarmState(alarmClient.getAlarmState());
 	}
 
-	private void syncDevices() {
-		// TODO Auto-generated method stub
+	private void syncDevices() throws IOException {
+		for (int idx : deviceRegistry.getAllIdx()) {
+			GetDeviceClient deviceClient = new GetDeviceClient(config, logger, idx);
+			DeviceJSON deviceState = deviceClient.getDeviceDetails();
+			deviceRegistry.updateDevice(idx, deviceState.result.status);
+		}
 	}
 
 	private void syncScenes() {

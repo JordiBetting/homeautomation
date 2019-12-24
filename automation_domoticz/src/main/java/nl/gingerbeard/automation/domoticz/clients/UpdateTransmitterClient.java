@@ -6,7 +6,7 @@ import java.io.InputStreamReader;
 import com.google.gson.JsonSyntaxException;
 
 import nl.gingerbeard.automation.domoticz.api.DomoticzException;
-import nl.gingerbeard.automation.domoticz.clients.json.DomoticzStatus;
+import nl.gingerbeard.automation.domoticz.clients.json.StatusJSON;
 import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
 import nl.gingerbeard.automation.domoticz.transmitter.urlcreator.DomoticzUrls;
 import nl.gingerbeard.automation.logging.ILogger;
@@ -33,7 +33,7 @@ public class UpdateTransmitterClient extends GetClient {
 
 	private void validateOutput(InputStreamReader responseBodyReader) throws DomoticzException {
 		try {
-			DomoticzStatus status = gson.fromJson(responseBodyReader, DomoticzStatus.class);
+			StatusJSON status = gson.fromJson(responseBodyReader, StatusJSON.class);
 			if (!"OK".equals(status.status)) {
 				throw new DomoticzException("Failed setting value in domoticz: " + status.status);
 			}

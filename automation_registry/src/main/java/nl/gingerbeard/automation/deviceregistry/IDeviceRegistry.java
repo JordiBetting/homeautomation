@@ -1,6 +1,7 @@
 package nl.gingerbeard.automation.deviceregistry;
 
 import java.util.Optional;
+import java.util.Set;
 
 import nl.gingerbeard.automation.devices.Device;
 
@@ -41,4 +42,10 @@ public interface IDeviceRegistry {
 	boolean devicePresent(int idx);
 
 	Optional<?> getDeviceState(int idx);
+
+	/**
+	 * Retrieve a unique set of idx of all known devices.
+	 * @return Set of unique idx
+	 */
+	Set<Integer> getAllIdx();
 }

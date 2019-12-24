@@ -6,7 +6,7 @@ import com.google.gson.annotations.SerializedName;
 
 import nl.gingerbeard.automation.state.AlarmState;
 
-public class GetSecStatus {
+public class GetSecStatusJSON {
 
 	@SerializedName("secstatus")
 	private int secstatus;
