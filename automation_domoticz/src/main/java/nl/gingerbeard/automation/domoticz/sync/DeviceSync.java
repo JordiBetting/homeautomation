@@ -19,7 +19,7 @@ public class DeviceSync {
 	public DeviceSync(DomoticzConfiguration config, IDeviceRegistry deviceRegistry, ILogger logger) throws IOException {
 		this(new GetDeviceClient(config, logger), deviceRegistry, logger);
 	}
- 
+
 	public DeviceSync(GetDeviceClient client, IDeviceRegistry deviceRegistry, ILogger logger) {
 		this.client = client;
 		this.deviceRegistry = deviceRegistry;
