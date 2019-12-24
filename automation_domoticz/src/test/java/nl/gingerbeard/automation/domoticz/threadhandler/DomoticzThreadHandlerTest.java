@@ -38,7 +38,6 @@ import nl.gingerbeard.automation.domoticz.clients.TimeOfDayClient;
 import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
 import nl.gingerbeard.automation.domoticz.sync.AlarmSync;
 import nl.gingerbeard.automation.domoticz.sync.DeviceSync;
-import nl.gingerbeard.automation.domoticz.sync.DeviceSyncTest;
 import nl.gingerbeard.automation.domoticz.sync.SyncAll;
 import nl.gingerbeard.automation.domoticz.sync.TimeSync;
 import nl.gingerbeard.automation.logging.ILogger;

@@ -12,7 +12,6 @@ import java.io.IOException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 import nl.gingerbeard.automation.domoticz.api.DomoticzException;
 import nl.gingerbeard.automation.domoticz.clients.TimeOfDayClient;
@@ -22,7 +21,6 @@ import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration.Do
 import nl.gingerbeard.automation.domoticz.receiver.DomoticzEventReceiverServer;
 import nl.gingerbeard.automation.domoticz.threadhandler.DomoticzThreadHandler;
 import nl.gingerbeard.automation.logging.ILogger;
-import nl.gingerbeard.automation.util.RetryUtil.RetryTask;
 
 public class DomoticzImplTest {
 
@@ -110,20 +108,20 @@ public class DomoticzImplTest {
 //		Thread.currentThread().interrupt();
 //		assertThrows(InterruptedException.class, () -> handler.syncFullState());
 //	}
-
-	private class FailingThreadHandler extends DomoticzImpl {
-
-		FailingThreadHandler(UpdateTransmitterClient transmitter, DomoticzEventReceiverServer receiver,
-				DomoticzThreadHandler threadHandler, TimeOfDayClient todClient, DomoticzConfiguration config,
-				ILogger log) {
-			super(transmitter, receiver, threadHandler, todClient, config, log);
-		}
-
-		@Override
-		void executeTaskWithRetries(RetryTask task, DomoticzInitBehaviorConfig config) throws DomoticzException {
-			throw new DomoticzException();
-		}
-	}
+//
+//	private class FailingThreadHandler extends DomoticzImpl {
+//
+//		FailingThreadHandler(UpdateTransmitterClient transmitter, DomoticzEventReceiverServer receiver,
+//				DomoticzThreadHandler threadHandler, TimeOfDayClient todClient, DomoticzConfiguration config,
+//				ILogger log) {
+//			super(transmitter, receiver, threadHandler, todClient, config, log);
+//		}
+//
+//		@Override
+//		void executeTaskWithRetries(RetryTask task, DomoticzInitBehaviorConfig config) throws DomoticzException {
+//			throw new DomoticzException();
+//		}
+//	}
 //	
 //	@Test
 //	public void syncFull_interrupted_throwsInterruptedException() throws InterruptedException, DomoticzException {

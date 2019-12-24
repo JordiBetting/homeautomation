@@ -42,9 +42,9 @@ public class DeviceSync {
 	private Optional<DeviceResultJSON> getDeviceDetails(int idx, DeviceJSON deviceState) {
 		Optional<DeviceResultJSON> details = Optional.empty();
 		DeviceResultJSON[] result = deviceState.result;
-		if (result.length == 0 || result[0] == null) {
+		if (result == null || result.length == 0 || result[0] == null) {
 			logger.warning(
-					String.format("No details received for device with idx %d. Could not set initial state.", idx));
+					String.format("No details received for device with idx %d. Could not set initial state. DomoticzReplyStatus: %s", idx, deviceState.status));
 		} else {
 			if (result.length > 1) {
 				logger.warning(
