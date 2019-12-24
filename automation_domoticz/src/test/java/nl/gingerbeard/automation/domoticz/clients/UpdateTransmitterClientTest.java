@@ -34,7 +34,7 @@ public class UpdateTransmitterClientTest {
 	private TestWebServer webserver;
 	private DomoticzConfiguration domoticzConfig;
 
-	public class StringTestDevice extends Device<String> {
+	public static class StringTestDevice extends Device<String> {
 
 		public StringTestDevice() {
 			super(42);

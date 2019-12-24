@@ -113,7 +113,7 @@ public class DomoticzImplTest {
 		assertEquals(InterruptedException.class, e.getCause().getClass());
 	}
 	
-	private class InterruptingImpl extends DomoticzImpl {
+	private static class InterruptingImpl extends DomoticzImpl {
 
 		InterruptingImpl(UpdateTransmitterClient transmitter, DomoticzEventReceiverServer receiver,
 				DomoticzThreadHandler threadHandler, TimeOfDayClient todClient, DomoticzConfiguration config,

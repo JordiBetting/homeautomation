@@ -12,6 +12,7 @@ public class DeviceRegistryComponent {
 	@Activate
 	public void createRegistry() {
 		deviceRegistry = new DeviceRegistry();
+		deviceRegistry.hashCode(); // prevent findbugs unused warning
 	}
 
 	@Deactivate

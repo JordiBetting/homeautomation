@@ -427,7 +427,8 @@ public class DomoticzThreadHandlerTest {
 		final DomoticzException exc = new DomoticzException("Test exception");
 		handler.execute(() -> { throw exc; });
 		
-		latch.await(1, TimeUnit.MINUTES);
+		boolean await = latch.await(1, TimeUnit.MINUTES);
+		assertTrue(await);
 		verify(logger, times(1)).exception(exc, "Failed to execute command");
 	}
 	
