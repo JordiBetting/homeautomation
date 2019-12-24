@@ -19,7 +19,7 @@ public class DeviceSync {
 	public DeviceSync(DomoticzConfiguration config, IDeviceRegistry deviceRegistry, ILogger logger) throws IOException {
 		this(new GetDeviceClient(config, logger), deviceRegistry, logger);
 	}
- 
+
 	public DeviceSync(GetDeviceClient client, IDeviceRegistry deviceRegistry, ILogger logger) {
 		this.client = client;
 		this.deviceRegistry = deviceRegistry;
@@ -29,7 +29,12 @@ public class DeviceSync {
 	public void syncDevice(int idx) throws IOException {
 		Optional<DeviceResultJSON> details = getDeviceDetails(idx);
 		if (details.isPresent()) {
-			deviceRegistry.updateDevice(idx, details.get().status);
+			if (details.get().status != null && !details.get().status.equals("")) {
+				deviceRegistry.updateDevice(idx, details.get().status);
+			} else {
+				logger.warning(
+						String.format("No status reported for device with idx %d. Could not set initial state.", idx));
+			}
 		}
 	}
 
