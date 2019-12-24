@@ -135,7 +135,7 @@ public class AutomationFramework implements IAutomationFrameworkInterface {
 					"Could not sync full state at startup, continuing without initial state. This may result in misbehaving rules.");
 		}
 		for (Room room : rooms.values()) {
-			room.init(state);
+			room.init(state); // TODO: AutoControl init is done before state is synced. Update that!
 		}
 	}
 
