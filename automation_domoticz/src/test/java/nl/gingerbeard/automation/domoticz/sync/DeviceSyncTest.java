@@ -82,6 +82,25 @@ public class DeviceSyncTest {
 	}
 	
 	@Test
+	public void emptyResults_registryNotCalled() throws IOException {
+		when(client.getDeviceDetails(1)).thenReturn(createDeviceWithEmptyResults());
+		
+		sync.syncDevice(1);
+		
+		verifyNoMoreInteractions(registry);
+	}
+
+	@Test
+	public void emptyResults_warningLogged() throws IOException {
+		when(client.getDeviceDetails(1)).thenReturn(createDeviceWithEmptyResults());
+		
+		sync.syncDevice(1);
+		
+		log.assertContains(LogLevel.WARNING, "No details received for device with idx 1. Could not set initial state. DomoticzReplyStatus: OK");
+	}
+	
+	
+	@Test
 	public void requestFailed() throws IOException {
 		when(client.getDeviceDetails(1)).thenReturn(createFailedResult());
 		
@@ -116,6 +135,13 @@ public class DeviceSyncTest {
 		DeviceJSON json = new DeviceJSON();
 		json.status = "OK";
 		json.result = new DeviceResultJSON[] { result1, result2 };
+		return json;
+	}
+	
+	private DeviceJSON createDeviceWithEmptyResults() {
+		DeviceJSON json = new DeviceJSON();
+		json.status = "OK"; 
+		json.result = new DeviceResultJSON[] { null };
 		return json;
 	}
 	
