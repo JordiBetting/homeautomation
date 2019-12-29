@@ -6,7 +6,6 @@ import java.util.TimerTask;
 
 import nl.gingerbeard.automation.autocontrol.heating.HeatingAutoControlContext;
 import nl.gingerbeard.automation.state.AlarmState;
-import nl.gingerbeard.automation.state.Temperature;
 
 public final class StateHeatingOnDelay extends HeatingState {
 	private final Timer timer = new Timer();
@@ -27,11 +26,6 @@ public final class StateHeatingOnDelay extends HeatingState {
 				context.changeStateAsync(Util.createNextOnStateBasedOnDaytime(context));
 			}
 		}
-	}
-
-	@Override
-	public Optional<Temperature> stateEntryResult() {
-		return Optional.of(context.offTemperature);
 	}
 
 	@Override
