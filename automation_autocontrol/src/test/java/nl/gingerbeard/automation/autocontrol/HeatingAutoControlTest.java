@@ -301,6 +301,16 @@ public class HeatingAutoControlTest {
 	}
 	
 	@Test
+	public void onDelay_zero_noWait() throws InterruptedException {
+		initSut(TimeOfDay.NIGHTTIME, AlarmState.ARM_AWAY);
+		sut.setDelayOnMillis(0);
+
+		List<NextState<?>> result = updateAlarm(AlarmState.DISARMED);
+		assertTemperature(HeatingAutoControl.DEFAULT_TEMP_C_NIGHT, result);
+		assertDelayedNotTriggered();
+	}
+	
+	@Test
 	public void onDelay_arm_onCancelled() throws InterruptedException {
 		initSut(TimeOfDay.NIGHTTIME, AlarmState.ARM_AWAY);
 		sut.setDelayOnMillis(500);
