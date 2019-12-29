@@ -116,7 +116,7 @@ public final class HeatingAutoControl extends AutoControl implements IHeatingAut
 	}
 
 	private String getStateName(HeatingState state) {
-		return state.getClass().getSimpleName();
+		return state != null ? state.getClass().getSimpleName() : "Uninitialized";
 	}
 
 	@Override
@@ -133,10 +133,13 @@ public final class HeatingAutoControl extends AutoControl implements IHeatingAut
 			getLogger().info("HeatingAutoControl for " + getOwner() + " changing state from "
 					+ getStateName(currentState) + " to " + getStateName(nextState));
 			currentState = nextState;
-			Optional<Temperature> stateEntryResult = currentState.stateEntryResult();
-			stateEntryResult.ifPresent((entryResult) -> result.addAll(createNextState(entryResult)));
 
 			Optional<HeatingState> onEntryNextState = currentState.stateEntryNextState();
+			
+			if(!onEntryNextState.isPresent()) {
+				Optional<Temperature> stateEntryResult = currentState.stateEntryResult();
+				stateEntryResult.ifPresent((entryResult) -> result.addAll(createNextState(entryResult)));
+			}
 			result.addAll(changeState(onEntryNextState));
 		}
 
@@ -196,7 +199,7 @@ public final class HeatingAutoControl extends AutoControl implements IHeatingAut
 	@Override
 	protected void onInit() {
 		context.configure(getState(), getLogger());
-		currentState = new StateHeatingOff(context);
+		changeStateAsync(Optional.of(new StateHeatingOff(context)));
 	}
 
 	// test interfaces

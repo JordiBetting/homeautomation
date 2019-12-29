@@ -4,12 +4,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.Test;
 
+import nl.gingerbeard.automation.autocontrol.heating.states.StateHeatingOff;
 import nl.gingerbeard.automation.autocontrol.heating.states.StateHeatingOnDaytime;
 import nl.gingerbeard.automation.autocontrol.heating.states.StateHeatingOnNighttime;
 import nl.gingerbeard.automation.devices.DoorSensor;
@@ -33,7 +35,7 @@ public class HeatingAutoControlTest {
 
 	private class TestListener implements AutoControlListener {
 
-		private List<NextState<?>> output;
+		private List<NextState<?>> output = new ArrayList<>();
 		volatile CountDownLatch notifyLatch;
 
 		public TestListener() {
@@ -42,7 +44,7 @@ public class HeatingAutoControlTest {
 		
 		@Override
 		public void outputChanged(String owner, List<NextState<?>> output) {
-			this.output = output;
+			this.output.addAll(output);
 			notifyLatch.countDown();
 		}
 
@@ -51,8 +53,8 @@ public class HeatingAutoControlTest {
 			reset();
 		}
 
-		private void reset() {
-			output = null;
+		public void reset() {
+			output.clear();
 			notifyLatch = new CountDownLatch(1);
 		}
 
@@ -72,16 +74,26 @@ public class HeatingAutoControlTest {
 		initSut(TimeOfDay.NIGHTTIME, AlarmState.DISARMED);
 	}
 	
-	private void initSut(TimeOfDay initialTimeOfDay, AlarmState initialAlarmState) {
+	private void initStartupState(TimeOfDay initialTimeOfDay, AlarmState initialAlarmState) {
 		state = new State();
+		state.alarm = initialAlarmState;
+		state.setTimeOfDay(initialTimeOfDay);
+		initSut(state);
+	}
+	
+	private void initSut(TimeOfDay initialTimeOfDay, AlarmState initialAlarmState) {
+		initStartupState(initialTimeOfDay, initialAlarmState);
+		listener.reset();
+	}
+
+	private void initSut(State state) {
+		this.state = state;
 		sut = new HeatingAutoControl();
 		listener = new TestListener();
 		testDevice = new Thermostat(2, 1);
 		sut.addThermostat(testDevice);
 		log = new TestLogger();
 		sut.init(listener, state, log);
-		updateTimeOfDay(initialTimeOfDay);
-		updateAlarm(initialAlarmState);
 	}
 	
 	@Test
@@ -216,9 +228,8 @@ public class HeatingAutoControlTest {
 	public void daytimeDisarmed_Night_heatingUp() throws InterruptedException {
 		initSut(TimeOfDay.DAYTIME, AlarmState.DISARMED);
 
-		updateAlarm(AlarmState.DISARMED);
 		List<NextState<?>> result = updateTimeOfDay(TimeOfDay.NIGHTTIME);
-		
+
 		assertTemperature(HeatingAutoControl.DEFAULT_TEMP_C_NIGHT, result);
 	}
 	
@@ -399,6 +410,38 @@ public class HeatingAutoControlTest {
 		
 		log.assertContains(LogLevel.INFO, "[INFO] [root] HeatingAutoControl for HeatingAutoControlTest changing state from StateHeatingOff to StateHeatingOnDelay");
 		log.assertContains(LogLevel.INFO, "[INFO] [root] HeatingAutoControl for HeatingAutoControlTest changing state from StateHeatingOnDelay to StateHeatingOnDaytime");
+	}
+	
+	@Test
+	public void init_onNightTime() {
+		initStartupState(TimeOfDay.NIGHTTIME, AlarmState.DISARMED);
+		
+		assertEquals(StateHeatingOnNighttime.class, sut.getControlState());
+		listener.assertTemperature(HeatingAutoControl.DEFAULT_TEMP_C_NIGHT);
+	}
+	
+	@Test
+	public void init_onDaytime() {
+		initStartupState(TimeOfDay.DAYTIME, AlarmState.DISARMED);
+		
+		assertEquals(StateHeatingOnDaytime.class, sut.getControlState());
+		listener.assertTemperature(HeatingAutoControl.DEFAULT_TEMP_C_DAY);
+	}
+
+	@Test
+	public void init_offNightTime() {
+		initStartupState(TimeOfDay.NIGHTTIME, AlarmState.ARM_AWAY);
+		
+		assertEquals(StateHeatingOff.class, sut.getControlState());
+		listener.assertTemperature(HeatingAutoControl.DEFAULT_TEMP_C_OFF);
+	}
+	
+	@Test
+	public void init_offDayTime() {
+		initStartupState(TimeOfDay.DAYTIME, AlarmState.ARM_AWAY);
+		
+		assertEquals(StateHeatingOff.class, sut.getControlState());
+		listener.assertTemperature(HeatingAutoControl.DEFAULT_TEMP_C_OFF);
 	}
 	
 	private List<NextState<?>> switchOn(OnOffDevice pauseDevice) {
