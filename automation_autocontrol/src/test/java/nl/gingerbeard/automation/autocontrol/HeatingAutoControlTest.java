@@ -496,6 +496,15 @@ public class HeatingAutoControlTest {
 	}
 	
 	@Test
+	public void away_timeChanges_ignored() {
+		initStartupState(TimeOfDay.DAYTIME, AlarmState.ARM_AWAY);
+		
+		List<NextState<?>> result = updateTimeOfDay(TimeOfDay.NIGHTTIME);
+		
+		assertEquals(0, result.size());
+	}
+	
+	@Test
 	public void init_onDaytimePaused() {
 		state = new State();
 		state.alarm = AlarmState.DISARMED;
