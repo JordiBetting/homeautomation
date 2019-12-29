@@ -31,10 +31,7 @@ public final class StateHeatingOnDelay extends HeatingState {
 
 	@Override
 	public Optional<Temperature> stateEntryResult() {
-		if (!delayEnabled()) {
-			return Optional.of(context.offTemperature);
-		}
-		return super.stateEntryResult();
+		return Optional.of(context.offTemperature);
 	}
 
 	@Override
