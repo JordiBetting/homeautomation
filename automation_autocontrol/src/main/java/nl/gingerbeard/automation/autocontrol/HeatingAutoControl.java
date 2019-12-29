@@ -85,6 +85,7 @@ public final class HeatingAutoControl extends AutoControl implements IHeatingAut
 		return deviceChanged();
 	}
 
+	@Subscribe
 	public List<NextState<?>> deviceChanged(OpenCloseDevice _void) {
 		return deviceChanged();
 	}
