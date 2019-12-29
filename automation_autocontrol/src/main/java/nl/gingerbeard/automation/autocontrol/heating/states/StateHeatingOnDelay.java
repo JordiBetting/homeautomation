@@ -14,7 +14,7 @@ public final class StateHeatingOnDelay extends HeatingState {
 
 	StateHeatingOnDelay(HeatingAutoControlContext context) {
 		this.context = context;
-		if (!delayEnabled()) {
+		if (delayEnabled()) {
 			context.getLogger().info("Scheduling heating on for " + context.getOwner() + " in " + context.delayOnMillis + "ms.");
 			timer.schedule(new TimerTick(), context.delayOnMillis);
 		}
@@ -48,14 +48,14 @@ public final class StateHeatingOnDelay extends HeatingState {
 
 	@Override
 	public Optional<HeatingState> stateEntryNextState() {
-		if (delayEnabled()) {
+		if (!delayEnabled()) {
 			return Util.createNextOnStateBasedOnDaytime(context);
 		}
 		return super.stateEntryNextState();
 	}
 
 	private boolean delayEnabled() {
-		return context.delayOnMillis <= 0;
+		return context.delayOnMillis > 0;
 	}
 
 }

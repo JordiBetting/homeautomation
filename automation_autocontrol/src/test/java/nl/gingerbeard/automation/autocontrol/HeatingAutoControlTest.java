@@ -23,7 +23,6 @@ import nl.gingerbeard.automation.devices.Switch;
 import nl.gingerbeard.automation.devices.Thermostat;
 import nl.gingerbeard.automation.logging.LogLevel;
 import nl.gingerbeard.automation.logging.TestLogger;
-import nl.gingerbeard.automation.logging.TestLogger.LogOutputToTestLogger;
 import nl.gingerbeard.automation.state.AlarmState;
 import nl.gingerbeard.automation.state.NextState;
 import nl.gingerbeard.automation.state.OnOffState;
@@ -209,8 +208,7 @@ public class HeatingAutoControlTest {
 		sut.setDelayOnMillis(500);
 
 		List<NextState<?>> result = updateAlarm(AlarmState.DISARMED);
-		assertTemperature(HeatingAutoControl.DEFAULT_TEMP_C_OFF, result); 
-		
+		assertEquals(0, result.size());
 		awaitDelayedOnAssertingSuccess();
 		listener.assertTemperature(HeatingAutoControl.DEFAULT_TEMP_C_DAY);
 	}
@@ -259,7 +257,7 @@ public class HeatingAutoControlTest {
 		sut.setDelayOnMillis(500);
 		
 		List<NextState<?>> result = updateAlarm(AlarmState.DISARMED);
-		assertTemperature(HeatingAutoControl.DEFAULT_TEMP_C_OFF, result);
+		assertEquals(0, result.size());
 		awaitDelayedOnAssertingSuccess();
 		listener.assertTemperature(HeatingAutoControl.DEFAULT_TEMP_C_NIGHT);
 		
@@ -270,7 +268,7 @@ public class HeatingAutoControlTest {
 		assertTemperature(HeatingAutoControl.DEFAULT_TEMP_C_OFF, result);
 		
 		result = updateAlarm(AlarmState.DISARMED);
-		assertTemperature(HeatingAutoControl.DEFAULT_TEMP_C_OFF, result);
+		assertEquals(0, result.size());
 		awaitDelayedOnAssertingSuccess();
 		listener.assertTemperature(HeatingAutoControl.DEFAULT_TEMP_C_DAY);
 		
@@ -288,6 +286,18 @@ public class HeatingAutoControlTest {
 		List<NextState<?>> result = updateAlarm(AlarmState.DISARMED);
 		
 		assertEquals(0, result.size());
+	}
+	
+	@Test
+	public void onDelay_applied() throws InterruptedException {
+		initSut(TimeOfDay.NIGHTTIME, AlarmState.ARM_AWAY);
+		sut.setDelayOnMillis(500);
+
+		updateAlarm(AlarmState.DISARMED);
+		listener.assertNoUpdate();
+		
+		awaitDelayedOutput();
+		listener.assertTemperature(HeatingAutoControl.DEFAULT_TEMP_C_NIGHT);
 	}
 	
 	@Test
