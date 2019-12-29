@@ -396,7 +396,7 @@ public class HeatingAutoControlTest {
 		switchOn(pauseDevice);
 		updateAlarm(AlarmState.ARM_AWAY);
 
-		assertDelayedNotTriggered();
+		assertDelayedNotTriggered();// TODO fails
 	}
 	
 	@Test
@@ -408,7 +408,7 @@ public class HeatingAutoControlTest {
 		switchOn(pauseDevice);
 		switchOff(pauseDevice);
 
-		assertDelayedNotTriggered();
+		assertDelayedNotTriggered(); // TODO fails
 	}
 	
 	@Test

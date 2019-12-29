@@ -37,6 +37,7 @@ public class HeatingAutoControlIntegrationTest extends IntegrationTest {
 	
 	@Test
 	public void theTest() throws IOException, InterruptedException {
+		//TODO: Introduce startup behavior
 		start(TestRoom.class);
 		updateAlarm("arm_away");
 		setNightTime();
