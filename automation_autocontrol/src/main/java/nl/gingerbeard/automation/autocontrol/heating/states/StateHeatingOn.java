@@ -14,8 +14,14 @@ public abstract class StateHeatingOn extends HeatingState {
 
 	@Override
 	public Optional<HeatingState> stateEntryNextState() {
-		// TODO check for pause devices
-		return super.stateEntryNextState();
+		if (isPauseDeviceOn()) {
+			return Optional.of(new StateHeatingPaused(context));
+		}
+		return Optional.empty();
+	}
+
+	private boolean isPauseDeviceOn() {
+		return !context.isAllPauseDevicesOff();
 	}
 	
 	@Override

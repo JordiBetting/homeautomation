@@ -91,7 +91,8 @@ public final class HeatingAutoControl extends AutoControl implements IHeatingAut
 
 	private List<NextState<?>> deviceChanged() {
 		Optional<HeatingState> nextState;
-		if (isAllPauseDevicesOff()) {
+		context.setAllPauseDeviceOff(isAllPauseDevicesOff());
+		if (context.isAllPauseDevicesOff()) {
 			nextState = currentState.allPauseDevicesOff();
 		} else {
 			nextState = currentState.pauseDeviceOn();
@@ -199,6 +200,7 @@ public final class HeatingAutoControl extends AutoControl implements IHeatingAut
 	@Override
 	protected void onInit() {
 		context.configure(getState(), getLogger());
+		context.setAllPauseDeviceOff(isAllPauseDevicesOff());
 		changeStateAsync(Optional.of(new StateHeatingOff(context)));
 	}
 

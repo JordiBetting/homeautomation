@@ -22,6 +22,7 @@ public final class HeatingAutoControlContext {
 	public IState frameworkState;
 	private ILogger log;
 	private String owner;
+	private boolean allPauseDevicesOff;
 
 	public HeatingAutoControlContext(IHeatingAutoControlStateControl autoControl, String owner) {
 		this.autoControl = autoControl;
@@ -43,6 +44,14 @@ public final class HeatingAutoControlContext {
 	public void configure(IState state, ILogger logger) {
 		this.log = logger;
 		this.frameworkState = state;
+	}
+
+	public void setAllPauseDeviceOff(boolean allPauseDevicesOff) {
+		this.allPauseDevicesOff = allPauseDevicesOff;
+	}
+
+	public boolean isAllPauseDevicesOff() {
+		return allPauseDevicesOff;
 	}
 
 }

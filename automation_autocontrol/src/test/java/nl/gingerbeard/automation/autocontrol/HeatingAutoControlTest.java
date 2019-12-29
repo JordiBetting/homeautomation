@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import nl.gingerbeard.automation.autocontrol.heating.states.StateHeatingOff;
 import nl.gingerbeard.automation.autocontrol.heating.states.StateHeatingOnDaytime;
 import nl.gingerbeard.automation.autocontrol.heating.states.StateHeatingOnNighttime;
+import nl.gingerbeard.automation.autocontrol.heating.states.StateHeatingPaused;
 import nl.gingerbeard.automation.devices.DoorSensor;
 import nl.gingerbeard.automation.devices.IDevice;
 import nl.gingerbeard.automation.devices.OnOffDevice;
@@ -60,6 +61,14 @@ public class HeatingAutoControlTest {
 
 		public void assertNoUpdate() {
 			assertTrue(output == null || output.size() == 0);
+		}
+
+		public String getAllOutput() {
+			StringBuilder out = new StringBuilder();
+			for (NextState<?> next : output) {
+				out.append(next.toString());
+			}
+			return out.toString();
 		}
 
 	}
@@ -221,7 +230,7 @@ public class HeatingAutoControlTest {
 
 	private void assertDelayedNotTriggered() throws InterruptedException {
 		boolean notified = listener.notifyLatch.await(1, TimeUnit.SECONDS);
-		assertFalse(notified);
+		assertFalse(notified, "Expected no delayed action, but got: " + listener.getAllOutput());
 	}
 
 	@Test
@@ -441,6 +450,26 @@ public class HeatingAutoControlTest {
 		initStartupState(TimeOfDay.DAYTIME, AlarmState.ARM_AWAY);
 		
 		assertEquals(StateHeatingOff.class, sut.getControlState());
+		listener.assertTemperature(HeatingAutoControl.DEFAULT_TEMP_C_OFF);
+	}
+	
+	@Test
+	public void init_onDaytimePaused() {
+		state = new State();
+		state.alarm = AlarmState.DISARMED;
+		state.setTimeOfDay(TimeOfDay.DAYTIME);
+		sut = new HeatingAutoControl();
+		listener = new TestListener();
+		testDevice = new Thermostat(2, 1);
+		sut.addThermostat(testDevice);
+		log = new TestLogger();
+
+		DoorSensor doorSensor = new DoorSensor(1);
+		doorSensor.setState(OpenCloseState.OPEN);
+		sut.addPauseDevice(doorSensor);
+		sut.init(listener, state, log);
+
+		assertEquals(StateHeatingPaused.class, sut.getControlState());
 		listener.assertTemperature(HeatingAutoControl.DEFAULT_TEMP_C_OFF);
 	}
 	
