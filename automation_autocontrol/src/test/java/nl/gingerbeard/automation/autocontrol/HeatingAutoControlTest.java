@@ -17,7 +17,6 @@ import nl.gingerbeard.automation.autocontrol.heating.states.StateHeatingOnNightt
 import nl.gingerbeard.automation.autocontrol.heating.states.StateHeatingPaused;
 import nl.gingerbeard.automation.devices.DoorSensor;
 import nl.gingerbeard.automation.devices.IDevice;
-import nl.gingerbeard.automation.devices.OnOffDevice;
 import nl.gingerbeard.automation.devices.OpenCloseDevice;
 import nl.gingerbeard.automation.devices.Switch;
 import nl.gingerbeard.automation.devices.Thermostat;
@@ -25,7 +24,6 @@ import nl.gingerbeard.automation.logging.LogLevel;
 import nl.gingerbeard.automation.logging.TestLogger;
 import nl.gingerbeard.automation.state.AlarmState;
 import nl.gingerbeard.automation.state.NextState;
-import nl.gingerbeard.automation.state.OnOffState;
 import nl.gingerbeard.automation.state.OpenCloseState;
 import nl.gingerbeard.automation.state.State;
 import nl.gingerbeard.automation.state.Temperature;
@@ -304,7 +302,7 @@ public class HeatingAutoControlTest {
 	@Test
 	public void pauseDevices_onAndResume_heatingOff() {
 		initSut(TimeOfDay.DAYTIME, AlarmState.DISARMED);
-		Switch pauseDevice = addPauseDevice();
+		DoorSensor pauseDevice = addPauseDevice();
 		
 		List<NextState<?>> result = switchOn(pauseDevice);
 		assertTemperature(HeatingAutoControl.DEFAULT_TEMP_C_OFF, result);
@@ -317,10 +315,10 @@ public class HeatingAutoControlTest {
 	@Test
 	public void pauseDevices_on_logged() {
 		initSut(TimeOfDay.DAYTIME, AlarmState.DISARMED);
-		Switch pauseDevice = addPauseDevice();
+		DoorSensor pauseDevice = addPauseDevice();
 		
 		switchOn(pauseDevice);
-		log.assertContains(LogLevel.INFO, "HeatingAutoControl for HeatingAutoControlTest detected that pause device Device [idx=3, name=Optional.empty, state=ON] now has state ON");
+		log.assertContains(LogLevel.INFO, "HeatingAutoControl for HeatingAutoControlTest detected that pause device Device [idx=3, name=Optional.empty, state=OPEN] now has state OPEN");
 	}
 	
 	@Test
@@ -351,7 +349,7 @@ public class HeatingAutoControlTest {
 	public void nighttime_pauseDevices_delayApplied() throws InterruptedException {
 		initSut(TimeOfDay.NIGHTTIME, AlarmState.DISARMED);
 		sut.setDelayPauseMillis(500);
-		Switch pauseDevice = addPauseDevice();
+		DoorSensor pauseDevice = addPauseDevice();
 		
 		switchOn(pauseDevice);
 		listener.assertNoUpdate();
@@ -363,8 +361,9 @@ public class HeatingAutoControlTest {
 		assertTemperature(HeatingAutoControl.DEFAULT_TEMP_C_NIGHT, result);
 	}
 
-	private Switch addPauseDevice() {
-		Switch pauseDevice = new Switch(3);
+	private DoorSensor addPauseDevice() {
+		DoorSensor pauseDevice = new DoorSensor(3);
+		pauseDevice.setState(OpenCloseState.CLOSE);
 		sut.addPauseDevice(pauseDevice);
 		return pauseDevice;
 	}
@@ -378,7 +377,7 @@ public class HeatingAutoControlTest {
 	@Test
 	public void armed_pauseDeviceOnOff_ignored() throws InterruptedException {
 		initSut(TimeOfDay.DAYTIME, AlarmState.ARM_AWAY);
-		Switch pauseDevice = addPauseDevice();
+		DoorSensor pauseDevice = addPauseDevice();
 		
 		switchOn(pauseDevice);
 		assertDelayedNotTriggered();
@@ -390,25 +389,26 @@ public class HeatingAutoControlTest {
 	@Test
 	public void onPauseDelay_armed_delayIgnored() throws InterruptedException {
 		initSut(TimeOfDay.NIGHTTIME, AlarmState.DISARMED);
-		Switch pauseDevice = addPauseDevice();
+		DoorSensor pauseDevice = addPauseDevice();
 		sut.setDelayPauseMillis(500);
 
 		switchOn(pauseDevice);
 		updateAlarm(AlarmState.ARM_AWAY);
 
-		assertDelayedNotTriggered();// TODO fails
+		assertDelayedNotTriggered();
 	}
 	
 	@Test
 	public void onPauseDelay_pauseDeviceOffWithinTimeout_delayIgnored() throws InterruptedException {
 		initSut(TimeOfDay.NIGHTTIME, AlarmState.DISARMED);
-		Switch pauseDevice = addPauseDevice();
+		DoorSensor pauseDevice = addPauseDevice();
 		sut.setDelayPauseMillis(500);
 
 		switchOn(pauseDevice);
 		switchOff(pauseDevice);
 
-		assertDelayedNotTriggered(); // TODO fails
+		log.printAll();
+		assertDelayedNotTriggered();
 	}
 	
 	@Test
@@ -473,14 +473,6 @@ public class HeatingAutoControlTest {
 		listener.assertTemperature(HeatingAutoControl.DEFAULT_TEMP_C_OFF);
 	}
 	
-	private List<NextState<?>> switchOn(OnOffDevice pauseDevice) {
-		return switchDevice(pauseDevice, OnOffState.ON);
-	}
-	
-	private List<NextState<?>> switchOff(OnOffDevice pauseDevice) {
-		return switchDevice(pauseDevice, OnOffState.OFF);
-	}
-	
 	private List<NextState<?>> switchOff(OpenCloseDevice pauseDevice) {
 		pauseDevice.setState(OpenCloseState.CLOSE);
 		return sut.deviceChanged(pauseDevice);
@@ -488,11 +480,6 @@ public class HeatingAutoControlTest {
 	
 	private List<NextState<?>> switchOn(OpenCloseDevice pauseDevice) {
 		pauseDevice.setState(OpenCloseState.OPEN);
-		return sut.deviceChanged(pauseDevice);
-	}
-
-	private List<NextState<?>> switchDevice(OnOffDevice pauseDevice, OnOffState newState) {
-		pauseDevice.setState(newState);
 		return sut.deviceChanged(pauseDevice);
 	}
 

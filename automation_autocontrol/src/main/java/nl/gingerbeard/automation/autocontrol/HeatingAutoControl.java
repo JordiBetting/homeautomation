@@ -90,14 +90,30 @@ public final class HeatingAutoControl extends AutoControl implements IHeatingAut
 	}
 
 	private List<NextState<?>> deviceChanged() {
+		boolean changed = updateContextPauseDevices();
+		if (changed) {
+			Optional<HeatingState> nextState = notifyPauseDeviceChanged();
+			return changeState(nextState);
+		}
+		return Lists.newArrayList();
+	}
+
+	private Optional<HeatingState> notifyPauseDeviceChanged() {
 		Optional<HeatingState> nextState;
-		context.setAllPauseDeviceOff(isAllPauseDevicesOff());
 		if (context.isAllPauseDevicesOff()) {
 			nextState = currentState.allPauseDevicesOff();
+			getLogger().info("HeatingAutoControl for " + getOwner() + " detected that all pause devices are OFF");
 		} else {
 			nextState = currentState.pauseDeviceOn();
 		}
-		return changeState(nextState);
+		return nextState;
+	}
+
+	private boolean updateContextPauseDevices() {
+		boolean oldValue = context.isAllPauseDevicesOff();
+		boolean newValue = isAllPauseDevicesOff();
+		context.setAllPauseDeviceOff(newValue);
+		return oldValue != newValue;
 	}
 
 	private boolean isAllPauseDevicesOff() {
