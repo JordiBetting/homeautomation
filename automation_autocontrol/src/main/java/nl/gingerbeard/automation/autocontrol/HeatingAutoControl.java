@@ -85,18 +85,36 @@ public final class HeatingAutoControl extends AutoControl implements IHeatingAut
 		return deviceChanged();
 	}
 
+	@Subscribe
 	public List<NextState<?>> deviceChanged(OpenCloseDevice _void) {
 		return deviceChanged();
 	}
 
 	private List<NextState<?>> deviceChanged() {
+		boolean changed = updateContextPauseDevices();
+		if (changed) {
+			Optional<HeatingState> nextState = notifyPauseDeviceChanged();
+			return changeState(nextState);
+		}
+		return Lists.newArrayList();
+	}
+
+	private Optional<HeatingState> notifyPauseDeviceChanged() {
 		Optional<HeatingState> nextState;
-		if (isAllPauseDevicesOff()) {
+		if (context.isAllPauseDevicesOff()) {
 			nextState = currentState.allPauseDevicesOff();
+			getLogger().info("HeatingAutoControl for " + getOwner() + " detected that all pause devices are OFF");
 		} else {
 			nextState = currentState.pauseDeviceOn();
 		}
-		return changeState(nextState);
+		return nextState;
+	}
+
+	private boolean updateContextPauseDevices() {
+		boolean oldValue = context.isAllPauseDevicesOff();
+		boolean newValue = isAllPauseDevicesOff();
+		context.setAllPauseDeviceOff(newValue);
+		return oldValue != newValue;
 	}
 
 	private boolean isAllPauseDevicesOff() {
@@ -116,13 +134,13 @@ public final class HeatingAutoControl extends AutoControl implements IHeatingAut
 	}
 
 	private String getStateName(HeatingState state) {
-		return state.getClass().getSimpleName();
+		return state != null ? state.getClass().getSimpleName() : "Uninitialized";
 	}
 
 	@Override
 	public void changeStateAsync(Optional<HeatingState> newState) {
 		List<NextState<?>> result = changeState(newState);
-		asyncOutput(result);
+		updateActuators(result);
 	}
 
 	private List<NextState<?>> changeState(Optional<HeatingState> nextStateOptional) {
@@ -133,18 +151,17 @@ public final class HeatingAutoControl extends AutoControl implements IHeatingAut
 			getLogger().info("HeatingAutoControl for " + getOwner() + " changing state from "
 					+ getStateName(currentState) + " to " + getStateName(nextState));
 			currentState = nextState;
-			Optional<Temperature> stateEntryResult = currentState.stateEntryResult();
-			stateEntryResult.ifPresent((entryResult) -> result.addAll(createNextState(entryResult)));
 
 			Optional<HeatingState> onEntryNextState = currentState.stateEntryNextState();
+			
+			if(!onEntryNextState.isPresent()) {
+				Optional<Temperature> stateEntryResult = currentState.stateEntryResult();
+				stateEntryResult.ifPresent((entryResult) -> result.addAll(createNextState(entryResult)));
+			}
 			result.addAll(changeState(onEntryNextState));
 		}
 
 		return result;
-	}
-
-	private void asyncOutput(List<NextState<?>> result) {
-		updateActuators(result);
 	}
 
 	private List<NextState<?>> createNextState(Temperature temperature) {
@@ -200,7 +217,8 @@ public final class HeatingAutoControl extends AutoControl implements IHeatingAut
 	@Override
 	protected void onInit() {
 		context.configure(getState(), getLogger());
-		currentState = new StateHeatingOff(context);
+		context.setAllPauseDeviceOff(isAllPauseDevicesOff());
+		changeStateAsync(Optional.of(new StateHeatingOff(context)));
 	}
 
 	// test interfaces

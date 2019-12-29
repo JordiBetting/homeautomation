@@ -13,6 +13,18 @@ public abstract class StateHeatingOn extends HeatingState {
 	}
 
 	@Override
+	public Optional<HeatingState> stateEntryNextState() {
+		if (isPauseDeviceOn()) {
+			return Optional.of(new StateHeatingPaused(context));
+		}
+		return Optional.empty();
+	}
+
+	private boolean isPauseDeviceOn() {
+		return !context.isAllPauseDevicesOff();
+	}
+	
+	@Override
 	public Optional<HeatingState> alarmChanged() {
 		if (!context.frameworkState.getAlarmState().meets(AlarmState.DISARMED)) {
 			return Optional.of(new StateHeatingOff(context));
@@ -20,4 +32,9 @@ public abstract class StateHeatingOn extends HeatingState {
 		return super.alarmChanged();
 	}
 
+	@Override
+	public final Optional<HeatingState> pauseDeviceOn() {
+		return Optional.of(new StateHeatingOnPauseDelay(context));
+	}
+	
 }

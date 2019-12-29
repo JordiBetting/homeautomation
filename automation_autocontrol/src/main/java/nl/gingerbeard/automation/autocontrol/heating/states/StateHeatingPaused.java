@@ -13,6 +13,11 @@ public final class StateHeatingPaused extends StateHeatingOn {
 	}
 	
 	@Override
+	public Optional<HeatingState> stateEntryNextState() {
+		return Optional.empty();
+	}
+	
+	@Override
 	public Optional<Temperature> stateEntryResult() {
 		return Optional.of(context.offTemperature);
 	}

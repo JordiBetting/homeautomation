@@ -4,14 +4,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.Test;
 
+import nl.gingerbeard.automation.autocontrol.heating.states.StateHeatingOff;
 import nl.gingerbeard.automation.autocontrol.heating.states.StateHeatingOnDaytime;
 import nl.gingerbeard.automation.autocontrol.heating.states.StateHeatingOnNighttime;
+import nl.gingerbeard.automation.autocontrol.heating.states.StateHeatingPaused;
 import nl.gingerbeard.automation.devices.DoorSensor;
 import nl.gingerbeard.automation.devices.IDevice;
 import nl.gingerbeard.automation.devices.OnOffDevice;
@@ -33,7 +36,7 @@ public class HeatingAutoControlTest {
 
 	private class TestListener implements AutoControlListener {
 
-		private List<NextState<?>> output;
+		private List<NextState<?>> output = new ArrayList<>();
 		volatile CountDownLatch notifyLatch;
 
 		public TestListener() {
@@ -42,7 +45,7 @@ public class HeatingAutoControlTest {
 		
 		@Override
 		public void outputChanged(String owner, List<NextState<?>> output) {
-			this.output = output;
+			this.output.addAll(output);
 			notifyLatch.countDown();
 		}
 
@@ -51,13 +54,21 @@ public class HeatingAutoControlTest {
 			reset();
 		}
 
-		private void reset() {
-			output = null;
+		public void reset() {
+			output.clear();
 			notifyLatch = new CountDownLatch(1);
 		}
 
 		public void assertNoUpdate() {
-			assertTrue(output == null || output.size() == 0);
+			assertEquals(0, output.size());
+		}
+
+		public String getAllOutput() {
+			StringBuilder out = new StringBuilder();
+			for (NextState<?> next : output) {
+				out.append(next.toString());
+			}
+			return out.toString();
 		}
 
 	}
@@ -72,16 +83,26 @@ public class HeatingAutoControlTest {
 		initSut(TimeOfDay.NIGHTTIME, AlarmState.DISARMED);
 	}
 	
-	private void initSut(TimeOfDay initialTimeOfDay, AlarmState initialAlarmState) {
+	private void initStartupState(TimeOfDay initialTimeOfDay, AlarmState initialAlarmState) {
 		state = new State();
+		state.alarm = initialAlarmState;
+		state.setTimeOfDay(initialTimeOfDay);
+		initSut(state);
+	}
+	
+	private void initSut(TimeOfDay initialTimeOfDay, AlarmState initialAlarmState) {
+		initStartupState(initialTimeOfDay, initialAlarmState);
+		listener.reset();
+	}
+
+	private void initSut(State state) {
+		this.state = state;
 		sut = new HeatingAutoControl();
 		listener = new TestListener();
 		testDevice = new Thermostat(2, 1);
 		sut.addThermostat(testDevice);
 		log = new TestLogger();
 		sut.init(listener, state, log);
-		updateTimeOfDay(initialTimeOfDay);
-		updateAlarm(initialAlarmState);
 	}
 	
 	@Test
@@ -187,10 +208,19 @@ public class HeatingAutoControlTest {
 		sut.setDelayOnMillis(500);
 
 		List<NextState<?>> result = updateAlarm(AlarmState.DISARMED);
-		assertTemperature(HeatingAutoControl.DEFAULT_TEMP_C_OFF, result); 
-		
+		assertEquals(0, result.size());
 		awaitDelayedOnAssertingSuccess();
 		listener.assertTemperature(HeatingAutoControl.DEFAULT_TEMP_C_DAY);
+	}
+	
+	@Test
+	public void daytimeArmed_disarm_noDelay_heatingOnNotDelayed() throws InterruptedException {
+		initSut(TimeOfDay.DAYTIME, AlarmState.ARM_AWAY);
+		sut.setDelayOnMillis(0);
+
+		List<NextState<?>> result = updateAlarm(AlarmState.DISARMED);
+		assertTemperature(HeatingAutoControl.DEFAULT_TEMP_C_DAY, result);
+		assertDelayedNotTriggered();
 	}
 
 	private void awaitDelayedOnAssertingSuccess() throws InterruptedException {
@@ -209,16 +239,15 @@ public class HeatingAutoControlTest {
 
 	private void assertDelayedNotTriggered() throws InterruptedException {
 		boolean notified = listener.notifyLatch.await(1, TimeUnit.SECONDS);
-		assertFalse(notified);
+		assertFalse(notified, "Expected no delayed action, but got: " + listener.getAllOutput());
 	}
 
 	@Test
 	public void daytimeDisarmed_Night_heatingUp() throws InterruptedException {
 		initSut(TimeOfDay.DAYTIME, AlarmState.DISARMED);
 
-		updateAlarm(AlarmState.DISARMED);
 		List<NextState<?>> result = updateTimeOfDay(TimeOfDay.NIGHTTIME);
-		
+
 		assertTemperature(HeatingAutoControl.DEFAULT_TEMP_C_NIGHT, result);
 	}
 	
@@ -228,7 +257,7 @@ public class HeatingAutoControlTest {
 		sut.setDelayOnMillis(500);
 		
 		List<NextState<?>> result = updateAlarm(AlarmState.DISARMED);
-		assertTemperature(HeatingAutoControl.DEFAULT_TEMP_C_OFF, result);
+		assertEquals(0, result.size());
 		awaitDelayedOnAssertingSuccess();
 		listener.assertTemperature(HeatingAutoControl.DEFAULT_TEMP_C_NIGHT);
 		
@@ -239,7 +268,7 @@ public class HeatingAutoControlTest {
 		assertTemperature(HeatingAutoControl.DEFAULT_TEMP_C_OFF, result);
 		
 		result = updateAlarm(AlarmState.DISARMED);
-		assertTemperature(HeatingAutoControl.DEFAULT_TEMP_C_OFF, result);
+		assertEquals(0, result.size());
 		awaitDelayedOnAssertingSuccess();
 		listener.assertTemperature(HeatingAutoControl.DEFAULT_TEMP_C_DAY);
 		
@@ -257,6 +286,28 @@ public class HeatingAutoControlTest {
 		List<NextState<?>> result = updateAlarm(AlarmState.DISARMED);
 		
 		assertEquals(0, result.size());
+	}
+	
+	@Test
+	public void onDelay_applied() throws InterruptedException {
+		initSut(TimeOfDay.NIGHTTIME, AlarmState.ARM_AWAY);
+		sut.setDelayOnMillis(500);
+
+		updateAlarm(AlarmState.DISARMED);
+		listener.assertNoUpdate();
+		
+		awaitDelayedOutput();
+		listener.assertTemperature(HeatingAutoControl.DEFAULT_TEMP_C_NIGHT);
+	}
+	
+	@Test
+	public void onDelay_zero_noWait() throws InterruptedException {
+		initSut(TimeOfDay.NIGHTTIME, AlarmState.ARM_AWAY);
+		sut.setDelayOnMillis(0);
+
+		List<NextState<?>> result = updateAlarm(AlarmState.DISARMED);
+		assertTemperature(HeatingAutoControl.DEFAULT_TEMP_C_NIGHT, result);
+		assertDelayedNotTriggered();
 	}
 	
 	@Test
@@ -284,7 +335,7 @@ public class HeatingAutoControlTest {
 	@Test
 	public void pauseDevices_onAndResume_heatingOff() {
 		initSut(TimeOfDay.DAYTIME, AlarmState.DISARMED);
-		Switch pauseDevice = addPauseDevice();
+		DoorSensor pauseDevice = addPauseDevice();
 		
 		List<NextState<?>> result = switchOn(pauseDevice);
 		assertTemperature(HeatingAutoControl.DEFAULT_TEMP_C_OFF, result);
@@ -293,14 +344,23 @@ public class HeatingAutoControlTest {
 		assertTemperature(HeatingAutoControl.DEFAULT_TEMP_C_DAY, result);
 	}
 	
-
+	@Test
+	public void pauseDevices_otherDevice_ignored() {
+		initSut(TimeOfDay.DAYTIME, AlarmState.DISARMED);
+		addPauseDevice();
+		Switch otherDevice = new Switch(42);
+		
+		List<NextState<?>> result = switchOn(otherDevice);
+		assertEquals(0, result.size());
+	}
+	
 	@Test
 	public void pauseDevices_on_logged() {
 		initSut(TimeOfDay.DAYTIME, AlarmState.DISARMED);
-		Switch pauseDevice = addPauseDevice();
+		DoorSensor pauseDevice = addPauseDevice();
 		
 		switchOn(pauseDevice);
-		log.assertContains(LogLevel.INFO, "HeatingAutoControl for HeatingAutoControlTest detected that pause device Device [idx=3, name=Optional.empty, state=ON] now has state ON");
+		log.assertContains(LogLevel.INFO, "HeatingAutoControl for HeatingAutoControlTest detected that pause device Device [idx=3, name=Optional.empty, state=OPEN] now has state OPEN");
 	}
 	
 	@Test
@@ -328,10 +388,25 @@ public class HeatingAutoControlTest {
 	}
 	
 	@Test
+	public void daytime_pauseDevicesOnOff_delayApplied() throws InterruptedException {
+		initSut(TimeOfDay.DAYTIME, AlarmState.DISARMED);
+		sut.setDelayPauseMillis(500);
+		Switch pauseDevice = addPauseDeviceSwitch();
+		
+		switchOn(pauseDevice);
+		listener.assertNoUpdate();
+		awaitDelayedOutput();
+		listener.assertTemperature(HeatingAutoControl.DEFAULT_TEMP_C_OFF);
+		
+		List<NextState<?>> result = switchOff(pauseDevice);
+		assertTemperature(HeatingAutoControl.DEFAULT_TEMP_C_DAY, result);
+	}
+	
+	@Test
 	public void nighttime_pauseDevices_delayApplied() throws InterruptedException {
 		initSut(TimeOfDay.NIGHTTIME, AlarmState.DISARMED);
 		sut.setDelayPauseMillis(500);
-		Switch pauseDevice = addPauseDevice();
+		DoorSensor pauseDevice = addPauseDevice();
 		
 		switchOn(pauseDevice);
 		listener.assertNoUpdate();
@@ -343,8 +418,9 @@ public class HeatingAutoControlTest {
 		assertTemperature(HeatingAutoControl.DEFAULT_TEMP_C_NIGHT, result);
 	}
 
-	private Switch addPauseDevice() {
-		Switch pauseDevice = new Switch(3);
+	private DoorSensor addPauseDevice() {
+		DoorSensor pauseDevice = new DoorSensor(3);
+		pauseDevice.setState(OpenCloseState.CLOSE);
 		sut.addPauseDevice(pauseDevice);
 		return pauseDevice;
 	}
@@ -355,10 +431,16 @@ public class HeatingAutoControlTest {
 		return doorSensor;
 	}
 	
+	private Switch addPauseDeviceSwitch() {
+		Switch Switch = new Switch(4);
+		sut.addPauseDevice(Switch);
+		return Switch;
+	}
+	
 	@Test
 	public void armed_pauseDeviceOnOff_ignored() throws InterruptedException {
 		initSut(TimeOfDay.DAYTIME, AlarmState.ARM_AWAY);
-		Switch pauseDevice = addPauseDevice();
+		DoorSensor pauseDevice = addPauseDevice();
 		
 		switchOn(pauseDevice);
 		assertDelayedNotTriggered();
@@ -370,7 +452,7 @@ public class HeatingAutoControlTest {
 	@Test
 	public void onPauseDelay_armed_delayIgnored() throws InterruptedException {
 		initSut(TimeOfDay.NIGHTTIME, AlarmState.DISARMED);
-		Switch pauseDevice = addPauseDevice();
+		DoorSensor pauseDevice = addPauseDevice();
 		sut.setDelayPauseMillis(500);
 
 		switchOn(pauseDevice);
@@ -382,13 +464,32 @@ public class HeatingAutoControlTest {
 	@Test
 	public void onPauseDelay_pauseDeviceOffWithinTimeout_delayIgnored() throws InterruptedException {
 		initSut(TimeOfDay.NIGHTTIME, AlarmState.DISARMED);
-		Switch pauseDevice = addPauseDevice();
+		DoorSensor pauseDevice = addPauseDevice();
 		sut.setDelayPauseMillis(500);
 
 		switchOn(pauseDevice);
 		switchOff(pauseDevice);
 
 		assertDelayedNotTriggered();
+	}
+	
+	@Test
+	public void onPauseDelay_disarm_delayApplied() throws InterruptedException {
+		initSut(TimeOfDay.NIGHTTIME, AlarmState.DISARMED);
+		sut.setDelayPauseMillis(500);
+		DoorSensor pauseDevice = addPauseDevice();
+		
+		switchOn(pauseDevice);
+		listener.assertNoUpdate();
+
+		updateAlarm(AlarmState.DISARMED);
+		listener.assertNoUpdate();
+		
+		awaitDelayedOutput();
+		listener.assertTemperature(HeatingAutoControl.DEFAULT_TEMP_C_OFF);
+		
+		List<NextState<?>> result = switchOff(pauseDevice);
+		assertTemperature(HeatingAutoControl.DEFAULT_TEMP_C_NIGHT, result);
 	}
 	
 	@Test
@@ -401,12 +502,65 @@ public class HeatingAutoControlTest {
 		log.assertContains(LogLevel.INFO, "[INFO] [root] HeatingAutoControl for HeatingAutoControlTest changing state from StateHeatingOnDelay to StateHeatingOnDaytime");
 	}
 	
-	private List<NextState<?>> switchOn(OnOffDevice pauseDevice) {
-		return switchDevice(pauseDevice, OnOffState.ON);
+	@Test
+	public void init_onNightTime() {
+		initStartupState(TimeOfDay.NIGHTTIME, AlarmState.DISARMED);
+		
+		assertEquals(StateHeatingOnNighttime.class, sut.getControlState());
+		listener.assertTemperature(HeatingAutoControl.DEFAULT_TEMP_C_NIGHT);
 	}
 	
-	private List<NextState<?>> switchOff(OnOffDevice pauseDevice) {
-		return switchDevice(pauseDevice, OnOffState.OFF);
+	@Test
+	public void init_onDaytime() {
+		initStartupState(TimeOfDay.DAYTIME, AlarmState.DISARMED);
+		
+		assertEquals(StateHeatingOnDaytime.class, sut.getControlState());
+		listener.assertTemperature(HeatingAutoControl.DEFAULT_TEMP_C_DAY);
+	}
+
+	@Test
+	public void init_offNightTime() {
+		initStartupState(TimeOfDay.NIGHTTIME, AlarmState.ARM_AWAY);
+		
+		assertEquals(StateHeatingOff.class, sut.getControlState());
+		listener.assertTemperature(HeatingAutoControl.DEFAULT_TEMP_C_OFF);
+	}
+	
+	@Test
+	public void init_offDayTime() {
+		initStartupState(TimeOfDay.DAYTIME, AlarmState.ARM_AWAY);
+		
+		assertEquals(StateHeatingOff.class, sut.getControlState());
+		listener.assertTemperature(HeatingAutoControl.DEFAULT_TEMP_C_OFF);
+	}
+	
+	@Test
+	public void away_timeChanges_ignored() {
+		initStartupState(TimeOfDay.DAYTIME, AlarmState.ARM_AWAY);
+		
+		List<NextState<?>> result = updateTimeOfDay(TimeOfDay.NIGHTTIME);
+		
+		assertEquals(0, result.size());
+	}
+	
+	@Test
+	public void init_onDaytimePaused() {
+		state = new State();
+		state.alarm = AlarmState.DISARMED;
+		state.setTimeOfDay(TimeOfDay.DAYTIME);
+		sut = new HeatingAutoControl();
+		listener = new TestListener();
+		testDevice = new Thermostat(2, 1);
+		sut.addThermostat(testDevice);
+		log = new TestLogger();
+
+		DoorSensor doorSensor = new DoorSensor(1);
+		doorSensor.setState(OpenCloseState.OPEN);
+		sut.addPauseDevice(doorSensor);
+		sut.init(listener, state, log);
+
+		assertEquals(StateHeatingPaused.class, sut.getControlState());
+		listener.assertTemperature(HeatingAutoControl.DEFAULT_TEMP_C_OFF);
 	}
 	
 	private List<NextState<?>> switchOff(OpenCloseDevice pauseDevice) {
@@ -419,11 +573,16 @@ public class HeatingAutoControlTest {
 		return sut.deviceChanged(pauseDevice);
 	}
 
-	private List<NextState<?>> switchDevice(OnOffDevice pauseDevice, OnOffState newState) {
-		pauseDevice.setState(newState);
+	private List<NextState<?>> switchOff(OnOffDevice pauseDevice) {
+		pauseDevice.setState(OnOffState.OFF);
 		return sut.deviceChanged(pauseDevice);
 	}
-
+	
+	private List<NextState<?>> switchOn(OnOffDevice pauseDevice) {
+		pauseDevice.setState(OnOffState.ON);
+		return sut.deviceChanged(pauseDevice);
+	}
+	
 	private List<NextState<?>> updateAlarm(AlarmState alarmState) {
 		state.setAlarmState(alarmState);
 		return sut.alarmChanged(null);

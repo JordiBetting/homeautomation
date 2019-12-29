@@ -6,7 +6,6 @@ import java.util.TimerTask;
 
 import nl.gingerbeard.automation.autocontrol.heating.HeatingAutoControlContext;
 import nl.gingerbeard.automation.state.AlarmState;
-import nl.gingerbeard.automation.state.Temperature;
 
 public final class StateHeatingOnDelay extends HeatingState {
 	private final Timer timer = new Timer();
@@ -14,7 +13,7 @@ public final class StateHeatingOnDelay extends HeatingState {
 
 	StateHeatingOnDelay(HeatingAutoControlContext context) {
 		this.context = context;
-		if (context.delayOnMillis > 0) {
+		if (delayEnabled()) {
 			context.getLogger().info("Scheduling heating on for " + context.getOwner() + " in " + context.delayOnMillis + "ms.");
 			timer.schedule(new TimerTick(), context.delayOnMillis);
 		}
@@ -30,14 +29,6 @@ public final class StateHeatingOnDelay extends HeatingState {
 	}
 
 	@Override
-	public Optional<Temperature> stateEntryResult() {
-		if (context.delayOnMillis > 0) {
-			return Optional.of(context.offTemperature);
-		}
-		return super.stateEntryResult();
-	}
-
-	@Override
 	public synchronized Optional<HeatingState> alarmChanged() {
 		if (!context.frameworkState.getAlarmState().meets(AlarmState.DISARMED)) {
 			timer.cancel();
@@ -48,10 +39,14 @@ public final class StateHeatingOnDelay extends HeatingState {
 
 	@Override
 	public Optional<HeatingState> stateEntryNextState() {
-		if (context.delayOnMillis == 0) {
+		if (!delayEnabled()) {
 			return Util.createNextOnStateBasedOnDaytime(context);
 		}
 		return super.stateEntryNextState();
+	}
+
+	private boolean delayEnabled() {
+		return context.delayOnMillis > 0;
 	}
 
 }
