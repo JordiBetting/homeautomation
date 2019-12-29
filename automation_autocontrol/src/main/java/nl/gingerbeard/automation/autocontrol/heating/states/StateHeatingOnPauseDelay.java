@@ -45,8 +45,7 @@ public final class StateHeatingOnPauseDelay extends HeatingState {
 	}
 
 	@Override
-	public
-	synchronized Optional<HeatingState> allPauseDevicesOff() {
+	public synchronized Optional<HeatingState> allPauseDevicesOff() {
 		timer.cancel();
 		return Util.createNextOnStateBasedOnDaytime(context);
 	}

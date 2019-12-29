@@ -23,6 +23,7 @@ import nl.gingerbeard.automation.devices.Switch;
 import nl.gingerbeard.automation.devices.Thermostat;
 import nl.gingerbeard.automation.logging.LogLevel;
 import nl.gingerbeard.automation.logging.TestLogger;
+import nl.gingerbeard.automation.logging.TestLogger.LogOutputToTestLogger;
 import nl.gingerbeard.automation.state.AlarmState;
 import nl.gingerbeard.automation.state.NextState;
 import nl.gingerbeard.automation.state.OnOffState;
@@ -60,7 +61,7 @@ public class HeatingAutoControlTest {
 		}
 
 		public void assertNoUpdate() {
-			assertTrue(output == null || output.size() == 0);
+			assertEquals(0, output.size());
 		}
 
 		public String getAllOutput() {
@@ -212,6 +213,16 @@ public class HeatingAutoControlTest {
 		
 		awaitDelayedOnAssertingSuccess();
 		listener.assertTemperature(HeatingAutoControl.DEFAULT_TEMP_C_DAY);
+	}
+	
+	@Test
+	public void daytimeArmed_disarm_noDelay_heatingOnNotDelayed() throws InterruptedException {
+		initSut(TimeOfDay.DAYTIME, AlarmState.ARM_AWAY);
+		sut.setDelayOnMillis(0);
+
+		List<NextState<?>> result = updateAlarm(AlarmState.DISARMED);
+		assertTemperature(HeatingAutoControl.DEFAULT_TEMP_C_DAY, result);
+		assertDelayedNotTriggered();
 	}
 
 	private void awaitDelayedOnAssertingSuccess() throws InterruptedException {
