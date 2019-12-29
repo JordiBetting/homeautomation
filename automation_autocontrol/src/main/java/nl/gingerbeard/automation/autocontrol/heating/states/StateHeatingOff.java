@@ -13,7 +13,7 @@ public final class StateHeatingOff extends HeatingState {
 	public StateHeatingOff(HeatingAutoControlContext context) {
 		this.context = context;
 	}
-	
+
 	@Override
 	public Optional<HeatingState> stateEntryNextState() {
 		if (isDisarmed()) {
@@ -22,7 +22,7 @@ public final class StateHeatingOff extends HeatingState {
 			return Optional.empty();
 		}
 	}
-	
+
 	@Override
 	public Optional<Temperature> stateEntryResult() {
 		return Optional.of(context.offTemperature);
@@ -30,11 +30,7 @@ public final class StateHeatingOff extends HeatingState {
 
 	@Override
 	public Optional<HeatingState> alarmChanged() {
-		if (isDisarmed()) {
-			return Optional.of(new StateHeatingOnDelay(context));
-		} else {
-			return Optional.empty();
-		}
+		return Optional.of(new StateHeatingOnDelay(context));
 	}
 
 	private boolean isDisarmed() {

@@ -17,6 +17,7 @@ import nl.gingerbeard.automation.autocontrol.heating.states.StateHeatingOnNightt
 import nl.gingerbeard.automation.autocontrol.heating.states.StateHeatingPaused;
 import nl.gingerbeard.automation.devices.DoorSensor;
 import nl.gingerbeard.automation.devices.IDevice;
+import nl.gingerbeard.automation.devices.OnOffDevice;
 import nl.gingerbeard.automation.devices.OpenCloseDevice;
 import nl.gingerbeard.automation.devices.Switch;
 import nl.gingerbeard.automation.devices.Thermostat;
@@ -24,6 +25,7 @@ import nl.gingerbeard.automation.logging.LogLevel;
 import nl.gingerbeard.automation.logging.TestLogger;
 import nl.gingerbeard.automation.state.AlarmState;
 import nl.gingerbeard.automation.state.NextState;
+import nl.gingerbeard.automation.state.OnOffState;
 import nl.gingerbeard.automation.state.OpenCloseState;
 import nl.gingerbeard.automation.state.State;
 import nl.gingerbeard.automation.state.Temperature;
@@ -311,7 +313,16 @@ public class HeatingAutoControlTest {
 		assertTemperature(HeatingAutoControl.DEFAULT_TEMP_C_DAY, result);
 	}
 	
-
+	@Test
+	public void pauseDevices_otherDevice_ignored() {
+		initSut(TimeOfDay.DAYTIME, AlarmState.DISARMED);
+		addPauseDevice();
+		Switch otherDevice = new Switch(42);
+		
+		List<NextState<?>> result = switchOn(otherDevice);
+		assertEquals(0, result.size());
+	}
+	
 	@Test
 	public void pauseDevices_on_logged() {
 		initSut(TimeOfDay.DAYTIME, AlarmState.DISARMED);
@@ -335,6 +346,21 @@ public class HeatingAutoControlTest {
 		initSut(TimeOfDay.DAYTIME, AlarmState.DISARMED);
 		sut.setDelayPauseMillis(500);
 		DoorSensor pauseDevice = addPauseDeviceDoorSensor();
+		
+		switchOn(pauseDevice);
+		listener.assertNoUpdate();
+		awaitDelayedOutput();
+		listener.assertTemperature(HeatingAutoControl.DEFAULT_TEMP_C_OFF);
+		
+		List<NextState<?>> result = switchOff(pauseDevice);
+		assertTemperature(HeatingAutoControl.DEFAULT_TEMP_C_DAY, result);
+	}
+	
+	@Test
+	public void daytime_pauseDevicesOnOff_delayApplied() throws InterruptedException {
+		initSut(TimeOfDay.DAYTIME, AlarmState.DISARMED);
+		sut.setDelayPauseMillis(500);
+		Switch pauseDevice = addPauseDeviceSwitch();
 		
 		switchOn(pauseDevice);
 		listener.assertNoUpdate();
@@ -374,6 +400,12 @@ public class HeatingAutoControlTest {
 		return doorSensor;
 	}
 	
+	private Switch addPauseDeviceSwitch() {
+		Switch Switch = new Switch(4);
+		sut.addPauseDevice(Switch);
+		return Switch;
+	}
+	
 	@Test
 	public void armed_pauseDeviceOnOff_ignored() throws InterruptedException {
 		initSut(TimeOfDay.DAYTIME, AlarmState.ARM_AWAY);
@@ -407,7 +439,6 @@ public class HeatingAutoControlTest {
 		switchOn(pauseDevice);
 		switchOff(pauseDevice);
 
-		log.printAll();
 		assertDelayedNotTriggered();
 	}
 	
@@ -483,6 +514,16 @@ public class HeatingAutoControlTest {
 		return sut.deviceChanged(pauseDevice);
 	}
 
+	private List<NextState<?>> switchOff(OnOffDevice pauseDevice) {
+		pauseDevice.setState(OnOffState.OFF);
+		return sut.deviceChanged(pauseDevice);
+	}
+	
+	private List<NextState<?>> switchOn(OnOffDevice pauseDevice) {
+		pauseDevice.setState(OnOffState.ON);
+		return sut.deviceChanged(pauseDevice);
+	}
+	
 	private List<NextState<?>> updateAlarm(AlarmState alarmState) {
 		state.setAlarmState(alarmState);
 		return sut.alarmChanged(null);

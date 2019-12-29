@@ -16,7 +16,6 @@ import nl.gingerbeard.automation.devices.DoorSensor;
 import nl.gingerbeard.automation.devices.Thermostat;
 import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration;
 import nl.gingerbeard.automation.domoticz.configuration.DomoticzConfiguration.DomoticzInitBehaviorConfig;
-import nl.gingerbeard.automation.logging.TestLogger.LogOutputToTestLogger;
 import nl.gingerbeard.automation.state.Temperature;
 
 public class HeatingAutoControlIntegrationTest extends IntegrationTest {
