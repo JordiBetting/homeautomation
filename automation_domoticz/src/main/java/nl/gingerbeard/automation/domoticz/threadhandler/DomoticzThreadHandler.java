@@ -102,8 +102,11 @@ public class DomoticzThreadHandler {
 	}
 
 	void execute(final Task command) throws InterruptedException, DomoticzException {
+		execute(command, config.isSynchronousEventHandling());
+	}
+	
+	void execute(final Task command, boolean isSynchronous) throws InterruptedException, DomoticzException {
 		final CountDownLatch sync = new CountDownLatch(1);
-		final boolean isSynchronous = config.isSynchronousEventHandling();
 
 		Container<DomoticzException> thrown = new Container<>();
 
@@ -130,6 +133,10 @@ public class DomoticzThreadHandler {
 				}
 			}
 		}
+	}
+	
+	private void executeSynchronous(final Task command) throws InterruptedException, DomoticzException {
+		execute(command, true);
 	}
 
 	public void deviceChanged(final int idx, final String newState) throws InterruptedException, DomoticzException {
@@ -184,7 +191,7 @@ public class DomoticzThreadHandler {
 	}
 
 	public void syncFull() throws DomoticzException, InterruptedException {
-		execute(() -> {
+		executeSynchronous(() -> {
 			try {
 				syncAll.syncAll();
 			} catch (IOException e) {
