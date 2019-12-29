@@ -122,7 +122,7 @@ public final class HeatingAutoControl extends AutoControl implements IHeatingAut
 	@Override
 	public void changeStateAsync(Optional<HeatingState> newState) {
 		List<NextState<?>> result = changeState(newState);
-		asyncOutput(result);
+		updateActuators(result);
 	}
 
 	private List<NextState<?>> changeState(Optional<HeatingState> nextStateOptional) {
@@ -141,10 +141,6 @@ public final class HeatingAutoControl extends AutoControl implements IHeatingAut
 		}
 
 		return result;
-	}
-
-	private void asyncOutput(List<NextState<?>> result) {
-		updateActuators(result);
 	}
 
 	private List<NextState<?>> createNextState(Temperature temperature) {
