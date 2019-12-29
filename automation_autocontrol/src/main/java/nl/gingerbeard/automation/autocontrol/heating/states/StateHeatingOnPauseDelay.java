@@ -37,8 +37,8 @@ public final class StateHeatingOnPauseDelay extends HeatingState {
 
 	@Override
 	public synchronized Optional<HeatingState> alarmChanged() {
-		timer.cancel();
 		if (!context.frameworkState.getAlarmState().meets(AlarmState.DISARMED)) {
+			timer.cancel();
 			return Optional.of(new StateHeatingOff(context));
 		}
 		return super.alarmChanged();

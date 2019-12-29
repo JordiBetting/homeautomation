@@ -454,6 +454,25 @@ public class HeatingAutoControlTest {
 	}
 	
 	@Test
+	public void onPauseDelay_disarm_delayApplied() throws InterruptedException {
+		initSut(TimeOfDay.NIGHTTIME, AlarmState.DISARMED);
+		sut.setDelayPauseMillis(500);
+		DoorSensor pauseDevice = addPauseDevice();
+		
+		switchOn(pauseDevice);
+		listener.assertNoUpdate();
+
+		updateAlarm(AlarmState.DISARMED);
+		listener.assertNoUpdate();
+		
+		awaitDelayedOutput();
+		listener.assertTemperature(HeatingAutoControl.DEFAULT_TEMP_C_OFF);
+		
+		List<NextState<?>> result = switchOff(pauseDevice);
+		assertTemperature(HeatingAutoControl.DEFAULT_TEMP_C_NIGHT, result);
+	}
+	
+	@Test
 	public void stateChange_logged() {
 		initSut(TimeOfDay.DAYTIME, AlarmState.ARM_AWAY);
 
