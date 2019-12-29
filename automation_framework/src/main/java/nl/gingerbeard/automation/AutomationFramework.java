@@ -47,17 +47,11 @@ public class AutomationFramework implements IAutomationFrameworkInterface {
 
 		room.getDevices().stream().forEach((device) -> addDevice(device));
 		room.getAutoControls().stream().forEach((autoControl) -> {
-			addAutoControl(autoControl);
+			events.subscribe(autoControl);
 		});
 		events.subscribe(room);
 
 		rooms.put(roomClass, room);
-	}
-
-	private void addAutoControl(AutoControl autoControl) {
-		autoControl.init(autoControlToDomoticz, state, log);
-		autoControl.getDevices().forEach((device) -> addDevice(device));
-		events.subscribe(autoControl);
 	}
 
 	private <T extends Room> void logAddRoom(T room) {
@@ -135,7 +129,10 @@ public class AutomationFramework implements IAutomationFrameworkInterface {
 					"Could not sync full state at startup, continuing without initial state. This may result in misbehaving rules.");
 		}
 		for (Room room : rooms.values()) {
-			room.init(state); // TODO: AutoControl init is done before state is synced. Update that!
+			for (AutoControl autoControl : room.getAutoControls()) {
+				autoControl.init(autoControlToDomoticz, state, log);
+			}
+			room.init(state);
 		}
 	}
 
