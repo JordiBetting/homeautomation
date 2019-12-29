@@ -41,7 +41,10 @@ public class Room {
 	}
 
 	public final List<IDevice<?>> getDevices() {
-		return Collections.unmodifiableList(allDevices);
+		List<IDevice<?>> allOwnedDevices = new ArrayList<>();
+		allOwnedDevices.addAll(allDevices);
+		allAutoControls.forEach((ac) -> allOwnedDevices.addAll(ac.getDevices()));
+		return Collections.unmodifiableList(allOwnedDevices);
 	}
 
 	public void addAutoControl(final AutoControl autoControl) {
