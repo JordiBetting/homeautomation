@@ -12,6 +12,18 @@ pipeline {
 	}
 
 	stages {
+		stage("Prep") {
+			steps {
+				script {
+					env.revnumber = sh (script: 'git rev-list --count HEAD', returnStdout: true).trim()
+					env.gitbranch = sh (script: 'git rev-parse --abbrev-ref HEAD', returnStdout: true).trim()
+					env.branchindicator = (env.gitbranch == 'master') ? '' : "${env.gitbranch}-"
+					env.dockerTag = "jordibetting/jordibetting:gingerbeard-domotica-framework-${env.branchindicator}${env.revnumber}"
+				}
+				echo "Building ${env.dockerTag}"
+			}
+		}	
+	
 		stage("Build + test Java") {
 			steps {
 				gradleBuild 'assemble test jacocoRootReport'
@@ -32,7 +44,7 @@ pipeline {
 		stage("Build docker") {
 			steps {
 				dir("docker") {
-					sh './buildDockerImage.sh $(git -C ${WORKSPACE} rev-list --count HEAD)'
+					sh './buildDockerImage.sh ${env.dockerTag} $(git -C ${WORKSPACE} rev-parse HEAD)'
 				}
 			}
 		}
@@ -65,7 +77,10 @@ pipeline {
 				stage("Publish docker") {
 					steps {
 						dir("docker") {
-							dockerSh './publishDockerImage.sh $(git -C ${WORKSPACE} rev-list --count HEAD) $(git -C ${WORKSPACE} rev-parse HEAD)'
+							dockerSh './publishDockerImage.sh ${env.dockerTag}'
+						}
+						script {
+							currentBuild.description = "${env.dockerTag}"
 						}
 					}
 				}
@@ -73,6 +88,7 @@ pipeline {
 			post {
 				always {
 					cleanWs()
+					sh 'docker image rm -f ${env.dockerTag}'
 				}
 			}
 		}
