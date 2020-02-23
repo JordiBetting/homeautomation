@@ -88,7 +88,7 @@ pipeline {
 			post {
 				always {
 					cleanWs()
-					sh 'docker image rm -f ${env.dockerTag}'
+					sh '''docker image rm -f ''' + env.dockerTag}
 				}
 			}
 		}
