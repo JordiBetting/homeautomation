@@ -77,7 +77,7 @@ pipeline {
 				stage("Publish docker") {
 					steps {
 						dir("docker") {
-							dockerSh './publishDockerImage.sh ${env.dockerTag}'
+							dockerSh '''./publishDockerImage.sh ''' + env.dockerTag
 						}
 						script {
 							currentBuild.description = "${env.dockerTag}"
