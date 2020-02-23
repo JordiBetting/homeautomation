@@ -44,7 +44,7 @@ pipeline {
 		stage("Build docker") {
 			steps {
 				dir("docker") {
-					sh "./buildDockerImage.sh ${env.dockerTag} $(git -C ${WORKSPACE} rev-parse HEAD)"
+					sh '''./buildDockerImage.sh ''' + env.dockerTag + ''' $(git rev-parse HEAD)'''
 				}
 			}
 		}
