@@ -382,6 +382,7 @@ public class DomoticzThreadHandlerTest {
 	}
 
 	@Test
+	@Disabled
 	public void deviceUpdated_sameState_noUpdate() throws IOException, InterruptedException, DomoticzException {
 		create(true);
 		IDomoticzDeviceStatusChanged deviceListener = mock(IDomoticzDeviceStatusChanged.class);
