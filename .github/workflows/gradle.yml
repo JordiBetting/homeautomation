@@ -23,4 +23,4 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
     - name: Build with Gradle
-      run: ./gradlew assemble test -P repoURL=none -P repoUser=none -P repoPassword=none
+      run: ./gradlew assemble -P repoURL=none -P repoUser=none -P repoPassword=none
