@@ -1,0 +1,22 @@
+name: Build & Publish build agent to DockerHub
+
+on:
+  push:
+    branches: [ buildagent* ]
+
+jobs:
+  build_publish:
+    name: Build & Publish build agent
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Get the version
+      id: vars
+      run: echo ::set-output name=commitcount::$(git rev-list --count HEAD)
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v1
+      with:
+        username: ${{ secrets.DOCKER_REGISTRY_USER }}
+        password: ${{ secrets.DOCKER_REGISTRY_PASSWORD }}
+        repository: jordibetting/jordibetting
+        tags: java8build-${{steps.vars.outputs.tag}}, latest
