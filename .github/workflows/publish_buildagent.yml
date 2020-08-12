@@ -19,4 +19,4 @@ jobs:
         username: ${{ secrets.DOCKER_REGISTRY_USER }}
         password: ${{ secrets.DOCKER_REGISTRY_PASSWORD }}
         repository: jordibetting/jordibetting
-        tags: java8build-${{steps.vars.outputs.commitcount}}, latest
+        tags: java8build-${{steps.vars.outputs.commitcount}}
